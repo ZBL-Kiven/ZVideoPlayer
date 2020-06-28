@@ -1,2 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.zj.player" />
+    package="com.zj.player">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+</manifest>

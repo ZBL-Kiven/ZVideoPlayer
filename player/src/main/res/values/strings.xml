@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="z_player_str_default_time" translatable="false">00:00</string>
+    <string name="z_player_str_loading_video_progress">视频加载中…</string>
+    <string name="z_player_str_loading_video_error">视频加载失败</string>
+    <string name="z_player_str_loading_video_error_tint">点击以再次尝试</string>
+
+</resources>

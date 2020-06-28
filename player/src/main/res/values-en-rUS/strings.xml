@@ -1,0 +1,5 @@
+<resources>
+    <string name="z_player_str_loading_video_progress">The video loading…</string>
+    <string name="z_player_str_loading_video_error">Video load fail</string>
+    <string name="z_player_str_loading_video_error_tint">tap here to try again</string>
+</resources>
