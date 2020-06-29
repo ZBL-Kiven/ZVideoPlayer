@@ -122,7 +122,7 @@ class BaseVideoController @JvmOverloads constructor(context: Context, attributeS
         return videoOverrideImageShaderView
     }
 
-    override fun controllerBinder(controller: ZController?) {
+    override fun onControllerBind(controller: ZController?) {
         this.controller = controller
     }
 
@@ -162,13 +162,13 @@ class BaseVideoController @JvmOverloads constructor(context: Context, attributeS
         seekBar?.isEnabled = false
         isInterruptPlayBtnAnim = true
         onSeekChanged(0, 0, false, 0)
-        if (isRegulate) showOrHidePlayBtn(true)
+        if (isRegulate) showOrHidePlayBtn(true, withState = false)
         full(false)
     }
 
     override fun completing(path: String, isRegulate: Boolean) {
         isInterruptPlayBtnAnim = true
-        showOrHidePlayBtn(true)
+        showOrHidePlayBtn(true, withState = false)
         if (isRegulate) full(false)
     }
 
@@ -177,7 +177,7 @@ class BaseVideoController @JvmOverloads constructor(context: Context, attributeS
         seekBar?.isEnabled = false
         isInterruptPlayBtnAnim = true
         if (isRegulate) {
-            showOrHidePlayBtn(true)
+            showOrHidePlayBtn(true, withState = false)
             full(false)
         }
         onSeekChanged(0, 0, false, 0)
@@ -220,7 +220,7 @@ class BaseVideoController @JvmOverloads constructor(context: Context, attributeS
             try {
                 if (!withState) {
                     it.isSelected = !isShow
-                    if (isShow && it.visibility == View.VISIBLE) return
+                    if (isShow && it.visibility == View.VISIBLE && it.tag == null) return
                 }
                 if (withState && it.tag != null) return
                 if (isShow && it.tag == 0) return
@@ -231,7 +231,8 @@ class BaseVideoController @JvmOverloads constructor(context: Context, attributeS
                 val end = if (isShow) 1.0f else 0.0f
                 it.alpha = start
                 if (isShow) it.visibility = View.VISIBLE
-                if (it.animation != null) it.clearAnimation()
+                it.animation?.cancel()
+                it.clearAnimation()
                 it.animate()?.alpha(end)?.setDuration(Constance.ANIMATE_DURATION)?.withEndAction {
                     it.alpha = end
                     it.visibility = if (isShow) View.VISIBLE else View.GONE

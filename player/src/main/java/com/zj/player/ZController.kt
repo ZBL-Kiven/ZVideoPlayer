@@ -11,6 +11,7 @@ import android.widget.RelativeLayout.CENTER_IN_PARENT
 import androidx.annotation.IntRange
 import com.zj.player.UT.Controller
 import com.zj.player.UT.PlayerEventController
+import com.zj.player.config.VideoConfig
 import java.lang.NullPointerException
 
 /**
@@ -28,10 +29,10 @@ class ZController private constructor(private var player: ZPlayer?, viewControll
     private var viewController: Controller? = null
         set(value) {
             if (field != null) {
-                field?.controllerBinder(null)
+                field?.onControllerBind(null)
             }
             field = value
-            field?.controllerBinder(this)
+            field?.onControllerBind(this)
         }
 
     init {
@@ -45,7 +46,11 @@ class ZController private constructor(private var player: ZPlayer?, viewControll
         var logAble = true
 
         fun build(viewController: Controller): ZController {
-            return build(viewController, ZPlayer())
+            return build(viewController, ZPlayer(VideoConfig.create()))
+        }
+
+        fun build(viewController: Controller, config: VideoConfig): ZController {
+            return build(viewController, ZPlayer(config))
         }
 
         fun <T : ZPlayer> build(viewController: Controller, player: T): ZController {

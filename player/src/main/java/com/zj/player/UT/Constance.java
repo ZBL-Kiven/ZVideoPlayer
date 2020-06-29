@@ -28,4 +28,6 @@ public class Constance {
     public static final int RESIZE_MODE_ZOOM = 4;
 
     public static final long ANIMATE_DURATION = 300L;
+
+
 }

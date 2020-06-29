@@ -37,6 +37,8 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
         android:background="@color/z_player_color_controller_bar_bg"
+        android:clickable="true"
+        android:focusable="true"
         android:orientation="horizontal"
         android:padding="10dp"
         android:translationZ="6dp"

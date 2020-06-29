@@ -14,7 +14,7 @@ import org.jetbrains.annotations.Nullable;
  */
 public interface Controller {
 
-    void controllerBinder(ZController controller);
+    void onControllerBind(ZController controller);
 
     Context getContext();
 

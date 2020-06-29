@@ -16,6 +16,7 @@ import com.google.android.exoplayer2.upstream.cache.*
 import com.google.android.exoplayer2.util.Util
 import com.zj.player.UT.PlayerEventController
 import com.zj.player.UT.RenderEvent
+import com.zj.player.base.VideoLoadControl
 import com.zj.player.base.VideoState
 import com.zj.player.config.VideoConfig
 import java.io.File
@@ -65,7 +66,7 @@ open class ZPlayer(var config: VideoConfig? = null) : Player.EventListener {
 
     private var handler: Handler? = Handler(Looper.getMainLooper()) {
         when (it.what) {
-            HANDLE_SEEK -> seekNow(it.arg1, it.obj as Boolean, duration)
+            HANDLE_SEEK -> seekNow(it.arg1, duration)
             HANDLE_PROGRESS -> updateProgress()
             HANDLE_STATE -> curState = it.obj as VideoState
         }
@@ -100,7 +101,7 @@ open class ZPlayer(var config: VideoConfig? = null) : Player.EventListener {
                 VideoState.PLAY -> {
                     runWithPlayer {
                         if (it.currentPosition >= it.duration) {
-                            seekNow(0, false, duration)
+                            seekNow(0, duration)
                         }
                         field = value
                         it.playWhenReady = true
@@ -148,7 +149,7 @@ open class ZPlayer(var config: VideoConfig? = null) : Player.EventListener {
 
     internal fun setViewController(c: PlayerEventController): String {
         curAccessKey = System.currentTimeMillis().toString()
-        this.controller?.onCompleted(currentPlayPath(), false)
+        this.controller?.onStop(currentPlayPath(), true)
         this.controller = c
         return curAccessKey
     }
@@ -156,10 +157,15 @@ open class ZPlayer(var config: VideoConfig? = null) : Player.EventListener {
     private fun loading(videoUrl: String) {
         handler?.removeCallbacksAndMessages(null)
         val context = controller?.context ?: return
+        val control: LoadControl = config?.let {
+            VideoLoadControl.Builder().createDefaultLoadControl(it.minBufferMs, it.maxBufferMs, it.bufferForPlaybackMs, it.bufferForPlaybackAfterBufferMs)
+        } ?: DefaultLoadControl.Builder().createDefaultLoadControl()
+        val renderFactory = DefaultRenderersFactory(context)
         if (player == null) {
             log("new player create")
-            player = ExoPlayerFactory.newSimpleInstance(context, DefaultTrackSelector())
+            player = ExoPlayerFactory.newSimpleInstance(context, renderFactory, DefaultTrackSelector(), control)
         }
+        player?.videoScalingMode = config?.videoScaleMod ?: C.VIDEO_SCALING_MODE_SCALE_TO_FIT
         log("video $videoUrl in loading...")
         controller?.playerView?.let {
             it.setPlayer(player)
@@ -212,9 +218,8 @@ open class ZPlayer(var config: VideoConfig? = null) : Player.EventListener {
         }
     }
 
-    private fun seekNow(progress: Int, fromUser: Boolean, duration: Long) {
+    private fun seekNow(progress: Int, duration: Long) {
         val seekProgress = (max(0f, min(100, progress) / 100f * max(duration, 1) - 1)).toLong()
-        if (fromUser) setPlayerState(VideoState.SEEK_LOADING)
         runWithPlayer { p ->
             p.seekTo(seekProgress)
             log("video seek to $seekProgress")
@@ -284,6 +289,9 @@ open class ZPlayer(var config: VideoConfig? = null) : Player.EventListener {
             }
             Player.STATE_READY -> {
                 setPlayerState(VideoState.READY)
+            }
+            Player.STATE_BUFFERING -> {
+                setPlayerState(VideoState.SEEK_LOADING)
             }
         }
     }
@@ -365,7 +373,6 @@ open class ZPlayer(var config: VideoConfig? = null) : Player.EventListener {
         handler?.sendMessageDelayed(Message.obtain().apply {
             what = HANDLE_SEEK
             arg1 = progress
-            obj = fromUser
         }, 200)
     }
 

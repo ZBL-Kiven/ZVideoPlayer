@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.util.Log
 import com.zj.player.VideoEventListener
 import com.zj.player.ZController
+import com.zj.player.config.VideoConfig
 import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
@@ -21,7 +22,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        controller = ZController.build(videoView1)
+        controller = ZController.build(videoView1, VideoConfig.create().setCacheEnable(false))
         controller?.setData(path)
         controller?.setVideoEventListener(onVideoEventListener)
         initView()
@@ -30,6 +31,10 @@ class MainActivity : AppCompatActivity() {
 
     private fun initView() {
         videoView1?.let {
+            it.getThumbView()?.setImageResource(R.drawable.ic_launcher_foreground)
+            it.getBackgroundView()?.setImageResource(R.drawable.ic_launcher_background)
+        }
+        videoView2?.let {
             it.getThumbView()?.setImageResource(R.drawable.ic_launcher_foreground)
             it.getBackgroundView()?.setImageResource(R.drawable.ic_launcher_background)
         }
@@ -49,7 +54,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         override fun onLog(s: String, curPath: String, accessKey: String, modeName: String) {
-            //            Log.e("zjj--- log", "$curPath  $modeName   $accessKey  ---- $s")
+            Log.e("zjj--- log", "$curPath  $modeName   $accessKey  ---- $s")
         }
     }
 }

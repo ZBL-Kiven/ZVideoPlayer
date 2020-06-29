@@ -1,5 +1,7 @@
 package com.zj.player.config
 
+import com.google.android.exoplayer2.C
+import com.zj.player.UT.ScalingMode
 import com.zj.player.ZPlayer
 
 
@@ -12,15 +14,50 @@ import com.zj.player.ZPlayer
 class VideoConfig private constructor() {
 
     companion object {
+
+        private const val MAX_CACHE_SIZE = ZPlayer.DEFAULT_VIDEO_MAX_CACHED_SIZE
+        private const val CACHE_FILE_DIR = ZPlayer.DEFAULT_VIDEO_CACHED_PATH
+        private const val CACHE_ENABLE = true
+        private const val VIDEO_SCALE_MOD = C.VIDEO_SCALING_MODE_SCALE_TO_FIT
+
+        /**
+         * The default minimum duration of media that the player will attempt to ensure is buffered at all
+         * times, in milliseconds.
+         */
+        private const val DEFAULT_MIN_BUFFER_MS = 15000
+
+        /**
+         * The default maximum duration of media that the player will attempt to buffer, in milliseconds.
+         */
+        private const val DEFAULT_MAX_BUFFER_MS = 50000
+
+        /**
+         * The default duration of media that must be buffered for playback to start or resume following a
+         * user action such as a seek, in milliseconds.
+         */
+        private const val DEFAULT_BUFFER_FOR_PLAYBACK_MS = 2500
+
+        /**
+         * The default duration of media that must be buffered for playback to resume after a re-buffer, in
+         * milliseconds. A re-buffer is defined to be caused by buffer depletion rather than a user action.
+         */
+        private const val DEFAULT_BUFFER_FOR_PLAYBACK_AFTER_RE_BUFFER_MS = 5000
+
         fun create(): VideoConfig {
             return VideoConfig()
         }
     }
 
-    internal var maxCacheSize: Long = ZPlayer.DEFAULT_VIDEO_MAX_CACHED_SIZE
-    internal var cacheFileDir: String = ZPlayer.DEFAULT_VIDEO_CACHED_PATH
-    internal var cacheEnable: Boolean = true
+    internal var maxCacheSize: Long = MAX_CACHE_SIZE
+    internal var cacheFileDir: String = CACHE_FILE_DIR
+    internal var cacheEnable: Boolean = CACHE_ENABLE
+    internal var videoScaleMod: Int = VIDEO_SCALE_MOD
+    internal var minBufferMs = DEFAULT_MIN_BUFFER_MS
+    internal var maxBufferMs = DEFAULT_MAX_BUFFER_MS
+    internal var bufferForPlaybackMs = DEFAULT_BUFFER_FOR_PLAYBACK_MS
+    internal var bufferForPlaybackAfterBufferMs = DEFAULT_BUFFER_FOR_PLAYBACK_AFTER_RE_BUFFER_MS
     internal var requestProperty: MutableMap<String, String>? = null
+
 
     /**
      * The default local disk persistent cache size is [ZPlayer.DEFAULT_VIDEO_MAX_CACHED_SIZE]. If you need to reset this value, please use this method.
@@ -48,10 +85,32 @@ class VideoConfig private constructor() {
     }
 
     /**
+     * the renderer codec type , see [ScalingMode]
+     * */
+    fun videoScaleMod(@ScalingMode mod: Int): VideoConfig {
+        this.videoScaleMod = mod
+        return this
+    }
+
+    /**
      * Set the parameters configured when the far end requests video
      * */
     fun setRequestProperty(requestProperty: MutableMap<String, String>?): VideoConfig {
         this.requestProperty = requestProperty
+        return this
+    }
+
+    /**
+     * @param minBufferMs see in #[DEFAULT_MIN_BUFFER_MS]
+     * @param maxBufferMs see in #[DEFAULT_MAX_BUFFER_MS]
+     * @param bufferForPlaybackMs see in #[DEFAULT_BUFFER_FOR_PLAYBACK_MS]
+     * @param bufferForPlaybackAfterBufferMs see in #[DEFAULT_BUFFER_FOR_PLAYBACK_AFTER_RE_BUFFER_MS]
+     * */
+    fun updateVideoLoadRule(minBufferMs: Int, maxBufferMs: Int, bufferForPlaybackMs: Int, bufferForPlaybackAfterBufferMs: Int): VideoConfig {
+        this.minBufferMs = minBufferMs
+        this.maxBufferMs = maxBufferMs
+        this.bufferForPlaybackMs = bufferForPlaybackMs
+        this.bufferForPlaybackAfterBufferMs = bufferForPlaybackAfterBufferMs
         return this
     }
 }
