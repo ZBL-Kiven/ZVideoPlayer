@@ -9,6 +9,7 @@ import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.animation.AccelerateDecelerateInterpolator
 import android.widget.FrameLayout
 import android.widget.ImageView
@@ -18,6 +19,7 @@ import com.zj.player.UT.Constance
 import com.zj.player.UT.Controller
 import com.zj.player.anim.ZFullValueAnimator
 import com.zj.player.base.InflateInfo
+import com.zj.player.full.BaseGestureFullScreenPopWindow
 import com.zj.player.view.BaseLoadingView
 import java.lang.NullPointerException
 import java.util.*
@@ -30,7 +32,7 @@ import java.util.*
  * The operation interface does not need to carry the playback controller, renderer, decoder and other components at any time, which means that it is just a simple View when you are not playing.
  * At the same time, any operation interface you define based on the Controller interface is It can be used as a container for video reception and display at any time without interruption.
  * */
-@Suppress("unused", "MemberVisibilityCanBePrivate")
+@Suppress("unused", "MemberVisibilityCanBePrivate", "InflateParams")
 class BaseVideoController @JvmOverloads constructor(context: Context, attributeSet: AttributeSet? = null, def: Int = 0) : FrameLayout(context, attributeSet, def), Controller {
 
     private var vPlay: View? = null
@@ -38,27 +40,32 @@ class BaseVideoController @JvmOverloads constructor(context: Context, attributeS
     private var tvEnd: TextView? = null
     private var seekBar: SeekBar? = null
     private var seekBarSmall: SeekBar? = null
+    private var fullScreen: View? = null
     private var loadingView: BaseLoadingView? = null
     private var bottomToolsBar: View? = null
     private var videoOverrideImageView: ImageView? = null
     private var videoOverrideImageShaderView: ImageView? = null
     private var isTickingSeekBarFromUser: Boolean = false
     private var autoPlay = false
+    private var videoRoot: View? = null
     private var controller: ZController? = null
     private var isFull = false
     private var isInterruptPlayBtnAnim = true
+    private var fullScreenPopWindow: BaseGestureFullScreenPopWindow? = null
 
     init {
-        LayoutInflater.from(context).inflate(R.layout.z_player_video_view, this, true)
-        vPlay = findViewById(R.id.z_player_video_preview_iv_play)
-        tvStart = findViewById(R.id.z_player_video_preview_tv_start)
-        tvEnd = findViewById(R.id.z_player_video_preview_tv_end)
-        loadingView = findViewById(R.id.z_player_video_preview_loading)
-        bottomToolsBar = findViewById(R.id.z_player_video_preview_tools_bar)
-        videoOverrideImageView = findViewById(R.id.z_player_video_thumb)
-        videoOverrideImageShaderView = findViewById(R.id.z_player_video_background)
-        seekBar = findViewById(R.id.z_player_video_preview_sb)
-        seekBarSmall = findViewById(R.id.z_player_video_preview_sb_small)
+        videoRoot = LayoutInflater.from(context).inflate(R.layout.z_player_video_view, null, false)
+        addView(videoRoot, LayoutParams(MATCH_PARENT, MATCH_PARENT))
+        vPlay = videoRoot?.findViewById(R.id.z_player_video_preview_iv_play)
+        tvStart = videoRoot?.findViewById(R.id.z_player_video_preview_tv_start)
+        tvEnd = videoRoot?.findViewById(R.id.z_player_video_preview_tv_end)
+        loadingView = videoRoot?.findViewById(R.id.z_player_video_preview_loading)
+        bottomToolsBar = videoRoot?.findViewById(R.id.z_player_video_preview_tools_bar)
+        videoOverrideImageView = videoRoot?.findViewById(R.id.z_player_video_thumb)
+        videoOverrideImageShaderView = videoRoot?.findViewById(R.id.z_player_video_background)
+        seekBar = videoRoot?.findViewById(R.id.z_player_video_preview_sb)
+        fullScreen = videoRoot?.findViewById(R.id.z_player_video_preview_iv_full_screen)
+        seekBarSmall = videoRoot?.findViewById(R.id.z_player_video_preview_sb_small)
         initListener()
         initSeekBar()
     }
@@ -72,7 +79,7 @@ class BaseVideoController @JvmOverloads constructor(context: Context, attributeS
                 controller?.pause()
             }
         }
-        setOnClickListener {
+        videoRoot?.setOnClickListener {
             controller?.let {
                 val full = !isFull
                 if (!isInterruptPlayBtnAnim) {
@@ -87,6 +94,10 @@ class BaseVideoController @JvmOverloads constructor(context: Context, attributeS
             if (path.isNullOrEmpty()) {
                 onError(NullPointerException("video path is null"))
             } else controller?.playOrResume(path)
+        }
+
+        fullScreen?.setOnClickListener {
+            onFullScreen(it, !it.isSelected)
         }
     }
 
@@ -127,7 +138,8 @@ class BaseVideoController @JvmOverloads constructor(context: Context, attributeS
     }
 
     override fun getControllerInfo(): InflateInfo {
-        return InflateInfo(this.getChildAt(0) as ViewGroup, 2)
+        val vpThis = (this.getChildAt(0) as? ViewGroup) ?: ((fullScreenPopWindow?.contentView as? ViewGroup)?.getChildAt(0) as? ViewGroup)
+        return InflateInfo(vpThis, 2)
     }
 
     override fun onLoading(path: String, isRegulate: Boolean) {
@@ -161,6 +173,7 @@ class BaseVideoController @JvmOverloads constructor(context: Context, attributeS
         seekBar?.isSelected = false
         seekBar?.isEnabled = false
         isInterruptPlayBtnAnim = true
+        seekBarSmall?.visibility = View.GONE
         onSeekChanged(0, 0, false, 0)
         if (isRegulate) showOrHidePlayBtn(true, withState = false)
         full(false)
@@ -202,6 +215,7 @@ class BaseVideoController @JvmOverloads constructor(context: Context, attributeS
     override fun onError(e: Exception?) {
         seekBar?.isSelected = false
         isInterruptPlayBtnAnim = true
+        seekBarSmall?.visibility = View.GONE
         onSeekChanged(0, 0, false, 0)
         showOrHidePlayBtn(false)
         loadingView?.setMode(BaseLoadingView.DisplayMode.NO_DATA)
@@ -296,6 +310,18 @@ class BaseVideoController @JvmOverloads constructor(context: Context, attributeS
                 it.alpha = if (isFull) 1f else 0f
                 if (!isFull) it.visibility = View.GONE
                 if (!isFull) seekBarSmall?.visibility = View.VISIBLE
+            }
+        }
+    }
+
+    private fun onFullScreen(v: View, full: Boolean) {
+        videoRoot?.let {
+            if (fullScreenPopWindow == null && full) fullScreenPopWindow = BaseGestureFullScreenPopWindow.show(this, it, 0.25f) { b ->
+                v.isSelected = b
+                fullScreenPopWindow = null
+            }
+            if (!full) {
+                fullScreenPopWindow?.dismiss();fullScreenPopWindow = null
             }
         }
     }

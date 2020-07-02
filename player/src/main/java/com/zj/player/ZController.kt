@@ -9,6 +9,11 @@ import android.widget.LinearLayout
 import android.widget.RelativeLayout
 import android.widget.RelativeLayout.CENTER_IN_PARENT
 import androidx.annotation.IntRange
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleObserver
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.OnLifecycleEvent
+import com.zj.player.UT.Constance.CORE_LOG_ABLE
 import com.zj.player.UT.Controller
 import com.zj.player.UT.PlayerEventController
 import com.zj.player.config.VideoConfig
@@ -20,12 +25,13 @@ import java.lang.NullPointerException
  * A controller that interacts with the user interface, player, and renderer.
  * */
 @Suppress("unused", "MemberVisibilityCanBePrivate")
-class ZController private constructor(private var player: ZPlayer?, viewController: Controller?) : PlayerEventController {
+class ZController private constructor(private var player: ZPlayer?, viewController: Controller?) : PlayerEventController, LifecycleObserver {
 
     private var seekProgressInterval: Long = 16
     private var videoEventListener: VideoEventListener? = null
     private var render: ZRender? = null
     private var curAccessKey: String = ""
+    private var isPausedByLifecycle = false
     private var viewController: Controller? = null
         set(value) {
             if (field != null) {
@@ -37,13 +43,11 @@ class ZController private constructor(private var player: ZPlayer?, viewControll
 
     init {
         this.viewController = viewController
+        isBindLifecycle(true)
         curAccessKey = runWithPlayer { it.setViewController(this) } ?: ""
-        addRenderAndControllerView()
     }
 
     companion object {
-
-        var logAble = true
 
         fun build(viewController: Controller): ZController {
             return build(viewController, ZPlayer(VideoConfig.create()))
@@ -58,17 +62,24 @@ class ZController private constructor(private var player: ZPlayer?, viewControll
         }
     }
 
-    // Add a renderer to the video
-    private fun addRenderAndControllerView() {
+    private fun checkRenderToken(needed: Boolean) {
+        val ignore = render?.parent == null && !needed
+        addRenderAndControllerView(!needed, ignore)
+    }
+
+    // Add a renderer to the video ,or remove only
+    private fun addRenderAndControllerView(removeOnly: Boolean = false, ignoredNullController: Boolean = false) {
         if (render == null) render = ZRender(context ?: return)
-        val info = viewController?.controllerInfo ?: throw NullPointerException("the controller view is required")
+        val info = viewController?.controllerInfo ?: if (ignoredNullController) return else throw NullPointerException("the controller view is required")
         val ctr = info.container
         (render?.parent as? ViewGroup)?.let {
-            if (ctr != it) {
+            if (ctr != it || removeOnly) {
                 it.removeView(render)
             }
+            if (ctr == it && !removeOnly) return
         }
-        if (ctr.width <= 0 || ctr.height <= 0) log("the controller view size is 0 , render may not to display")
+        if (ctr == null || removeOnly) return
+        if (ctr.measuredWidth <= 0 || ctr.measuredHeight <= 0) log("the controller view size is 0 , render may not to display")
         val rlp = info.layoutParams ?: getSuitParentLayoutParams(ctr)
         render?.z = Resources.getSystem().displayMetrics.density * info.zHeightDp + 0.5f
         ctr.addView(render, 0, rlp)
@@ -166,7 +177,6 @@ class ZController private constructor(private var player: ZPlayer?, viewControll
         log("user update the view controller names ${viewController::class.java.simpleName}")
         this.viewController = viewController
         runWithPlayer { it.updateControllerState() }
-        addRenderAndControllerView()
     }
 
     /**
@@ -174,7 +184,9 @@ class ZController private constructor(private var player: ZPlayer?, viewControll
      * */
     fun release() {
         log("user released all player")
+        isPausedByLifecycle = false
         (render?.parent as? ViewGroup)?.removeView(render)
+        render?.release()
         render = null
         player?.release()
         viewController?.onStop("", true)
@@ -183,6 +195,7 @@ class ZController private constructor(private var player: ZPlayer?, viewControll
         curAccessKey = " - released - "
         seekProgressInterval = -1
         player = null
+        isBindLifecycle(false)
     }
 
 
@@ -202,6 +215,7 @@ class ZController private constructor(private var player: ZPlayer?, viewControll
     }
 
     override fun onError(e: Exception?) {
+        checkRenderToken(true)
         viewController?.onError(e)
         videoEventListener?.onError(e)
     }
@@ -215,11 +229,13 @@ class ZController private constructor(private var player: ZPlayer?, viewControll
     }
 
     override fun onLoading(path: String?, isRegulate: Boolean) {
+        checkRenderToken(true)
         log("on loading ...")
         viewController?.onLoading(path, isRegulate)
     }
 
     override fun onPause(path: String?, isRegulate: Boolean) {
+        checkRenderToken(true)
         log("on pause ...")
         viewController?.onPause(path, isRegulate)
     }
@@ -230,15 +246,18 @@ class ZController private constructor(private var player: ZPlayer?, viewControll
 
     override fun onSeekChanged(seek: Int, buffered: Int, fromUser: Boolean, videoSize: Long) {
         if (fromUser) log("on seek changed to $seek")
+        checkRenderToken(true)
         viewController?.onSeekChanged(seek, buffered, fromUser, videoSize)
     }
 
     override fun onSeekingLoading(path: String?, isRegulate: Boolean) {
+        checkRenderToken(true)
         viewController?.onSeekingLoading(path)
     }
 
     override fun onPrepare(path: String?, videoSize: Long, isRegulate: Boolean) {
         log("on prepared ...")
+        checkRenderToken(true)
         viewController?.onPrepare(path, videoSize, isRegulate)
     }
 
@@ -248,21 +267,25 @@ class ZController private constructor(private var player: ZPlayer?, viewControll
 
     override fun onPlay(path: String?, isRegulate: Boolean) {
         log("on play ...")
+        checkRenderToken(true)
         viewController?.onPlay(path, isRegulate)
     }
 
     override fun onStop(path: String?, isRegulate: Boolean) {
         log("on stop ...")
+        checkRenderToken(false)
         viewController?.onStop(path, isRegulate)
     }
 
     override fun onCompleted(path: String?, isRegulate: Boolean) {
         log("on completed ...")
+        checkRenderToken(false)
         viewController?.onCompleted(path, isRegulate)
     }
 
     override fun completing(path: String?, isRegulate: Boolean) {
         log("on completing ...")
+        checkRenderToken(true)
         viewController?.completing(path, isRegulate)
     }
 
@@ -281,7 +304,35 @@ class ZController private constructor(private var player: ZPlayer?, viewControll
         }
     }
 
+    private fun isBindLifecycle(isBind: Boolean) {
+        (viewController?.context as? LifecycleOwner)?.let {
+            if (isBind) it.lifecycle.addObserver(this)
+            else it.lifecycle.removeObserver(this)
+        }
+    }
+
+    @OnLifecycleEvent(value = Lifecycle.Event.ON_RESUME)
+    private fun onResumed() {
+        if (isPausedByLifecycle) {
+            isPausedByLifecycle = false
+            playOrResume()
+        }
+    }
+
+    @OnLifecycleEvent(value = Lifecycle.Event.ON_STOP)
+    private fun onStopped() {
+        if (isPlaying()) {
+            isPausedByLifecycle = true
+            pause()
+        }
+    }
+
+    @OnLifecycleEvent(value = Lifecycle.Event.ON_DESTROY)
+    private fun onDestroyed() {
+        release()
+    }
+
     private fun log(s: String) {
-        if (logAble) onLog(s, getPath(), curAccessKey, "ZController")
+        if (CORE_LOG_ABLE) onLog(s, getPath(), curAccessKey, "ZController")
     }
 }

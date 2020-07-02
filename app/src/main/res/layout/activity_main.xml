@@ -3,33 +3,10 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <com.zj.player.BaseVideoController
+        android:id="@+id/videoView1"
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        android:layout_gravity="center" />
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
-
-
-        <com.zj.player.BaseVideoController
-            android:id="@+id/videoView1"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1" />
-
-        <com.zj.player.BaseVideoController
-            android:id="@+id/videoView2"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1" />
-    </LinearLayout>
-
-    <Button
-        android:id="@+id/btn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:layout_marginTop="40dp"
-        android:background="#3000"
-        android:text="⬆️ change ⬇️"
-        android:textSize="12sp" />
 </FrameLayout>

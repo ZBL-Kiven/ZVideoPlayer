@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item android:drawable="@mipmap/z_player_btn_full_screen_exit" android:state_selected="true" />
+    <item android:drawable="@mipmap/z_player_btn_full_screen_on" />
+</selector>

@@ -41,8 +41,7 @@
         android:focusable="true"
         android:orientation="horizontal"
         android:padding="10dp"
-        android:translationZ="6dp"
-        android:visibility="gone">
+        android:translationZ="6dp">
 
 
         <TextView
@@ -56,7 +55,7 @@
             android:id="@+id/z_player_video_preview_sb"
             style="@style/CustomSeekBarStyle"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_gravity="center"
             android:layout_weight="1"
             tools:progress="20" />
@@ -67,6 +66,15 @@
             android:layout_height="wrap_content"
             android:text="@string/z_player_str_default_time"
             android:textColor="@color/z_player_color_gray_5" />
+
+        <ImageView
+            android:id="@+id/z_player_video_preview_iv_full_screen"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginStart="15dp"
+            android:layout_marginEnd="5dp"
+            android:src="@drawable/z_player_video_btn_full_screen"
+            tools:ignore="ContentDescription" />
 
     </LinearLayout>
 

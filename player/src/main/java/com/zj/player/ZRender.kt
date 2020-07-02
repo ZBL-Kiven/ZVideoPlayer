@@ -17,7 +17,6 @@ import com.zj.player.UT.ResizeMode
 import com.zj.player.UT.SurfaceType
 import com.zj.player.view.AspectRatioFrameLayout
 
-
 /**
  * @author ZJJ on 2020/6/22.
  *
@@ -87,6 +86,7 @@ open class ZRender @JvmOverloads constructor(context: Context, attrs: AttributeS
         this.resizeMode = resizeMode
         if (surfaceType != SURFACE_TYPE_NONE) {
             val params = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
+            resetSurface()
             videoSurfaceView = when (surfaceType) {
                 SURFACE_TYPE_TEXTURE_VIEW -> TextureView(context)
                 else -> SurfaceView(context)
@@ -149,5 +149,21 @@ open class ZRender @JvmOverloads constructor(context: Context, attrs: AttributeS
      */
     protected open fun onContentAspectRatioChanged(contentAspectRatio: Float, @Nullable contentView: View?) {
         setAspectRatio(contentAspectRatio)
+    }
+
+    private fun resetSurface() {
+        videoSurfaceView?.let {
+            (it.parent as? ViewGroup)?.removeView(it)
+        }
+        videoSurfaceView = null
+    }
+
+    /**
+     * don`t forgot call this after your video finished
+     * */
+    fun release() {
+        resetSurface()
+        player = null
+        renderEvent = null
     }
 }

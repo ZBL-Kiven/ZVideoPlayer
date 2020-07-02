@@ -14,6 +14,7 @@ import com.google.android.exoplayer2.trackselection.DefaultTrackSelector
 import com.google.android.exoplayer2.upstream.*
 import com.google.android.exoplayer2.upstream.cache.*
 import com.google.android.exoplayer2.util.Util
+import com.zj.player.UT.Constance.CORE_LOG_ABLE
 import com.zj.player.UT.PlayerEventController
 import com.zj.player.UT.RenderEvent
 import com.zj.player.base.VideoLoadControl
@@ -29,7 +30,7 @@ import kotlin.math.min
  *
  * The core component used in video playback is based on Google [ExoPlayer].
  * In most cases, you don’t have to rewrite the interaction mode and monitoring logic it provides, but it is supported in special cases.
- * ZPlayer supports user behavior Collection and full logging, eg: [log], [logP], and output through [ZController].
+ * ZPlayer supports user behavior Collection and full logging,see [log]. and output through [ZController].
  * In addition, if you use the configuration method to build, you can configure some required parameters for video loading, see [VideoConfig] .
  * Calling [release] will completely clear all the content related to this ZPlayer instance to reclaim the memory,
  * and the cached video loaded by the cache method will not be affected.
@@ -40,7 +41,6 @@ import kotlin.math.min
 open class ZPlayer(var config: VideoConfig? = null) : Player.EventListener {
 
     companion object {
-        var logAble = true
         const val DEFAULT_VIDEO_CACHED_PATH = "videoCache"
         const val DEFAULT_VIDEO_MAX_CACHED_SIZE = 512 * 1024 * 1024L
         private var cache: Cache? = null
@@ -95,7 +95,6 @@ open class ZPlayer(var config: VideoConfig? = null) : Player.EventListener {
                         player?.playWhenReady
                         setPlayerState(VideoState.PLAY)
                         autoPlay(false)
-                        return
                     }
                 }
                 VideoState.PLAY -> {
@@ -108,7 +107,6 @@ open class ZPlayer(var config: VideoConfig? = null) : Player.EventListener {
                     }
                     startProgressListen()
                     controller?.onPlay(currentPlayPath(), false)
-                    return
                 }
 
                 VideoState.COMPLETING -> {
@@ -184,7 +182,7 @@ open class ZPlayer(var config: VideoConfig? = null) : Player.EventListener {
     }
 
     private fun createDefaultDataSource(context: Context, path: Uri?): MediaSource {
-        log("create default media data source")
+        log("create [default media data source]")
         val dataSourceFactory: DataSource.Factory = DefaultDataSourceFactory(context, Util.getUserAgent(context, context.packageName), DefaultBandwidthMeter())
         return ExtractorMediaSource.Factory(dataSourceFactory).createMediaSource(path)
     }
@@ -202,17 +200,14 @@ open class ZPlayer(var config: VideoConfig? = null) : Player.EventListener {
         }
         val cachedDataSourceFactory = CacheDataSourceFactory(cache, httpFactory)
         return ExtractorMediaSource.Factory(if (config?.cacheEnable == true) {
-            log("create http cache media data source media data source");cachedDataSourceFactory
+            log("create [http cache media data source] media data source");cachedDataSourceFactory
         } else {
-            log("create http media data source media data source"); httpFactory
+            log("create [http media data source] media data source"); httpFactory
         }).createMediaSource(Uri.parse(videoUrl))
     }
 
     private fun setPlayerState(state: VideoState) {
-        if (isReady() && state == VideoState.READY) {
-            log("update player status fail , the cur state is already READY")
-            return
-        }
+        if (isReady() && state == VideoState.READY) return
         handler?.let {
             it.sendMessage(Message.obtain().apply { what = HANDLE_STATE; obj = state })
         }
@@ -308,11 +303,7 @@ open class ZPlayer(var config: VideoConfig? = null) : Player.EventListener {
     }
 
     private fun log(s: String) {
-        if (logAble) controller?.onLog(s, currentPlayPath(), curAccessKey, "ZPlayer")
-    }
-
-    private fun logP(s: String) {
-        if (logAble) controller?.onLog(s, currentPlayPath(), curAccessKey, "preference")
+        if (CORE_LOG_ABLE) controller?.onLog(s, currentPlayPath(), curAccessKey, "ZPlayer")
     }
 
     open fun isReady(): Boolean {
