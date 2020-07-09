@@ -3,6 +3,7 @@ package com.zj.player
 import android.animation.Animator
 import android.animation.ValueAnimator
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.content.Context
 import android.content.res.Resources
 import android.util.AttributeSet
@@ -19,7 +20,7 @@ import com.zj.player.UT.Constance
 import com.zj.player.UT.Controller
 import com.zj.player.anim.ZFullValueAnimator
 import com.zj.player.base.InflateInfo
-import com.zj.player.full.BaseGestureFullScreenPopWindow
+import com.zj.player.full.BaseGestureFullScreenDialog
 import com.zj.player.view.BaseLoadingView
 import java.lang.NullPointerException
 import java.util.*
@@ -45,13 +46,14 @@ class BaseVideoController @JvmOverloads constructor(context: Context, attributeS
     private var bottomToolsBar: View? = null
     private var videoOverrideImageView: ImageView? = null
     private var videoOverrideImageShaderView: ImageView? = null
-    private var isTickingSeekBarFromUser: Boolean = false
-    private var autoPlay = false
     private var videoRoot: View? = null
     private var controller: ZController? = null
+    private var fullScreenDialog: BaseGestureFullScreenDialog? = null
+    private var autoPlay = false
     private var isFull = false
     private var isInterruptPlayBtnAnim = true
-    private var fullScreenPopWindow: BaseGestureFullScreenPopWindow? = null
+    private var isFullingOrDismissing = false
+    private var isTickingSeekBarFromUser: Boolean = false
 
     init {
         videoRoot = LayoutInflater.from(context).inflate(R.layout.z_player_video_view, null, false)
@@ -97,7 +99,10 @@ class BaseVideoController @JvmOverloads constructor(context: Context, attributeS
         }
 
         fullScreen?.setOnClickListener {
-            onFullScreen(it, !it.isSelected)
+            if (!isFullingOrDismissing) {
+                isFullingOrDismissing = true
+                onFullScreen(it, !it.isSelected)
+            }
         }
     }
 
@@ -137,8 +142,14 @@ class BaseVideoController @JvmOverloads constructor(context: Context, attributeS
         this.controller = controller
     }
 
+    override fun onDestroy(path: String?, isRegulate: Boolean) {
+        fullScreenDialog?.let {
+            if (it.isShowing) it.dismiss()
+        }
+    }
+
     override fun getControllerInfo(): InflateInfo {
-        val vpThis = (this.getChildAt(0) as? ViewGroup) ?: ((fullScreenPopWindow?.contentView as? ViewGroup)?.getChildAt(0) as? ViewGroup)
+        val vpThis = (this.getChildAt(0) as? ViewGroup) ?: fullScreenDialog?.getRootView() as? ViewGroup
         return InflateInfo(vpThis, 2)
     }
 
@@ -287,6 +298,7 @@ class BaseVideoController @JvmOverloads constructor(context: Context, attributeS
     private val fullListener = object : ZFullValueAnimator.FullAnimatorListener {
 
         override fun onDurationChange(animation: ValueAnimator, duration: Float, isFull: Boolean) {
+            if (checkActIsFinished()) return
             bottomToolsBar?.let {
                 val toolsBottomHeight = it.measuredHeight * 1.0f
                 if (isFull && it.translationY == 0f) {
@@ -304,29 +316,37 @@ class BaseVideoController @JvmOverloads constructor(context: Context, attributeS
         }
 
         override fun onAnimEnd(animation: Animator, isFull: Boolean) {
+            if (checkActIsFinished()) return
             bottomToolsBar?.let {
                 val toolsBottomHeight = (it.measuredHeight) * 1.0f
                 it.translationY = if (isFull) 0f else toolsBottomHeight
                 it.alpha = if (isFull) 1f else 0f
                 if (!isFull) it.visibility = View.GONE
-                if (!isFull) seekBarSmall?.visibility = View.VISIBLE
+                if (!isFull && (controller?.isPlaying() == true || controller?.isPause(true) == true)) seekBarSmall?.visibility = View.VISIBLE
             }
         }
     }
 
     private fun onFullScreen(v: View, full: Boolean) {
         videoRoot?.let {
-            if (fullScreenPopWindow == null && full) fullScreenPopWindow = BaseGestureFullScreenPopWindow.show(this, it, 0.25f) { b ->
+            if (fullScreenDialog == null && full) fullScreenDialog = BaseGestureFullScreenDialog.show(this, it) { b ->
                 v.isSelected = b
-                fullScreenPopWindow = null
+                if (!b) {
+                    fullScreenDialog = null
+                }
+                isFullingOrDismissing = false
             }
             if (!full) {
-                fullScreenPopWindow?.dismiss();fullScreenPopWindow = null
+                fullScreenDialog?.dismiss()
             }
         }
     }
 
     private fun setChildZ(zIn: Float) {
         videoOverrideImageShaderView?.z = zIn
+    }
+
+    private fun checkActIsFinished(): Boolean {
+        return (context as? Activity)?.isFinishing == true
     }
 }

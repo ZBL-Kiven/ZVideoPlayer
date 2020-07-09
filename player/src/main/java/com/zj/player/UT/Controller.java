@@ -2,7 +2,6 @@ package com.zj.player.UT;
 
 
 import android.content.Context;
-import android.view.ViewGroup;
 
 import com.zj.player.ZController;
 import com.zj.player.base.InflateInfo;
@@ -29,6 +28,8 @@ public interface Controller {
     void onPause(String path, boolean isRegulate);
 
     void onStop(String path, boolean isRegulate);
+
+    void onDestroy(String path, boolean isRegulate);
 
     void completing(String path, boolean isRegulate);
 

@@ -154,19 +154,34 @@ class ZController private constructor(private var player: ZPlayer?, viewControll
         runWithPlayer { it.stop() }
     }
 
-    fun isPause(): Boolean {
+    fun isPause(accurate: Boolean = false): Boolean {
         log("user query cur state is pause or not")
-        return runWithPlayer { it.isPause() } ?: false
+        return runWithPlayer { it.isPause(accurate) } ?: false
     }
 
-    fun isStop(): Boolean {
+    fun isStop(accurate: Boolean = false): Boolean {
         log("user query cur state is stop or not")
-        return runWithPlayer { it.isStop() } ?: true
+        return runWithPlayer { it.isStop(accurate) } ?: true
     }
 
-    fun isPlaying(): Boolean {
+    fun isPlaying(accurate: Boolean = false): Boolean {
         log("user query cur state is playing or not")
-        return runWithPlayer { it.isPlaying() } ?: false
+        return runWithPlayer { it.isPlaying(accurate) } ?: false
+    }
+
+    fun isReady(accurate: Boolean = false): Boolean {
+        log("user query cur state is ready or not")
+        return runWithPlayer { it.isReady(accurate) } ?: false
+    }
+
+    fun isLoading(accurate: Boolean = false): Boolean {
+        log("user query cur state is loading or not")
+        return runWithPlayer { it.isLoading(accurate) } ?: false
+    }
+
+    fun isDestroyed(accurate: Boolean = false): Boolean {
+        log("user query cur state is destroy or not")
+        return runWithPlayer { it.isDestroyed(accurate) } ?: true
     }
 
     /**
@@ -190,6 +205,7 @@ class ZController private constructor(private var player: ZPlayer?, viewControll
         render = null
         player?.release()
         viewController?.onStop("", true)
+        viewController?.onDestroy("", true)
         viewController = null
         videoEventListener = null
         curAccessKey = " - released - "

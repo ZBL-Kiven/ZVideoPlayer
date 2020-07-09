@@ -11,9 +11,16 @@ import com.google.android.exoplayer2.ExoPlaybackException.*
 import com.google.android.exoplayer2.source.ExtractorMediaSource
 import com.google.android.exoplayer2.source.MediaSource
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector
-import com.google.android.exoplayer2.upstream.*
-import com.google.android.exoplayer2.upstream.cache.*
+import com.google.android.exoplayer2.upstream.DataSource
+import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter
+import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
+import com.google.android.exoplayer2.upstream.DefaultHttpDataSourceFactory
+import com.google.android.exoplayer2.upstream.cache.Cache
+import com.google.android.exoplayer2.upstream.cache.CacheDataSourceFactory
+import com.google.android.exoplayer2.upstream.cache.LeastRecentlyUsedCacheEvictor
+import com.google.android.exoplayer2.upstream.cache.SimpleCache
 import com.google.android.exoplayer2.util.Util
+import com.zj.player.UT.Constance
 import com.zj.player.UT.Constance.CORE_LOG_ABLE
 import com.zj.player.UT.PlayerEventController
 import com.zj.player.UT.RenderEvent
@@ -21,7 +28,6 @@ import com.zj.player.base.VideoLoadControl
 import com.zj.player.base.VideoState
 import com.zj.player.config.VideoConfig
 import java.io.File
-import java.lang.StringBuilder
 import kotlin.math.max
 import kotlin.math.min
 
@@ -166,7 +172,7 @@ open class ZPlayer(var config: VideoConfig? = null) : Player.EventListener {
         player?.videoScalingMode = config?.videoScaleMod ?: C.VIDEO_SCALING_MODE_SCALE_TO_FIT
         log("video $videoUrl in loading...")
         controller?.playerView?.let {
-            it.setPlayer(player)
+            it.setPlayer(player, Constance.SURFACE_TYPE_TEXTURE_VIEW)
             it.setRenderListener(renderListener)
         }
         val f = File(videoUrl)
@@ -306,24 +312,28 @@ open class ZPlayer(var config: VideoConfig? = null) : Player.EventListener {
         if (CORE_LOG_ABLE) controller?.onLog(s, currentPlayPath(), curAccessKey, "ZPlayer")
     }
 
-    open fun isReady(): Boolean {
-        return curState.pri >= VideoState.READY.pri
+    open fun isLoading(accurate: Boolean = false): Boolean {
+        return if (accurate) curState.pri == VideoState.LOADING.pri else curState.pri >= VideoState.LOADING.pri
     }
 
-    open fun isPlaying(): Boolean {
-        return curState.pri >= VideoState.PLAY.pri
+    open fun isReady(accurate: Boolean = false): Boolean {
+        return if (accurate) curState.pri == VideoState.READY.pri else curState.pri >= VideoState.READY.pri
     }
 
-    open fun isPause(): Boolean {
-        return curState.pri <= VideoState.PAUSE.pri
+    open fun isPlaying(accurate: Boolean = false): Boolean {
+        return if (accurate) curState.pri == VideoState.PLAY.pri else curState.pri >= VideoState.PLAY.pri
     }
 
-    open fun isStop(): Boolean {
-        return curState.pri <= VideoState.STOP.pri
+    open fun isPause(accurate: Boolean = false): Boolean {
+        return if (accurate) curState.pri == VideoState.PAUSE.pri else curState.pri <= VideoState.PAUSE.pri
     }
 
-    open fun isDestroyed(): Boolean {
-        return curState.pri <= VideoState.DESTROY.pri
+    open fun isStop(accurate: Boolean = false): Boolean {
+        return if (accurate) curState.pri == VideoState.STOP.pri else curState.pri <= VideoState.STOP.pri
+    }
+
+    open fun isDestroyed(accurate: Boolean = false): Boolean {
+        return if (accurate) curState.pri == VideoState.DESTROY.pri else curState.pri <= VideoState.DESTROY.pri
     }
 
     open fun currentPlayPath(): String {

@@ -2,7 +2,7 @@ package com.zj.player.full
 
 import android.graphics.RectF
 
-internal class RectFCalculateUtil(private val bv: RectF, sv: RectF) {
+internal class RectFCalculateUtil(bv: RectF, sv: RectF) {
 
     var lastOffset: Float = 0.0f
     private val ol: Float
