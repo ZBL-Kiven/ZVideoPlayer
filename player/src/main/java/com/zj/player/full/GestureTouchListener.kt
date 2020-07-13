@@ -2,6 +2,9 @@ package com.zj.player.full
 
 import android.graphics.PointF
 import android.graphics.drawable.GradientDrawable.Orientation
+import android.os.Handler
+import android.os.Looper
+import android.os.Message
 import android.view.MotionEvent
 import android.view.View
 import androidx.annotation.FloatRange
@@ -19,12 +22,28 @@ internal abstract class GestureTouchListener(private val intercepted: () -> Bool
     private var paddingX: Float = 0.0f
     private var paddingY: Float = 0.0f
     private var inTouching = false
+    private var isRemoved = false
     private var interpolator = 58f
     private var triggerX = 230f
     private var triggerY = 400f
     private var startX = 0f
     private var startY = 0f
     private var noPaddingClickPointStart: PointF? = null
+    private var isOnceTap = false
+    private var handler = Handler(Looper.getMainLooper()) {
+        when (it.what) {
+            0 -> {
+                isOnceTap = false
+                (it.obj as? View)?.performClick()
+            }
+            else -> {
+                if (!isOnceTap) return@Handler false
+                isOnceTap = false
+                onDoubleClick()
+            }
+        }
+        return@Handler false
+    }
 
     fun setPadding(@FloatRange(from = .0, to = .5) paddingX: Float, @FloatRange(from = .0, to = .5) paddingY: Float) {
         this.paddingX = paddingX
@@ -36,7 +55,6 @@ internal abstract class GestureTouchListener(private val intercepted: () -> Bool
     }
 
     override fun onTouch(v: View?, event: MotionEvent?): Boolean {
-
         if (intercepted()) return true
         var paddingX = 0f
         var paddingY = 0f
@@ -51,8 +69,16 @@ internal abstract class GestureTouchListener(private val intercepted: () -> Bool
             }
             MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
                 try {
-                    if (isPerformTouchClick(min(triggerY, event.rawY - _y) / triggerY) && (abs((noPaddingClickPointStart?.x ?: _x) - max(event.rawX, paddingX)) < 20f && abs((noPaddingClickPointStart?.y ?: _y) - event.rawY) < 20f)) {
-                        v?.performClick()
+                    if (onEventEnd(min(triggerY, event.rawY - _y) / triggerY) && !isRemoved && (abs((noPaddingClickPointStart?.x ?: _x) - max(event.rawX, paddingX)) < 20f && abs((noPaddingClickPointStart?.y ?: _y) - event.rawY) < 20f)) {
+                        if (isOnceTap) {
+                            handler.removeMessages(0)
+                            handler.sendEmptyMessage(1)
+                        } else {
+                            isOnceTap = true
+                            handler.sendMessageDelayed(Message.obtain().apply {
+                                what = 0;obj = v
+                            }, 250)
+                        }
                     }
                 } finally {
                     reset();noPaddingClickPointStart = null
@@ -69,6 +95,7 @@ internal abstract class GestureTouchListener(private val intercepted: () -> Bool
                     if (parseCurOrientation(x, y)) {
                         init(v, event); return true
                     }
+                    isRemoved = true
                     parseCurTouchOffset(x, y)
                 } finally {
                     lstX = event.rawX;lstY = max(event.rawY, _y)
@@ -79,7 +106,7 @@ internal abstract class GestureTouchListener(private val intercepted: () -> Bool
     }
 
     private fun reset() {
-        lstY = 0f;lstX = 0f;_x = 0f;_y = 0f;startX = 0f;startY = 0f;curOrientation = null;lastOrientation = null;inTouching = false
+        lstY = 0f;lstX = 0f;_x = 0f;_y = 0f;startX = 0f;startY = 0f;curOrientation = null;lastOrientation = null;inTouching = false;isRemoved = false
     }
 
     private fun init(v: View?, event: MotionEvent) {
@@ -138,7 +165,9 @@ internal abstract class GestureTouchListener(private val intercepted: () -> Bool
         return `in` * (1f - (interpolator * 0.06f) / (interpolator * 0.06f + 1f)) * base
     }
 
-    abstract fun isPerformTouchClick(formTrigDuration: Float): Boolean
+    abstract fun onEventEnd(formTrigDuration: Float): Boolean
+
+    abstract fun onDoubleClick()
 
     abstract fun onTracked(offsetX: Float, offsetY: Float, easeY: Float, orientation: Orientation, formTrigDuration: Float)
 }

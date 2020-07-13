@@ -4,12 +4,12 @@ import android.graphics.RectF
 
 internal class RectFCalculateUtil(bv: RectF, sv: RectF) {
 
-    var lastOffset: Float = 0.0f
+    private var lastOffset: Float = 0.0f
     private val ol: Float
     private val or: Float
     private val tr: Float
     private val br: Float
-    var lastRectF: RectF? = null
+    private var lastRectF: RectF? = null
 
     init {
         if ((bv.right - bv.left) < (sv.right - sv.left) || (bv.bottom - bv.top) < (sv.bottom - sv.top)) throw IllegalArgumentException("invalid params, the named 's' must be small than named 'b' !")
@@ -20,14 +20,14 @@ internal class RectFCalculateUtil(bv: RectF, sv: RectF) {
     }
 
     fun calculate(offset: Float): RectF {
-        if (offset < 0 || lastOffset == offset) lastRectF?.let { return it } ?: throw NullPointerException("can`t calculate with never been calculated and start with offset 0 ")
+        if (offset < 0 || lastOffset == offset) lastRectF?.let { return it } ?: RectF()
         try {
             val nextL = offset * ol
             val nextT = offset * tr
             val nextR = offset * or
             val nextB = offset * br
             lastRectF = RectF(nextL, nextT, nextR, nextB)
-            return lastRectF ?: throw NullPointerException()
+            return lastRectF ?: RectF()
         } finally {
             lastOffset = offset
         }

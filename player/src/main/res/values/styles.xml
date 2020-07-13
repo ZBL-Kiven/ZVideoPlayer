@@ -44,10 +44,14 @@
         <item name="android:thumb">@drawable/z_player_video_seek_thumb_single</item>
     </style>
 
-    <style name="BaseGestureFullScreenDialogStyle" parent="Theme.AppCompat.NoActionBar">
-        <item name="android:windowBackground">#00000000</item>
-        <item name="android:windowFullscreen">true</item>
-        <item name="android:windowIsFloating">true</item>
+    <style name="BaseGestureFullScreenDialogStyle" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="windowNoTitle">true</item>
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:backgroundDimEnabled">false</item>
+        <item name="android:fitsSystemWindows">false</item>
+        <item name="android:clipToPadding">false</item>
+        <item name="android:clipChildren">false</item>
     </style>
 
 </resources>

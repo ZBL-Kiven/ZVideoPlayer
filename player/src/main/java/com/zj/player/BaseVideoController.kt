@@ -56,6 +56,12 @@ class BaseVideoController @JvmOverloads constructor(context: Context, attributeS
     private var isTickingSeekBarFromUser: Boolean = false
 
     init {
+        initView()
+        initListener()
+        initSeekBar()
+    }
+
+    private fun initView() {
         videoRoot = LayoutInflater.from(context).inflate(R.layout.z_player_video_view, null, false)
         addView(videoRoot, LayoutParams(MATCH_PARENT, MATCH_PARENT))
         vPlay = videoRoot?.findViewById(R.id.z_player_video_preview_iv_play)
@@ -68,8 +74,6 @@ class BaseVideoController @JvmOverloads constructor(context: Context, attributeS
         seekBar = videoRoot?.findViewById(R.id.z_player_video_preview_sb)
         fullScreen = videoRoot?.findViewById(R.id.z_player_video_preview_iv_full_screen)
         seekBarSmall = videoRoot?.findViewById(R.id.z_player_video_preview_sb_small)
-        initListener()
-        initSeekBar()
     }
 
     private fun initListener() {
@@ -149,7 +153,7 @@ class BaseVideoController @JvmOverloads constructor(context: Context, attributeS
     }
 
     override fun getControllerInfo(): InflateInfo {
-        val vpThis = (this.getChildAt(0) as? ViewGroup) ?: fullScreenDialog?.getRootView() as? ViewGroup
+        val vpThis = (this.getChildAt(0) as? ViewGroup) ?: fullScreenDialog?.getControllerView() as? ViewGroup
         return InflateInfo(vpThis, 2)
     }
 

@@ -3,18 +3,24 @@ package com.zj.player.full
 import android.animation.Animator
 import android.animation.ValueAnimator
 import android.app.Activity
+import android.app.Dialog
 import android.content.Context
-import android.graphics.*
+import android.graphics.Color
+import android.graphics.Point
+import android.graphics.Rect
+import android.graphics.RectF
+import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.GradientDrawable.Orientation
 import android.view.*
+import android.view.animation.DecelerateInterpolator
 import android.widget.FrameLayout
-import com.zj.player.anim.ZFullValueAnimator
-import android.widget.PopupWindow
 import androidx.annotation.FloatRange
-import kotlin.math.min
+import com.zj.player.R
+import com.zj.player.anim.ZFullValueAnimator
 import kotlin.math.roundToInt
 
-class BaseGestureFullScreenDialog private constructor(private val vp: ViewGroup, private val view: View, private val vlp: ViewGroup.LayoutParams, private val onDisplayChanged: (Boolean) -> Unit) : PopupWindow() {
+
+class BaseGestureFullScreenDialog private constructor(private val vp: ViewGroup, private val controllerView: View, private val vlp: ViewGroup.LayoutParams, private val onDisplayChanged: (Boolean) -> Unit) : Dialog(controllerView.context, R.style.BaseGestureFullScreenDialogStyle) {
 
     companion object {
         private const val MAX_DEEP_RATIO = 0.55f
@@ -23,85 +29,97 @@ class BaseGestureFullScreenDialog private constructor(private val vp: ViewGroup,
         }
     }
 
-    private val systemUiFlags = view.systemUiVisibility
-    private val _width: Int
-    private val _height: Int
-    private val originWidth: Int = view.measuredWidth
-    private val originHeight: Int = view.measuredHeight
-    private val originViewRectF: RectF
-    private val viewRectF: RectF
-    private val calculateUtils: RectFCalculateUtil
+    private val systemUiFlags = getActivity()?.window?.decorView?.systemUiVisibility
+    private var _width: Int = 0
+    private var _height: Int = 0
+    private val originWidth: Int = getControllerView().measuredWidth
+    private val originHeight: Int = getControllerView().measuredHeight
+    private var calculateUtils: RectFCalculateUtil? = null
     private var originInScreen: Point? = null
     private var curScaleOffset: Float = 1.0f
     private var isAnimRun = false
-    private val scaleAnim: ZFullValueAnimator
-    private val touchListener: GestureTouchListener
-    private val onKeyListener: View.OnKeyListener
+    private var scaleAnim: ZFullValueAnimator? = null
+    private var touchListener: GestureTouchListener? = null
+    private var onKeyListener: View.OnKeyListener? = null
     private var isDismissing = false
+    private val interpolator = DecelerateInterpolator(1.5f)
+    private var scrolled: Point = Point()
+    private var isMaxFull = false
+    private val originViewRectF = getControllerViewRect()
 
     init {
-        this.isOutsideTouchable = false
-        this.isTouchable = true
-        this.isClippingEnabled = false
-        this.softInputMode = WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN
-        val screenSize = getWindowSize()
+        init(isMaxFull)
+        setContent()
+        initListeners()
+        show(getControllerView())
+    }
+
+    private fun init(isMaxFull: Boolean) {
+        this.isMaxFull = isMaxFull
+        this.setCanceledOnTouchOutside(false)
+        this.setCancelable(false)
+        val screenSize = getWindowSize(isMaxFull)
         _width = screenSize.x
         _height = screenSize.y
-        width = _width
-        height = _height
-        val point = IntArray(2)
-        view.getLocationOnScreen(point)
-        val x = point[0] * 1.0f
-        val y = point[1] * 1.0f
-        originViewRectF = RectF(x, y, x + originWidth, y + originHeight)
-        viewRectF = RectF(0f, 0f, _width * 1.0f, _height * 1.0f)
+        scrolled.x = vp.bottom
+        val viewRectF = RectF(0f, 0f, _width * 1.0f, _height * 1.0f)
         calculateUtils = RectFCalculateUtil(viewRectF, originViewRectF)
-        (view.parent as? ViewGroup)?.removeView(view)
-        val ref = calculateUtils.calculate(1f)
-        getFrameLayoutParams(view, ref)
+        changeSystemWindowVisibility(true, isMaxFull)
+        updateContent(0f)
+        setBackground(1f)
+    }
+
+    private fun setContent() {
+        (getControllerView().parent as? ViewGroup)?.removeView(getControllerView())
+        this@BaseGestureFullScreenDialog.setContentView(getControllerView())
+    }
+
+    private fun initListeners() {
         scaleAnim = ZFullValueAnimator(object : ZFullValueAnimator.FullAnimatorListener {
             override fun onDurationChange(animation: ValueAnimator, duration: Float, isFull: Boolean) {
                 if (isFull) {
-                    val rect = calculateUtils.calculate(1 - duration)
-                    getFrameLayoutParams(view, rect)
+                    updateContent(1 - duration)
                 } else {
-                    if (originInScreen == null) originInScreen = Point(view.scrollX, view.scrollY)
+                    if (originInScreen == null) originInScreen = Point(getControllerView().scrollX, getControllerView().scrollY)
                     originInScreen?.let {
-                        val sx = (it.x * (1f - duration)).toInt()
-                        val sy = (it.y * (1f - duration)).toInt()
-                        view.scrollTo(sx, sy)
+                        val sx = (it.x * (1f - duration)).roundToInt()
+                        val sy = (it.y * (1f - duration)).roundToInt()
+                        getControllerView().scrollTo(sx, sy)
                     }
                     val curOff = if (curScaleOffset <= 0f) 1f else curScaleOffset
                     val offset = (duration * curOff) + (1f - curOff)
-                    val rect = calculateUtils.calculate(offset)
-                    getFrameLayoutParams(view, rect)
+                    updateContent(offset)
                 }
             }
 
             override fun onAnimEnd(animation: Animator, isFull: Boolean) {
-                val rect = calculateUtils.calculate(0.0f)
-                getFrameLayoutParams(view, rect)
+                updateContent(0.0f)
                 isAnimRun = false
                 originInScreen = null
                 if (!isFull) dismissed()
                 else onDisplayChanged(true)
+                //                scrolled.y = originViewRectF?.bottom?.roundToInt()
+                getControllerView().scrollTo(0, 0)
             }
         }, false).apply {
-            duration = 240
+            duration = 220
         }
         touchListener = object : GestureTouchListener({ isAnimRun || isDismissing }) {
-            override fun isPerformTouchClick(formTrigDuration: Float): Boolean {
-                setBackground(0f)
+            override fun onEventEnd(formTrigDuration: Float): Boolean {
                 return isAutoScaleFromTouchEnd(formTrigDuration)
             }
 
             override fun onTracked(offsetX: Float, offsetY: Float, easeY: Float, orientation: Orientation, formTrigDuration: Float) {
                 setBackground(1f - formTrigDuration)
                 followWithFinger(offsetX, offsetY)
-                scaleWithOffset(easeY, true)
+                scaleWithOffset(easeY)
+            }
+
+            override fun onDoubleClick() {
+                init(!isMaxFull)
             }
         }
-        touchListener.setPadding(0.15f, 0.13f)
+        touchListener?.setPadding(0.15f, 0.13f)
         onKeyListener = View.OnKeyListener { _, keyCode, _ ->
             if (keyCode == KeyEvent.KEYCODE_BACK) {
                 dismiss()
@@ -109,75 +127,64 @@ class BaseGestureFullScreenDialog private constructor(private val vp: ViewGroup,
             }
             true
         }
-        contentView = FrameLayout(view.context).apply {
-            val cal = calculateUtils.calculate(1f)
-            getFrameLayoutParams(view, cal)
-            fitsSystemWindows = false
-            clipChildren = false
-            addView(view)
-        }
-        show(view)
+    }
+
+    internal fun getControllerView(): View {
+        return controllerView
+    }
+
+    private fun updateContent(offset: Float) {
+        val rect = calculateUtils?.calculate(offset)
+        getFrameLayoutParams(getControllerView(), rect)
     }
 
     private fun show(view: View) {
-        changeSystemWindowVisibility(true)
         if (isShowing || (view.context as? Activity)?.isFinishing == true) return
-        val parent = (getActivity()?.window?.decorView) as? ViewGroup
-        showAtLocation(parent, Gravity.NO_GRAVITY, 0, 0)
         view.setOnTouchListener(touchListener)
         view.setOnKeyListener(onKeyListener)
+        show()
         isAnimRun = true
-        scaleAnim.start(true)
+        scaleAnim?.start(true)
     }
 
     private fun dismissed() {
         onDisplayChanged(false)
         curScaleOffset = 0f
-        view.setOnTouchListener(null)
-        if (view.parent != null) (view.parent as? ViewGroup)?.removeView(view)
-        vlp.width = originWidth
-        vlp.height = originHeight
-        vp.addView(view, vlp)
+        getControllerView().setOnTouchListener(null)
+        if (getControllerView().parent != null) (getControllerView().parent as? ViewGroup)?.removeView(getControllerView())
+        vp.addView(getControllerView(), vlp)
         isDismissing = false
         super.dismiss()
     }
 
-    internal fun getRootView(): View {
-        return view
-    }
-
     private fun followWithFinger(x: Float, y: Float) {
-        view.scrollTo(x.toInt(), y.toInt())
+        getControllerView().scrollTo(x.roundToInt(), y.roundToInt())
     }
 
-    private fun scaleWithOffset(curYOffset: Float, fromUser: Boolean = false) {
-        val ref = calculateUtils.calculate(curYOffset)
-        if (fromUser) {
-            getFrameLayoutParams(view, ref)
-        } else {
-            getFrameLayoutParams(view, ref)
-        }
+    private fun scaleWithOffset(curYOffset: Float) {
+        updateContent(curYOffset)
         curScaleOffset = 1 - curYOffset
     }
 
     private fun isAutoScaleFromTouchEnd(curYOffset: Float): Boolean {
         val isScaleAuto = curYOffset <= MAX_DEEP_RATIO
         if (isScaleAuto) {
-            view.scrollTo(0, 0)
+            getControllerView().scrollTo(0, 0)
             scaleWithOffset(0f)
         } else {
             isAnimRun = true
-            changeSystemWindowVisibility(false)
-            scaleAnim.start(false)
+            changeSystemWindowVisibility(false, isMaxFull = false)
+            scaleAnim?.start(false)
         }
         return isScaleAuto
     }
 
-    private fun getFrameLayoutParams(view: View, ref: RectF) {
-        val pl: Int = ref.left.toInt()
-        val pt: Int = ref.top.toInt()
-        val pr: Int = ref.right.toInt()
-        val pb: Int = ref.bottom.toInt()
+    private fun getFrameLayoutParams(view: View, ref: RectF?) {
+        if (ref == null) return
+        val pl: Int = ref.left.roundToInt()
+        val pt: Int = ref.top.roundToInt()
+        val pr: Int = ref.right.roundToInt()
+        val pb: Int = ref.bottom.roundToInt()
         val flp = FrameLayout.LayoutParams(originWidth, originHeight)
         flp.setMargins(pl, pt, pr, pb)
         flp.width = _width - (pl + pr)
@@ -186,7 +193,7 @@ class BaseGestureFullScreenDialog private constructor(private val vp: ViewGroup,
     }
 
     override fun dismiss() {
-        if (getActivity()?.isFinishing == true) {
+        if ((context as? Activity)?.isFinishing == true) {
             dismissed();super.dismiss()
         } else {
             if (isDismissing) return
@@ -195,32 +202,56 @@ class BaseGestureFullScreenDialog private constructor(private val vp: ViewGroup,
         }
     }
 
-    private fun changeSystemWindowVisibility(visible: Boolean) {
-        val flag = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY or View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+    private fun changeSystemWindowVisibility(visible: Boolean, isMaxFull: Boolean) {
+        val flag: Int = WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN or WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
+        val flagSystem: Int = View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION or View.SYSTEM_UI_FLAG_LAYOUT_STABLE or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
         if (visible) {
-            getDecorView()?.systemUiVisibility = flag
-            getActivity()?.window?.attributes?.flags?.or(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+            window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+            if (isMaxFull) {
+                window?.addFlags(flag)
+                window?.decorView?.systemUiVisibility = flagSystem
+            } else {
+                window?.addFlags(flag or WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS or WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION)
+                window?.decorView?.systemUiVisibility = flagSystem or View.SYSTEM_UI_FLAG_FULLSCREEN or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+            }
         } else {
-            getDecorView()?.systemUiVisibility = systemUiFlags
-            getActivity()?.window?.attributes?.flags?.and(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+            window?.decorView?.systemUiVisibility = systemUiFlags ?: flagSystem
+            window?.clearFlags(flag)
         }
     }
 
-    private fun getDecorView(): View? {
-        return getActivity()?.window?.decorView
+    private fun getActivity(): Activity? {
+        return getControllerView().context as? Activity
     }
 
-    private fun getActivity(): Activity? {
-        return view.context as? Activity
+    private fun getControllerViewRect(): RectF {
+        val point = IntArray(2)
+        getControllerView().getLocationInWindow(point)
+        val x = point[0] * 1.0f
+        val y = point[1] * 1.0f
+        return RectF(x, y, x + originWidth, y + originHeight)
     }
 
     private fun setBackground(@FloatRange(from = 0.0, to = 1.0) duration: Float) {
-        contentView?.setBackgroundColor(Color.argb((min(1f, duration) * 255f).roundToInt(), 0, 0, 0))
+        window?.setDimAmount(interpolator.getInterpolation(duration))
     }
 
-    private fun getWindowSize(): Point {
-        val windowSize = Point()
-        (view.context?.getSystemService(Context.WINDOW_SERVICE) as? WindowManager)?.defaultDisplay?.getRealSize(windowSize)
-        return windowSize
+    private fun getWindowSize(isMaxFull: Boolean): Point {
+        return if (isMaxFull) {
+            val windowSize = Point()
+            (getActivity()?.getSystemService(Context.WINDOW_SERVICE) as? WindowManager)?.defaultDisplay?.getRealSize(windowSize)
+            windowSize
+        } else {
+            val rect = Rect()
+            window?.windowManager?.defaultDisplay?.getRectSize(rect)
+            Point(rect.right - rect.left, rect.bottom - rect.top)
+        }
+    }
+
+    override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            dismiss();return true
+        }
+        return super.onKeyDown(keyCode, event)
     }
 }
