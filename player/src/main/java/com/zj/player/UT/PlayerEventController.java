@@ -42,4 +42,6 @@ public interface PlayerEventController {
     void onLog(String s, String curPath, String accessKey, String modeName);
 
     void onFirstFrameRender();
+
+    void onPlayerInfo(float volume, float speed);
 }

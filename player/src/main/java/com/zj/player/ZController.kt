@@ -154,6 +154,16 @@ class ZController private constructor(private var player: ZPlayer?, viewControll
         runWithPlayer { it.stop() }
     }
 
+    fun setSpeed(s: Float) {
+        log("user set speed to $s")
+        runWithPlayer { it.setSpeed(s) }
+    }
+
+    fun setVolume(volume: Float) {
+        log("user set volume to $volume")
+        runWithPlayer { it.setVolume(volume) }
+    }
+
     fun isPause(accurate: Boolean = false): Boolean {
         log("user query cur state is pause or not")
         return runWithPlayer { it.isPause(accurate) } ?: false
@@ -184,6 +194,14 @@ class ZController private constructor(private var player: ZPlayer?, viewControll
         return runWithPlayer { it.isDestroyed(accurate) } ?: true
     }
 
+    fun getCurVolume(): Float {
+        return player?.getVolume() ?: 0f
+    }
+
+    fun getCurSpeed(): Float {
+        return player?.getSpeed() ?: 1f
+    }
+
     /**
      * Use another View to bind to the Controller. The bound ViewController will take effect immediately and receive the method callback from the player.
      * */
@@ -195,7 +213,7 @@ class ZController private constructor(private var player: ZPlayer?, viewControll
     }
 
     /**
-     * Completely recycle a Controller, after which this instance will be completely invalid.
+     * recycle a Controller in Completely, after which this instance will be invalid.
      * */
     fun release() {
         log("user released all player")
@@ -305,6 +323,10 @@ class ZController private constructor(private var player: ZPlayer?, viewControll
         viewController?.completing(path, isRegulate)
     }
 
+    override fun onPlayerInfo(volume: Float, speed: Float) {
+        viewController?.updateCurPlayerInfo(volume, speed)
+    }
+
     private fun getSuitParentLayoutParams(v: ViewGroup): ViewGroup.LayoutParams {
         return when (v) {
             is FrameLayout -> FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT).apply {
@@ -333,6 +355,7 @@ class ZController private constructor(private var player: ZPlayer?, viewControll
             isPausedByLifecycle = false
             playOrResume()
         }
+        viewController?.onLifecycleResume()
     }
 
     @OnLifecycleEvent(value = Lifecycle.Event.ON_STOP)
@@ -341,6 +364,7 @@ class ZController private constructor(private var player: ZPlayer?, viewControll
             isPausedByLifecycle = true
             pause()
         }
+        viewController?.onLifecycleStop()
     }
 
     @OnLifecycleEvent(value = Lifecycle.Event.ON_DESTROY)

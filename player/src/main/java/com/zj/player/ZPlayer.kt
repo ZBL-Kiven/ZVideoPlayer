@@ -388,7 +388,24 @@ open class ZPlayer(var config: VideoConfig? = null) : Player.EventListener {
             val np = PlaybackParameters(s, p.pitch, p.skipSilence)
             log("video update speed from ${p.speed} to $s")
             it.playbackParameters = np
+            controller?.onPlayerInfo(getVolume(), s)
         }
+    }
+
+    open fun getSpeed(): Float {
+        return player?.playbackParameters?.speed ?: 1f
+    }
+
+    open fun setVolume(volume: Float) {
+        runWithPlayer {
+            log("video set volume to $volume")
+            it.volume = volume
+            controller?.onPlayerInfo(volume, getSpeed())
+        }
+    }
+
+    open fun getVolume(): Float {
+        return player?.volume ?: 0f
     }
 
     internal fun autoPlay(autoPlay: Boolean) {
@@ -417,5 +434,6 @@ open class ZPlayer(var config: VideoConfig? = null) : Player.EventListener {
                 }
             }
         }
+        controller?.onPlayerInfo(getVolume(), getSpeed())
     }
 }

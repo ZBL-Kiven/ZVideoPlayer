@@ -3,7 +3,6 @@ package com.zj.videotest
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
-import android.view.WindowManager
 import com.zj.player.VideoEventListener
 import com.zj.player.ZController
 import com.zj.player.config.VideoConfig
@@ -22,6 +21,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
+        videoView1?.setScreenContentLayout(R.layout.activity_full)
         controller = ZController.build(videoView1, VideoConfig.create().setCacheEnable(false))
         controller?.setData(path)
         controller?.setVideoEventListener(onVideoEventListener)

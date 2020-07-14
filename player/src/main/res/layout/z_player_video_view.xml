@@ -32,11 +32,47 @@
         tools:ignore="ContentDescription" />
 
     <LinearLayout
+        android:id="@+id/z_player_video_preview_top_bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:clickable="true"
+        android:focusable="true"
+        android:gravity="end"
+        android:orientation="horizontal"
+        android:padding="10dp"
+        android:translationZ="6dp"
+        android:visibility="gone"
+        tools:ignore="UseCompoundDrawables">
+
+        <TextView
+            android:id="@+id/z_player_video_preview_tv_speed"
+            android:layout_width="27dp"
+            android:layout_height="27dp"
+            android:background="@drawable/z_player_video_bg_top_bar"
+            android:gravity="center"
+            android:text="1X"
+            android:textColor="@color/z_player_color_gray_5"
+            android:textSize="12sp" />
+
+        <ImageView
+            android:id="@+id/z_player_video_preview_iv_mute"
+            android:layout_width="27dp"
+            android:layout_height="27dp"
+            android:layout_marginStart="15dp"
+            android:layout_marginEnd="5dp"
+            android:background="@drawable/z_player_video_bg_top_bar"
+            android:padding="6dp"
+            android:src="@drawable/z_player_video_btn_volume"
+            tools:ignore="ContentDescription" />
+    </LinearLayout>
+
+
+    <LinearLayout
         android:id="@+id/z_player_video_preview_tools_bar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
-        android:background="@color/z_player_color_controller_bar_bg"
+        android:background="@drawable/z_player_video_bg_tools_bar"
         android:clickable="true"
         android:focusable="true"
         android:orientation="horizontal"
@@ -98,8 +134,8 @@
 
     <ImageView
         android:id="@+id/z_player_video_preview_iv_play"
-        android:layout_width="80dp"
-        android:layout_height="80dp"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
         android:layout_gravity="center"
         android:background="@drawable/z_player_video_btn_bg"
         android:padding="20dp"

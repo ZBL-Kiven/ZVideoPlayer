@@ -6,5 +6,6 @@
     <color name="z_player_color_loading">#c4c6c0</color>
     <color name="z_player_color_gray_5">#F5F5F5</color>
     <color name="z_player_color_trans_50">#a000</color>
-    <color name="z_player_color_controller_bar_bg">#7f181F2A</color>
+    <color name="z_player_color_controller_bar_bg">#cf181F2A</color>
+    <color name="z_player_color_controller_bar_bg_pressed">#7f1a2c1f</color>
 </resources>
