@@ -2,9 +2,11 @@ package com.zj.player.full
 
 import android.animation.Animator
 import android.animation.ValueAnimator
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.Dialog
 import android.content.Context
+import android.content.pm.ActivityInfo
 import android.graphics.Color
 import android.graphics.Point
 import android.graphics.PointF
@@ -50,6 +52,12 @@ class BaseGestureFullScreenDialog private constructor(private val controllerView
     private val originViewRectF: RectF
     private var contentLayoutView: View? = null
     private var realWindowSize = Point()
+    private var screenUtil: ScreenUtils? = null
+    private var curScreenRotation: RotateOrientation? = null
+        set(value) {
+            if (value == null || field == value || !isMaxFull) return
+            field = value;controllerView.rotation = value.degree
+        }
 
     init {
         this.setCanceledOnTouchOutside(false)
@@ -66,6 +74,7 @@ class BaseGestureFullScreenDialog private constructor(private val controllerView
 
     private fun setContent(isMaxFull: Boolean, isResizeCalculate: Boolean = false) {
         this.isMaxFull = isMaxFull
+        screenRotationsChanged(isMaxFull)
         try {
             (getControllerView().parent as? ViewGroup)?.removeView(getControllerView())
             if (isMaxFull || contentLayoutView == null) {
@@ -103,15 +112,21 @@ class BaseGestureFullScreenDialog private constructor(private val controllerView
         }.invoke()
     }
 
-    private fun init(isMaxFull: Boolean) {
-        val viewRectF = getWindowSize(isMaxFull)
+    private fun init(isMaxFull: Boolean, isResizeConfig: Boolean = false) {
+        var viewRectF = getWindowSize(isMaxFull)
+        if (isResizeConfig) {
+            val l = viewRectF.top
+            val t = viewRectF.left
+            val r = viewRectF.bottom
+            val b = viewRectF.right
+            viewRectF = RectF(l, t, r, b)
+        }
         _width = viewRectF.right - viewRectF.left
         _height = viewRectF.bottom - viewRectF.top
         calculateUtils = RectFCalculateUtil(viewRectF, originViewRectF)
         updateContent(0f)
         setBackground(1f)
     }
-
 
     private fun dismissed() {
         onFullScreenListener.onDisplayChanged(false)
@@ -171,6 +186,7 @@ class BaseGestureFullScreenDialog private constructor(private val controllerView
             }
         }
         touchListener?.setPadding(0.15f, 0.13f)
+        screenUtil = ScreenUtils(context) { curScreenRotation = it }
     }
 
     internal fun getControllerView(): View {
@@ -217,6 +233,7 @@ class BaseGestureFullScreenDialog private constructor(private val controllerView
     }
 
     override fun dismiss() {
+        screenRotationsChanged(false)
         if ((context as? Activity)?.isFinishing == true) {
             dismissed();super.dismiss()
         } else {
@@ -226,6 +243,7 @@ class BaseGestureFullScreenDialog private constructor(private val controllerView
         }
     }
 
+    @SuppressLint("SourceLockedOrientationActivity")
     private fun changeSystemWindowVisibility(visible: Boolean) {
         val flag: Int = WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN or WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS or WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS or WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION
         val flagSystem: Int = View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION or View.SYSTEM_UI_FLAG_LAYOUT_STABLE or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION or View.SYSTEM_UI_FLAG_FULLSCREEN or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
@@ -233,9 +251,15 @@ class BaseGestureFullScreenDialog private constructor(private val controllerView
             window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
             window?.addFlags(flag)
             window?.decorView?.systemUiVisibility = flagSystem
+            getActivity()?.let {
+                if (it.requestedOrientation != ActivityInfo.SCREEN_ORIENTATION_PORTRAIT) {
+                    it.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+                }
+            }
         } else {
             window?.decorView?.systemUiVisibility = systemUiFlags ?: flagSystem
             window?.clearFlags(flag)
+            getActivity()?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
         }
     }
 
@@ -280,6 +304,11 @@ class BaseGestureFullScreenDialog private constructor(private val controllerView
         val x = point[0] * 1.0f
         val y = point[1] * 1.0f
         return PointF(x, y)
+    }
+
+    private fun screenRotationsChanged(isRotated: Boolean, degree: Float = 0f) {
+        controllerView.rotation = degree
+        if (isRotated) screenUtil?.enable() else screenUtil?.disable()
     }
 
     fun onResume() {

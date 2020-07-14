@@ -89,6 +89,6 @@ class ScreenUtils(private val context: Context, private val gravityListener: (Ro
     }
 }
 
-enum class RotateOrientation(degree: Int) {
-    P0(0), P1(180), L0(90), L1(270)
+enum class RotateOrientation(val degree: Float) {
+    P0(0f), P1(180f), L0(270f), L1(90f)
 }
