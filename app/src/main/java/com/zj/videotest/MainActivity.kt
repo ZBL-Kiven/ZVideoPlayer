@@ -12,7 +12,8 @@ class MainActivity : AppCompatActivity() {
 
 
 //    private val path = "https://gcdn.channelthree.tv/20200616/4/f/2/f/9/4f2f94b03d674d8880b5c4091857dacb.mp4"
-    private val path = "https://gcdn.channelthree.tv/20200714/4/6/f/4/e/46f4ed05895a4797bb3c00565aac3980.mp4"
+    private val path = "https://gcdn.channelthree.tv/20200716/9/e/b/e/0/9ebe0040976547379e61a2be93b386ca.mp4"
+//    private val path = "https://gcdn.channelthree.tv/20200714/4/6/f/4/e/46f4ed05895a4797bb3c00565aac3980.mp4"
     private var controller: ZController? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {

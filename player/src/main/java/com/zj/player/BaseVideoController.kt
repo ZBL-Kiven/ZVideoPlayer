@@ -121,6 +121,7 @@ class BaseVideoController @JvmOverloads constructor(context: Context, attributeS
             seekBar = videoRoot?.findViewById(R.id.z_player_video_preview_sb)
             speedView?.text = context.getString(R.string.z_player_str_speed, 1)
             isLockScreenRotation = lockScreenRotation != -1
+            isFull = bottomToolsBar?.visibility == View.VISIBLE
         } finally {
             ta.recycle()
         }
@@ -188,9 +189,7 @@ class BaseVideoController @JvmOverloads constructor(context: Context, attributeS
     @SuppressLint("ClickableViewAccessibility")
     private fun initSeekBar() {
         seekBar?.isEnabled = false
-        seekBarSmall?.setOnTouchListener { _, _ ->
-            return@setOnTouchListener true
-        }
+        seekBarSmall?.setOnTouchListener(null)
         seekBar?.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(p0: SeekBar?, p1: Int, p2: Boolean) {
                 if (isTickingSeekBarFromUser && p2) {
@@ -245,6 +244,7 @@ class BaseVideoController @JvmOverloads constructor(context: Context, attributeS
         showOrHidePlayBtn(false)
         loadingView?.setMode(BaseLoadingView.DisplayMode.DISMISS)
         full(false)
+        seekBarSmall?.visibility = View.VISIBLE
     }
 
     override fun onPause(path: String, isRegulate: Boolean) {
