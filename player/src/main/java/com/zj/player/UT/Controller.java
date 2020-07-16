@@ -46,4 +46,6 @@ public interface Controller {
     void onLifecycleResume();
 
     void onLifecycleStop();
+
+    void onLifecyclePause();
 }

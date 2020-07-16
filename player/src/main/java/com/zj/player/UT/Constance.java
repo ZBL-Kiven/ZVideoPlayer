@@ -32,4 +32,15 @@ public class Constance {
 
     public static final long ANIMATE_DURATION = 300L;
 
+
+    /**
+     * ------- set the global default controller visibility --------
+     */
+    public static int defaultControllerVisibility = 1;
+    public static int muteIconEnable = 2;
+    public static int speedIconEnable = 2;
+    public static int fullScreenEnAble = 2;
+    public static int secondarySeekBarEnable = 1;
+    public static boolean isDefaultMaxScreen = false;
+    public static boolean fullMaxScreenEnable = true;
 }

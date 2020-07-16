@@ -6,6 +6,7 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.Service
 import android.content.Context
+import android.content.pm.ActivityInfo
 import android.content.res.Resources
 import android.media.AudioManager
 import android.util.AttributeSet
@@ -14,16 +15,14 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.animation.AccelerateDecelerateInterpolator
-import android.widget.FrameLayout
-import android.widget.ImageView
-import android.widget.SeekBar
-import android.widget.TextView
+import android.widget.*
 import androidx.annotation.LayoutRes
 import com.zj.player.UT.Constance
 import com.zj.player.UT.Controller
 import com.zj.player.anim.ZFullValueAnimator
 import com.zj.player.base.InflateInfo
 import com.zj.player.full.BaseGestureFullScreenDialog
+import com.zj.player.full.FullContentListener
 import com.zj.player.full.FullScreenListener
 import com.zj.player.view.BaseLoadingView
 import java.lang.NullPointerException
@@ -49,6 +48,7 @@ class BaseVideoController @JvmOverloads constructor(context: Context, attributeS
     private var fullScreen: View? = null
     private var speedView: TextView? = null
     private var muteView: View? = null
+    private var lockScreen: View? = null
     private var loadingView: BaseLoadingView? = null
     private var bottomToolsBar: View? = null
     private var topToolsBar: View? = null
@@ -64,32 +64,66 @@ class BaseVideoController @JvmOverloads constructor(context: Context, attributeS
     private var isTickingSeekBarFromUser: Boolean = false
     private var fullScreenContentLayoutId: Int = -1
     private var fullScreenSupported = false
-
     private val supportedSpeedList = floatArrayOf(1f, 2f, 4f)
     private var curSpeedIndex = 0
+    private var alphaAnimViewsGroup: MutableList<View?>? = null
+    private var onFullScreenLayoutInflateListener: ((v: View) -> Unit)? = null
+    private var isDefaultMaxScreen: Boolean = false
+    private var fullMaxScreenEnable: Boolean = true
+    private var lockScreenRotation: Int = -1
+    private var isLockScreenRotation: Boolean = false
 
     init {
-        initView()
+        initView(context, attributeSet)
         initListener()
         initSeekBar()
     }
 
-    private fun initView() {
-        videoRoot = LayoutInflater.from(context).inflate(R.layout.z_player_video_view, null, false)
-        addView(videoRoot, LayoutParams(MATCH_PARENT, MATCH_PARENT))
-        vPlay = videoRoot?.findViewById(R.id.z_player_video_preview_iv_play)
-        speedView = videoRoot?.findViewById(R.id.z_player_video_preview_tv_speed)
-        muteView = videoRoot?.findViewById(R.id.z_player_video_preview_iv_mute)
-        tvStart = videoRoot?.findViewById(R.id.z_player_video_preview_tv_start)
-        tvEnd = videoRoot?.findViewById(R.id.z_player_video_preview_tv_end)
-        loadingView = videoRoot?.findViewById(R.id.z_player_video_preview_loading)
-        bottomToolsBar = videoRoot?.findViewById(R.id.z_player_video_preview_tools_bar)
-        topToolsBar = videoRoot?.findViewById(R.id.z_player_video_preview_top_bar)
-        videoOverrideImageView = videoRoot?.findViewById(R.id.z_player_video_thumb)
-        videoOverrideImageShaderView = videoRoot?.findViewById(R.id.z_player_video_background)
-        seekBar = videoRoot?.findViewById(R.id.z_player_video_preview_sb)
-        fullScreen = videoRoot?.findViewById(R.id.z_player_video_preview_iv_full_screen)
-        seekBarSmall = videoRoot?.findViewById(R.id.z_player_video_preview_sb_small)
+    /**
+     * config it in [R.styleable.BaseVideoController]
+     * */
+    private fun initView(context: Context, attributeSet: AttributeSet?) {
+        val ta = context.obtainStyledAttributes(attributeSet, R.styleable.BaseVideoController)
+        fun <T : View> setDefaultControllerStyle(id: Int, mode: Int): T? {
+            return when (mode) {
+                1, 2 -> {
+                    val v = videoRoot?.findViewById<T>(id)
+                    v?.visibility = if (mode == 2) View.VISIBLE else View.GONE
+                    v
+                }
+                else -> null
+            }
+        }
+        try {
+            val defaultControllerVisibility = ta.getInt(R.styleable.BaseVideoController_defaultControllerVisibility, Constance.defaultControllerVisibility)
+            val muteIconEnable = ta.getInt(R.styleable.BaseVideoController_muteIconEnable, Constance.muteIconEnable)
+            val speedIconEnable = ta.getInt(R.styleable.BaseVideoController_speedIconEnable, Constance.speedIconEnable)
+            val secondarySeekBarEnable = ta.getInt(R.styleable.BaseVideoController_secondarySeekBarEnable, Constance.secondarySeekBarEnable)
+            val fullScreenEnable = ta.getInt(R.styleable.BaseVideoController_fullScreenEnable, Constance.fullScreenEnAble)
+            fullMaxScreenEnable = ta.getBoolean(R.styleable.BaseVideoController_fullMaxScreenEnable, Constance.fullMaxScreenEnable)
+            isDefaultMaxScreen = ta.getBoolean(R.styleable.BaseVideoController_isDefaultMaxScreen, Constance.isDefaultMaxScreen)
+            lockScreenRotation = ta.getInt(R.styleable.BaseVideoController_lockScreenRotation, -1)
+            videoRoot = LayoutInflater.from(context).inflate(R.layout.z_player_video_view, null, false)
+            addView(videoRoot, LayoutParams(MATCH_PARENT, MATCH_PARENT))
+            vPlay = videoRoot?.findViewById(R.id.z_player_video_preview_iv_play)
+            muteView = setDefaultControllerStyle(R.id.z_player_video_preview_iv_mute, muteIconEnable)
+            speedView = setDefaultControllerStyle(R.id.z_player_video_preview_tv_speed, speedIconEnable)
+            fullScreen = setDefaultControllerStyle(R.id.z_player_video_preview_iv_full_screen, fullScreenEnable)
+            seekBarSmall = setDefaultControllerStyle(R.id.z_player_video_preview_sb_small, secondarySeekBarEnable)
+            bottomToolsBar = setDefaultControllerStyle(R.id.z_player_video_preview_tools_bar, defaultControllerVisibility)
+            lockScreen = videoRoot?.findViewById(R.id.z_player_video_preview_iv_lock_screen)
+            tvStart = videoRoot?.findViewById(R.id.z_player_video_preview_tv_start)
+            tvEnd = videoRoot?.findViewById(R.id.z_player_video_preview_tv_end)
+            loadingView = videoRoot?.findViewById(R.id.z_player_video_preview_loading)
+            topToolsBar = videoRoot?.findViewById(R.id.z_player_video_preview_top_bar)
+            videoOverrideImageView = videoRoot?.findViewById(R.id.z_player_video_thumb)
+            videoOverrideImageShaderView = videoRoot?.findViewById(R.id.z_player_video_background)
+            seekBar = videoRoot?.findViewById(R.id.z_player_video_preview_sb)
+            speedView?.text = context.getString(R.string.z_player_str_speed, 1)
+            isLockScreenRotation = lockScreenRotation != -1
+        } finally {
+            ta.recycle()
+        }
     }
 
     private fun initListener() {
@@ -136,6 +170,10 @@ class BaseVideoController @JvmOverloads constructor(context: Context, attributeS
             initVolume(nextState)
             it.isSelected = nextState
         }
+
+        lockScreen?.setOnClickListener {
+            if (!lockScreenRotate(!it.isSelected)) Toast.makeText(context, R.string.z_player_str_screen_locked_tint, Toast.LENGTH_SHORT).show()
+        }
     }
 
     private fun initVolume(isMute: Boolean) {
@@ -169,18 +207,6 @@ class BaseVideoController @JvmOverloads constructor(context: Context, attributeS
                 controller?.autoPlayWhenReady(true)
             }
         })
-    }
-
-    fun getThumbView(): ImageView? {
-        return videoOverrideImageView
-    }
-
-    fun getBackgroundView(): ImageView? {
-        return videoOverrideImageShaderView
-    }
-
-    fun setScreenContentLayout(@LayoutRes layoutId: Int) {
-        this.fullScreenContentLayoutId = layoutId
     }
 
     override fun onControllerBind(controller: ZController?) {
@@ -298,6 +324,36 @@ class BaseVideoController @JvmOverloads constructor(context: Context, attributeS
         fullScreenDialog?.onStopped()
     }
 
+    override fun onLifecyclePause() {
+        //use off in extends
+    }
+
+    fun getThumbView(): ImageView? {
+        return videoOverrideImageView
+    }
+
+    fun getBackgroundView(): ImageView? {
+        return videoOverrideImageShaderView
+    }
+
+    fun setScreenContentLayout(@LayoutRes layoutId: Int, onFullScreenLayoutInflateListener: ((v: View) -> Unit)? = null) {
+        this.fullScreenContentLayoutId = layoutId
+        this.onFullScreenLayoutInflateListener = onFullScreenLayoutInflateListener
+    }
+
+    /**
+     * even though you called it and set the lock to FALSE ,
+     * it also merge with the system screen rotate settings.
+     * @return the status form this operation
+     * */
+    fun lockScreenRotate(isLock: Boolean): Boolean {
+        return if (fullScreenDialog?.lockScreenRotation(isLock) == true) {
+            isLockScreenRotation = isLock
+            lockScreen?.isSelected = isLock
+            true
+        } else false
+    }
+
     private fun getDuration(mediaDuration: Long): String {
         val duration = mediaDuration / 1000
         val minute = duration / 60
@@ -403,29 +459,65 @@ class BaseVideoController @JvmOverloads constructor(context: Context, attributeS
         }
     }
 
+    @SuppressLint("SourceLockedOrientationActivity")
     private fun onFullScreen(v: View, full: Boolean) {
         videoRoot?.let {
-            if (fullScreenDialog == null && full) fullScreenDialog = BaseGestureFullScreenDialog.show(it, fullScreenContentLayoutId, object : FullScreenListener {
-                override fun onDisplayChanged(isShow: Boolean) {
-                    v.isSelected = isShow
-                    if (!isShow) {
-                        fullScreenDialog = null
-                    }
-                    isFullingOrDismissing = false
-                }
-
-                override fun onContentLayoutInflated(content: View) {
-
-                }
-
-                override fun onFullMaxChanged(isMax: Boolean) {
-
-                }
-            })
             if (!full) {
+                lockScreen?.visibility = GONE
                 fullScreenDialog?.dismiss()
+            } else {
+                if (!isDefaultMaxScreen) (context as? Activity)?.let {
+                    if (it.requestedOrientation != ActivityInfo.SCREEN_ORIENTATION_PORTRAIT) {
+                        it.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+                    }
+                }
+                if (fullScreenDialog == null) fullScreenDialog = BaseGestureFullScreenDialog.let { d ->
+                    if (isDefaultMaxScreen) {
+                        lockScreen?.visibility = View.VISIBLE
+                        d.showFull(it, lockScreenRotation, object : FullScreenListener {
+                            override fun onDisplayChanged(dialog: BaseGestureFullScreenDialog, isShow: Boolean) {
+                                onDisplayChanged(v, isShow)
+                            }
+
+                            override fun onFocusChange(dialog: BaseGestureFullScreenDialog, isMax: Boolean) {
+                                onFocusChanged(dialog, isMax)
+                            }
+                        })
+                    } else d.showInContent(it, fullScreenContentLayoutId, fullMaxScreenEnable, lockScreenRotation, object : FullContentListener {
+                        override fun onDisplayChanged(dialog: BaseGestureFullScreenDialog, isShow: Boolean) {
+                            onDisplayChanged(v, isShow)
+                        }
+
+                        override fun onContentLayoutInflated(dialog: BaseGestureFullScreenDialog, content: View) {
+                            onFullScreenLayoutInflateListener?.invoke(content)
+                        }
+
+                        override fun onFullMaxChanged(dialog: BaseGestureFullScreenDialog, isMax: Boolean) {
+                            lockScreen?.visibility = if (isMax) View.VISIBLE else GONE
+                            onFocusChanged(dialog, isMax)
+                        }
+
+                        override fun onFocusChange(dialog: BaseGestureFullScreenDialog, isMax: Boolean) {
+                            onFocusChanged(dialog, isMax)
+                        }
+                    })
+                }
+                lockScreenRotate(isLockScreenRotation)
             }
         }
+    }
+
+    private fun onDisplayChanged(v: View, isShow: Boolean) {
+        v.isSelected = isShow
+        if (!isShow) {
+            fullScreenDialog = null
+            lockScreen?.isSelected = false
+        }
+        isFullingOrDismissing = false
+    }
+
+    private fun onFocusChanged(dialog: BaseGestureFullScreenDialog, isMax: Boolean) {
+        if (isMax) lockScreen?.isSelected = dialog.isLockedCurrent()
     }
 
     private fun setChildZ(zIn: Float) {

@@ -41,31 +41,40 @@
         android:orientation="horizontal"
         android:padding="10dp"
         android:translationZ="6dp"
-        android:visibility="gone"
-        tools:ignore="UseCompoundDrawables">
+        android:visibility="gone">
+
+        <ImageView
+            android:id="@+id/z_player_video_preview_iv_lock_screen"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:background="@drawable/z_player_video_bg_top_bar"
+            android:padding="5dp"
+            android:src="@drawable/z_player_video_btn_lock"
+            android:visibility="gone"
+            tools:ignore="ContentDescription" />
 
         <TextView
             android:id="@+id/z_player_video_preview_tv_speed"
-            android:layout_width="27dp"
-            android:layout_height="27dp"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_marginStart="10dp"
             android:background="@drawable/z_player_video_bg_top_bar"
             android:gravity="center"
-            android:text="1X"
+            android:text="@string/z_player_str_speed"
             android:textColor="@color/z_player_color_gray_5"
             android:textSize="12sp" />
 
         <ImageView
             android:id="@+id/z_player_video_preview_iv_mute"
-            android:layout_width="27dp"
-            android:layout_height="27dp"
-            android:layout_marginStart="15dp"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_marginStart="10dp"
             android:layout_marginEnd="5dp"
             android:background="@drawable/z_player_video_bg_top_bar"
             android:padding="6dp"
             android:src="@drawable/z_player_video_btn_volume"
             tools:ignore="ContentDescription" />
     </LinearLayout>
-
 
     <LinearLayout
         android:id="@+id/z_player_video_preview_tools_bar"
@@ -111,10 +120,10 @@
             android:layout_marginStart="15dp"
             android:layout_marginEnd="5dp"
             android:src="@drawable/z_player_video_btn_full_screen"
+            android:visibility="gone"
             tools:ignore="ContentDescription" />
 
     </LinearLayout>
-
 
     <com.zj.player.view.BaseLoadingView
         android:id="@+id/z_player_video_preview_loading"

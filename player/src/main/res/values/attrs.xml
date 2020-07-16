@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="BaseLoadingView">
+        <attr name="backgroundFill" format="color|reference" />
+        <attr name="backgroundOnAct" format="color|reference" />
+        <attr name="loadingRes" format="reference" />
+        <attr name="noDataRes" format="reference" />
+        <attr name="noNetworkRes" format="reference" />
+        <attr name="hintColor" format="color|reference" />
+        <attr name="refreshTextColor" format="color|reference" />
+        <attr name="loadingText" format="string" />
+        <attr name="noDataText" format="string" />
+        <attr name="networkErrorText" format="string" />
+        <attr name="refreshText" format="string" />
+        <attr name="showOnActDefault" format="boolean" />
+        <attr name="refreshEnable" format="boolean" />
+    </declare-styleable>
+
+    <declare-styleable name="BaseVideoController">
+
+        <attr name="muteIconEnable" format="enum">
+            <enum name="DISPLAY_VISIBLE" value="2" />
+            <enum name="DISPLAY_GONE" value="1" />
+            <enum name="GONE" value="0" />
+        </attr>
+        <attr name="speedIconEnable" format="enum">
+            <enum name="DISPLAY_VISIBLE" value="2" />
+            <enum name="DISPLAY_GONE" value="1" />
+            <enum name="GONE" value="0" />
+        </attr>
+        <attr name="defaultControllerVisibility" format="enum">
+            <enum name="DISPLAY_VISIBLE" value="2" />
+            <enum name="DISPLAY_GONE" value="1" />
+            <enum name="GONE" value="0" />
+        </attr>
+        <attr name="fullScreenEnable" format="enum">
+            <enum name="DISPLAY_VISIBLE" value="2" />
+            <enum name="DISPLAY_GONE" value="1" />
+            <enum name="GONE" value="0" />
+        </attr>
+        <attr name="secondarySeekBarEnable" format="enum">
+            <enum name="DISPLAY_VISIBLE" value="2" />
+            <enum name="DISPLAY_GONE" value="1" />
+            <enum name="GONE" value="0" />
+        </attr>
+        <attr name="isDefaultMaxScreen" format="boolean" />
+        <attr name="fullMaxScreenEnable" format="boolean" />
+        <attr name="lockScreenRotation" format="enum">
+            <enum name="LANDSCAPE" value="0" />
+            <enum name="PORTRAIT" value="1" />
+        </attr>
+    </declare-styleable>
+</resources>

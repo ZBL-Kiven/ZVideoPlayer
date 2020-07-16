@@ -360,11 +360,16 @@ class ZController private constructor(private var player: ZPlayer?, viewControll
 
     @OnLifecycleEvent(value = Lifecycle.Event.ON_STOP)
     private fun onStopped() {
+        viewController?.onLifecycleStop()
+    }
+
+    @OnLifecycleEvent(value = Lifecycle.Event.ON_PAUSE)
+    private fun onPaused() {
         if (isPlaying()) {
             isPausedByLifecycle = true
             pause()
         }
-        viewController?.onLifecycleStop()
+        viewController?.onLifecyclePause()
     }
 
     @OnLifecycleEvent(value = Lifecycle.Event.ON_DESTROY)
