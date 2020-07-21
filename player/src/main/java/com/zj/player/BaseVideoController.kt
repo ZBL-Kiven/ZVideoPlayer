@@ -156,7 +156,7 @@ class BaseVideoController @JvmOverloads constructor(context: Context, attributeS
         fullScreen?.setOnClickListener {
             if (!isFullingOrDismissing) {
                 isFullingOrDismissing = true
-                onFullScreen(it, !it.isSelected)
+                onFullScreen(!it.isSelected)
             }
         }
         speedView?.setOnClickListener {
@@ -459,8 +459,37 @@ class BaseVideoController @JvmOverloads constructor(context: Context, attributeS
         }
     }
 
+    private val fullScreenListener = object : FullScreenListener {
+        override fun onDisplayChanged(dialog: BaseGestureFullScreenDialog, isShow: Boolean) {
+            onDisplayChanged(fullScreen, isShow)
+        }
+
+        override fun onFocusChange(dialog: BaseGestureFullScreenDialog, isMax: Boolean) {
+            onFocusChanged(dialog, isMax)
+        }
+    }
+
+    private val fullContentListener = object : FullContentListener {
+        override fun onDisplayChanged(dialog: BaseGestureFullScreenDialog, isShow: Boolean) {
+            onDisplayChanged(fullScreen, isShow)
+        }
+
+        override fun onContentLayoutInflated(dialog: BaseGestureFullScreenDialog, content: View) {
+            onFullScreenLayoutInflateListener?.invoke(content)
+        }
+
+        override fun onFullMaxChanged(dialog: BaseGestureFullScreenDialog, isMax: Boolean) {
+            lockScreen?.visibility = if (isMax) View.VISIBLE else GONE
+            onFocusChanged(dialog, isMax)
+        }
+
+        override fun onFocusChange(dialog: BaseGestureFullScreenDialog, isMax: Boolean) {
+            onFocusChanged(dialog, isMax)
+        }
+    }
+
     @SuppressLint("SourceLockedOrientationActivity")
-    private fun onFullScreen(v: View, full: Boolean) {
+    private fun onFullScreen(full: Boolean) {
         videoRoot?.let {
             if (!full) {
                 lockScreen?.visibility = GONE
@@ -474,41 +503,16 @@ class BaseVideoController @JvmOverloads constructor(context: Context, attributeS
                 if (fullScreenDialog == null) fullScreenDialog = BaseGestureFullScreenDialog.let { d ->
                     if (isDefaultMaxScreen) {
                         lockScreen?.visibility = View.VISIBLE
-                        d.showFull(it, lockScreenRotation, object : FullScreenListener {
-                            override fun onDisplayChanged(dialog: BaseGestureFullScreenDialog, isShow: Boolean) {
-                                onDisplayChanged(v, isShow)
-                            }
-
-                            override fun onFocusChange(dialog: BaseGestureFullScreenDialog, isMax: Boolean) {
-                                onFocusChanged(dialog, isMax)
-                            }
-                        })
-                    } else d.showInContent(it, fullScreenContentLayoutId, fullMaxScreenEnable, lockScreenRotation, object : FullContentListener {
-                        override fun onDisplayChanged(dialog: BaseGestureFullScreenDialog, isShow: Boolean) {
-                            onDisplayChanged(v, isShow)
-                        }
-
-                        override fun onContentLayoutInflated(dialog: BaseGestureFullScreenDialog, content: View) {
-                            onFullScreenLayoutInflateListener?.invoke(content)
-                        }
-
-                        override fun onFullMaxChanged(dialog: BaseGestureFullScreenDialog, isMax: Boolean) {
-                            lockScreen?.visibility = if (isMax) View.VISIBLE else GONE
-                            onFocusChanged(dialog, isMax)
-                        }
-
-                        override fun onFocusChange(dialog: BaseGestureFullScreenDialog, isMax: Boolean) {
-                            onFocusChanged(dialog, isMax)
-                        }
-                    })
+                        d.showFull(it, lockScreenRotation, fullScreenListener)
+                    } else d.showInContent(it, fullScreenContentLayoutId, fullMaxScreenEnable, lockScreenRotation, fullContentListener)
                 }
                 lockScreenRotate(isLockScreenRotation)
             }
         }
     }
 
-    private fun onDisplayChanged(v: View, isShow: Boolean) {
-        v.isSelected = isShow
+    private fun onDisplayChanged(v: View?, isShow: Boolean) {
+        v?.isSelected = isShow
         if (!isShow) {
             fullScreenDialog = null
             lockScreen?.isSelected = false

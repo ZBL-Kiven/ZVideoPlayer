@@ -19,3 +19,7 @@ interface FullScreenListener {
 
     fun onFocusChange(dialog: BaseGestureFullScreenDialog, isMax: Boolean)
 }
+
+enum class RotateOrientation(val degree: Float) {
+    P0(0f), P1(180f), L0(270f), L1(90f)
+}

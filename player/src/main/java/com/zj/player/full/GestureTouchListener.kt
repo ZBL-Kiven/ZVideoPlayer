@@ -30,7 +30,7 @@ internal abstract class GestureTouchListener(private val intercepted: () -> Bool
     private var startY = 0f
     private var noPaddingClickPointStart: PointF? = null
     private var isOnceTap = false
-    private var handler = Handler(Looper.getMainLooper()) {
+    private var handler: Handler? = Handler(Looper.getMainLooper()) {
         when (it.what) {
             0 -> {
                 isOnceTap = false
@@ -71,11 +71,11 @@ internal abstract class GestureTouchListener(private val intercepted: () -> Bool
                 try {
                     if (onEventEnd(min(triggerY, event.rawY - _y) / triggerY) && !isRemoved && (abs((noPaddingClickPointStart?.x ?: _x) - max(event.rawX, paddingX)) < 20f && abs((noPaddingClickPointStart?.y ?: _y) - event.rawY) < 20f)) {
                         if (isOnceTap) {
-                            handler.removeMessages(0)
-                            handler.sendEmptyMessage(1)
+                            handler?.removeMessages(0)
+                            handler?.sendEmptyMessage(1)
                         } else {
                             isOnceTap = true
-                            handler.sendMessageDelayed(Message.obtain().apply {
+                            handler?.sendMessageDelayed(Message.obtain().apply {
                                 what = 0;obj = v
                             }, 250)
                         }
@@ -163,6 +163,11 @@ internal abstract class GestureTouchListener(private val intercepted: () -> Bool
     private fun easingInterpolator(`in`: Float, interpolator: Float, base: Float = 0.765f): Float {
         if (`in` == 0f) return 0f
         return `in` * (1f - (interpolator * 0.06f) / (interpolator * 0.06f + 1f)) * base
+    }
+
+    fun release() {
+        handler?.removeCallbacksAndMessages(null)
+        handler = null
     }
 
     abstract fun onEventEnd(formTrigDuration: Float): Boolean
