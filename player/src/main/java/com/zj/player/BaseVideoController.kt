@@ -129,12 +129,7 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
 
     private fun initListener() {
         vPlay?.setOnClickListener {
-            it.isEnabled = false
-            if (!it.isSelected) {
-                controller?.playOrResume()
-            } else {
-                controller?.pause()
-            }
+            onPlayClick(it)
         }
         videoRoot?.setOnClickListener {
             controller?.let {
@@ -154,22 +149,15 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
         }
 
         fullScreen?.setOnClickListener {
-            if (!isFullingOrDismissing) {
-                isFullingOrDismissing = true
-                onFullScreen(!it.isSelected)
-            }
+            onFullScreenClick(it)
         }
+
         speedView?.setOnClickListener {
-            if (controller?.isReady() == true) {
-                val curSpeed = supportedSpeedList[++curSpeedIndex % supportedSpeedList.size]
-                controller?.setSpeed(curSpeed)
-            }
+            onSpeedClick(it)
         }
 
         muteView?.setOnClickListener {
-            val nextState = !it.isSelected
-            initVolume(nextState)
-            it.isSelected = nextState
+            onMuteClick(it)
         }
 
         lockScreen?.setOnClickListener {
@@ -339,6 +327,35 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
     open fun setScreenContentLayout(@LayoutRes layoutId: Int, onFullScreenLayoutInflateListener: ((v: View) -> Unit)? = null) {
         this.fullScreenContentLayoutId = layoutId
         this.onFullScreenLayoutInflateListener = onFullScreenLayoutInflateListener
+    }
+
+    open fun onPlayClick(v: View) {
+        v.isEnabled = false
+        if (!v.isSelected) {
+            controller?.playOrResume()
+        } else {
+            controller?.pause()
+        }
+    }
+
+    open fun onFullScreenClick(v: View) {
+        if (!isFullingOrDismissing) {
+            isFullingOrDismissing = true
+            onFullScreen(!v.isSelected)
+        }
+    }
+
+    open fun onSpeedClick(v: View) {
+        if (controller?.isReady() == true) {
+            val curSpeed = supportedSpeedList[++curSpeedIndex % supportedSpeedList.size]
+            controller?.setSpeed(curSpeed)
+        }
+    }
+
+    open fun onMuteClick(v: View) {
+        val nextState = !v.isSelected
+        initVolume(nextState)
+        v.isSelected = nextState
     }
 
     /**
