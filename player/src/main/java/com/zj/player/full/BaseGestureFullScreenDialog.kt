@@ -281,14 +281,14 @@ class BaseGestureFullScreenDialog private constructor(private var controllerView
                 }
             }
         } else {
-            window?.decorView?.systemUiVisibility = systemUiFlags ?: flagSystem
+            window?.decorView?.systemUiVisibility = systemUiFlags ?: 0
             window?.clearFlags(flag)
             getActivity()?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
         }
     }
 
     private fun getActivity(): Activity? {
-        return (context as? Activity)?.let { return WeakReference(it).get() }
+        return ((getControllerView().context as? Activity) ?: ownerActivity)?.let { return WeakReference(it).get() }
     }
 
     private fun setBackground(@FloatRange(from = 0.0, to = 1.0) duration: Float) {
