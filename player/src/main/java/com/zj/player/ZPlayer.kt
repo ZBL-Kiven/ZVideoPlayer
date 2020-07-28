@@ -419,6 +419,9 @@ open class ZPlayer(var config: VideoConfig? = null) : Player.EventListener {
     @UiThread
     internal fun updateControllerState() {
         curState.let {
+            if (it == VideoState.PLAY || it == VideoState.PAUSE || it == VideoState.COMPLETING) {
+                controller?.onPrepare(currentPlayPath(), duration, true)
+            }
             when (it) {
                 VideoState.SEEK_LOADING -> controller?.onSeekingLoading(currentPlayPath(), true)
                 VideoState.LOADING -> controller?.onLoading(currentPlayPath(), true)

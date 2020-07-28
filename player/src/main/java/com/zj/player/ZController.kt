@@ -205,11 +205,13 @@ class ZController private constructor(private var player: ZPlayer?, viewControll
     /**
      * Use another View to bind to the Controller. The bound ViewController will take effect immediately and receive the method callback from the player.
      * */
-    fun updateViewController(viewController: Controller) {
-        if (this.viewController === viewController) return
-        log("user update the view controller names ${viewController::class.java.simpleName}")
+    fun updateViewController(viewController: Controller?) {
+        if (this.viewController == viewController) return
         this.viewController = viewController
-        runWithPlayer { it.updateControllerState() }
+        if (viewController != null) {
+            log("user update the view controller names ${viewController::class.java.simpleName}")
+            runWithPlayer { it.updateControllerState() }
+        }
     }
 
     /**
