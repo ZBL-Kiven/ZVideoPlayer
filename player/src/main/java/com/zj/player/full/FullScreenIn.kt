@@ -2,15 +2,11 @@ package com.zj.player.full
 
 import android.view.View
 
-interface FullContentListener {
-
-    fun onDisplayChanged(dialog: BaseGestureFullScreenDialog, isShow: Boolean)
+interface FullContentListener : FullScreenListener {
 
     fun onContentLayoutInflated(dialog: BaseGestureFullScreenDialog, content: View)
 
     fun onFullMaxChanged(dialog: BaseGestureFullScreenDialog, isMax: Boolean)
-
-    fun onFocusChange(dialog: BaseGestureFullScreenDialog, isMax: Boolean)
 }
 
 interface FullScreenListener {
@@ -18,6 +14,8 @@ interface FullScreenListener {
     fun onDisplayChanged(dialog: BaseGestureFullScreenDialog, isShow: Boolean)
 
     fun onFocusChange(dialog: BaseGestureFullScreenDialog, isMax: Boolean)
+
+    fun onTrack(isStart: Boolean, formTrigDuration: Float)
 }
 
 enum class RotateOrientation(val degree: Float) {

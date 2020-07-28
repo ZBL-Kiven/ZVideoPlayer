@@ -186,11 +186,12 @@ class BaseGestureFullScreenDialog private constructor(private var controllerView
                 return isAutoScaleFromTouchEnd(formTrigDuration, true)
             }
 
-            override fun onTracked(offsetX: Float, offsetY: Float, easeY: Float, orientation: Orientation, formTrigDuration: Float) {
+            override fun onTracked(isStart: Boolean, offsetX: Float, offsetY: Float, easeY: Float, orientation: Orientation, formTrigDuration: Float) {
                 (getControllerView().parent as? ViewGroup)?.clipChildren = false
                 setBackground(1f - formTrigDuration)
                 followWithFinger(offsetX, offsetY)
                 scaleWithOffset(easeY)
+                onTracked(isStart, formTrigDuration)
             }
 
             override fun onDoubleClick() {
@@ -237,6 +238,7 @@ class BaseGestureFullScreenDialog private constructor(private var controllerView
             getControllerView().scrollTo(0, 0)
             scaleWithOffset(0f)
             setBackground(1f)
+            onTracked(false, 0f)
         } else {
             isAnimRun = true
             changeSystemWindowVisibility(false)
@@ -356,6 +358,10 @@ class BaseGestureFullScreenDialog private constructor(private var controllerView
         return screenUtil?.let {
             if (!it.checkAccelerometerSystem()) true else isScreenRotateLocked
         } ?: false
+    }
+
+    private fun onTracked(isStart: Boolean, formTrigDuration: Float) {
+        onFullContentListener?.onTrack(isStart, formTrigDuration) ?: onFullScreenListener?.onTrack(isStart, formTrigDuration)
     }
 
     private fun onDisplayChange(isShow: Boolean) {

@@ -488,6 +488,10 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
         override fun onFocusChange(dialog: BaseGestureFullScreenDialog, isMax: Boolean) {
             onFocusChanged(dialog, isMax)
         }
+
+        override fun onTrack(isStart: Boolean, formTrigDuration: Float) {
+            onTracked(isStart, formTrigDuration)
+        }
     }
 
     protected val fullContentListener = object : FullContentListener {
@@ -508,6 +512,10 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
 
         override fun onFocusChange(dialog: BaseGestureFullScreenDialog, isMax: Boolean) {
             onFocusChanged(dialog, isMax)
+        }
+
+        override fun onTrack(isStart: Boolean, formTrigDuration: Float) {
+            onTracked(isStart, formTrigDuration)
         }
     }
 
@@ -530,6 +538,17 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
                     } else d.showInContent(it, fullScreenContentLayoutId, fullMaxScreenEnable, lockScreenRotation, fullContentListener)
                 }
                 lockScreenRotate(isLockScreenRotation)
+            }
+        }
+    }
+
+
+    private fun onTracked(isStart: Boolean, formTrigDuration: Float) {
+        if (isStart) {
+            if (this.isFull) full(false)
+        } else {
+            if (formTrigDuration == 0f && !this.isFull) {
+                full(true)
             }
         }
     }

@@ -22,6 +22,7 @@ internal abstract class GestureTouchListener(private val intercepted: () -> Bool
     private var paddingX: Float = 0.0f
     private var paddingY: Float = 0.0f
     private var inTouching = false
+    private var startTrack = false
     private var isRemoved = false
     private var interpolator = 58f
     private var triggerX = 230f
@@ -110,7 +111,7 @@ internal abstract class GestureTouchListener(private val intercepted: () -> Bool
     }
 
     private fun init(v: View?, event: MotionEvent) {
-        _x = max(event.rawX, paddingX);_y = max(event.rawY, paddingY);lstX = _x;lstY = _y;startX = _x - (v?.left ?: 0);startY = _y - (v?.top ?: 0)
+        _x = max(event.rawX, paddingX);_y = max(event.rawY, paddingY);lstX = _x;lstY = _y;startX = _x - (v?.left ?: 0);startY = _y - (v?.top ?: 0);startTrack = true
     }
 
     private fun parseCurOrientation(x: Float, y: Float): Boolean {
@@ -145,7 +146,7 @@ internal abstract class GestureTouchListener(private val intercepted: () -> Bool
             else max(0f, elasticStep(max(_x - x, triggerX), triggerX))
         }
         val easeY = easingInterpolator(1f - _y / y, 9.8f, 1f)
-        curOrientation?.let { onTracked(rx, ry, easeY, it, min(triggerY, y - _y) / triggerY) }
+        curOrientation?.let { onTracked(startTrack, rx, ry, easeY, it, min(triggerY, y - _y) / triggerY);startTrack = false }
     }
 
     private fun isTouchInPadding(v: View?, x: Float, y: Float, px: Float, py: Float): Boolean {
@@ -174,5 +175,5 @@ internal abstract class GestureTouchListener(private val intercepted: () -> Bool
 
     abstract fun onDoubleClick()
 
-    abstract fun onTracked(offsetX: Float, offsetY: Float, easeY: Float, orientation: Orientation, formTrigDuration: Float)
+    abstract fun onTracked(isStart: Boolean, offsetX: Float, offsetY: Float, easeY: Float, orientation: Orientation, formTrigDuration: Float)
 }
