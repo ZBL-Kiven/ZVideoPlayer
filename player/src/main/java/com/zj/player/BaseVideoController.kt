@@ -68,6 +68,8 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
     private var curSpeedIndex = 0
     protected var alphaAnimViewsGroup: MutableList<View?>? = null
     protected var onFullScreenLayoutInflateListener: ((v: View) -> Unit)? = null
+    protected var onFullScreenListener: ((isFull: Boolean) -> Unit)? = null
+    protected var onFullMaxChangedListener: ((isMaxFull: Boolean) -> Unit)? = null
     protected var isDefaultMaxScreen: Boolean = false
     protected var fullMaxScreenEnable: Boolean = true
     protected var lockScreenRotation: Int = -1
@@ -329,6 +331,14 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
         this.onFullScreenLayoutInflateListener = onFullScreenLayoutInflateListener
     }
 
+    open fun setFullScreenListener(l: (Boolean) -> Unit) {
+        this.onFullScreenListener = l
+    }
+
+    open fun setFullMaxChangedListener(l: (Boolean) -> Unit) {
+        this.onFullMaxChangedListener = l
+    }
+
     open fun onPlayClick(v: View) {
         v.isEnabled = false
         if (!v.isSelected) {
@@ -489,6 +499,7 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
     protected val fullContentListener = object : FullContentListener {
         override fun onDisplayChanged(dialog: BaseGestureFullScreenDialog, isShow: Boolean) {
             onDisplayChanged(fullScreen, isShow)
+            onFullScreenListener?.invoke(isShow)
         }
 
         override fun onContentLayoutInflated(dialog: BaseGestureFullScreenDialog, content: View) {
@@ -498,6 +509,7 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
         override fun onFullMaxChanged(dialog: BaseGestureFullScreenDialog, isMax: Boolean) {
             lockScreen?.visibility = if (isMax) View.VISIBLE else GONE
             onFocusChanged(dialog, isMax)
+            onFullMaxChangedListener?.invoke(isMax)
         }
 
         override fun onFocusChange(dialog: BaseGestureFullScreenDialog, isMax: Boolean) {

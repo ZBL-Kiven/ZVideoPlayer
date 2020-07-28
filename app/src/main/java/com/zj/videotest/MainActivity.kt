@@ -24,7 +24,7 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         videoView1?.setScreenContentLayout(R.layout.activity_full)
-        controller = ZController.build(videoView1, VideoConfig.create().setCacheEnable(false))
+        controller = ZController.build(videoView1, VideoConfig.create().setCacheEnable(true))
         controller?.setData(path)
         controller?.setVideoEventListener(onVideoEventListener)
         initView()
