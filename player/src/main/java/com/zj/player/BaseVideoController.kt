@@ -542,8 +542,7 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
         }
     }
 
-
-    private fun onTracked(isStart: Boolean, formTrigDuration: Float) {
+    open fun onTracked(isStart: Boolean, formTrigDuration: Float) {
         if (isStart) {
             if (this.isFull) full(false)
         } else {
