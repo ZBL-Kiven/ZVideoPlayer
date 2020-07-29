@@ -59,6 +59,7 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
     protected var fullScreenDialog: BaseGestureFullScreenDialog? = null
     protected var autoPlay = false
     protected var isFull = false
+    protected var isStartTrack = false
     protected var isInterruptPlayBtnAnim = true
     protected var isFullingOrDismissing = false
     protected var isTickingSeekBarFromUser: Boolean = false
@@ -471,7 +472,7 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
                 it.translationY = if (isFull) 0f else toolsBottomHeight
                 it.alpha = if (isFull) 1f else 0f
                 if (!isFull) it.visibility = View.GONE
-                if (!isFull && (controller?.isPlaying() == true || controller?.isPause(true) == true)) seekBarSmall?.visibility = View.VISIBLE
+                if (!isFull && !isStartTrack && (controller?.isPlaying() == true || controller?.isPause(true) == true)) seekBarSmall?.visibility = View.VISIBLE
             }
             topToolsBar?.let {
                 it.alpha = if (isFull) 1f else 0f
@@ -544,10 +545,16 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
 
     open fun onTracked(isStart: Boolean, isEnd: Boolean, formTrigDuration: Float) {
         if (isStart && this.isFull) {
-            full(false)
+            isStartTrack = true;full(false)
+            if (!isInterruptPlayBtnAnim) {
+                showOrHidePlayBtn(isShow = false, withState = true)
+            }
         }
         if (isEnd && !this.isFull) {
-            full(true)
+            isStartTrack = false;full(true)
+            if (!isInterruptPlayBtnAnim) {
+                showOrHidePlayBtn(isShow = true, withState = true)
+            }
         }
     }
 
