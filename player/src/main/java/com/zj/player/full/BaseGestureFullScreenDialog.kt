@@ -191,7 +191,7 @@ class BaseGestureFullScreenDialog private constructor(private var controllerView
                 setBackground(1f - formTrigDuration)
                 followWithFinger(offsetX, offsetY)
                 scaleWithOffset(easeY)
-                onTracked(isStart, formTrigDuration)
+                onTracked(isStart, false, formTrigDuration)
             }
 
             override fun onDoubleClick() {
@@ -238,7 +238,7 @@ class BaseGestureFullScreenDialog private constructor(private var controllerView
             getControllerView().scrollTo(0, 0)
             scaleWithOffset(0f)
             setBackground(1f)
-            onTracked(false, 0f)
+            onTracked(false, isEnd = true, formTrigDuration = 0f)
         } else {
             isAnimRun = true
             changeSystemWindowVisibility(false)
@@ -360,8 +360,8 @@ class BaseGestureFullScreenDialog private constructor(private var controllerView
         } ?: false
     }
 
-    private fun onTracked(isStart: Boolean, formTrigDuration: Float) {
-        onFullContentListener?.onTrack(isStart, formTrigDuration) ?: onFullScreenListener?.onTrack(isStart, formTrigDuration)
+    private fun onTracked(isStart: Boolean, isEnd: Boolean, formTrigDuration: Float) {
+        onFullContentListener?.onTrack(isStart, isEnd, formTrigDuration) ?: onFullScreenListener?.onTrack(isStart, isEnd, formTrigDuration)
     }
 
     private fun onDisplayChange(isShow: Boolean) {

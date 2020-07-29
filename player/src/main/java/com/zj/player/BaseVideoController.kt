@@ -489,8 +489,8 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
             onFocusChanged(dialog, isMax)
         }
 
-        override fun onTrack(isStart: Boolean, formTrigDuration: Float) {
-            onTracked(isStart, formTrigDuration)
+        override fun onTrack(isStart: Boolean, isEnd: Boolean, formTrigDuration: Float) {
+            onTracked(isStart, isEnd, formTrigDuration)
         }
     }
 
@@ -514,8 +514,8 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
             onFocusChanged(dialog, isMax)
         }
 
-        override fun onTrack(isStart: Boolean, formTrigDuration: Float) {
-            onTracked(isStart, formTrigDuration)
+        override fun onTrack(isStart: Boolean, isEnd: Boolean, formTrigDuration: Float) {
+            onTracked(isStart, isEnd, formTrigDuration)
         }
     }
 
@@ -542,13 +542,12 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
         }
     }
 
-    open fun onTracked(isStart: Boolean, formTrigDuration: Float) {
-        if (isStart) {
-            if (this.isFull) full(false)
-        } else {
-            if (formTrigDuration == 0f && !this.isFull) {
-                full(true)
-            }
+    open fun onTracked(isStart: Boolean, isEnd: Boolean, formTrigDuration: Float) {
+        if (isStart && this.isFull) {
+            full(false)
+        }
+        if (isEnd && !this.isFull) {
+            full(true)
         }
     }
 

@@ -15,7 +15,7 @@ interface FullScreenListener {
 
     fun onFocusChange(dialog: BaseGestureFullScreenDialog, isMax: Boolean)
 
-    fun onTrack(isStart: Boolean, formTrigDuration: Float)
+    fun onTrack(isStart: Boolean, isEnd: Boolean, formTrigDuration: Float)
 }
 
 enum class RotateOrientation(val degree: Float) {
