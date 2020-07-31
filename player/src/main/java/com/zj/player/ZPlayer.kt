@@ -51,6 +51,7 @@ open class ZPlayer(var config: VideoConfig? = null) : Player.EventListener {
 
     companion object {
         const val DEFAULT_VIDEO_CACHED_PATH = "videoCache"
+        const val ONLY_RESET = "onlyReset"
         const val DEFAULT_VIDEO_MAX_CACHED_SIZE = 512 * 1024 * 1024L
         private var cache: Cache? = null
         private const val HANDLE_SEEK = 10101
@@ -77,13 +78,20 @@ open class ZPlayer(var config: VideoConfig? = null) : Player.EventListener {
         when (it.what) {
             HANDLE_SEEK -> seekNow(it.arg1, duration)
             HANDLE_PROGRESS -> updateProgress()
-            HANDLE_STATE -> curState = it.obj as VideoState
+            HANDLE_STATE -> synchronized(curState) {
+                curState = it.obj as VideoState
+            }
         }
         return@Handler false
     }
 
     private var curState: VideoState = VideoState.DESTROY
         set(value) {
+            if (value.obj().toString() == ONLY_RESET) {
+                value.setObj(null)
+                field = value
+                return
+            }
             field.setObj(null)
             if (field == value) return
             log("update player status form ${field.name} to ${value.name}")
@@ -311,8 +319,12 @@ open class ZPlayer(var config: VideoConfig? = null) : Player.EventListener {
         setPlayerState(VideoState.STOP.setObj(error))
     }
 
+    open fun isLoadData(): Boolean {
+        return isLoading() || isPause(true)
+    }
+
     open fun isLoading(accurate: Boolean = false): Boolean {
-        return if (accurate) curState.pri == VideoState.LOADING.pri else curState.pri >= VideoState.LOADING.pri
+        return if (accurate) (curState.pri == VideoState.LOADING.pri || curState.pri == VideoState.SEEK_LOADING.pri) else curState.pri >= VideoState.SEEK_LOADING.pri
     }
 
     open fun isReady(accurate: Boolean = false): Boolean {
@@ -370,9 +382,13 @@ open class ZPlayer(var config: VideoConfig? = null) : Player.EventListener {
         setPlayerState(VideoState.STOP)
     }
 
-    open fun stopNow() {
+    open fun stopNow(withNotify: Boolean) {
+        handler?.removeCallbacksAndMessages(null)
         synchronized(curState) {
-            if (curState != VideoState.STOP) curState = VideoState.STOP
+            if (curState != VideoState.STOP) {
+                curState = VideoState.STOP.setObj(ONLY_RESET)
+                resetAndStop(withNotify, null)
+            }
         }
     }
 

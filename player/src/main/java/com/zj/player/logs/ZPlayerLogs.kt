@@ -14,14 +14,14 @@ object ZPlayerLogs {
         this.videoEventListener = videoEventListener
     }
 
-    internal fun onError(es: String) {
+    internal fun onError(es: String, soft: Boolean = false) {
         val e = IllegalStateException(es)
-        onError(e)
+        onError(e, soft)
     }
 
-    internal fun onError(e: Exception?) {
+    internal fun onError(e: Exception?, soft: Boolean = false) {
         e?.let {
-            if (debugAble) throw e
+            if (debugAble && !soft) throw e
             videoEventListener?.onError(e)
         }
     }

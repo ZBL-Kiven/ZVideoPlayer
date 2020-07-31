@@ -4,6 +4,7 @@ import android.content.Context
 import android.util.AttributeSet
 import android.view.View
 import com.zj.player.BaseVideoController
+import com.zj.player.ZController
 
 /**
  * @author ZJJ on 2020.6.16
@@ -16,32 +17,51 @@ open class BaseListVideoController @JvmOverloads constructor(c: Context, attr: A
 
     private var curPlayingIndex: Int = -1
 
-    var isBindingController = false
+    var isCompleted: Boolean = false
+
+    val isBindingController: Boolean
+        get() {
+            return controller != null
+        }
 
     open fun onBindHolder(index: Int) {
         curPlayingIndex = index
     }
 
     override fun onPlayClick(v: View) {
-        if (controller?.isPlaying() == true) super.onPlayClick(v) else {
+        load(v, false)
+    }
+
+    override fun reload(v: View) {
+        load(v, true)
+    }
+
+    private fun load(v: View, reload: Boolean) {
+        if (controller?.isPlaying() == true) if (reload) super.reload(v) else super.onPlayClick(v) else {
             controller?.let {
-                super.onPlayClick(v)
+                if (reload) super.reload(v) else super.onPlayClick(v)
             } ?: videoControllerIn?.waitingForPlay(curPlayingIndex)
         }
+    }
+
+    override fun onCompleted(path: String, isRegulate: Boolean) {
+        super.onCompleted(path, isRegulate)
+        isCompleted = true
     }
 
     internal fun setControllerIn(ci: VideoControllerIn) {
         this.videoControllerIn = ci
     }
 
-    fun resetWhenDisFocus() {
-        isBindingController = false
+    internal fun resetWhenDisFocus() {
         controller?.updateViewController(null)
+        controller = null
         this.reset()
     }
 
     open fun reset(isShowThumb: Boolean = true, isShowBackground: Boolean = true, isSinkBottomShader: Boolean = false) {
-        reset(true, isShowThumb, isShowBackground, isSinkBottomShader)
+        isCompleted = false
+        reset(true, isRegulate = true, isShowThumb = isShowThumb, isShowBackground = isShowBackground, isSinkBottomShader = isSinkBottomShader)
     }
 
     override fun onFullScreenListener(isFull: Boolean) {

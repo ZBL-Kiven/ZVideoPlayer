@@ -147,10 +147,7 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
         }
 
         loadingView?.setRefreshListener {
-            val path = controller?.getPath()
-            if (path.isNullOrEmpty()) {
-                onError(NullPointerException("video path is null"))
-            } else controller?.playOrResume(path)
+            reload(it)
         }
 
         fullScreen?.setOnClickListener {
@@ -254,7 +251,7 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
     }
 
     override fun onStop(path: String, isRegulate: Boolean) {
-        reset(isRegulate)
+        reset(false, isRegulate)
         updateCurPlayerInfo(1f, supportedSpeedList[0])
     }
 
@@ -346,6 +343,16 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
         }
     }
 
+    open fun reload(v: View) {
+        val path = controller?.getPath()
+        if (path.isNullOrEmpty()) {
+            loadingView?.setMode(BaseLoadingView.DisplayMode.LOADING)
+            v.postDelayed({
+                onError(NullPointerException("video path is null"))
+            }, 300)
+        } else controller?.playOrResume(path)
+    }
+
     open fun onFullScreenClick(v: View) {
         if (!isFullingOrDismissing) {
             isFullingOrDismissing = true
@@ -418,16 +425,29 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
         }
     }
 
-    protected fun full(isFull: Boolean) {
-        bottomToolsBar?.let {
-            if (anim?.isRunning == true) return
-            if (isFull == this.isFull) return
-            this.isFull = isFull
-            it.clearAnimation()
-            anim?.start(isFull)
-            log("on tools bar hidden ${!isFull}", BehaviorLogsTable.onToolsBarShow(isFull))
+    protected fun full(isFull: Boolean, isSetNow: Boolean = false) {
+        if (isSetNow) {
+            anim?.end()
+            bottomToolsBar?.let {
+                it.clearAnimation()
+                it.visibility = if (isFull) VISIBLE else GONE
+            }
+            topToolsBar?.let {
+                it.alpha = 1.0f
+                it.visibility = if (isFull) VISIBLE else GONE
+            }
+            seekBarSmall?.visibility = GONE
+        } else {
+            bottomToolsBar?.let {
+                if (anim?.isRunning == true) return
+                if (isFull == this.isFull) return
+                this.isFull = isFull
+                it.clearAnimation()
+                anim?.start(isFull)
+                log("on tools bar hidden ${!isFull}", BehaviorLogsTable.onToolsBarShow(isFull))
+            }
+            if (isFull) seekBarSmall?.visibility = View.GONE
         }
-        if (isFull) seekBarSmall?.visibility = View.GONE
     }
 
     protected fun setOverlayViews(isShowThumb: Boolean, isShowBackground: Boolean, isSinkBottomShader: Boolean) {
@@ -562,9 +582,9 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
         }
     }
 
-    open fun reset(isRegulate: Boolean, isShowThumb: Boolean = true, isShowBackground: Boolean = true, isSinkBottomShader: Boolean = false) {
+    open fun reset(isNow: Boolean, isRegulate: Boolean, isShowThumb: Boolean = true, isShowBackground: Boolean = true, isSinkBottomShader: Boolean = false) {
         vPlay?.isEnabled = true
-        loadingView?.setMode(BaseLoadingView.DisplayMode.NONE)
+        loadingView?.setMode(BaseLoadingView.DisplayMode.DISMISS, "", false, setNow = true)
         setOverlayViews(isShowThumb, isShowBackground, isSinkBottomShader)
         seekBar?.isSelected = false
         seekBar?.isEnabled = false
@@ -572,7 +592,7 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
         seekBarSmall?.visibility = View.GONE
         onSeekChanged(0, 0, false, 0)
         if (isRegulate) showOrHidePlayBtn(true, withState = false)
-        full(false)
+        full(false, isSetNow = isNow)
     }
 
     protected fun onDisplayChanged(v: View?, isShow: Boolean) {

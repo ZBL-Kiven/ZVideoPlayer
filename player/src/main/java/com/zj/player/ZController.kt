@@ -163,9 +163,9 @@ class ZController private constructor(private var player: ZPlayer?, viewControll
         runWithPlayer { it.stop() }
     }
 
-    fun stopNow() {
+    fun stopNow(withNotify: Boolean = false) {
         log("user call stop --now")
-        runWithPlayer { it.stopNow() }
+        runWithPlayer { it.stopNow(withNotify) }
     }
 
     fun setSpeed(s: Float) {
@@ -203,6 +203,11 @@ class ZController private constructor(private var player: ZPlayer?, viewControll
         return runWithPlayer { it.isLoading(accurate) } ?: false
     }
 
+    fun isLoadData(): Boolean {
+        log("user query cur state is  loaded data")
+        return runWithPlayer { it.isLoadData() } ?: false
+    }
+
     fun isDestroyed(accurate: Boolean = false): Boolean {
         log("user query cur state is destroy or not")
         return runWithPlayer { it.isDestroyed(accurate) } ?: true
@@ -220,13 +225,16 @@ class ZController private constructor(private var player: ZPlayer?, viewControll
      * Use another View to bind to the Controller. The bound ViewController will take effect immediately and receive the method callback from the player.
      * */
     fun updateViewController(viewController: Controller?) {
-        if (this.viewController != viewController) {
-            this.viewController = viewController
-            if (viewController != null) {
+        if (viewController != null) {
+            if (this.viewController != viewController) {
+                addRenderAndControllerView(viewController, false)
                 log("user update the view controller names ${viewController::class.java.simpleName}")
                 syncPlayerState()
             }
+        } else {
+            addRenderAndControllerView(this.viewController, false)
         }
+        this.viewController = viewController
     }
 
     fun syncPlayerState() {
@@ -259,7 +267,7 @@ class ZController private constructor(private var player: ZPlayer?, viewControll
     private fun <T> runWithPlayer(block: (ZPlayer) -> T): T? {
         return try {
             player?.let {
-                block(it)
+                block(it) ?: return@runWithPlayer null
             } ?: throw NullPointerException("are you`re forgot setting a Player in to the video view controller? ,now it used the default player.")
         } catch (e: java.lang.Exception) {
             ZPlayerLogs.onError("in VideoViewController.runWithPlayer error case: - ${e.message}")
@@ -273,7 +281,7 @@ class ZController private constructor(private var player: ZPlayer?, viewControll
 
     override fun onError(e: Exception?) {
         checkRenderToken(true)?.onError(e)
-        ZPlayerLogs.onError(e)
+        ZPlayerLogs.onError(e, true)
     }
 
     override fun getPlayerView(): ZRender? {

@@ -8,4 +8,5 @@ package com.zj.player.list
 internal interface VideoControllerIn {
 
     fun waitingForPlay(curPlayingIndex: Int)
+
 }

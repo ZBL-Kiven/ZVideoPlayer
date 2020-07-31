@@ -4,10 +4,13 @@ import android.graphics.Rect
 import android.os.Handler
 import android.os.Looper
 import android.os.Message
+import android.text.TextUtils
 import android.view.animation.AccelerateInterpolator
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.zj.player.ZController
+import com.zj.player.logs.ZPlayerLogs
+import java.lang.NullPointerException
 import kotlin.math.abs
 import kotlin.math.min
 
@@ -52,16 +55,13 @@ abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : Rec
 
     override fun onViewDetachedFromWindow(holder: VH) {
         getViewController(holder)?.let {
-            it.post {
-                getItem(holder.adapterPosition)?.let { p ->
-                    val pac = getPathAndLogsCallId(p)
-                    pac?.let { pv -> it.onBehaviorDetached(pv.first, pv.second) }
-                }
-                if (isStopWhenItemDetached && holder.adapterPosition == curPlayingIndex) {
-                    if (it.isBindingController) controller?.stopNow() else it.resetWhenDisFocus()
-                }
+            getItem(holder.adapterPosition)?.let { p ->
+                val pac = getPathAndLogsCallId(p)
+                pac?.let { pv -> it.onBehaviorDetached(pv.first, pv.second) }
             }
+            if (isStopWhenItemDetached && holder.adapterPosition == curPlayingIndex) if (it.isBindingController) controller?.stopNow(false)
         }
+        getViewController(holder)?.resetWhenDisFocus()
     }
 
     override fun bindData(holder: VH?, p: Int, d: T?, pl: MutableList<Any>?) {
@@ -74,12 +74,11 @@ abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : Rec
                     if (pls.startsWith(DEFAULT_LOADER)) {
                         val index = pls.split("#")[1].toInt()
                         if (p == index) {
-                            if (!vc.isBindingController) onBindVideoView(vc)
-                            getPathAndLogsCallId(d)?.let {
-                                controller?.playOrResume(it.first, it.second)
-                                vc.onBehaviorAttached(it.first, it.second)
+                            vc.post {
+                                if (!vc.isBindingController) onBindVideoView(vc)
+                                playOrResume(vc, p, d)
+                                curPlayingIndex = p
                             }
-                            curPlayingIndex = p
                         } else {
                             vc.resetWhenDisFocus()
                         }
@@ -151,10 +150,9 @@ abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : Rec
                 offsetPositions = if (isFo) fvo else lvo
                 if (isFo) fv else lv
             } else if (fv <= 0) lv else fv
-            if (tr != curPlayingIndex || controller?.isPlaying() != true) {
-                @Suppress("UNCHECKED_CAST") val vc = getViewController(recyclerView?.findViewHolderForAdapterPosition(tr) as? VH)
-                vc?.clickPlayBtn()
-            }
+            @Suppress("UNCHECKED_CAST") (getViewController(recyclerView?.findViewHolderForAdapterPosition(tr) as? VH)?.let {
+                if (!it.isBindingController) it.clickPlayBtn()
+            })
             if (!scrollAuto) return@let
             val offset = offsetPositions ?: {
                 val itemOffset = @Suppress("UNCHECKED_CAST") (recyclerView?.findViewHolderForAdapterPosition(tr) as? VH)?.itemView?.top ?: 0
@@ -162,6 +160,30 @@ abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : Rec
             }.invoke()
             recyclerView?.smoothScrollBy(0, offset, AccelerateInterpolator(), 600)
         }
+    }
+
+    private fun playOrResume(vc: BaseListVideoController?, p: Int, data: T?) {
+        if (vc == null) {
+            ZPlayerLogs.onError(NullPointerException("use a null view controller ,means show what?"))
+            return
+        }
+        controller = controller ?: createZController(vc)
+        controller?.let { ctr ->
+            getPathAndLogsCallId(data ?: getItem(p))?.let { d ->
+                fun play() {
+                    ctr.playOrResume(d.first, d.second)
+                    vc.onBehaviorAttached(d.first, d.second)
+                }
+                //when ctr is playing another path or in other positions
+                if ((ctr.isLoadData() && p != curPlayingIndex) || (ctr.isLoadData() && ctr.getPath() != d.first)) {
+                    ctr.stopNow(false)
+                }
+                if (p != curPlayingIndex || (!vc.isCompleted && !ctr.isLoadData()) || (ctr.isLoadData() && !ctr.isPlaying() && !ctr.isPause(true) && !vc.isCompleted)) {
+                    play()
+                }
+            }
+        } ?: ZPlayerLogs.onError(NullPointerException("where is the thread call crashed, make the ZController to be null?"))
+
     }
 
     private var handler: Handler? = Handler(Looper.getMainLooper()) {

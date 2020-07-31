@@ -31,7 +31,7 @@ class MainActivity : AppCompatActivity() {
             }
 
             override fun onLog(s: String, curPath: String, accessKey: String, modeName: String, params: Map<String, Any>?) {
-                if (params != null) Log.e("------ ", params.toString())
+                if (params != null) Log.e("------ ", s)
             }
         })
     }

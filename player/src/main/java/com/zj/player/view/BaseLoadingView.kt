@@ -33,7 +33,7 @@ internal class BaseLoadingView @JvmOverloads constructor(context: Context, attrs
     private var curBackgroundView: View? = null
     private var tvHint: TextView? = null
     private var tvRefresh: TextView? = null
-    private var refresh: (() -> Unit)? = null
+    private var refresh: ((View) -> Unit)? = null
 
     private var bgColor: Int = 0
     private var bgColorOnAct: Int = 0
@@ -90,11 +90,11 @@ internal class BaseLoadingView @JvmOverloads constructor(context: Context, attrs
      * you can get the event when this view was clicked
      * and you can refresh content  when the  "onCallRefresh()" callback
      */
-    fun setRefreshListener(refresh: () -> Unit) {
+    fun setRefreshListener(refresh: (v: View) -> Unit) {
         this.refresh = refresh
         setOnClickListener {
             if (refreshEnable && refreshEnableWithView && this@BaseLoadingView.refresh != null) {
-                this@BaseLoadingView.refresh?.invoke()
+                this@BaseLoadingView.refresh?.invoke(it)
             }
         }
     }
@@ -197,7 +197,7 @@ internal class BaseLoadingView @JvmOverloads constructor(context: Context, attrs
      * @param hint      show something when it`s change a mode;
      */
     @JvmOverloads
-    fun setMode(m: DisplayMode, hint: String = "", showOnContent: Boolean? = null) {
+    fun setMode(m: DisplayMode, hint: String = "", showOnContent: Boolean? = null, setNow: Boolean = false) {
         var mode = m
         var showOnAct = showOnContent
         if (showOnAct == null) showOnAct = showOnActDefault
@@ -212,17 +212,23 @@ internal class BaseLoadingView @JvmOverloads constructor(context: Context, attrs
         }
         refreshEnableWithView = refreshEnable && (mode == DisplayMode.NO_DATA || mode == DisplayMode.NET_ERROR)
         tvRefresh?.visibility = if (refreshEnableWithView) View.VISIBLE else View.INVISIBLE
-        if (valueAnimator == null) {
-            valueAnimator = BaseLoadingValueAnimator(listener)
-            valueAnimator?.duration = DEFAULT_ANIM_DURATION
-        } else {
+        if (setNow) {
             valueAnimator?.end()
-        }
-        disPlayViews?.put(mode, 0.0f)
-        if (!isSameMode) {
-            resetBackground(showOnAct)
-            needBackgroundColor = if (showOnAct) bgColorOnAct else bgColor
-            valueAnimator?.start(mode, showOnAct)
+            setViews(1f, m)
+            setBackground(1f, m)
+        } else {
+            if (valueAnimator == null) {
+                valueAnimator = BaseLoadingValueAnimator(listener)
+                valueAnimator?.duration = DEFAULT_ANIM_DURATION
+            } else {
+                valueAnimator?.end()
+            }
+            disPlayViews?.put(mode, 0.0f)
+            if (!isSameMode) {
+                resetBackground(showOnAct)
+                needBackgroundColor = if (showOnAct) bgColorOnAct else bgColor
+                valueAnimator?.start(mode, showOnAct)
+            }
         }
     }
 
@@ -294,7 +300,8 @@ internal class BaseLoadingView @JvmOverloads constructor(context: Context, attrs
             alpha = 1.0f - duration
             if (alpha <= 0.05f) {
                 alpha = 0f
-                setBackgroundColor({ oldBackgroundColor = 0;oldBackgroundColor }.invoke())
+                oldBackgroundColor = 0
+                setBackgroundColor(oldBackgroundColor)
                 visibility = View.GONE
             }
         }
