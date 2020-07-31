@@ -5,6 +5,7 @@ import android.hardware.SensorManager
 import android.provider.Settings
 import android.provider.Settings.SettingNotFoundException
 import android.view.OrientationEventListener
+import com.zj.player.logs.ZPlayerLogs
 import java.lang.ref.WeakReference
 
 @Suppress("unused")
@@ -51,7 +52,7 @@ class ScreenOrientationListener(private var c: WeakReference<Context>?, private 
             val available = Settings.System.getInt(c?.get()?.contentResolver, Settings.System.ACCELEROMETER_ROTATION)
             return available == 1
         } catch (e: SettingNotFoundException) {
-            e.printStackTrace()
+            ZPlayerLogs.onError(e)
         }
         return false
     }

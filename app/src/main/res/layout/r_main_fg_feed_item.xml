@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginStart="3dp"
+    android:layout_marginTop="1.5dp"
+    android:layout_marginEnd="3dp"
+    android:layout_marginBottom="1.5dp"
+    android:background="#fff"
+    android:clipChildren="false"
+    android:clipToPadding="false">
+
+    <ImageView
+        android:id="@+id/r_main_fg_feed_item_iv_avatar"
+        android:layout_width="35dp"
+        android:layout_height="35dp"
+        android:layout_marginStart="6dp"
+        android:layout_marginTop="6dp"
+        android:layout_marginEnd="10dp"
+        android:layout_marginBottom="4dp"
+        android:background="#cca"
+        android:contentDescription="@string/app_name" />
+
+    <TextView
+        android:id="@+id/r_main_fg_feed_item_tv_nickname"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@id/r_main_fg_feed_item_iv_avatar"
+        android:layout_alignBottom="@id/r_main_fg_feed_item_iv_avatar"
+        android:layout_toEndOf="@id/r_main_fg_feed_item_iv_avatar"
+        android:ellipsize="end"
+        android:gravity="center"
+        android:lines="1"
+        android:maxLines="1"
+        android:textColor="#777"
+        android:textSize="14sp"
+        tools:text="User Name" />
+
+    <TextView
+        android:id="@+id/r_main_fg_feed_item_tv_desc"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/r_main_fg_feed_item_iv_avatar"
+        android:layout_alignStart="@id/r_main_fg_feed_item_iv_avatar"
+        android:ellipsize="end"
+        android:maxLines="3"
+        android:textColor="#333"
+        android:textSize="14sp"
+        tools:text="the posts description" />
+
+    <com.zj.videotest.videos.CCVideoController
+        android:id="@+id/r_main_fg_feed_item_vc"
+        android:layout_width="match_parent"
+        android:layout_height="242dp"
+        android:layout_below="@id/r_main_fg_feed_item_tv_desc"
+        android:layout_marginTop="5dp"
+        android:background="#eee" />
+
+    <LinearLayout
+        android:id="@+id/r_main_fg_feed_item_ll_claps"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@id/r_main_fg_feed_item_v_share"
+        android:layout_toStartOf="@id/r_main_fg_feed_item_v_share"
+        android:clickable="true"
+        android:focusable="true"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:layout_width="35dp"
+            android:layout_height="35dp"
+            android:clickable="true"
+            android:contentDescription="@string/app_name"
+            android:focusable="true"
+            android:padding="6dp"
+            android:src="@mipmap/ic_launcher" />
+
+        <TextView
+            android:id="@+id/r_main_fg_feed_item_tv_claps"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:textColor="#777"
+            android:textSize="14sp"
+            tools:text="9986" />
+
+    </LinearLayout>
+
+    <ImageView
+        android:id="@+id/r_main_fg_feed_item_v_share"
+        android:layout_width="35dp"
+        android:layout_height="35dp"
+        android:layout_alignTop="@id/r_main_fg_feed_item_v_more"
+        android:layout_toStartOf="@id/r_main_fg_feed_item_v_more"
+        android:clickable="true"
+        android:contentDescription="@string/app_name"
+        android:focusable="true"
+        android:padding="6dp"
+        android:src="@mipmap/ic_launcher" />
+
+    <ImageView
+        android:id="@+id/r_main_fg_feed_item_v_more"
+        android:layout_width="35dp"
+        android:layout_height="35dp"
+        android:layout_below="@id/r_main_fg_feed_item_vc"
+        android:layout_alignParentEnd="true"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="6dp"
+        android:clickable="true"
+        android:contentDescription="@string/app_name"
+        android:focusable="true"
+        android:padding="6dp"
+        android:src="@mipmap/ic_launcher" />
+
+</RelativeLayout>

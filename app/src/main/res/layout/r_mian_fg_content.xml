@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.zj.views.list.refresh.layout.RefreshLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#efefef"
+    app:rlDragRate="1.5"
+    app:rlFooterTriggerRate="1.2"
+    app:rlHeaderTriggerRate="1.2">
+
+    <com.zj.videotest.refresh.RefreshHeader
+        android:layout_width="match_parent"
+        android:layout_height="80dp" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/r_main_frg_feed_rv"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:overScrollMode="never"
+        android:paddingTop="1.5dp"
+        android:paddingBottom="1.5dp"
+        android:scrollbars="none"
+        tools:listitem="@layout/r_main_fg_feed_item" />
+
+    <com.zj.videotest.refresh.RefreshFooter
+        android:layout_width="match_parent"
+        android:layout_height="40dp" />
+
+</com.zj.views.list.refresh.layout.RefreshLayout>

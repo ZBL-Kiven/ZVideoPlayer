@@ -3,47 +3,64 @@ package com.zj.videotest
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
-import com.zj.player.VideoEventListener
-import com.zj.player.ZController
-import com.zj.player.config.VideoConfig
-import kotlinx.android.synthetic.main.activity_main.*
+import com.zj.cf.managers.BaseFragmentManager
+import com.zj.player.logs.VideoEventListener
+import com.zj.player.logs.ZPlayerLogs
+import com.zj.videotest.feed.RFeedFragment
+import com.zj.views.DrawableTextView
 
 class MainActivity : AppCompatActivity() {
 
+    private var fragmentManager: BaseFragmentManager? = null
+    private var mRFeedFragment: RFeedFragment? = null
+    private var mRewardFragmentR: RFeedFragment? = null
+    private var mMeFragmentR: RFeedFragment? = null
 
-//    private val path = "https://gcdn.channelthree.tv/20200616/4/f/2/f/9/4f2f94b03d674d8880b5c4091857dacb.mp4"
-    private val path = "https://gcdn.channelthree.tv/20200716/9/e/b/e/0/9ebe0040976547379e61a2be93b386ca.mp4"
-//    private val path = "https://gcdn.channelthree.tv/20200714/4/6/f/4/e/46f4ed05895a4797bb3c00565aac3980.mp4"
-    private var controller: ZController? = null
+    private var mFeedNavView: DrawableTextView? = null
+    private var mRewardNavView: DrawableTextView? = null
+    private var mMeNavView: DrawableTextView? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
-    }
-
-    override fun onResume() {
-        super.onResume()
-        videoView1?.setScreenContentLayout(R.layout.activity_full)
-        controller = ZController.build(videoView1, VideoConfig.create().setCacheEnable(true))
-        controller?.setData(path)
-        controller?.setVideoEventListener(onVideoEventListener)
+        setContentView(R.layout.r_main_act_content)
         initView()
+        initFrg()
+        ZPlayerLogs.setVideoEventListener(object : VideoEventListener() {
+            override fun onError(e: Exception) {
+                Log.e("------ ", " ================ error !!     ${e.message}")
+            }
+
+            override fun onLog(s: String, curPath: String, accessKey: String, modeName: String, params: Map<String, Any>?) {
+                if (params != null) Log.e("------ ", params.toString())
+            }
+        })
     }
 
     private fun initView() {
-        videoView1?.let {
-            it.getThumbView()?.setImageResource(R.drawable.ic_launcher_foreground)
-            it.getBackgroundView()?.setImageResource(R.drawable.ic_launcher_background)
-        }
+        mFeedNavView = findViewById(R.id.r_main_act_fragment_nav_btn_feed)
+        mRewardNavView = findViewById(R.id.r_main_act_fragment_nav_btn_reward)
+        mMeNavView = findViewById(R.id.r_main_act_fragment_nav_btn_me)
     }
 
-    private val onVideoEventListener = object : VideoEventListener {
-        override fun onError(e: Exception?) {
-            Log.e("zjj--- error", "${e?.message}")
-        }
+    private fun initFrg() {
+        mRFeedFragment = RFeedFragment()
+        mRewardFragmentR = RFeedFragment()
+        mMeFragmentR = RFeedFragment()
+        fragmentManager = object : BaseFragmentManager(this, R.id.r_main_act_fragment_content, 0, listOfNotNull(mFeedNavView, mRewardNavView, mMeNavView), mRFeedFragment, mRewardFragmentR, mMeFragmentR) {
+            override fun syncSelectState(selectId: String) {
+                super.syncSelectState(selectId)
+                if (selectId == mRFeedFragment?.fId) {
 
-        override fun onLog(s: String, curPath: String, accessKey: String, modeName: String) {
-            Log.e("zjj--- log", "$curPath  $modeName   $accessKey  ---- $s")
+                } else {
+                    //todo hide time bar
+                }
+            }
+
+            override fun whenShowSameFragment(shownId: String) {
+                if (shownId == mRFeedFragment?.fId) {
+
+                }
+            }
         }
     }
 }

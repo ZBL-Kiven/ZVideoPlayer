@@ -3,7 +3,6 @@ package com.zj.player.anim
 import android.animation.Animator
 import android.animation.ValueAnimator
 import android.view.animation.AccelerateDecelerateInterpolator
-import com.zj.player.base.log
 
 /**
  * @author ZJJ on 2019.10.24

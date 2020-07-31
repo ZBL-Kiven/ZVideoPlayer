@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <ImageView
+        android:id="@+id/r_main_fg_list_iv_avatar"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:layout_marginStart="18dp"
+        android:layout_marginTop="18dp"
+        android:background="#adc"
+        android:contentDescription="@null" />
+
+    <TextView
+        android:id="@+id/r_main_fg_list_tv_nickname"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@id/r_main_fg_list_iv_avatar"
+        android:layout_alignBottom="@id/r_main_fg_list_iv_avatar"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_toEndOf="@id/r_main_fg_list_iv_avatar"
+        android:ellipsize="end"
+        android:gravity="center"
+        android:singleLine="true"
+        android:textColor="#eee"
+        android:textSize="13sp"
+        tools:text="video title" />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/r_main_fg_list_tv_desc"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/r_main_fg_list_iv_avatar"
+        android:layout_alignStart="@id/r_main_fg_list_iv_avatar"
+        android:layout_marginTop="6dp"
+        android:layout_marginEnd="8dp"
+        android:ellipsize="end"
+        android:singleLine="true"
+        android:textColor="#eee"
+        android:textSize="13sp"
+        tools:text="some description for videos" />
+
+    <FrameLayout
+        android:id="@id/player_gesture_full_screen_content"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@id/r_main_fg_feed_item_ll_claps"
+        android:layout_below="@id/r_main_fg_list_tv_desc"
+        android:layout_marginTop="4dp" />
+
+
+    <LinearLayout
+        android:id="@+id/r_main_fg_feed_item_ll_claps"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@id/r_main_fg_feed_item_v_share"
+        android:layout_toStartOf="@id/r_main_fg_feed_item_v_share"
+        android:clickable="true"
+        android:focusable="true"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:layout_width="35dp"
+            android:layout_height="35dp"
+            android:clickable="true"
+            android:contentDescription="@string/app_name"
+            android:focusable="true"
+            android:padding="6dp"
+            android:src="@mipmap/ic_launcher" />
+
+        <TextView
+            android:id="@+id/r_main_fg_feed_item_tv_claps"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:textColor="#ccc"
+            android:textSize="14sp"
+            tools:text="9986" />
+    </LinearLayout>
+
+    <ImageView
+        android:id="@+id/r_main_fg_feed_item_v_share"
+        android:layout_width="35dp"
+        android:layout_height="35dp"
+        android:layout_alignTop="@id/r_main_fg_feed_item_v_more"
+        android:layout_toStartOf="@id/r_main_fg_feed_item_v_more"
+        android:clickable="true"
+        android:contentDescription="@string/app_name"
+        android:focusable="true"
+        android:padding="6dp"
+        android:src="@mipmap/ic_launcher" />
+
+    <ImageView
+        android:id="@+id/r_main_fg_feed_item_v_more"
+        android:layout_width="35dp"
+        android:layout_height="35dp"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="6dp"
+        android:layout_marginBottom="15dp"
+        android:clickable="true"
+        android:contentDescription="@string/app_name"
+        android:focusable="true"
+        android:padding="6dp"
+        android:src="@mipmap/ic_launcher" />
+
+</RelativeLayout>
+
+
+

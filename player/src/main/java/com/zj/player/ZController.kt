@@ -13,10 +13,13 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.OnLifecycleEvent
-import com.zj.player.UT.Constance.CORE_LOG_ABLE
-import com.zj.player.UT.Controller
-import com.zj.player.UT.PlayerEventController
+import com.zj.player.ut.Constance.CORE_LOG_ABLE
+import com.zj.player.ut.Controller
+import com.zj.player.ut.PlayerEventController
 import com.zj.player.config.VideoConfig
+import com.zj.player.logs.BehaviorData
+import com.zj.player.logs.BehaviorLogsTable
+import com.zj.player.logs.ZPlayerLogs
 import java.lang.NullPointerException
 
 /**
@@ -28,10 +31,10 @@ import java.lang.NullPointerException
 class ZController private constructor(private var player: ZPlayer?, viewController: Controller?) : PlayerEventController, LifecycleObserver {
 
     private var seekProgressInterval: Long = 16
-    private var videoEventListener: VideoEventListener? = null
     private var render: ZRender? = null
     private var curAccessKey: String = ""
     private var isPausedByLifecycle = false
+    private var isIgnoreNullControllerGlobal = false
     private var viewController: Controller? = null
         set(value) {
             if (field != null) {
@@ -39,6 +42,7 @@ class ZController private constructor(private var player: ZPlayer?, viewControll
             }
             field = value
             field?.onControllerBind(this)
+            isIgnoreNullControllerGlobal = value == null
         }
 
     init {
@@ -47,8 +51,12 @@ class ZController private constructor(private var player: ZPlayer?, viewControll
         curAccessKey = runWithPlayer { it.setViewController(this) } ?: ""
     }
 
+    /**
+     * build a video controller.
+     * require a viewController and a player ex [ZPlayer]
+     * the uniqueId is required and it also binding with a viewController, changed if recreate or viewController [updateViewController] updated.
+     * */
     companion object {
-
         fun build(viewController: Controller): ZController {
             return build(viewController, ZPlayer(VideoConfig.create()))
         }
@@ -62,15 +70,17 @@ class ZController private constructor(private var player: ZPlayer?, viewControll
         }
     }
 
-    private fun checkRenderToken(needed: Boolean) {
+    private fun checkRenderToken(needed: Boolean): Controller? {
         val ignore = render?.parent == null && !needed
-        addRenderAndControllerView(!needed, ignore)
+        val c = getController()
+        addRenderAndControllerView(c, !needed, ignore)
+        return c
     }
 
     // Add a renderer to the video ,or remove only
-    private fun addRenderAndControllerView(removeOnly: Boolean = false, ignoredNullController: Boolean = false) {
+    private fun addRenderAndControllerView(c: Controller?, removeOnly: Boolean = false, ignoredNullController: Boolean = false) {
         if (render == null) render = ZRender(context ?: return)
-        val info = viewController?.controllerInfo ?: if (ignoredNullController) return else throw NullPointerException("the controller view is required")
+        val info = c?.controllerInfo ?: if (isIgnoreNullControllerGlobal || ignoredNullController) return else throw NullPointerException("the controller view is required")
         val ctr = info.container
         (render?.parent as? ViewGroup)?.let {
             if (ctr != it || removeOnly) {
@@ -91,9 +101,9 @@ class ZController private constructor(private var player: ZPlayer?, viewControll
      * you need to manually call [playOrResume] or #{@link autoPlayWhenReady(true) } to play, of course, the path parameter will no longer be necessary.
      * @param autoPlay When this value is true, the video will play automatically after loading is completed.
      * */
-    fun setData(url: String, autoPlay: Boolean = false) {
-        log("user set new data")
-        runWithPlayer { it.setData(url, autoPlay) }
+    fun setData(url: String, autoPlay: Boolean = false, callId: Any? = null) {
+        log("user set new data", BehaviorLogsTable.setNewData(url, callId, autoPlay))
+        runWithPlayer { it.setData(url, autoPlay, callId) }
     }
 
     /**
@@ -105,14 +115,6 @@ class ZController private constructor(private var player: ZPlayer?, viewControll
     }
 
     /**
-     * Set a listener for events generated during video playback.
-     * */
-    fun setVideoEventListener(videoEventListener: VideoEventListener?) {
-        log("user set video event listener")
-        this.videoEventListener = videoEventListener
-    }
-
-    /**
      * Get the current video address of the player. Local or remote.
      * */
     fun getPath(): String {
@@ -120,7 +122,14 @@ class ZController private constructor(private var player: ZPlayer?, viewControll
     }
 
     /**
-     * 检索视频播放位置，[i] 仅允许在 0-100 之间传递。
+     * Get the current video playing back call id.
+     * */
+    fun getCallId(): Any? {
+        return runWithPlayer { it.currentCallId() }
+    }
+
+    /**
+     * Retrieve the video playback position, [i] can only between 0-100.
      * */
     fun seekTo(@IntRange(from = 0, to = 100) i: Int) {
         log("user seek the video on $i%")
@@ -138,9 +147,9 @@ class ZController private constructor(private var player: ZPlayer?, viewControll
     /**
      * Call this method to start automatic playback after the player processes playable frames.
      * */
-    fun playOrResume(path: String = getPath()) {
+    fun playOrResume(path: String = getPath(), callId: Any? = null) {
         log("user call play or resume")
-        if (path != getPath()) setData(path)
+        if (path != getPath()) setData(path, false, callId)
         runWithPlayer { it.play() }
     }
 
@@ -152,6 +161,11 @@ class ZController private constructor(private var player: ZPlayer?, viewControll
     fun stop() {
         log("user call stop")
         runWithPlayer { it.stop() }
+    }
+
+    fun stopNow() {
+        log("user call stop --now")
+        runWithPlayer { it.stopNow() }
     }
 
     fun setSpeed(s: Float) {
@@ -206,10 +220,17 @@ class ZController private constructor(private var player: ZPlayer?, viewControll
      * Use another View to bind to the Controller. The bound ViewController will take effect immediately and receive the method callback from the player.
      * */
     fun updateViewController(viewController: Controller?) {
-        if (this.viewController == viewController) return
-        this.viewController = viewController
+        if (this.viewController != viewController) {
+            this.viewController = viewController
+            if (viewController != null) {
+                log("user update the view controller names ${viewController::class.java.simpleName}")
+                syncPlayerState()
+            }
+        }
+    }
+
+    fun syncPlayerState() {
         if (viewController != null) {
-            log("user update the view controller names ${viewController::class.java.simpleName}")
             runWithPlayer { it.updateControllerState() }
         }
     }
@@ -218,20 +239,20 @@ class ZController private constructor(private var player: ZPlayer?, viewControll
      * recycle a Controller in Completely, after which this instance will be invalid.
      * */
     fun release() {
-        log("user released all player")
         isPausedByLifecycle = false
         (render?.parent as? ViewGroup)?.removeView(render)
         render?.release()
         render = null
         player?.release()
-        viewController?.onStop("", true)
-        viewController?.onDestroy("", true)
+        viewController?.let {
+            it.onStop("", true)
+            it.onDestroy("", true)
+        }
         viewController = null
-        videoEventListener = null
-        curAccessKey = " - released - "
-        seekProgressInterval = -1
         player = null
         isBindLifecycle(false)
+        seekProgressInterval = -1
+        curAccessKey = " - released - "
     }
 
 
@@ -241,7 +262,7 @@ class ZController private constructor(private var player: ZPlayer?, viewControll
                 block(it)
             } ?: throw NullPointerException("are you`re forgot setting a Player in to the video view controller? ,now it used the default player.")
         } catch (e: java.lang.Exception) {
-            log("in VideoViewController.runWithPlayer error case: - ${e.message}")
+            ZPlayerLogs.onError("in VideoViewController.runWithPlayer error case: - ${e.message}")
             null
         }
     }
@@ -251,29 +272,22 @@ class ZController private constructor(private var player: ZPlayer?, viewControll
     }
 
     override fun onError(e: Exception?) {
-        checkRenderToken(true)
-        viewController?.onError(e)
-        videoEventListener?.onError(e)
+        checkRenderToken(true)?.onError(e)
+        ZPlayerLogs.onError(e)
     }
 
     override fun getPlayerView(): ZRender? {
         return render
     }
 
-    override fun onLog(case: String, curPath: String, accessKey: String, modeName: String) {
-        videoEventListener?.onLog(case, curPath, accessKey, modeName)
-    }
-
     override fun onLoading(path: String?, isRegulate: Boolean) {
-        checkRenderToken(true)
-        log("on loading ...")
-        viewController?.onLoading(path, isRegulate)
+        log("on video loading ...", BehaviorLogsTable.controllerState("loading", getCallId(), getPath()))
+        checkRenderToken(true)?.onLoading(path, isRegulate)
     }
 
     override fun onPause(path: String?, isRegulate: Boolean) {
-        checkRenderToken(true)
-        log("on pause ...")
-        viewController?.onPause(path, isRegulate)
+        log("on video loading ...", BehaviorLogsTable.controllerState("onPause", getCallId(), getPath()))
+        checkRenderToken(true)?.onPause(path, isRegulate)
     }
 
     override fun onFirstFrameRender() {
@@ -282,51 +296,46 @@ class ZController private constructor(private var player: ZPlayer?, viewControll
 
     override fun onSeekChanged(seek: Int, buffered: Int, fromUser: Boolean, videoSize: Long) {
         if (fromUser) log("on seek changed to $seek")
-        checkRenderToken(true)
-        viewController?.onSeekChanged(seek, buffered, fromUser, videoSize)
+        checkRenderToken(true)?.onSeekChanged(seek, buffered, fromUser, videoSize)
     }
 
     override fun onSeekingLoading(path: String?, isRegulate: Boolean) {
-        checkRenderToken(true)
-        viewController?.onSeekingLoading(path)
+        log("on video seek loading ...", BehaviorLogsTable.controllerState("onSeekLoading", getCallId(), getPath()))
+        checkRenderToken(true)?.onSeekingLoading(path)
     }
 
     override fun onPrepare(path: String?, videoSize: Long, isRegulate: Boolean) {
-        log("on prepared ...")
-        checkRenderToken(true)
-        viewController?.onPrepare(path, videoSize, isRegulate)
+        log("on video prepare ...", BehaviorLogsTable.controllerState("onPrepare", getCallId(), getPath()))
+        checkRenderToken(true)?.onPrepare(path, videoSize, isRegulate)
     }
 
     override fun getContext(): Context? {
-        return viewController?.context
+        return getController()?.context
     }
 
     override fun onPlay(path: String?, isRegulate: Boolean) {
-        log("on play ...")
-        checkRenderToken(true)
-        viewController?.onPlay(path, isRegulate)
+        log("on video playing ...", BehaviorLogsTable.controllerState("onPlay", getCallId(), getPath()))
+        checkRenderToken(true)?.onPlay(path, isRegulate)
     }
 
     override fun onStop(path: String?, isRegulate: Boolean) {
-        log("on stop ...")
-        checkRenderToken(false)
-        viewController?.onStop(path, isRegulate)
+        log("on video stop ...", BehaviorLogsTable.controllerState("onStop", getCallId(), getPath()))
+        checkRenderToken(false)?.onStop(path, isRegulate)
     }
 
     override fun onCompleted(path: String?, isRegulate: Boolean) {
-        log("on completed ...")
-        checkRenderToken(false)
-        viewController?.onCompleted(path, isRegulate)
+        log("on video completed ...", BehaviorLogsTable.controllerState("onCompleted", getCallId(), getPath()))
+        checkRenderToken(false)?.onCompleted(path, isRegulate)
     }
 
     override fun completing(path: String?, isRegulate: Boolean) {
-        log("on completing ...")
-        checkRenderToken(true)
-        viewController?.completing(path, isRegulate)
+        log("on video completing ...", BehaviorLogsTable.controllerState("completing", getCallId(), getPath()))
+        checkRenderToken(true)?.completing(path, isRegulate)
     }
 
     override fun onPlayerInfo(volume: Float, speed: Float) {
-        viewController?.updateCurPlayerInfo(volume, speed)
+        log("on video upload player info ...", BehaviorLogsTable.controllerState("onUploadPlayerInfo", getCallId(), getPath()))
+        checkRenderToken(false)?.updateCurPlayerInfo(volume, speed)
     }
 
     private fun getSuitParentLayoutParams(v: ViewGroup): ViewGroup.LayoutParams {
@@ -345,10 +354,14 @@ class ZController private constructor(private var player: ZPlayer?, viewControll
     }
 
     private fun isBindLifecycle(isBind: Boolean) {
-        (viewController?.context as? LifecycleOwner)?.let {
+        (getController()?.context as? LifecycleOwner)?.let {
             if (isBind) it.lifecycle.addObserver(this)
             else it.lifecycle.removeObserver(this)
         }
+    }
+
+    fun getController(): Controller? {
+        return viewController
     }
 
     @OnLifecycleEvent(value = Lifecycle.Event.ON_RESUME)
@@ -357,12 +370,12 @@ class ZController private constructor(private var player: ZPlayer?, viewControll
             isPausedByLifecycle = false
             playOrResume()
         }
-        viewController?.onLifecycleResume()
+        getController()?.onLifecycleResume()
     }
 
     @OnLifecycleEvent(value = Lifecycle.Event.ON_STOP)
     private fun onStopped() {
-        viewController?.onLifecycleStop()
+        getController()?.onLifecycleStop()
     }
 
     @OnLifecycleEvent(value = Lifecycle.Event.ON_PAUSE)
@@ -371,7 +384,7 @@ class ZController private constructor(private var player: ZPlayer?, viewControll
             isPausedByLifecycle = true
             pause()
         }
-        viewController?.onLifecyclePause()
+        getController()?.onLifecyclePause()
     }
 
     @OnLifecycleEvent(value = Lifecycle.Event.ON_DESTROY)
@@ -379,7 +392,11 @@ class ZController private constructor(private var player: ZPlayer?, viewControll
         release()
     }
 
-    private fun log(s: String) {
-        if (CORE_LOG_ABLE) onLog(s, getPath(), curAccessKey, "ZController")
+    private fun log(s: String, bd: BehaviorData? = null) {
+        recordLogs(s, "ZController", bd)
+    }
+
+    internal fun recordLogs(s: String, modeName: String, bd: BehaviorData? = null) {
+        if (CORE_LOG_ABLE) ZPlayerLogs.onLog(s, getPath(), curAccessKey, modeName, bd)
     }
 }

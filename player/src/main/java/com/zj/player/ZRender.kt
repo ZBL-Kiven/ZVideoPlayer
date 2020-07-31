@@ -11,10 +11,15 @@ import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.text.TextOutput
 import com.google.android.exoplayer2.util.Assertions
 import com.google.android.exoplayer2.video.VideoListener
-import com.zj.player.UT.Constance.*
-import com.zj.player.UT.RenderEvent
-import com.zj.player.UT.ResizeMode
-import com.zj.player.UT.SurfaceType
+import com.zj.player.logs.BehaviorLogsTable
+import com.zj.player.logs.ZPlayerLogs
+import com.zj.player.ut.Constance.RESIZE_MODE_FIT
+import com.zj.player.ut.Constance.SURFACE_TYPE_NONE
+import com.zj.player.ut.Constance.SURFACE_TYPE_SURFACE_VIEW
+import com.zj.player.ut.Constance.SURFACE_TYPE_TEXTURE_VIEW
+import com.zj.player.ut.RenderEvent
+import com.zj.player.ut.ResizeMode
+import com.zj.player.ut.SurfaceType
 import com.zj.player.view.AspectRatioFrameLayout
 
 /**
@@ -96,6 +101,7 @@ open class ZRender @JvmOverloads constructor(context: Context, attrs: AttributeS
         } else {
             videoSurfaceView = null
         }
+        ZPlayerLogs.onLog("the renderer frame updated surfaceType = $surfaceType  ,resizeMode = $resizeMode", "", "", "Render", BehaviorLogsTable.onRenderSet(surfaceType, resizeMode))
     }
 
     final override fun onVideoSizeChanged(width: Int, height: Int, unappliedRotationDegrees: Int, pixelWidthHeightRatio: Float) {

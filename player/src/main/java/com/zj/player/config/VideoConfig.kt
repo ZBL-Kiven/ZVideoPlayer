@@ -1,8 +1,9 @@
 package com.zj.player.config
 
 import com.google.android.exoplayer2.C
-import com.zj.player.UT.ScalingMode
+import com.zj.player.ut.ScalingMode
 import com.zj.player.ZPlayer
+import com.zj.player.logs.ZPlayerLogs
 
 
 /**
@@ -56,7 +57,7 @@ class VideoConfig private constructor() {
     internal var maxBufferMs = DEFAULT_MAX_BUFFER_MS
     internal var bufferForPlaybackMs = DEFAULT_BUFFER_FOR_PLAYBACK_MS
     internal var bufferForPlaybackAfterBufferMs = DEFAULT_BUFFER_FOR_PLAYBACK_AFTER_RE_BUFFER_MS
-    internal var requestProperty: MutableMap<String, String>? = null
+    internal var requestProperty: List<Pair<String, String>>? = null
 
 
     /**
@@ -95,8 +96,16 @@ class VideoConfig private constructor() {
     /**
      * Set the parameters configured when the far end requests video
      * */
-    fun setRequestProperty(requestProperty: MutableMap<String, String>?): VideoConfig {
-        this.requestProperty = requestProperty
+    fun setRequestProperty(vararg requestProperty: Pair<String, String>?): VideoConfig {
+        this.requestProperty = requestProperty.filterNotNull()
+        return this
+    }
+
+    /**
+     * if debug able , the all of crashes will throw in runtime .
+     * */
+    fun setDebugAble(debugAble: Boolean): VideoConfig {
+        ZPlayerLogs.debugAble = debugAble
         return this
     }
 

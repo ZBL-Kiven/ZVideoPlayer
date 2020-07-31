@@ -361,7 +361,7 @@ class BaseGestureFullScreenDialog private constructor(private var controllerView
     }
 
     private fun onTracked(isStart: Boolean, isEnd: Boolean, formTrigDuration: Float) {
-        onFullContentListener?.onTrack(isStart, isEnd, formTrigDuration) ?: onFullScreenListener?.onTrack(isStart, isEnd, formTrigDuration)
+        if (!isMaxFull) onFullContentListener?.onTrack(isStart, isEnd, formTrigDuration) ?: onFullScreenListener?.onTrack(isStart, isEnd, formTrigDuration)
     }
 
     private fun onDisplayChange(isShow: Boolean) {

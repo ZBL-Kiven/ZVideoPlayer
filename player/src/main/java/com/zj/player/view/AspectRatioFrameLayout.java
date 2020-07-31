@@ -7,13 +7,13 @@ import android.widget.FrameLayout;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.zj.player.UT.ResizeMode;
+import com.zj.player.ut.ResizeMode;
 
-import static com.zj.player.UT.Constance.RESIZE_MODE_FILL;
-import static com.zj.player.UT.Constance.RESIZE_MODE_FIT;
-import static com.zj.player.UT.Constance.RESIZE_MODE_FIXED_HEIGHT;
-import static com.zj.player.UT.Constance.RESIZE_MODE_FIXED_WIDTH;
-import static com.zj.player.UT.Constance.RESIZE_MODE_ZOOM;
+import static com.zj.player.ut.Constance.RESIZE_MODE_FILL;
+import static com.zj.player.ut.Constance.RESIZE_MODE_FIT;
+import static com.zj.player.ut.Constance.RESIZE_MODE_FIXED_HEIGHT;
+import static com.zj.player.ut.Constance.RESIZE_MODE_FIXED_WIDTH;
+import static com.zj.player.ut.Constance.RESIZE_MODE_ZOOM;
 
 
 /**

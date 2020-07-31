@@ -17,13 +17,16 @@ import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.animation.AccelerateDecelerateInterpolator
 import android.widget.*
 import androidx.annotation.LayoutRes
-import com.zj.player.UT.Constance
-import com.zj.player.UT.Controller
+import com.zj.player.ut.Constance
+import com.zj.player.ut.Controller
 import com.zj.player.anim.ZFullValueAnimator
 import com.zj.player.base.InflateInfo
 import com.zj.player.full.BaseGestureFullScreenDialog
 import com.zj.player.full.FullContentListener
 import com.zj.player.full.FullScreenListener
+import com.zj.player.logs.BehaviorData
+import com.zj.player.logs.BehaviorLogsTable
+import com.zj.player.logs.ZPlayerLogs
 import com.zj.player.view.BaseLoadingView
 import java.lang.NullPointerException
 import java.util.*
@@ -130,6 +133,7 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
 
     private fun initListener() {
         vPlay?.setOnClickListener {
+            log("on play btn click", BehaviorLogsTable.onPlayClick())
             onPlayClick(it)
         }
         videoRoot?.setOnClickListener {
@@ -154,25 +158,27 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
         }
 
         speedView?.setOnClickListener {
+            log("on speed btn click", BehaviorLogsTable.onSpeedClick())
             onSpeedClick(it)
         }
 
         muteView?.setOnClickListener {
+            log("on mute btn click", BehaviorLogsTable.onMuteClick())
             onMuteClick(it)
         }
 
         lockScreen?.setOnClickListener {
+            log("on lock screen btn click", BehaviorLogsTable.onLockScreenClick())
             if (!lockScreenRotate(!it.isSelected)) Toast.makeText(context, R.string.z_player_str_screen_locked_tint, Toast.LENGTH_SHORT).show()
         }
     }
 
     private fun initVolume(isMute: Boolean) {
-        if (isMute) {
-            controller?.setVolume(0f)
-        } else {
+        val volume = if (isMute) 0f else {
             val audioManager = context.getSystemService(Service.AUDIO_SERVICE) as AudioManager
-            controller?.setVolume(audioManager.getStreamVolume(AudioManager.STREAM_SYSTEM) * 1.0f)
+            audioManager.getStreamVolume(AudioManager.STREAM_SYSTEM) * 1.0f
         }
+        controller?.setVolume(volume)
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -226,7 +232,7 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
     }
 
     override fun onPlay(path: String, isRegulate: Boolean) {
-        setOverlayViews(false)
+        setOverlayViews(isShowThumb = false, isShowBackground = true, isSinkBottomShader = true)
         seekBar?.isSelected = true
         seekBar?.isEnabled = true
         isInterruptPlayBtnAnim = false
@@ -248,15 +254,8 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
     }
 
     override fun onStop(path: String, isRegulate: Boolean) {
-        setOverlayViews(true)
-        seekBar?.isSelected = false
-        seekBar?.isEnabled = false
-        isInterruptPlayBtnAnim = true
-        seekBarSmall?.visibility = View.GONE
+        reset(isRegulate)
         updateCurPlayerInfo(1f, supportedSpeedList[0])
-        onSeekChanged(0, 0, false, 0)
-        if (isRegulate) showOrHidePlayBtn(true, withState = false)
-        full(false)
     }
 
     override fun completing(path: String, isRegulate: Boolean) {
@@ -315,6 +314,10 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
 
     override fun onLifecyclePause() {
         //use off in extends
+    }
+
+    open fun clickPlayBtn() {
+        vPlay?.callOnClick()
     }
 
     open fun getThumbView(): ImageView? {
@@ -422,13 +425,16 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
             this.isFull = isFull
             it.clearAnimation()
             anim?.start(isFull)
+            log("on tools bar hidden ${!isFull}", BehaviorLogsTable.onToolsBarShow(isFull))
         }
         if (isFull) seekBarSmall?.visibility = View.GONE
     }
 
-    protected fun setOverlayViews(isShow: Boolean) {
-        videoOverrideImageView?.visibility = if (isShow) View.VISIBLE else View.GONE
-        videoOverrideImageShaderView?.z = if (isShow) Resources.getSystem().displayMetrics.density * 3 + 0.5f else 0f
+    protected fun setOverlayViews(isShowThumb: Boolean, isShowBackground: Boolean, isSinkBottomShader: Boolean) {
+        log("on overlay views visibility  thumb = $isShowThumb  bg = $isShowBackground", BehaviorLogsTable.thumbImgVisible(isShowThumb, isShowBackground))
+        videoOverrideImageView?.visibility = if (isShowThumb) View.VISIBLE else View.GONE
+        videoOverrideImageShaderView?.visibility = if (isShowBackground) View.VISIBLE else View.GONE
+        videoOverrideImageShaderView?.z = if (isSinkBottomShader) 0f else Resources.getSystem().displayMetrics.density * 3 + 0.5f
     }
 
     private var anim: ZFullValueAnimator? = null
@@ -498,7 +504,6 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
     protected val fullContentListener = object : FullContentListener {
         override fun onDisplayChanged(dialog: BaseGestureFullScreenDialog, isShow: Boolean) {
             onDisplayChanged(fullScreen, isShow)
-            onFullScreenListener(isShow)
         }
 
         override fun onContentLayoutInflated(dialog: BaseGestureFullScreenDialog, content: View) {
@@ -508,7 +513,6 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
         override fun onFullMaxChanged(dialog: BaseGestureFullScreenDialog, isMax: Boolean) {
             lockScreen?.visibility = if (isMax) View.VISIBLE else GONE
             onFocusChanged(dialog, isMax)
-            onFullMaxChangedListener(isMax)
         }
 
         override fun onFocusChange(dialog: BaseGestureFullScreenDialog, isMax: Boolean) {
@@ -558,17 +562,34 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
         }
     }
 
+    open fun reset(isRegulate: Boolean, isShowThumb: Boolean = true, isShowBackground: Boolean = true, isSinkBottomShader: Boolean = false) {
+        vPlay?.isEnabled = true
+        loadingView?.setMode(BaseLoadingView.DisplayMode.NONE)
+        setOverlayViews(isShowThumb, isShowBackground, isSinkBottomShader)
+        seekBar?.isSelected = false
+        seekBar?.isEnabled = false
+        isInterruptPlayBtnAnim = true
+        seekBarSmall?.visibility = View.GONE
+        onSeekChanged(0, 0, false, 0)
+        if (isRegulate) showOrHidePlayBtn(true, withState = false)
+        full(false)
+    }
+
     protected fun onDisplayChanged(v: View?, isShow: Boolean) {
+        log("on full screen $isShow", BehaviorLogsTable.onFullscreen(isShow))
         v?.isSelected = isShow
         if (!isShow) {
             fullScreenDialog = null
             lockScreen?.isSelected = false
         }
         isFullingOrDismissing = false
+        onFullScreenListener(isShow)
     }
 
     protected fun onFocusChanged(dialog: BaseGestureFullScreenDialog, isMax: Boolean) {
+        log("on full max screen $isMax", BehaviorLogsTable.onFullMaxScreen(isMax))
         if (isMax) lockScreen?.isSelected = dialog.isLockedCurrent()
+        onFullMaxChangedListener(isMax)
     }
 
     protected fun setChildZ(zIn: Float) {
@@ -577,5 +598,13 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
 
     protected fun checkActIsFinished(): Boolean {
         return (context as? Activity)?.isFinishing == true
+    }
+
+    private fun log(s: String, bd: BehaviorData? = null) {
+        controller?.recordLogs(s, "BaseViewController", bd)
+    }
+
+    protected fun recordLogs(s: String, modeName: String, vararg params: Pair<String, Any>) {
+        if (Constance.CORE_LOG_ABLE) ZPlayerLogs.onLog(s, controller?.getPath() ?: "", "", modeName, *params)
     }
 }

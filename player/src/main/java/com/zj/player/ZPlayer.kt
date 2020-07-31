@@ -20,13 +20,16 @@ import com.google.android.exoplayer2.upstream.cache.CacheDataSourceFactory
 import com.google.android.exoplayer2.upstream.cache.LeastRecentlyUsedCacheEvictor
 import com.google.android.exoplayer2.upstream.cache.SimpleCache
 import com.google.android.exoplayer2.util.Util
-import com.zj.player.UT.Constance
-import com.zj.player.UT.Constance.CORE_LOG_ABLE
-import com.zj.player.UT.PlayerEventController
-import com.zj.player.UT.RenderEvent
+import com.zj.player.ut.Constance
+import com.zj.player.ut.Constance.CORE_LOG_ABLE
+import com.zj.player.ut.PlayerEventController
+import com.zj.player.ut.RenderEvent
 import com.zj.player.base.VideoLoadControl
 import com.zj.player.base.VideoState
 import com.zj.player.config.VideoConfig
+import com.zj.player.logs.BehaviorData
+import com.zj.player.logs.BehaviorLogsTable
+import com.zj.player.logs.ZPlayerLogs
 import java.io.File
 import kotlin.math.max
 import kotlin.math.min
@@ -55,7 +58,7 @@ open class ZPlayer(var config: VideoConfig? = null) : Player.EventListener {
         private const val HANDLE_STATE = 10103
     }
 
-    private var playPath: String = ""
+    private var playPath: Pair<String, Any?>? = null
     protected var player: SimpleExoPlayer? = null
     private var isReady = false
     private var duration = 0L
@@ -136,8 +139,6 @@ open class ZPlayer(var config: VideoConfig? = null) : Player.EventListener {
                     val error = (value.obj() as? ExoPlaybackException)
                     if (isStop()) return
                     if (isPlaying()) setPlayerState(VideoState.PAUSE)
-                    isReady = false
-                    autoPlay(false)
                     resetAndStop(true, error)
                 }
 
@@ -196,8 +197,8 @@ open class ZPlayer(var config: VideoConfig? = null) : Player.EventListener {
     private fun createCachedDataSource(context: Context, videoUrl: String): MediaSource? {
         val httpFactory = DefaultHttpDataSourceFactory(Util.getUserAgent(context, context.packageName), DefaultBandwidthMeter())
         config?.requestProperty?.let {
-            log("set request property $it")
-            httpFactory.defaultRequestProperties.set(it)
+            log("set request property $it", BehaviorLogsTable.requestParams(currentCallId(), it.toMap()))
+            httpFactory.defaultRequestProperties.set(it.toMap())
         }
         if (cache == null) {
             val cachePath = context.applicationContext.externalCacheDir
@@ -223,7 +224,7 @@ open class ZPlayer(var config: VideoConfig? = null) : Player.EventListener {
         val seekProgress = (max(0f, min(100, progress) / 100f * max(duration, 1) - 1)).toLong()
         runWithPlayer { p ->
             p.seekTo(seekProgress)
-            log("video seek to $seekProgress")
+            log("video seek to $seekProgress", BehaviorLogsTable.seekTo(currentCallId(), seekProgress))
         }
     }
 
@@ -232,13 +233,15 @@ open class ZPlayer(var config: VideoConfig? = null) : Player.EventListener {
             try {
                 block(it)
             } catch (e: Exception) {
-                e.printStackTrace()
+                ZPlayerLogs.onError(e)
             }
         }
     }
 
     @Suppress("SameParameterValue")
     private fun resetAndStop(notifyStop: Boolean = false, e: ExoPlaybackException?) {
+        isReady = false
+        autoPlay(false)
         runWithPlayer {
             it.removeListener(this)
             it.release()
@@ -249,7 +252,7 @@ open class ZPlayer(var config: VideoConfig? = null) : Player.EventListener {
         }
         handler?.removeCallbacksAndMessages(null)
         player = null
-        log("video finished , current progress at $_curLookedProgress%")
+        log("video finished , current progress at $_curLookedProgress%", BehaviorLogsTable.videoStopped(currentCallId(), _curLookedProgress / 100f))
     }
 
     private fun updateProgress() {
@@ -304,12 +307,8 @@ open class ZPlayer(var config: VideoConfig? = null) : Player.EventListener {
             if (it.type == TYPE_SOURCE) sb.append("sourceException : ").append(it.sourceException?.message).append(" \n")
             if (it.type == TYPE_UNEXPECTED) sb.append("unexpectedException : ").append(it.unexpectedException?.message)
         }
-        log("video on play error case : $sb")
+        log("video on play error case : $sb", BehaviorLogsTable.playError(currentCallId(), "$sb"))
         setPlayerState(VideoState.STOP.setObj(error))
-    }
-
-    private fun log(s: String) {
-        if (CORE_LOG_ABLE) controller?.onLog(s, currentPlayPath(), curAccessKey, "ZPlayer")
     }
 
     open fun isLoading(accurate: Boolean = false): Boolean {
@@ -337,12 +336,17 @@ open class ZPlayer(var config: VideoConfig? = null) : Player.EventListener {
     }
 
     open fun currentPlayPath(): String {
-        return playPath
+        return playPath?.first ?: ""
     }
 
-    open fun setData(path: String, autoPlay: Boolean) {
+    open fun currentCallId(): Any? {
+        return playPath?.second
+    }
+
+
+    open fun setData(path: String, autoPlay: Boolean, callId: Any? = null) {
         log("set video data to $path")
-        playPath = path
+        playPath = Pair(path, callId)
         if (autoPlay) setPlayerState(VideoState.LOADING)
     }
 
@@ -366,6 +370,12 @@ open class ZPlayer(var config: VideoConfig? = null) : Player.EventListener {
         setPlayerState(VideoState.STOP)
     }
 
+    open fun stopNow() {
+        synchronized(curState) {
+            if (curState != VideoState.STOP) curState = VideoState.STOP
+        }
+    }
+
     open fun seekTo(progress: Int, fromUser: Boolean) {
         if (curState != VideoState.PAUSE && fromUser) {
             setPlayerState(VideoState.PAUSE.setObj(true))
@@ -378,15 +388,15 @@ open class ZPlayer(var config: VideoConfig? = null) : Player.EventListener {
     }
 
     open fun release() {
-        log("video call release")
         setPlayerState(VideoState.DESTROY)
+        log("video call release", BehaviorLogsTable.released())
     }
 
     open fun setSpeed(s: Float) {
         runWithPlayer {
             val p = it.playbackParameters
             val np = PlaybackParameters(s, p.pitch, p.skipSilence)
-            log("video update speed from ${p.speed} to $s")
+            log("video update speed from ${p.speed} to $s", BehaviorLogsTable.newSpeed(currentCallId(), s))
             it.playbackParameters = np
             controller?.onPlayerInfo(getVolume(), s)
         }
@@ -398,14 +408,14 @@ open class ZPlayer(var config: VideoConfig? = null) : Player.EventListener {
 
     open fun setVolume(volume: Float) {
         runWithPlayer {
-            log("video set volume to $volume")
+            log("video set volume to $volume", BehaviorLogsTable.newVolume(currentCallId(), volume))
             it.volume = volume
             controller?.onPlayerInfo(volume, getSpeed())
         }
     }
 
     open fun getVolume(): Float {
-        return player?.volume ?: 0f
+        return player?.volume ?: 1f
     }
 
     internal fun autoPlay(autoPlay: Boolean) {
@@ -419,13 +429,12 @@ open class ZPlayer(var config: VideoConfig? = null) : Player.EventListener {
     @UiThread
     internal fun updateControllerState() {
         curState.let {
-            if (it == VideoState.PLAY || it == VideoState.PAUSE || it == VideoState.COMPLETING) {
+            if (it == VideoState.LOADING) controller?.onLoading(currentPlayPath(), true)
+            if (it == VideoState.SEEK_LOADING) controller?.onSeekingLoading(currentPlayPath(), true)
+            if (it == VideoState.PLAY || it == VideoState.PAUSE || it == VideoState.COMPLETING || it == VideoState.READY) {
                 controller?.onPrepare(currentPlayPath(), duration, true)
             }
             when (it) {
-                VideoState.SEEK_LOADING -> controller?.onSeekingLoading(currentPlayPath(), true)
-                VideoState.LOADING -> controller?.onLoading(currentPlayPath(), true)
-                VideoState.READY -> controller?.onPrepare(currentPlayPath(), duration, true)
                 VideoState.PLAY -> controller?.onPlay(currentPlayPath(), true)
                 VideoState.COMPLETING -> controller?.completing(currentPlayPath(), true)
                 VideoState.COMPLETED -> controller?.onCompleted(currentPlayPath(), true)
@@ -435,8 +444,14 @@ open class ZPlayer(var config: VideoConfig? = null) : Player.EventListener {
                     if (e != null) controller?.onError(e)
                     else controller?.onStop(currentPlayPath(), true)
                 }
+                else -> {
+                }
             }
         }
         controller?.onPlayerInfo(getVolume(), getSpeed())
+    }
+
+    private fun log(s: String, bd: BehaviorData? = null) {
+        if (CORE_LOG_ABLE) ZPlayerLogs.onLog(s, currentPlayPath(), curAccessKey, "ZPlayer", bd)
     }
 }

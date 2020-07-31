@@ -13,6 +13,7 @@ import android.widget.FrameLayout
 import android.widget.ProgressBar
 import android.widget.TextView
 import com.zj.player.R
+import com.zj.player.logs.ZPlayerLogs
 import java.util.*
 import kotlin.math.max
 import kotlin.math.min
@@ -116,7 +117,7 @@ internal class BaseLoadingView @JvmOverloads constructor(context: Context, attrs
                 showOnActDefault = array.getBoolean(R.styleable.BaseLoadingView_showOnActDefault, false)
                 refreshEnable = array.getBoolean(R.styleable.BaseLoadingView_refreshEnable, true)
             } catch (e: Exception) {
-                e.printStackTrace()
+                ZPlayerLogs.onError(e)
             } finally {
                 array.recycle()
             }
