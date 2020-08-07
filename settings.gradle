@@ -1,3 +1,4 @@
 rootProject.name='VideoTest'
 include ':app'
 include ':player'
+include ':img'

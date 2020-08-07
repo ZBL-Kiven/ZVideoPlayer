@@ -89,7 +89,6 @@
         android:translationZ="6dp"
         android:visibility="gone">
 
-
         <TextView
             android:id="@+id/z_player_video_preview_tv_start"
             android:layout_width="wrap_content"

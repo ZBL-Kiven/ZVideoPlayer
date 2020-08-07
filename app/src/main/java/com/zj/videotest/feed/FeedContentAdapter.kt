@@ -3,25 +3,23 @@ package com.zj.videotest.feed
 import android.animation.Animator
 import android.animation.ObjectAnimator
 import android.content.Context
+import android.util.Log
 import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import com.bumptech.glide.Glide
-import com.bumptech.glide.load.resource.bitmap.CircleCrop
-import com.bumptech.glide.request.RequestOptions
+import com.zj.img.ImageLoader
 import com.zj.videotest.feed.data.FeedDataIn
 import com.zj.player.ZController
 import com.zj.player.config.VideoConfig
 import com.zj.player.list.BaseListVideoController
 import com.zj.player.list.ListVideoAdapterDelegate
-import com.zj.videotest.AutomationImageCalculateUtils
 import com.zj.videotest.BuildConfig
 import com.zj.videotest.R
 import com.zj.videotest.videos.CCVideoController
 import com.zj.views.list.adapters.AnimationAdapter
 import com.zj.views.list.holders.BaseViewHolder
-import jp.wasabeef.glide.transformations.BlurTransformation
+import java.lang.ref.WeakReference
 
 class FeedContentAdapter<T : FeedDataIn> : AnimationAdapter<T>(R.layout.r_main_fg_feed_item) {
 
@@ -77,8 +75,6 @@ class FeedContentAdapter<T : FeedDataIn> : AnimationAdapter<T>(R.layout.r_main_f
                 val imgPath = d?.getImagePath() ?: ""
                 val videoWidth = d?.getViewWidth() ?: 1
                 val videoHeight = d?.getViewHeight() ?: 1
-                val maxWidth = holder.itemView.width
-                val maxHeight = holder.itemView.height
                 h.getView<ImageView>(R.id.r_main_fg_feed_item_iv_avatar)?.let {
                     it.post { loadAvatar(ctx, avatarPath, it) }
                     it.setOnClickListener { avatarClicked(d, p) }
@@ -86,13 +82,14 @@ class FeedContentAdapter<T : FeedDataIn> : AnimationAdapter<T>(R.layout.r_main_f
                 h.getView<TextView>(R.id.r_main_fg_feed_item_tv_nickname)?.text = d?.getNickname()
                 h.getView<TextView>(R.id.r_main_fg_feed_item_tv_desc)?.text = d?.getDesc()
                 h.getView<TextView>(R.id.r_main_fg_feed_item_tv_claps)?.text = "${d?.getClapsCount() ?: 0}"
-                val thumb = vc.getThumbView()
-                val overlay = vc.getBackgroundView()
                 h.getView<View>(R.id.r_main_fg_feed_item_ll_claps)?.setOnClickListener {
                     clap(d, p)
                 }
-                overlay?.post { loadBlurImage(ctx, imgPath, overlay) }
-                thumb?.post { loadThumbImage(ctx, videoWidth, videoHeight, maxWidth, maxHeight, imgPath, thumb) }
+                vc.post {
+                    val maxWidth = holder.itemView.width
+                    val maxHeight = holder.itemView.height
+                    loadThumbImage(ctx, videoWidth, videoHeight, maxWidth, maxHeight, imgPath, vc)
+                }
                 vc.setScreenContentLayout(R.layout.r_main_video_details_content) { v ->
                     v.findViewById<ImageView>(R.id.r_main_fg_list_iv_avatar)?.let {
                         loadAvatar(vc.context, d?.getAvatarPath() ?: "", it)
@@ -110,23 +107,19 @@ class FeedContentAdapter<T : FeedDataIn> : AnimationAdapter<T>(R.layout.r_main_f
 
     }
 
-
     private fun loadAvatar(context: Context, url: String, iv: ImageView) {
-        val options = RequestOptions().centerCrop().transform(CircleCrop())
-        val width = if (iv.width <= 0) 1 else iv.width
-        val height = if (iv.height <= 0) 1 else iv.height
-        Glide.with(context).load(url).override(width, height).apply(options).into(iv)
+        //        val options = RequestOptions().centerCrop().transform(CircleCrop())
+        //        val width = if (iv.width <= 0) 1 else iv.width
+        //        val height = if (iv.height <= 0) 1 else iv.height
+        //        Glide.with(context).load(url).override(width, height).apply(options).into(iv)
     }
 
-    private fun loadBlurImage(context: Context, url: String, iv: ImageView) {
-        val width = if (iv.width <= 0) 1 else iv.width
-        val height = if (iv.height <= 0) 1 else iv.height
-        Glide.with(context).load(url).override(width, height).transform(BlurTransformation()).into(iv)
-    }
-
-    private fun loadThumbImage(ctx: Context, videoWidth: Int, videoHeight: Int, maxWidth: Int, maxHeight: Int, imgPath: String, iv: ImageView) {
-        val size = AutomationImageCalculateUtils.proportionalWH(videoWidth, videoHeight, maxWidth, maxHeight, 0.45f)
-        Glide.with(ctx).load(imgPath).override(size[0], size[1]).into(iv)
+    private fun loadThumbImage(ctx: Context, videoWidth: Int, videoHeight: Int, maxWidth: Int, maxHeight: Int, imgPath: String, vc: BaseListVideoController) {
+        ImageLoader.load(ctx, videoWidth, videoHeight, maxWidth, maxHeight, 0.5f, 0.5f, "feed", imgPath, "") {
+            Log.e("----- ", "33333   ${System.currentTimeMillis()}")
+            it.withCtx(WeakReference(ctx))?.centerCrop()?.blur(90)?.crossFade()?.memoryEnable(false)?.into(vc.getBackgroundView())
+            it.withCtx(WeakReference(ctx))?.thumbnail(0.7f)?.crossFade()?.memoryEnable(false)?.into(vc.getThumbView())
+        }
     }
 
     override fun getAnimators(p0: View?): Array<Animator> {

@@ -16,8 +16,6 @@ interface FeedDataIn {
 
     fun getClapsCount(): Int
 
-    fun getCoinCount(): Int
-
     fun getViewWidth(): Int
 
     fun getViewHeight(): Int
