@@ -8,19 +8,21 @@ import androidx.annotation.DrawableRes
 import com.bumptech.glide.RequestBuilder
 import com.bumptech.glide.RequestManager
 import com.bumptech.glide.TransitionOptions
+import com.bumptech.glide.load.Transformation
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.load.resource.bitmap.CircleCrop
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
+import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.RequestOptions
 import com.bumptech.glide.request.transition.DrawableCrossFadeFactory
 import jp.wasabeef.glide.transformations.BlurTransformation
 
 
 @Suppress("unused", "CheckResult")
-class LoaderConfig<T> internal constructor(private val glide: RequestBuilder<Drawable>) {
+class LoaderConfig internal constructor(private val glide: RequestBuilder<Drawable>) {
 
     companion object {
-        internal fun <T> load(rm: RequestManager?, p: T?): LoaderConfig<Drawable>? {
+        internal fun <T> load(rm: RequestManager?, p: T?): LoaderConfig? {
             return rm?.let {
                 LoaderConfig(when (p) {
                     is Bitmap -> rm.load(p)
@@ -35,59 +37,67 @@ class LoaderConfig<T> internal constructor(private val glide: RequestBuilder<Dra
         }
     }
 
-    fun thumbnail(sizeMultiplier: Float): LoaderConfig<T> {
+    fun thumbnail(sizeMultiplier: Float): LoaderConfig {
         glide.thumbnail(sizeMultiplier);return this
     }
 
-    fun error(id: Int): LoaderConfig<T> {
+    fun error(id: Int): LoaderConfig {
         glide.error(id);return this
     }
 
-    fun error(drawable: Drawable): LoaderConfig<T> {
+    fun error(drawable: Drawable): LoaderConfig {
         glide.error(drawable);return this
     }
 
-    fun override(w: Int, h: Int): LoaderConfig<T> {
+    fun override(w: Int, h: Int): LoaderConfig {
         glide.override(w, h);return this
     }
 
-    fun override(size: Int): LoaderConfig<T> {
+    fun override(size: Int): LoaderConfig {
         glide.override(size);return this
     }
 
-    fun blur(radius: Int): LoaderConfig<T> {
+    fun blur(radius: Int): LoaderConfig {
         glide.transform(BlurTransformation(radius));return this
     }
 
-    fun centerCrop(): LoaderConfig<T> {
+    fun centerCrop(): LoaderConfig {
         glide.centerCrop();return this
+    }
+
+    fun transform(trs: Transformation<Bitmap>): LoaderConfig {
+        glide.transform(trs);return this
     }
 
     fun placeHolder(@DrawableRes id: Int) {
         glide.apply(RequestOptions().placeholder(id))
     }
 
-    fun crossFade(): LoaderConfig<T> {
+    fun crossFade(): LoaderConfig {
         val drawableCrossFadeFactory = DrawableCrossFadeFactory.Builder(300).setCrossFadeEnabled(true).build()
         val transOp: TransitionOptions<DrawableTransitionOptions, in Drawable> = DrawableTransitionOptions.with(drawableCrossFadeFactory)
         glide.transition(transOp)
         return this
     }
 
-    fun memoryEnable(enable: Boolean): LoaderConfig<T> {
+    fun addListener(l: RequestListener<Drawable>) {
+        glide.addListener(l)
+    }
+
+    fun memoryEnable(enable: Boolean): LoaderConfig {
         glide.skipMemoryCache(enable)
         return this
     }
 
-    fun fitCenter(): LoaderConfig<T> {
+    fun fitCenter(): LoaderConfig {
         glide.fitCenter();return this
     }
 
-    fun centerInside(): LoaderConfig<T> {
+    fun centerInside(): LoaderConfig {
         glide.centerInside();return this
     }
 
-    fun circle(): LoaderConfig<T> {
+    fun circle(): LoaderConfig {
         glide.transform(CircleCrop());return this
     }
 

@@ -20,4 +20,5 @@ interface FeedDataIn {
 
     fun getViewHeight(): Int
 
+    fun getType(): DataType
 }

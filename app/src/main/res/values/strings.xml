@@ -1,3 +1,5 @@
 <resources>
-    <string name="app_name">VideoTest</string>
+    <string name="app_name" translatable="false">VideoTest</string>
+    <string name="r_main_feed_list_item_replay" translatable="false">Replay</string>
+    <string name="r_main_feed_list_load_more_no_data" translatable="false"> Sorry ! there is no more data</string>
 </resources>

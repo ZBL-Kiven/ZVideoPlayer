@@ -1,18 +1,28 @@
 package com.zj.videotest.feed
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.zj.cf.fragments.BaseLinkageFragment
 import com.zj.videotest.R
+import com.zj.videotest.feed.apis.config.Constance
+import com.zj.videotest.feed.apis.init.AppInitApi
+import com.zj.videotest.feed.bean.VideoSource
+import com.zj.videotest.feed.data.FeedDataIn
 import com.zj.videotest.feed.data.FeedMockImpl
+import com.zj.views.list.refresh.layout.RefreshLayout
+import com.zj.views.list.refresh.layout.api.RefreshLayoutIn
+import com.zj.views.list.refresh.layout.listener.OnRefreshLoadMoreListener
 
 class RFeedFragment : BaseLinkageFragment() {
 
     private var rvContent: RecyclerView? = null
-    private var adapter: FeedContentAdapter<FeedMockImpl>? = null
+    private var adapter: FeedContentAdapter<FeedDataIn>? = null
+    private var refreshLayout: RefreshLayout? = null
 
 
     override fun getView(inflater: LayoutInflater, container: ViewGroup?): View {
@@ -21,53 +31,70 @@ class RFeedFragment : BaseLinkageFragment() {
 
     override fun onCreate() {
         super.onCreate()
+        Constance.curUserId = "${System.currentTimeMillis()}"
         rvContent = find(R.id.r_main_frg_feed_rv)
+        refreshLayout = find(R.id.r_main_frg_feed_refresh)
         adapter = FeedContentAdapter()
-        rvContent?.adapter = adapter
         rvContent?.layoutManager = LinearLayoutManager(this.activity)
-        
-        adapter?.add(arrayListOf(
-                FeedMockImpl("https://gcdn.channelthree.tv/20200714/4/6/f/4/e/46f4ed05895a4797bb3c00565aac3980.mp4","https://ss0.bdstatic.com/70cFvHSh_Q1YnxGkpoWK1HF6hhy/it/u=3953532663,104445135&fm=26&gp=0.jpg"),
-                FeedMockImpl("https://gcdn.channelthree.tv/20200716/9/e/b/e/0/9ebe0040976547379e61a2be93b386ca.mp4","https://ss0.bdstatic.com/70cFvHSh_Q1YnxGkpoWK1HF6hhy/it/u=1846195734,3132450742&fm=26&gp=0.jpg"),
-                FeedMockImpl("https://gcdn.channelthree.tv/20200616/4/f/2/f/9/4f2f94b03d674d8880b5c4091857dacb.mp4","https://ss0.bdstatic.com/70cFuHSh_Q1YnxGkpoWK1HF6hhy/it/u=3087142844,2835489870&fm=26&gp=0.jpg"),
-                FeedMockImpl("https://gcdn.channelthree.tv/20200714/4/6/f/4/e/46f4ed05895a4797bb3c00565aac3980.mp4","https://ss0.bdstatic.com/70cFvHSh_Q1YnxGkpoWK1HF6hhy/it/u=3953532663,104445135&fm=26&gp=0.jpg"),
-                FeedMockImpl("https://gcdn.channelthree.tv/20200716/9/e/b/e/0/9ebe0040976547379e61a2be93b386ca.mp4","https://ss0.bdstatic.com/70cFvHSh_Q1YnxGkpoWK1HF6hhy/it/u=1846195734,3132450742&fm=26&gp=0.jpg"),
-                FeedMockImpl("https://gcdn.channelthree.tv/20200616/4/f/2/f/9/4f2f94b03d674d8880b5c4091857dacb.mp4","https://ss0.bdstatic.com/70cFuHSh_Q1YnxGkpoWK1HF6hhy/it/u=3087142844,2835489870&fm=26&gp=0.jpg"),
-                FeedMockImpl("https://gcdn.channelthree.tv/20200714/4/6/f/4/e/46f4ed05895a4797bb3c00565aac3980.mp4","https://ss0.bdstatic.com/70cFvHSh_Q1YnxGkpoWK1HF6hhy/it/u=3953532663,104445135&fm=26&gp=0.jpg"),
-                FeedMockImpl("https://gcdn.channelthree.tv/20200716/9/e/b/e/0/9ebe0040976547379e61a2be93b386ca.mp4","https://ss0.bdstatic.com/70cFvHSh_Q1YnxGkpoWK1HF6hhy/it/u=1846195734,3132450742&fm=26&gp=0.jpg"),
-                FeedMockImpl("https://gcdn.channelthree.tv/20200616/4/f/2/f/9/4f2f94b03d674d8880b5c4091857dacb.mp4","https://ss0.bdstatic.com/70cFuHSh_Q1YnxGkpoWK1HF6hhy/it/u=3087142844,2835489870&fm=26&gp=0.jpg"),
-                FeedMockImpl("https://gcdn.channelthree.tv/20200714/4/6/f/4/e/46f4ed05895a4797bb3c00565aac3980.mp4","https://ss0.bdstatic.com/70cFvHSh_Q1YnxGkpoWK1HF6hhy/it/u=3953532663,104445135&fm=26&gp=0.jpg"),
-                FeedMockImpl("https://gcdn.channelthree.tv/20200716/9/e/b/e/0/9ebe0040976547379e61a2be93b386ca.mp4","https://ss0.bdstatic.com/70cFvHSh_Q1YnxGkpoWK1HF6hhy/it/u=1846195734,3132450742&fm=26&gp=0.jpg"),
-                FeedMockImpl("https://gcdn.channelthree.tv/20200616/4/f/2/f/9/4f2f94b03d674d8880b5c4091857dacb.mp4","https://ss0.bdstatic.com/70cFuHSh_Q1YnxGkpoWK1HF6hhy/it/u=3087142844,2835489870&fm=26&gp=0.jpg"),
-                FeedMockImpl("https://gcdn.channelthree.tv/20200714/4/6/f/4/e/46f4ed05895a4797bb3c00565aac3980.mp4","https://ss0.bdstatic.com/70cFvHSh_Q1YnxGkpoWK1HF6hhy/it/u=3953532663,104445135&fm=26&gp=0.jpg"),
-                FeedMockImpl("https://gcdn.channelthree.tv/20200716/9/e/b/e/0/9ebe0040976547379e61a2be93b386ca.mp4","https://ss0.bdstatic.com/70cFvHSh_Q1YnxGkpoWK1HF6hhy/it/u=1846195734,3132450742&fm=26&gp=0.jpg"),
-                FeedMockImpl("https://gcdn.channelthree.tv/20200616/4/f/2/f/9/4f2f94b03d674d8880b5c4091857dacb.mp4","https://ss0.bdstatic.com/70cFuHSh_Q1YnxGkpoWK1HF6hhy/it/u=3087142844,2835489870&fm=26&gp=0.jpg"),
-                FeedMockImpl("https://gcdn.channelthree.tv/20200714/4/6/f/4/e/46f4ed05895a4797bb3c00565aac3980.mp4","https://ss0.bdstatic.com/70cFvHSh_Q1YnxGkpoWK1HF6hhy/it/u=3953532663,104445135&fm=26&gp=0.jpg"),
-                FeedMockImpl("https://gcdn.channelthree.tv/20200716/9/e/b/e/0/9ebe0040976547379e61a2be93b386ca.mp4","https://ss0.bdstatic.com/70cFvHSh_Q1YnxGkpoWK1HF6hhy/it/u=1846195734,3132450742&fm=26&gp=0.jpg"),
-                FeedMockImpl("https://gcdn.channelthree.tv/20200616/4/f/2/f/9/4f2f94b03d674d8880b5c4091857dacb.mp4","https://ss0.bdstatic.com/70cFuHSh_Q1YnxGkpoWK1HF6hhy/it/u=3087142844,2835489870&fm=26&gp=0.jpg"),
-                FeedMockImpl("https://gcdn.channelthree.tv/20200714/4/6/f/4/e/46f4ed05895a4797bb3c00565aac3980.mp4","https://ss0.bdstatic.com/70cFvHSh_Q1YnxGkpoWK1HF6hhy/it/u=3953532663,104445135&fm=26&gp=0.jpg"),
-                FeedMockImpl("https://gcdn.channelthree.tv/20200716/9/e/b/e/0/9ebe0040976547379e61a2be93b386ca.mp4","https://ss0.bdstatic.com/70cFvHSh_Q1YnxGkpoWK1HF6hhy/it/u=1846195734,3132450742&fm=26&gp=0.jpg"),
-                FeedMockImpl("https://gcdn.channelthree.tv/20200616/4/f/2/f/9/4f2f94b03d674d8880b5c4091857dacb.mp4","https://ss0.bdstatic.com/70cFuHSh_Q1YnxGkpoWK1HF6hhy/it/u=3087142844,2835489870&fm=26&gp=0.jpg"),
-                FeedMockImpl("https://gcdn.channelthree.tv/20200714/4/6/f/4/e/46f4ed05895a4797bb3c00565aac3980.mp4","https://ss0.bdstatic.com/70cFvHSh_Q1YnxGkpoWK1HF6hhy/it/u=3953532663,104445135&fm=26&gp=0.jpg"),
-                FeedMockImpl("https://gcdn.channelthree.tv/20200716/9/e/b/e/0/9ebe0040976547379e61a2be93b386ca.mp4","https://ss0.bdstatic.com/70cFvHSh_Q1YnxGkpoWK1HF6hhy/it/u=1846195734,3132450742&fm=26&gp=0.jpg"),
-                FeedMockImpl("https://gcdn.channelthree.tv/20200616/4/f/2/f/9/4f2f94b03d674d8880b5c4091857dacb.mp4","https://ss0.bdstatic.com/70cFuHSh_Q1YnxGkpoWK1HF6hhy/it/u=3087142844,2835489870&fm=26&gp=0.jpg"),
-                FeedMockImpl("https://gcdn.channelthree.tv/20200714/4/6/f/4/e/46f4ed05895a4797bb3c00565aac3980.mp4","https://ss0.bdstatic.com/70cFvHSh_Q1YnxGkpoWK1HF6hhy/it/u=3953532663,104445135&fm=26&gp=0.jpg"),
-                FeedMockImpl("https://gcdn.channelthree.tv/20200716/9/e/b/e/0/9ebe0040976547379e61a2be93b386ca.mp4","https://ss0.bdstatic.com/70cFvHSh_Q1YnxGkpoWK1HF6hhy/it/u=1846195734,3132450742&fm=26&gp=0.jpg"),
-                FeedMockImpl("https://gcdn.channelthree.tv/20200616/4/f/2/f/9/4f2f94b03d674d8880b5c4091857dacb.mp4","https://ss0.bdstatic.com/70cFuHSh_Q1YnxGkpoWK1HF6hhy/it/u=3087142844,2835489870&fm=26&gp=0.jpg"),
-                FeedMockImpl("https://gcdn.channelthree.tv/20200714/4/6/f/4/e/46f4ed05895a4797bb3c00565aac3980.mp4","https://ss0.bdstatic.com/70cFvHSh_Q1YnxGkpoWK1HF6hhy/it/u=3953532663,104445135&fm=26&gp=0.jpg"),
-                FeedMockImpl("https://gcdn.channelthree.tv/20200716/9/e/b/e/0/9ebe0040976547379e61a2be93b386ca.mp4","https://ss0.bdstatic.com/70cFvHSh_Q1YnxGkpoWK1HF6hhy/it/u=1846195734,3132450742&fm=26&gp=0.jpg"),
-                FeedMockImpl("https://gcdn.channelthree.tv/20200616/4/f/2/f/9/4f2f94b03d674d8880b5c4091857dacb.mp4","https://ss0.bdstatic.com/70cFuHSh_Q1YnxGkpoWK1HF6hhy/it/u=3087142844,2835489870&fm=26&gp=0.jpg"), 
-                FeedMockImpl("https://gcdn.channelthree.tv/20200714/4/6/f/4/e/46f4ed05895a4797bb3c00565aac3980.mp4", "https://ss0.bdstatic.com/70cFvHSh_Q1YnxGkpoWK1HF6hhy/it/u=3953532663,104445135&fm=26&gp=0.jpg"), 
-                FeedMockImpl("https://gcdn.channelthree.tv/20200716/9/e/b/e/0/9ebe0040976547379e61a2be93b386ca.mp4", "https://ss0.bdstatic.com/70cFvHSh_Q1YnxGkpoWK1HF6hhy/it/u=1846195734,3132450742&fm=26&gp=0.jpg"), 
-                FeedMockImpl("https://gcdn.channelthree.tv/20200616/4/f/2/f/9/4f2f94b03d674d8880b5c4091857dacb.mp4", "https://ss0.bdstatic.com/70cFuHSh_Q1YnxGkpoWK1HF6hhy/it/u=3087142844,2835489870&fm=26&gp=0.jpg")
-            )
-        )
+        rvContent?.adapter = adapter
+        initData(false)
+        initListener()
     }
 
-
-    private fun initVideoPlayer(w: Int, h: Int, preview: String, overlay: String) {
-
+    private fun initData(isLoadMore: Boolean) {
+        refreshLayout?.autoLoadMore(16)
+        AppInitApi.getFeedMock { b, d, es ->
+            if (!isLoadMore) adapter?.cancelAllPLay()
+            if (b) setAdapterData(d?.toMutableList(), isLoadMore)
+            else if (es != null) Toast.makeText(activity, es.message(), Toast.LENGTH_SHORT).show()
+            if (!isLoadMore) refreshLayout?.finishRefresh(32)
+            if (isLoadMore) {
+                if (d.isNullOrEmpty()) refreshLayout?.setNoMoreData(true)
+                else refreshLayout?.finishLoadMore()
+            } else {
+                refreshLayout?.finishRefresh(32)
+            }
+            if (!isLoadMore) adapter?.resume()
+        }
     }
 
+    private fun setAdapterData(d: MutableList<FeedDataIn>?, loadMore: Boolean) {
+        if (d.isNullOrEmpty()) return
+        if (loadMore) {
+            adapter?.add(d)
+        } else {
+            adapter?.change(d)
+        }
+    }
 
+    private fun initListener() {
+        refreshLayout?.setOnRefreshLoadMoreListener(object : OnRefreshLoadMoreListener {
+            override fun onLoadMore(p0: RefreshLayoutIn) {
+                initData(true)
+            }
+
+            override fun onRefresh(p0: RefreshLayoutIn) {
+                initData(false)
+            }
+        })
+
+        adapter?.setAdapterInterface(object : FeedAdapterInterface<FeedDataIn> {
+            override fun clap(d: FeedDataIn?, p: Int) {
+
+            }
+
+            override fun avatarClicked(d: FeedDataIn?, p: Int) {
+
+            }
+
+            override fun onShare(v: View, d: FeedDataIn?, p: Int) {
+                Log.e("------- ", "onShare   ${d?.getSourceId()}")
+            }
+        })
+    }
+
+    override fun onStopped() {
+        super.onStopped()
+        adapter?.release()
+    }
 }

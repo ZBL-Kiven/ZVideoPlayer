@@ -7,24 +7,24 @@ import android.os.Message
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
-import java.util.concurrent.Callable
 
-internal class ImageSaveTask(private val bmp: Bitmap, private val cacheFolderPath: String, private val fileName: String, private val onGot: (String) -> Unit) : Callable<Unit> {
+internal class ImageSaveTask<T>(private val tag: T?, private val bmp: Bitmap, private val cacheFolderPath: String, private val fileName: String, private val recyclerNeeded: Boolean, private var onGot: ((T?, String) -> Unit)? = null, private var transaction: ((Bitmap) -> Bitmap)? = null) : Runnable {
 
     companion object {
         private const val SAVED = 0xa3b7e
     }
 
-    private val handler = Handler(Looper.getMainLooper()) {
+    private var handler: Handler? = Handler(Looper.getMainLooper()) {
         if (it.what == SAVED) {
-            onGot(it.obj.toString())
+            onGot?.invoke(tag, it.obj.toString())
+            clear()
         }
         return@Handler false
     }
 
-    override fun call() {
+    override fun run() {
         val path = putImg(fileName, bmp)
-        handler.sendMessage(Message.obtain().apply {
+        handler?.sendMessage(Message.obtain().apply {
             what = SAVED
             obj = path
         })
@@ -46,9 +46,10 @@ internal class ImageSaveTask(private val bmp: Bitmap, private val cacheFolderPat
                 if (file.isDirectory) f.delete()
             }
         }
+        val bitMap = transaction?.invoke(bmp) ?: bmp
         val fos = FileOutputStream(file)
         return try {
-            bmp.compress(Bitmap.CompressFormat.JPEG, 100, fos)
+            bitMap.compress(Bitmap.CompressFormat.JPEG, 100, fos)
             fos.close()
             fos.flush()
             file.path
@@ -56,9 +57,23 @@ internal class ImageSaveTask(private val bmp: Bitmap, private val cacheFolderPat
             e.printStackTrace()
             ""
         } finally {
-            if (!bmp.isRecycled) {
+            if (recyclerNeeded && !bmp.isRecycled) {
                 bmp.recycle()
             }
+            if ((recyclerNeeded || bitMap != bmp) && !bitMap.isRecycled) {
+                bitMap.recycle()
+            }
+        }
+    }
+
+    private fun clear() {
+        try {
+            if (recyclerNeeded && !bmp.isRecycled) bmp.recycle()
+            handler?.removeCallbacksAndMessages(null)
+            handler = null
+            onGot = null
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
     }
 }

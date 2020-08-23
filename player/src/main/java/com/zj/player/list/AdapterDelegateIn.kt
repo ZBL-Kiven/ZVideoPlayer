@@ -27,5 +27,5 @@ interface AdapterDelegateIn<T, VH : RecyclerView.ViewHolder> {
     /**
      * call in with the overridden form data adapter [RecyclerView.Adapter.bindViewHolder]
      * */
-    fun bindData(holder: VH?, p: Int, d: T?, pl: MutableList<Any>?)
+    fun bindData(holder: VH?, p: Int, d: T?, playAble: Boolean, pl: MutableList<Any>?)
 }

@@ -1,23 +1,26 @@
-package com.zj.player.list
+package com.zj.player.controller
 
 import android.content.Context
 import android.util.AttributeSet
 import android.view.View
-import com.zj.player.BaseVideoController
-import com.zj.player.ZController
+import com.zj.player.list.VideoControllerIn
 
 /**
  * @author ZJJ on 2020.6.16
  * the view controller and adapt use in list view,
  * implements the data binder interfaces.
  **/
-open class BaseListVideoController @JvmOverloads constructor(c: Context, attr: AttributeSet? = null, def: Int = 0) : BaseVideoController(c, attr, def) {
+abstract class BaseListVideoController @JvmOverloads constructor(c: Context, attr: AttributeSet? = null, def: Int = 0) : BackgroundVideoController(c, attr, def) {
 
     private var videoControllerIn: VideoControllerIn? = null
 
     private var curPlayingIndex: Int = -1
+    private var isFullScreen: Boolean = false
 
     var isCompleted: Boolean = false
+
+    private var completedListener: ((BaseListVideoController) -> Unit)? = null
+    private var resetListener: ((BaseListVideoController) -> Unit)? = null
 
     val isBindingController: Boolean
         get() {
@@ -47,25 +50,36 @@ open class BaseListVideoController @JvmOverloads constructor(c: Context, attr: A
     override fun onCompleted(path: String, isRegulate: Boolean) {
         super.onCompleted(path, isRegulate)
         isCompleted = true
+        completedListener?.invoke(this)
     }
 
     internal fun setControllerIn(ci: VideoControllerIn) {
         this.videoControllerIn = ci
     }
 
-    internal fun resetWhenDisFocus() {
+    open fun resetWhenDisFocus() {
         controller?.updateViewController(null)
         controller = null
+        resetListener?.invoke(this)
         this.reset()
     }
 
-    open fun reset(isShowThumb: Boolean = true, isShowBackground: Boolean = true, isSinkBottomShader: Boolean = false) {
+    open fun reset(isShowThumb: Boolean = true, isShowBackground: Boolean = !isFullScreen, isSinkBottomShader: Boolean = false) {
         isCompleted = false
-        reset(true, isRegulate = true, isShowThumb = isShowThumb, isShowBackground = isShowBackground, isSinkBottomShader = isSinkBottomShader)
+        reset(true, isRegulate = true, isShowPlayBtn = isPlayable, isShowThumb = isShowThumb, isShowBackground = isShowBackground, isSinkBottomShader = isSinkBottomShader)
     }
 
     override fun onFullScreenListener(isFull: Boolean) {
+        isFullScreen = isFull
         getBackgroundView()?.visibility = if (isFull) View.GONE else View.VISIBLE
+    }
+
+    fun setOnCompletedListener(l: ((BaseListVideoController) -> Unit)? = null) {
+        this.completedListener = l
+    }
+
+    fun setOnResetListener(l: ((BaseListVideoController) -> Unit)? = null) {
+        this.resetListener = l
     }
 
     fun onBehaviorDetached(p: String, callId: Any?) {

@@ -4,11 +4,13 @@ import android.graphics.Rect
 import android.os.Handler
 import android.os.Looper
 import android.os.Message
-import android.text.TextUtils
+import android.view.View
 import android.view.animation.AccelerateInterpolator
+import androidx.annotation.MainThread
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.zj.player.ZController
+import com.zj.player.controller.BaseListVideoController
 import com.zj.player.logs.ZPlayerLogs
 import java.lang.NullPointerException
 import kotlin.math.abs
@@ -26,13 +28,13 @@ abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : Rec
     private var curPlayingIndex: Int = -1
     private var isStopWhenItemDetached = true
     private var isAutoPlayWhenItemAttached = true
-    private var isAutoScrollToCenter = false
+    private var isAutoScrollToVisible = false
     private var recyclerView: RecyclerView? = null
     protected abstract fun createZController(vc: BaseListVideoController): ZController
     protected abstract fun getViewController(holder: VH?): V?
     protected abstract fun getItem(p: Int): T?
     protected abstract fun getPathAndLogsCallId(d: T?): Pair<String, Any?>?
-    protected abstract fun onBindData(holder: VH?, p: Int, d: T?, vc: BaseListVideoController, pl: MutableList<Any>?)
+    protected abstract fun onBindData(holder: VH?, p: Int, d: T?, playAble: Boolean, vc: BaseListVideoController, pl: MutableList<Any>?)
 
     /**
      * overridden your data adapter and call;
@@ -60,14 +62,15 @@ abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : Rec
                 pac?.let { pv -> it.onBehaviorDetached(pv.first, pv.second) }
             }
             if (isStopWhenItemDetached && holder.adapterPosition == curPlayingIndex) if (it.isBindingController) controller?.stopNow(false)
+            it.resetWhenDisFocus()
         }
-        getViewController(holder)?.resetWhenDisFocus()
     }
 
-    override fun bindData(holder: VH?, p: Int, d: T?, pl: MutableList<Any>?) {
+    override fun bindData(holder: VH?, p: Int, d: T?, playAble: Boolean, pl: MutableList<Any>?) {
         getViewController(holder)?.let { vc ->
             vc.onBindHolder(p)
             vc.setControllerIn(this)
+            if (playAble != vc.isPlayable) vc.isPlayable = playAble
             if (pl?.isNullOrEmpty() == false) {
                 val pls = pl.last().toString()
                 if (pls.isNotEmpty()) {
@@ -75,30 +78,74 @@ abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : Rec
                         val index = pls.split("#")[1].toInt()
                         if (p == index) {
                             vc.post {
-                                if (!vc.isBindingController) onBindVideoView(vc)
-                                playOrResume(vc, p, d)
+                                if (playAble && vc.isPlayable) {
+                                    if (!vc.isBindingController) onBindVideoView(vc)
+                                    playOrResume(vc, p, d)
+                                } else {
+                                    if (controller?.isPlaying() == true) {
+                                        controller?.stopNow(false, isRegulate = true)
+                                    }
+                                }
                                 curPlayingIndex = p
                             }
                         } else {
                             vc.resetWhenDisFocus()
                         }
+                        return@let
                     }
                 }
-                return
             }
-            onBindData(holder, p, getItem(p), vc, pl)
+            onBindData(holder, p, getItem(p), playAble, vc, pl)
 
             getPathAndLogsCallId(d)?.let {
                 vc.post {
                     if (curPlayingIndex == p && controller?.getPath() == it.first && controller?.isPlaying() == true) {
                         if (!vc.isBindingController) onBindVideoView(vc)
                         controller?.playOrResume(it.first, it.second)
-                    } else {
-                        vc.resetWhenDisFocus()
-                    }
+                    } else vc.resetWhenDisFocus()
                 }
             }
         }
+    }
+
+    @MainThread
+    fun isVisible(position: Int): Boolean {
+        (recyclerView?.layoutManager as? LinearLayoutManager)?.let { lm ->
+            val first = lm.findFirstVisibleItemPosition()
+            val last = lm.findLastVisibleItemPosition()
+            return position in first..last
+        }
+        return false
+    }
+
+    @MainThread
+    fun <V : View> findViewByPosition(position: Int, id: Int, attachForce: Boolean = false): V? {
+        recyclerView?.findViewHolderForAdapterPosition(position)?.let {
+            if (!attachForce || it.itemView.isAttachedToWindow) return it.itemView.findViewById(id)
+        }
+        return null
+    }
+
+    fun setIsStopWhenItemDetached(`is`: Boolean) {
+        this.isStopWhenItemDetached = `is`
+    }
+
+    fun setIsAutoPlayWhenItemAttached(`is`: Boolean) {
+        this.isAutoPlayWhenItemAttached = `is`
+    }
+
+    fun setIsAutoScrollToCenter(`is`: Boolean) {
+        this.isAutoScrollToVisible = `is`
+    }
+
+    fun resume() {
+        isAutoPlayWhenItemAttached = true
+    }
+
+    fun cancelAll() {
+        isAutoPlayWhenItemAttached = false
+        handler?.removeCallbacksAndMessages(null)
+        controller?.stopNow(true, isRegulate = true)
     }
 
     fun release() {
@@ -132,7 +179,7 @@ abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : Rec
             var fv = lm.findFirstCompletelyVisibleItemPosition()
             var lv = lm.findLastCompletelyVisibleItemPosition()
             var offsetPositions: Int? = null
-            var scrollAuto = isAutoScrollToCenter
+            var scrollAuto = isAutoScrollToVisible
             if (fv < 0 && lv < 0) {
                 fv = lm.findFirstVisibleItemPosition()
                 lv = lm.findLastVisibleItemPosition()
@@ -203,7 +250,7 @@ abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : Rec
             if (!isAutoPlayWhenItemAttached) return
             handler?.removeMessages(1)
             if (newState == RecyclerView.SCROLL_STATE_IDLE) {
-                handler?.sendEmptyMessageDelayed(1, 300)
+                handler?.sendEmptyMessageDelayed(1, 150)
             }
         }
     }

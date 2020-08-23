@@ -7,6 +7,7 @@ import com.zj.cf.managers.BaseFragmentManager
 import com.zj.player.logs.VideoEventListener
 import com.zj.player.logs.ZPlayerLogs
 import com.zj.videotest.feed.RFeedFragment
+import com.zj.videotest.feed.apis.init.AppInitApi
 import com.zj.views.DrawableTextView
 
 class MainActivity : AppCompatActivity() {
@@ -27,11 +28,11 @@ class MainActivity : AppCompatActivity() {
         initFrg()
         ZPlayerLogs.setVideoEventListener(object : VideoEventListener() {
             override fun onError(e: Exception) {
-                Log.e("------ ", " ================ error !!     ${e.message}")
+//                Log.e("------ ", " ================ error !!     ${e.message}")
             }
 
             override fun onLog(s: String, curPath: String, accessKey: String, modeName: String, params: Map<String, Any>?) {
-                if (params != null) Log.e("------ ", s)
+//                if (params != null) Log.e("------ ", s)
             }
         })
     }

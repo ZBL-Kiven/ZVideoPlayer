@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#9000"
+    android:clickable="true"
+    android:clipChildren="false"
+    android:clipToPadding="false"
+    android:focusable="true"
+    android:gravity="center"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:id="@+id/r_main_fg_feed_item_finish_ll_parent"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:paddingStart="20dp"
+        android:paddingEnd="20dp">
+
+        <ImageView
+            android:id="@+id/r_main_fg_feed_item_share_facebook"
+            android:layout_width="0dp"
+            android:layout_height="80dp"
+            android:layout_weight="1"
+            android:contentDescription="@string/app_name"
+            android:padding="20dp"
+            android:src="@mipmap/ic_share_facebook" />
+
+        <ImageView
+            android:id="@+id/r_main_fg_feed_item_share_message"
+            android:layout_width="0dp"
+            android:layout_height="80dp"
+            android:layout_weight="1"
+            android:contentDescription="@string/app_name"
+            android:padding="20dp"
+            android:src="@mipmap/ic_share_messages" />
+
+        <ImageView
+            android:id="@+id/r_main_fg_feed_item_share_whats_app"
+            android:layout_width="0dp"
+            android:layout_height="80dp"
+            android:layout_weight="1"
+            android:contentDescription="@string/app_name"
+            android:padding="20dp"
+            android:src="@mipmap/ic_share_whats_app" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/r_main_fg_feed_item_share_replay"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="22dp"
+        android:background="@drawable/r_fg_feed_replay_bg"
+        android:drawableStart="@drawable/r_fg_feed_replay_ic"
+        android:drawablePadding="6dp"
+        android:text="@string/r_main_feed_list_item_replay"
+        android:textColor="@drawable/r_fg_feed_replay_text_color"
+        android:textSize="14sp" />
+
+</LinearLayout>

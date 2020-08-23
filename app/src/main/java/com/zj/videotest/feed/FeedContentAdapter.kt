@@ -2,30 +2,68 @@ package com.zj.videotest.feed
 
 import android.animation.Animator
 import android.animation.ObjectAnimator
-import android.content.Context
-import android.util.Log
+import android.annotation.SuppressLint
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import com.zj.img.ImageLoader
+import com.bumptech.glide.Glide
 import com.zj.videotest.feed.data.FeedDataIn
 import com.zj.player.ZController
 import com.zj.player.config.VideoConfig
-import com.zj.player.list.BaseListVideoController
+import com.zj.player.controller.BaseListVideoController
+import com.zj.player.img.ImgLoader
 import com.zj.player.list.ListVideoAdapterDelegate
 import com.zj.videotest.BuildConfig
 import com.zj.videotest.R
-import com.zj.videotest.videos.CCVideoController
-import com.zj.views.list.adapters.AnimationAdapter
+import com.zj.videotest.controllers.CCImageLoader
+import com.zj.videotest.feed.data.DataType
+import com.zj.videotest.controllers.CCVideoController
 import com.zj.views.list.holders.BaseViewHolder
-import java.lang.ref.WeakReference
+import java.lang.IllegalArgumentException
 
-class FeedContentAdapter<T : FeedDataIn> : AnimationAdapter<T>(R.layout.r_main_fg_feed_item) {
+class FeedContentAdapter<T : FeedDataIn> : ListenerAnimAdapter<T>(R.layout.r_main_fg_feed_item) {
 
     init {
         setFirstOnly(false)
     }
+
+    private var adapterInterface: FeedAdapterInterface<T>? = null
+
+    private var finishOverrideView: View? = null
+        @SuppressLint("InflateParams") get() {
+            if (field == null) {
+                context?.let { ctx ->
+                    val root = LayoutInflater.from(ctx).inflate(R.layout.r_main_fg_feed_item_finish_view, null, false)
+                    root.findViewById<View>(R.id.r_main_fg_feed_item_share_replay).setOnClickListener {
+                        (root.parent as? CCVideoController)?.let {
+                            it.playIfReady()
+                            it.removeView(root)
+                        }
+                    }
+                    root.findViewById<View>(R.id.r_main_fg_feed_item_share_facebook).setOnClickListener {
+                        (root?.tag as? Int)?.let { p ->
+                            onShare(it, p)
+                        }
+                    }
+                    root.findViewById<View>(R.id.r_main_fg_feed_item_share_message).setOnClickListener {
+                        (root?.tag as? Int)?.let { p ->
+                            onShare(it, p)
+                        }
+                    }
+                    root.findViewById<View>(R.id.r_main_fg_feed_item_share_whats_app).setOnClickListener {
+                        (root?.tag as? Int)?.let { p ->
+                            onShare(it, p)
+                        }
+                    }
+                    root.z = 100f
+                    field = root
+                }
+            }
+            return field
+        }
 
     override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
         super.onAttachedToRecyclerView(recyclerView)
@@ -39,11 +77,34 @@ class FeedContentAdapter<T : FeedDataIn> : AnimationAdapter<T>(R.layout.r_main_f
 
     override fun onViewDetachedFromWindow(holder: BaseViewHolder) {
         super.onViewDetachedFromWindow(holder)
+        stopOrResumeGif(true, holder)
         adapterDelegate?.onViewDetachedFromWindow(holder)
     }
 
+    override fun onViewAttachedToWindow(holder: BaseViewHolder) {
+        super.onViewAttachedToWindow(holder)
+        stopOrResumeGif(false, holder)
+    }
+
+    private fun stopOrResumeGif(stop: Boolean, holder: BaseViewHolder) {
+        holder.getView<CCVideoController>(R.id.r_main_fg_feed_item_vc)?.stopOrResumeGif(stop)
+    }
+
     override fun bindData(holder: BaseViewHolder?, p: Int, d: T?, pl: MutableList<Any>?) {
-        adapterDelegate?.bindData(holder, p, d, pl)
+        holder?.let { h ->
+            val avatarPath = d?.getAvatarPath() ?: ""
+            h.getView<ImageView>(R.id.r_main_fg_feed_item_iv_avatar)?.let {
+                it.post { loadAvatar(avatarPath, it) }
+                it.setOnClickListener { adapterInterface?.avatarClicked(d, p) }
+            }
+            h.getView<TextView>(R.id.r_main_fg_feed_item_tv_nickname)?.text = d?.getNickname()
+            h.getView<TextView>(R.id.r_main_fg_feed_item_tv_desc)?.text = d?.getDesc()
+            h.getView<TextView>(R.id.r_main_fg_feed_item_tv_claps)?.text = "${d?.getClapsCount() ?: 0}"
+            h.getView<View>(R.id.r_main_fg_feed_item_ll_claps)?.setOnClickListener {
+                adapterInterface?.clap(d, p)
+            }
+            adapterDelegate?.bindData(holder, p, d, d?.getType() == DataType.VIDEO, pl)
+        }
     }
 
     private var adapterDelegate: ListVideoAdapterDelegate<T, BaseListVideoController, BaseViewHolder>? = object : ListVideoAdapterDelegate<T, BaseListVideoController, BaseViewHolder>(this@FeedContentAdapter) {
@@ -63,63 +124,63 @@ class FeedContentAdapter<T : FeedDataIn> : AnimationAdapter<T>(R.layout.r_main_f
             return Pair(d?.getVideoPath() ?: "", d?.getSourceId())
         }
 
-        override fun onBindData(holder: BaseViewHolder?, p: Int, d: T?, vc: BaseListVideoController, pl: MutableList<Any>?) {
-            onBindAdapterData(holder, p, d, vc, pl)
+        override fun onBindData(holder: BaseViewHolder?, p: Int, d: T?, playAble: Boolean, vc: BaseListVideoController, pl: MutableList<Any>?) {
+            vc.setOnCompletedListener(if (playAble) onVcCompletedListener else null)
+            vc.setOnResetListener(if (playAble) onResetListener else null)
+            onBindAdapterData(d, vc, pl)
         }
     }
 
-    private fun onBindAdapterData(holder: BaseViewHolder?, p: Int, d: T?, vc: BaseListVideoController, pl: MutableList<Any>?) {
-        context?.let { ctx ->
-            holder?.let { h ->
-                val avatarPath = d?.getAvatarPath() ?: ""
-                val imgPath = d?.getImagePath() ?: ""
-                val videoWidth = d?.getViewWidth() ?: 1
-                val videoHeight = d?.getViewHeight() ?: 1
-                h.getView<ImageView>(R.id.r_main_fg_feed_item_iv_avatar)?.let {
-                    it.post { loadAvatar(ctx, avatarPath, it) }
-                    it.setOnClickListener { avatarClicked(d, p) }
-                }
-                h.getView<TextView>(R.id.r_main_fg_feed_item_tv_nickname)?.text = d?.getNickname()
-                h.getView<TextView>(R.id.r_main_fg_feed_item_tv_desc)?.text = d?.getDesc()
-                h.getView<TextView>(R.id.r_main_fg_feed_item_tv_claps)?.text = "${d?.getClapsCount() ?: 0}"
-                h.getView<View>(R.id.r_main_fg_feed_item_ll_claps)?.setOnClickListener {
-                    clap(d, p)
-                }
-                vc.post {
-                    val maxWidth = holder.itemView.width
-                    val maxHeight = holder.itemView.height
-                    loadThumbImage(ctx, videoWidth, videoHeight, maxWidth, maxHeight, imgPath, vc)
-                }
-                vc.setScreenContentLayout(R.layout.r_main_video_details_content) { v ->
-                    v.findViewById<ImageView>(R.id.r_main_fg_list_iv_avatar)?.let {
-                        loadAvatar(vc.context, d?.getAvatarPath() ?: "", it)
-                    }
-                }
+    private val onVcCompletedListener: (BaseListVideoController) -> Unit = {
+        finishOverrideView?.tag = it.tag
+        removeIfNeed(it) { _ ->
+            val lp = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
+            it.addView(finishOverrideView, lp)
+        }
+    }
+    private val onResetListener: (BaseListVideoController) -> Unit = {
+        removeIfNeed(it)
+    }
+
+    private fun removeIfNeed(vc: BaseListVideoController, onNext: ((View) -> Unit)? = null) {
+        finishOverrideView?.let { v ->
+            if (v.tag == vc.tag) {
+                (v.parent as? ViewGroup)?.removeView(v)
+                onNext?.invoke(v)
             }
         }
     }
 
-    private fun clap(d: T?, p: Int) {
-
-    }
-
-    private fun avatarClicked(d: T?, p: Int) {
-
-    }
-
-    private fun loadAvatar(context: Context, url: String, iv: ImageView) {
-        //        val options = RequestOptions().centerCrop().transform(CircleCrop())
-        //        val width = if (iv.width <= 0) 1 else iv.width
-        //        val height = if (iv.height <= 0) 1 else iv.height
-        //        Glide.with(context).load(url).override(width, height).apply(options).into(iv)
-    }
-
-    private fun loadThumbImage(ctx: Context, videoWidth: Int, videoHeight: Int, maxWidth: Int, maxHeight: Int, imgPath: String, vc: BaseListVideoController) {
-        ImageLoader.load(ctx, videoWidth, videoHeight, maxWidth, maxHeight, 0.5f, 0.5f, "feed", imgPath, "") {
-            Log.e("----- ", "33333   ${System.currentTimeMillis()}")
-            it.withCtx(WeakReference(ctx))?.centerCrop()?.blur(90)?.crossFade()?.memoryEnable(false)?.into(vc.getBackgroundView())
-            it.withCtx(WeakReference(ctx))?.thumbnail(0.7f)?.crossFade()?.memoryEnable(false)?.into(vc.getThumbView())
+    private fun onBindAdapterData(d: T?, vc: BaseListVideoController, pl: MutableList<Any>?) {
+        val imgPath = d?.getImagePath() ?: ""
+        val videoWidth = d?.getViewWidth() ?: 1
+        val videoHeight = d?.getViewHeight() ?: 1
+        loadThumbImage(videoWidth, videoHeight, imgPath, vc, d)
+        vc.setScreenContentLayout(R.layout.r_main_video_details_content) { v ->
+            v.findViewById<ImageView>(R.id.r_main_fg_list_iv_avatar)?.let {
+                loadAvatar(d?.getAvatarPath() ?: "", it)
+            }
         }
+    }
+
+    private fun loadAvatar(url: String, iv: ImageView) {
+        val width = if (iv.width <= 0) 1 else iv.width
+        val height = if (iv.height <= 0) 1 else iv.height
+        Glide.with(iv).load(url).override(width, height).circleCrop().into(iv)
+    }
+
+    private fun loadThumbImage(videoWidth: Int, videoHeight: Int, imgPath: String, vc: BaseListVideoController, d: T?) {
+        val tag = d?.getSourceId() ?: return
+        val imgType = when (val type = d.getType()) {
+            DataType.VIDEO, DataType.IMG -> ImgLoader.ImgType.IMG
+            DataType.GIF -> ImgLoader.ImgType.GIF
+            else -> throw IllegalArgumentException("the data type [$type] is not supported !")
+        }
+        vc.loadBackground(tag, imgPath, videoWidth, videoHeight, imgType, CCImageLoader())
+    }
+
+    private fun onShare(v: View, p: Int) {
+        adapterInterface?.onShare(v, getItem(p), p)
     }
 
     override fun getAnimators(p0: View?): Array<Animator> {
@@ -128,8 +189,30 @@ class FeedContentAdapter<T : FeedDataIn> : AnimationAdapter<T>(R.layout.r_main_f
         return arrayOf(anim)
     }
 
+    fun setAdapterInterface(adapterInterface: FeedAdapterInterface<T>) {
+        this.adapterInterface = adapterInterface
+    }
+
+    fun getDelegate(): ListVideoAdapterDelegate<T, BaseListVideoController, BaseViewHolder>? {
+        return adapterDelegate
+    }
+
+    fun cancelAllPLay() {
+        adapterDelegate?.cancelAll()
+    }
+
+    fun resume() {
+        adapterDelegate?.resume()
+    }
+
     fun release() {
         adapterDelegate?.release()
         adapterDelegate = null
+        onDataChange(null)
+    }
+
+    override fun onDataChange(data: MutableList<T>?) {
+        context?.let { Glide.get(it).clearMemory() }
+        System.gc()
     }
 }

@@ -147,7 +147,7 @@ open class ZPlayer(var config: VideoConfig? = null) : Player.EventListener {
                     val error = (value.obj() as? ExoPlaybackException)
                     if (isStop()) return
                     if (isPlaying()) setPlayerState(VideoState.PAUSE)
-                    resetAndStop(true, error)
+                    resetAndStop(true, isRegulate = false, e = error)
                 }
 
                 VideoState.DESTROY -> {
@@ -247,7 +247,7 @@ open class ZPlayer(var config: VideoConfig? = null) : Player.EventListener {
     }
 
     @Suppress("SameParameterValue")
-    private fun resetAndStop(notifyStop: Boolean = false, e: ExoPlaybackException?) {
+    private fun resetAndStop(notifyStop: Boolean = false, isRegulate: Boolean = false, e: ExoPlaybackException?) {
         isReady = false
         autoPlay(false)
         runWithPlayer {
@@ -256,7 +256,7 @@ open class ZPlayer(var config: VideoConfig? = null) : Player.EventListener {
         }
         if (notifyStop) {
             if (e != null) controller?.onError(e)
-            else controller?.onStop(currentPlayPath(), false)
+            else controller?.onStop(currentPlayPath(), isRegulate)
         }
         handler?.removeCallbacksAndMessages(null)
         player = null
@@ -382,12 +382,12 @@ open class ZPlayer(var config: VideoConfig? = null) : Player.EventListener {
         setPlayerState(VideoState.STOP)
     }
 
-    open fun stopNow(withNotify: Boolean) {
+    open fun stopNow(withNotify: Boolean, isRegulate: Boolean = false) {
         handler?.removeCallbacksAndMessages(null)
         synchronized(curState) {
             if (curState != VideoState.STOP) {
                 curState = VideoState.STOP.setObj(ONLY_RESET)
-                resetAndStop(withNotify, null)
+                resetAndStop(withNotify, isRegulate, null)
             }
         }
     }

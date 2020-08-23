@@ -163,9 +163,9 @@ class ZController private constructor(private var player: ZPlayer?, viewControll
         runWithPlayer { it.stop() }
     }
 
-    fun stopNow(withNotify: Boolean = false) {
+    fun stopNow(withNotify: Boolean = false, isRegulate: Boolean = false) {
         log("user call stop --now")
-        runWithPlayer { it.stopNow(withNotify) }
+        runWithPlayer { it.stopNow(withNotify,isRegulate) }
     }
 
     fun setSpeed(s: Float) {

@@ -1,11 +1,9 @@
 package com.zj.img.cache
 
 import android.content.Context
-import android.graphics.Bitmap
-import android.util.Base64
-import android.util.Log
+import com.zj.img.ImgLoader
 import java.io.File
-import java.util.*
+import java.lang.Exception
 import java.util.concurrent.Executors
 import java.util.regex.Pattern
 import kotlin.IllegalArgumentException
@@ -27,7 +25,7 @@ import kotlin.IllegalArgumentException
  * Support local pictures, resource files, network pictures
  * */
 @Suppress("unused")
-abstract class ImageCacheUtil(private val context: Context, private val w: Int, private val h: Int, private val quality: Float, private val cache: CacheAble, private val fillType: Int = DEFAULT, private val payloads: String? = null) {
+internal class ImageCacheUtil<T>(private val context: Context, private val tag: T, private val imgHandler: ImageHandler<T>, private val w: Int, private val h: Int, private val maxW: Int, private val maxH: Int, private val quality: Float, private val cache: CacheAble, private val fillType: Int = DEFAULT, private val payloads: String? = null) {
 
     companion object {
         const val CENTER_CROP = 1
@@ -38,33 +36,36 @@ abstract class ImageCacheUtil(private val context: Context, private val w: Int, 
         private val imageSaverService = Executors.newFixedThreadPool(5)
     }
 
-    abstract fun getCacheDir(context: Context): String
-    abstract fun loadImgForOriginal(cacheOriginalPath: String, w: Int, h: Int, fillType: Int, onResult: (Bitmap?) -> Unit)
 
-    protected fun getCache(): CacheAble {
+    private fun getCache(): CacheAble {
         return cache
     }
 
-    protected fun getContext(): Context {
-        return context
-    }
-
-    protected fun getPayloads(): String? {
+    private fun getPayloads(): String? {
         return payloads
     }
 
-    fun load(onGot: ((String) -> Unit)) {
+    fun cancel() {
+        imgHandler.onCancel(context)
+    }
+
+    fun trimMemory() {
+        imgHandler.onLowMemory(context)
+    }
+
+    fun load(onGot: ((String, String, tag: T?) -> Unit)) {
         val cached = cache
+        val quality = quality
         if (w <= 0) throw IllegalArgumentException("the load width must not be a zero or negative number")
         if (h <= 0) throw IllegalArgumentException("the load height must not be a zero or negative number")
-        val cacheDir = getCacheDir(context)
+        val cacheDir = imgHandler.getCacheDir(context, cache, payloads)
         val cacheOriginalPath = cached.getOriginalPath(payloads)
         if (cacheDir.isEmpty()) {
-            onGot("the cache directory name was null or empty!!")
+            onGot("the cache directory name was null or empty!!", cacheOriginalPath ?: "", tag)
             return
         }
         if (cacheOriginalPath.isNullOrEmpty()) {
-            onGot("the original path was null or empty!!")
+            onGot("the original path was null or empty!!", "", tag)
             return
         }
         val fName = getFileName(cacheOriginalPath)
@@ -74,7 +75,7 @@ abstract class ImageCacheUtil(private val context: Context, private val w: Int, 
             if (cachedFolder.exists()) {
                 val cachedFile = File(cachedFolder, fileName)
                 if (cachedFile.exists()) {
-                    onGot(cachedFile.path)
+                    onGot(cachedFile.path, cacheOriginalPath, tag)
                     return
                 } else {
                     if (cachedFolder.exists()) {
@@ -85,25 +86,27 @@ abstract class ImageCacheUtil(private val context: Context, private val w: Int, 
             if (quality !in 0f..1f) {
                 throw IllegalArgumentException("error operations quality for image ,the quality must in 0.0f to 1.0f")
             }
-            val cacheWidth = (w * quality).toInt()
-            val cacheHeight = (h * quality).toInt()
-            loadImgForOriginal(cacheOriginalPath, cacheWidth, cacheHeight, fillType) { bmp ->
-                Log.e("----- ", "loaded 11111   ${System.currentTimeMillis()}")
-                if (bmp == null || bmp.isRecycled) {
-                    onGot("")
-                } else imageSaverService.submit(ImageSaveTask(bmp, cacheDir, fileName) {
-                    Log.e("----- ", "saved 222222   ${System.currentTimeMillis()}")
-                    onGot.invoke(it)
-                    if (!bmp.isRecycled) {
+            imgHandler.load(context, cacheOriginalPath, w, h, maxW, maxH, quality, fillType) { bmp ->
+                try {
+                    if (bmp == null || bmp.isRecycled) {
+                        onGot("", cacheOriginalPath, tag)
+                    } else imageSaverService.submit(ImageSaveTask(tag, bmp, cacheDir, fileName, true, { t, s ->
+                        onGot(s, cacheOriginalPath, t)
+                        if (!bmp.isRecycled) {
+                            bmp.recycle()
+                        }
+                    }))
+                } catch (e: Exception) {
+                    if (bmp != null && !bmp.isRecycled) {
                         bmp.recycle()
                     }
-                })
+                }
             }
         } else {
             /**
              * cancel the multi cache , because source is gif or another unsupported types, or may redirect in server
              */
-            onGot(cacheOriginalPath)
+            onGot(cacheOriginalPath, cacheOriginalPath, tag)
         }
     }
 

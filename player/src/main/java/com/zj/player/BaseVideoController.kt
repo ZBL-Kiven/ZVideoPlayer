@@ -77,6 +77,14 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
     protected var lockScreenRotation: Int = -1
     protected var isLockScreenRotation: Boolean = false
 
+    var isPlayable = true
+        set(value) {
+            if (value != field) {
+                vPlay?.visibility = if (value) View.VISIBLE else GONE
+                field = value
+            }
+        }
+
     init {
         initView(context, attributeSet)
         initListener()
@@ -126,6 +134,8 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
             speedView?.text = context.getString(R.string.z_player_str_speed, 1)
             isLockScreenRotation = lockScreenRotation != -1
             isFull = bottomToolsBar?.visibility == View.VISIBLE
+        } catch (e: Exception) {
+            e.printStackTrace()
         } finally {
             ta.recycle()
         }
@@ -251,7 +261,7 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
     }
 
     override fun onStop(path: String, isRegulate: Boolean) {
-        reset(false, isRegulate)
+        reset(false, isRegulate = isRegulate, isShowPlayBtn = true)
         updateCurPlayerInfo(1f, supportedSpeedList[0])
     }
 
@@ -313,8 +323,12 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
         //use off in extends
     }
 
-    open fun clickPlayBtn() {
+    internal fun clickPlayBtn() {
         vPlay?.callOnClick()
+    }
+
+    open fun playIfReady() {
+        controller?.playOrResume()
     }
 
     open fun getThumbView(): ImageView? {
@@ -335,6 +349,7 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
     open fun onFullMaxChangedListener(isFull: Boolean) {}
 
     open fun onPlayClick(v: View) {
+        if (!isPlayable) return
         v.isEnabled = false
         if (!v.isSelected) {
             controller?.playOrResume()
@@ -347,7 +362,7 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
         val path = controller?.getPath()
         if (path.isNullOrEmpty()) {
             loadingView?.setMode(BaseLoadingView.DisplayMode.LOADING)
-            v.postDelayed({
+            postDelayed({
                 onError(NullPointerException("video path is null"))
             }, 300)
         } else controller?.playOrResume(path)
@@ -582,8 +597,8 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
         }
     }
 
-    open fun reset(isNow: Boolean, isRegulate: Boolean, isShowThumb: Boolean = true, isShowBackground: Boolean = true, isSinkBottomShader: Boolean = false) {
-        vPlay?.isEnabled = true
+    open fun reset(isNow: Boolean, isRegulate: Boolean, isShowPlayBtn: Boolean, isShowThumb: Boolean = true, isShowBackground: Boolean = true, isSinkBottomShader: Boolean = false) {
+        vPlay?.isEnabled = isShowPlayBtn
         loadingView?.setMode(BaseLoadingView.DisplayMode.DISMISS, "", false, setNow = true)
         setOverlayViews(isShowThumb, isShowBackground, isSinkBottomShader)
         seekBar?.isSelected = false
@@ -591,7 +606,7 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
         isInterruptPlayBtnAnim = true
         seekBarSmall?.visibility = View.GONE
         onSeekChanged(0, 0, false, 0)
-        if (isRegulate) showOrHidePlayBtn(true, withState = false)
+        if (isRegulate) showOrHidePlayBtn(isShowPlayBtn, withState = false)
         full(false, isSetNow = isNow)
     }
 
