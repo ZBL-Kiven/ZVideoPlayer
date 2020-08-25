@@ -15,7 +15,6 @@ abstract class BaseListVideoController @JvmOverloads constructor(c: Context, att
     private var videoControllerIn: VideoControllerIn? = null
 
     private var curPlayingIndex: Int = -1
-    private var isFullScreen: Boolean = false
 
     var isCompleted: Boolean = false
 
@@ -64,14 +63,9 @@ abstract class BaseListVideoController @JvmOverloads constructor(c: Context, att
         this.reset()
     }
 
-    open fun reset(isShowThumb: Boolean = true, isShowBackground: Boolean = !isFullScreen, isSinkBottomShader: Boolean = false) {
+    open fun reset(isShowThumb: Boolean = true, isShowBackground: Boolean = true, isSinkBottomShader: Boolean = false) {
         isCompleted = false
         reset(true, isRegulate = true, isShowPlayBtn = isPlayable, isShowThumb = isShowThumb, isShowBackground = isShowBackground, isSinkBottomShader = isSinkBottomShader)
-    }
-
-    override fun onFullScreenListener(isFull: Boolean) {
-        isFullScreen = isFull
-        getBackgroundView()?.visibility = if (isFull) View.GONE else View.VISIBLE
     }
 
     fun setOnCompletedListener(l: ((BaseListVideoController) -> Unit)? = null) {

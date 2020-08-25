@@ -9,6 +9,8 @@ import android.content.Context
 import android.content.pm.ActivityInfo
 import android.content.res.Resources
 import android.media.AudioManager
+import android.os.Handler
+import android.os.Looper
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.View
@@ -24,6 +26,8 @@ import com.zj.player.base.InflateInfo
 import com.zj.player.full.BaseGestureFullScreenDialog
 import com.zj.player.full.FullContentListener
 import com.zj.player.full.FullScreenListener
+import com.zj.player.img.scale.ImageViewTouchEnableIn
+import com.zj.player.img.scale.TouchScaleImageView
 import com.zj.player.logs.BehaviorData
 import com.zj.player.logs.BehaviorLogsTable
 import com.zj.player.logs.ZPlayerLogs
@@ -55,9 +59,9 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
     private var loadingView: BaseLoadingView? = null
     protected var bottomToolsBar: View? = null
     protected var topToolsBar: View? = null
-    protected var videoOverrideImageView: ImageView? = null
+    protected var videoOverrideImageView: TouchScaleImageView? = null
     protected var videoOverrideImageShaderView: ImageView? = null
-    protected var videoRoot: View? = null
+    protected var videoRoot: FrameLayout? = null
     protected var controller: ZController? = null
     protected var fullScreenDialog: BaseGestureFullScreenDialog? = null
     protected var autoPlay = false
@@ -76,6 +80,21 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
     protected var fullMaxScreenEnable: Boolean = true
     protected var lockScreenRotation: Int = -1
     protected var isLockScreenRotation: Boolean = false
+    private var isOnceTap = false
+    private var mHandler = Handler(Looper.getMainLooper()) {
+        when (it.what) {
+            0 -> {
+                isOnceTap = false
+                onRootClick()
+            }
+            else -> {
+                if (!isOnceTap) return@Handler false
+                isOnceTap = false
+                onRootDoubleClick()
+            }
+        }
+        return@Handler false
+    }
 
     var isPlayable = true
         set(value) {
@@ -115,22 +134,23 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
             fullMaxScreenEnable = ta.getBoolean(R.styleable.BaseVideoController_fullMaxScreenEnable, Constance.fullMaxScreenEnable)
             isDefaultMaxScreen = ta.getBoolean(R.styleable.BaseVideoController_isDefaultMaxScreen, Constance.isDefaultMaxScreen)
             lockScreenRotation = ta.getInt(R.styleable.BaseVideoController_lockScreenRotation, -1)
-            videoRoot = LayoutInflater.from(context).inflate(R.layout.z_player_video_view, null, false)
-            addView(videoRoot, LayoutParams(MATCH_PARENT, MATCH_PARENT))
-            vPlay = videoRoot?.findViewById(R.id.z_player_video_preview_iv_play)
+            val view = LayoutInflater.from(context).inflate(R.layout.z_player_video_view, null, false)
+            addView(view, LayoutParams(MATCH_PARENT, MATCH_PARENT))
+            vPlay = view?.findViewById(R.id.z_player_video_preview_iv_play)
+            videoRoot = view?.findViewById(R.id.z_player_video_root)
             muteView = setDefaultControllerStyle(R.id.z_player_video_preview_iv_mute, muteIconEnable)
             speedView = setDefaultControllerStyle(R.id.z_player_video_preview_tv_speed, speedIconEnable)
             fullScreen = setDefaultControllerStyle(R.id.z_player_video_preview_iv_full_screen, fullScreenEnable)
             seekBarSmall = setDefaultControllerStyle(R.id.z_player_video_preview_sb_small, secondarySeekBarEnable)
             bottomToolsBar = setDefaultControllerStyle(R.id.z_player_video_preview_tools_bar, defaultControllerVisibility)
-            lockScreen = videoRoot?.findViewById(R.id.z_player_video_preview_iv_lock_screen)
-            tvStart = videoRoot?.findViewById(R.id.z_player_video_preview_tv_start)
-            tvEnd = videoRoot?.findViewById(R.id.z_player_video_preview_tv_end)
-            loadingView = videoRoot?.findViewById(R.id.z_player_video_preview_loading)
-            topToolsBar = videoRoot?.findViewById(R.id.z_player_video_preview_top_bar)
-            videoOverrideImageView = videoRoot?.findViewById(R.id.z_player_video_thumb)
-            videoOverrideImageShaderView = videoRoot?.findViewById(R.id.z_player_video_background)
-            seekBar = videoRoot?.findViewById(R.id.z_player_video_preview_sb)
+            lockScreen = view?.findViewById(R.id.z_player_video_preview_iv_lock_screen)
+            tvStart = view?.findViewById(R.id.z_player_video_preview_tv_start)
+            tvEnd = view?.findViewById(R.id.z_player_video_preview_tv_end)
+            loadingView = view?.findViewById(R.id.z_player_video_preview_loading)
+            topToolsBar = view?.findViewById(R.id.z_player_video_preview_top_bar)
+            videoOverrideImageView = view?.findViewById(R.id.z_player_video_thumb)
+            videoOverrideImageShaderView = view?.findViewById(R.id.z_player_video_background)
+            seekBar = view?.findViewById(R.id.z_player_video_preview_sb)
             speedView?.text = context.getString(R.string.z_player_str_speed, 1)
             isLockScreenRotation = lockScreenRotation != -1
             isFull = bottomToolsBar?.visibility == View.VISIBLE
@@ -146,13 +166,14 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
             log("on play btn click", BehaviorLogsTable.onPlayClick())
             onPlayClick(it)
         }
+
         videoRoot?.setOnClickListener {
-            controller?.let {
-                val full = !isFull
-                if (!isInterruptPlayBtnAnim) {
-                    showOrHidePlayBtn(full, true)
-                }
-                full(full)
+            if (isOnceTap) {
+                mHandler.removeMessages(0)
+                mHandler.sendEmptyMessage(1)
+            } else {
+                isOnceTap = true
+                mHandler.sendEmptyMessageDelayed(0, 200)
             }
         }
 
@@ -178,6 +199,10 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
             log("on lock screen btn click", BehaviorLogsTable.onLockScreenClick())
             if (!lockScreenRotate(!it.isSelected)) Toast.makeText(context, R.string.z_player_str_screen_locked_tint, Toast.LENGTH_SHORT).show()
         }
+
+        videoOverrideImageView?.setTouchEnabled(ImageViewTouchEnableIn {
+            return@ImageViewTouchEnableIn !isPlayable && fullScreen?.isSelected == true
+        })
     }
 
     private fun initVolume(isMute: Boolean) {
@@ -222,7 +247,7 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
     }
 
     override fun getControllerInfo(): InflateInfo {
-        val vpThis = (this.getChildAt(0) as? ViewGroup) ?: fullScreenDialog?.getControllerView() as? ViewGroup
+        val vpThis = videoRoot ?: fullScreenDialog?.getControllerView() as? ViewGroup
         return InflateInfo(vpThis, 2)
     }
 
@@ -368,7 +393,24 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
         } else controller?.playOrResume(path)
     }
 
+    open fun onRootClick() {
+        log("on root view click", BehaviorLogsTable.onRootClick())
+        controller?.let {
+            val full = !isFull
+            if (!isInterruptPlayBtnAnim) {
+                showOrHidePlayBtn(full, true)
+            }
+            full(full)
+        }
+    }
+
+    open fun onRootDoubleClick() {
+        log("on root view double click", BehaviorLogsTable.onRootDoubleClick())
+        fullScreen?.let { onFullScreenClick(it) }
+    }
+
     open fun onFullScreenClick(v: View) {
+        log("on full screen", BehaviorLogsTable.onFullScreen())
         if (!isFullingOrDismissing) {
             isFullingOrDismissing = true
             onFullScreen(!v.isSelected)

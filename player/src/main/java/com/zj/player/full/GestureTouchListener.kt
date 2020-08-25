@@ -78,7 +78,7 @@ internal abstract class GestureTouchListener(private val intercepted: () -> Bool
                             isOnceTap = true
                             handler?.sendMessageDelayed(Message.obtain().apply {
                                 what = 0;obj = v
-                            }, 250)
+                            }, 200)
                         }
                     }
                 } finally {

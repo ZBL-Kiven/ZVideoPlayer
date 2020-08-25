@@ -6,6 +6,7 @@ import com.zj.player.img.loader.FillType
 import java.io.File
 import java.lang.Exception
 import java.lang.NullPointerException
+import java.lang.ref.WeakReference
 import java.util.concurrent.Executors
 import kotlin.IllegalArgumentException
 
@@ -26,7 +27,7 @@ import kotlin.IllegalArgumentException
  * Support local pictures, resource files, network pictures
  * */
 @Suppress("unused")
-internal class ImageCacheUtil<T : Any>(private val context: Context, private val tag: T, private val imgHandler: ImageHandler<T>, private val w: Int, private val h: Int, private val path: String, private val fillType: FillType, private val payloads: String? = null) {
+internal class ImageCacheUtil<T : Any>(private val wkc: WeakReference<Context>, private val tag: T, private val imgHandler: ImageHandler<T>, private val w: Int, private val h: Int, private val path: String, private val fillType: FillType, private val payloads: String? = null) {
 
     companion object {
         private val imageSaverService = Executors.newFixedThreadPool(5)
@@ -37,11 +38,11 @@ internal class ImageCacheUtil<T : Any>(private val context: Context, private val
     }
 
     fun cancel() {
-        imgHandler.onCancel(context)
+        wkc.get()?.let { imgHandler.onCancel(it) }
     }
 
     fun onLowMemory() {
-        imgHandler.onLowMemory(context)
+        wkc.get()?.let { imgHandler.onLowMemory(it) }
     }
 
     fun load(type: ImgLoader.ImgType, onGot: ((filePath: String?, type: ImgLoader.ImgType, tag: T, Exception?) -> Unit)) {
@@ -50,11 +51,11 @@ internal class ImageCacheUtil<T : Any>(private val context: Context, private val
         if (h <= 0) throw IllegalArgumentException("the load height must not be a zero or negative number")
         if (path.isEmpty()) {
             onGot(path, type, tag, NullPointerException("the original path was null or empty!!"))
-            return
+        } else {
+            imgHandler.initData(wkc, type, path, w, h, fillType, tag) { cachePath, tag, imgType, e ->
+                onGot(cachePath, imgType, tag, e)
+            }
+            imageSaverService.execute(imgHandler)
         }
-        imgHandler.initData(context, type, path, w, h, fillType, tag) { cachePath, tag, imgType, e ->
-            onGot(cachePath, imgType, tag, e)
-        }
-        imageSaverService.execute(imgHandler)
     }
 }

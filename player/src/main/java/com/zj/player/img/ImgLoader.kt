@@ -13,6 +13,7 @@ import com.zj.player.img.loader.FillType
 import java.lang.Exception
 import java.lang.IllegalArgumentException
 import java.lang.NullPointerException
+import java.lang.ref.WeakReference
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.math.min
 
@@ -100,7 +101,7 @@ class ImgLoader<T : Any> private constructor(private val path: String, private v
         this.type = type;return this
     }
 
-    fun <R : ImageHandler<T>> start(context: Context, loader: R, payloads: String? = null, onResult: (filePath: String?, type: ImgType, tag: T, e: Exception?) -> Unit) {
+    fun <R : ImageHandler<T>> start(wkc: WeakReference<Context>, loader: R, payloads: String? = null, onResult: (filePath: String?, type: ImgType, tag: T, e: Exception?) -> Unit) {
         val w = overrideSize?.first ?: 0
         val h = overrideSize?.second ?: 0
         val mw = limit?.w ?: 0
@@ -121,8 +122,8 @@ class ImgLoader<T : Any> private constructor(private val path: String, private v
             width = p.second[0]
             height = p.second[1]
         }
-        val utl = ImageCacheUtil(context, tag, loader, width, height, path, fillType, payloads)
-        loadCachePool[tag.hashCode()] = utl
+        val utl = ImageCacheUtil(wkc, tag, loader, width, height, path, fillType, payloads)
+        loadCachePool[tag] = utl
         utl.load(type) { p, t, tag, e ->
             onResult(p, t, tag, e)
             loadCachePool.remove(tag)

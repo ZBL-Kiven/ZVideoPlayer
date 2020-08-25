@@ -57,6 +57,19 @@ internal object BehaviorLogsTable {
         return ViewBaseData(detail = "click play button", name = "playView")
     }
 
+    fun onRootClick(): ViewBaseData {
+        return ViewBaseData(detail = "click controller view root", name = "rootView")
+    }
+
+    fun onRootDoubleClick(): ViewBaseData {
+        return ViewBaseData(detail = "double click controller view root", name = "rootViewDouble")
+    }
+
+    fun onFullScreen(): ViewBaseData {
+        return ViewBaseData(detail = "click or call fullscreen btn", name = "fullScreen")
+    }
+
+
     fun onSpeedClick(): ViewBaseData {
         return ViewBaseData(detail = "click speed button", name = "speedView")
     }

@@ -11,9 +11,7 @@ import com.zj.cf.fragments.BaseLinkageFragment
 import com.zj.videotest.R
 import com.zj.videotest.feed.apis.config.Constance
 import com.zj.videotest.feed.apis.init.AppInitApi
-import com.zj.videotest.feed.bean.VideoSource
 import com.zj.videotest.feed.data.FeedDataIn
-import com.zj.videotest.feed.data.FeedMockImpl
 import com.zj.views.list.refresh.layout.RefreshLayout
 import com.zj.views.list.refresh.layout.api.RefreshLayoutIn
 import com.zj.views.list.refresh.layout.listener.OnRefreshLoadMoreListener
@@ -47,12 +45,11 @@ class RFeedFragment : BaseLinkageFragment() {
             if (!isLoadMore) adapter?.cancelAllPLay()
             if (b) setAdapterData(d?.toMutableList(), isLoadMore)
             else if (es != null) Toast.makeText(activity, es.message(), Toast.LENGTH_SHORT).show()
-            if (!isLoadMore) refreshLayout?.finishRefresh(32)
             if (isLoadMore) {
                 if (d.isNullOrEmpty()) refreshLayout?.setNoMoreData(true)
                 else refreshLayout?.finishLoadMore()
             } else {
-                refreshLayout?.finishRefresh(32)
+                refreshLayout?.finishRefresh(1700)
             }
             if (!isLoadMore) adapter?.resume()
         }
@@ -96,5 +93,10 @@ class RFeedFragment : BaseLinkageFragment() {
     override fun onStopped() {
         super.onStopped()
         adapter?.release()
+    }
+
+    override fun onDestroyed() {
+        super.onDestroyed()
+        adapter?.destroy()
     }
 }

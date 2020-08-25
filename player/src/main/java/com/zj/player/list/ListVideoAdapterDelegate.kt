@@ -13,6 +13,8 @@ import com.zj.player.ZController
 import com.zj.player.controller.BaseListVideoController
 import com.zj.player.logs.ZPlayerLogs
 import java.lang.NullPointerException
+import java.lang.ref.SoftReference
+import java.lang.ref.WeakReference
 import kotlin.math.abs
 import kotlin.math.min
 
@@ -30,11 +32,11 @@ abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : Rec
     private var isAutoPlayWhenItemAttached = true
     private var isAutoScrollToVisible = false
     private var recyclerView: RecyclerView? = null
-    protected abstract fun createZController(vc: BaseListVideoController): ZController
+    protected abstract fun createZController(vc: V): ZController
     protected abstract fun getViewController(holder: VH?): V?
     protected abstract fun getItem(p: Int): T?
     protected abstract fun getPathAndLogsCallId(d: T?): Pair<String, Any?>?
-    protected abstract fun onBindData(holder: VH?, p: Int, d: T?, playAble: Boolean, vc: BaseListVideoController, pl: MutableList<Any>?)
+    protected abstract fun onBindData(holder: SoftReference<VH>?, p: Int, d: T?, playAble: Boolean, vc: V, pl: MutableList<Any>?)
 
     /**
      * overridden your data adapter and call;
@@ -55,19 +57,23 @@ abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : Rec
         this.recyclerView = null
     }
 
-    override fun onViewDetachedFromWindow(holder: VH) {
-        getViewController(holder)?.let {
-            getItem(holder.adapterPosition)?.let { p ->
-                val pac = getPathAndLogsCallId(p)
-                pac?.let { pv -> it.onBehaviorDetached(pv.first, pv.second) }
+    override fun onViewDetachedFromWindow(holder: WeakReference<VH>?) {
+        holder?.get()?.let { h ->
+            val position = h.adapterPosition
+            getViewController(h)?.let {
+                getItem(position)?.let { p ->
+                    val pac = getPathAndLogsCallId(p)
+                    pac?.let { pv -> it.onBehaviorDetached(pv.first, pv.second) }
+                }
+                if (isStopWhenItemDetached && position == curPlayingIndex) if (it.isBindingController) controller?.stopNow(false)
+                it.resetWhenDisFocus()
             }
-            if (isStopWhenItemDetached && holder.adapterPosition == curPlayingIndex) if (it.isBindingController) controller?.stopNow(false)
-            it.resetWhenDisFocus()
         }
+        holder?.clear()
     }
 
-    override fun bindData(holder: VH?, p: Int, d: T?, playAble: Boolean, pl: MutableList<Any>?) {
-        getViewController(holder)?.let { vc ->
+    override fun bindData(holder: SoftReference<VH>?, p: Int, d: T?, playAble: Boolean, pl: MutableList<Any>?) {
+        WeakReference(getViewController(holder?.get())).get()?.let { vc ->
             vc.onBindHolder(p)
             vc.setControllerIn(this)
             if (playAble != vc.isPlayable) vc.isPlayable = playAble
@@ -96,7 +102,6 @@ abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : Rec
                 }
             }
             onBindData(holder, p, getItem(p), playAble, vc, pl)
-
             getPathAndLogsCallId(d)?.let {
                 vc.post {
                     if (curPlayingIndex == p && controller?.getPath() == it.first && controller?.isPlaying() == true) {
@@ -157,7 +162,7 @@ abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : Rec
         handler = null
     }
 
-    private fun onBindVideoView(vc: BaseListVideoController) {
+    private fun onBindVideoView(vc: V) {
         if (controller == null) {
             controller = createZController(vc)
         } else {
@@ -209,7 +214,7 @@ abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : Rec
         }
     }
 
-    private fun playOrResume(vc: BaseListVideoController?, p: Int, data: T?) {
+    private fun playOrResume(vc: V?, p: Int, data: T?) {
         if (vc == null) {
             ZPlayerLogs.onError(NullPointerException("use a null view controller ,means show what?"))
             return
@@ -230,7 +235,6 @@ abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : Rec
                 }
             }
         } ?: ZPlayerLogs.onError(NullPointerException("where is the thread call crashed, make the ZController to be null?"))
-
     }
 
     private var handler: Handler? = Handler(Looper.getMainLooper()) {

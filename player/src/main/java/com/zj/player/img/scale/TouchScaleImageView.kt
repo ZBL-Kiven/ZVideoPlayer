@@ -4,7 +4,7 @@ import android.content.Context
 import android.util.AttributeSet
 import com.zj.player.img.scale.easing.ScaleEffect
 
-internal class TouchScaleImageView : ImageViewTouch {
+class TouchScaleImageView : ImageViewTouch {
 
     constructor(context: Context) : super(context)
 

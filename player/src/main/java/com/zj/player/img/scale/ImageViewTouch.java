@@ -15,7 +15,7 @@ import android.view.ScaleGestureDetector.OnScaleGestureListener;
 import android.view.ViewConfiguration;
 
 @SuppressWarnings("unused")
-class ImageViewTouch extends ImageViewTouchBase {
+public class ImageViewTouch extends ImageViewTouchBase {
 
     static final float SCROLL_DELTA_THRESHOLD = 1.0f;
     protected ScaleGestureDetector mScaleDetector;
@@ -25,9 +25,12 @@ class ImageViewTouch extends ImageViewTouchBase {
     protected int mDoubleTapDirection;
     protected OnGestureListener mGestureListener;
     protected OnScaleGestureListener mScaleListener;
-    protected boolean mDoubleTapEnabled = true;
-    protected boolean mScaleEnabled = true;
-    protected boolean mScrollEnabled = true;
+
+    protected ImageViewTouchEnableIn mDoubleTapEnabled = () -> true;
+    protected ImageViewTouchEnableIn mScaleEnabled = () -> true;
+    protected ImageViewTouchEnableIn mScrollEnabled = () -> true;
+    protected ImageViewTouchEnableIn mTouchEnabled = () -> true;
+
     private int durationMs;
     private OnImageViewTouchDoubleTapListener mDoubleTapListener;
     private OnImageViewTouchSingleTapListener mSingleTapListener;
@@ -64,20 +67,24 @@ class ImageViewTouch extends ImageViewTouchBase {
         mSingleTapListener = listener;
     }
 
-    public void setDoubleTapEnabled(boolean value) {
-        mDoubleTapEnabled = value;
+    public void setDoubleTapEnabled(ImageViewTouchEnableIn func) {
+        mDoubleTapEnabled = func;
     }
 
-    public void setScaleEnabled(boolean value) {
-        mScaleEnabled = value;
+    public void setScaleEnabled(ImageViewTouchEnableIn func) {
+        mScaleEnabled = func;
     }
 
-    public void setScrollEnabled(boolean value) {
-        mScrollEnabled = value;
+    public void setTouchEnabled(ImageViewTouchEnableIn func) {
+        mScaleEnabled = func;
+    }
+
+    public void setScrollEnabled(ImageViewTouchEnableIn func) {
+        mScrollEnabled = func;
     }
 
     public boolean getDoubleTapEnabled() {
-        return mDoubleTapEnabled;
+        return mTouchEnabled.enable() && mDoubleTapEnabled.enable();
     }
 
     protected OnGestureListener getGestureListener() {
@@ -97,10 +104,11 @@ class ImageViewTouch extends ImageViewTouchBase {
     @SuppressLint("ClickableViewAccessibility")
     @Override
     public boolean onTouchEvent(MotionEvent event) {
+        if (!mTouchEnabled.enable()) return false;
         mScaleDetector.onTouchEvent(event);
-
         if (!mScaleDetector.isInProgress()) {
             mGestureDetector.onTouchEvent(event);
+            return false;
         }
         int action = event.getAction();
         switch (action & MotionEvent.ACTION_MASK) {
@@ -215,7 +223,7 @@ class ImageViewTouch extends ImageViewTouchBase {
 
         @Override
         public boolean onDoubleTap(MotionEvent e) {
-            if (mDoubleTapEnabled) {
+            if (mDoubleTapEnabled.enable()) {
                 mUserScaled = true;
                 float targetScale = getScale();
                 targetScale = onDoubleTapPost(targetScale, getMaxScale());
@@ -242,8 +250,7 @@ class ImageViewTouch extends ImageViewTouchBase {
 
         @Override
         public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
-
-            if (!mScrollEnabled) return false;
+            if (!mScrollEnabled.enable()) return false;
             if (e1 == null || e2 == null) return false;
             if (e1.getPointerCount() > 1 || e2.getPointerCount() > 1) return false;
             if (mScaleDetector.isInProgress()) return false;
@@ -252,7 +259,7 @@ class ImageViewTouch extends ImageViewTouchBase {
 
         @Override
         public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
-            if (!mScrollEnabled) return false;
+            if (!mScrollEnabled.enable()) return false;
 
             if (e1.getPointerCount() > 1 || e2.getPointerCount() > 1) return false;
             if (mScaleDetector.isInProgress()) return false;
@@ -282,7 +289,7 @@ class ImageViewTouch extends ImageViewTouchBase {
             float span = detector.getCurrentSpan() - detector.getPreviousSpan();
             float targetScale = getScale() * detector.getScaleFactor();
 
-            if (mScaleEnabled) {
+            if (mScaleEnabled.enable()) {
                 if (mScaled && span != 0) {
                     mUserScaled = true;
                     targetScale = Math.min(getMaxScale(), Math.max(targetScale, getMinScale() - 0.1f));

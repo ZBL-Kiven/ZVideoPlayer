@@ -57,6 +57,9 @@ class ZController private constructor(private var player: ZPlayer?, viewControll
      * the uniqueId is required and it also binding with a viewController, changed if recreate or viewController [updateViewController] updated.
      * */
     companion object {
+
+        private const val releaseKey = " - released - "
+
         fun build(viewController: Controller): ZController {
             return build(viewController, ZPlayer(VideoConfig.create()))
         }
@@ -165,7 +168,7 @@ class ZController private constructor(private var player: ZPlayer?, viewControll
 
     fun stopNow(withNotify: Boolean = false, isRegulate: Boolean = false) {
         log("user call stop --now")
-        runWithPlayer { it.stopNow(withNotify,isRegulate) }
+        runWithPlayer { it.stopNow(withNotify, isRegulate) }
     }
 
     fun setSpeed(s: Float) {
@@ -260,17 +263,21 @@ class ZController private constructor(private var player: ZPlayer?, viewControll
         player = null
         isBindLifecycle(false)
         seekProgressInterval = -1
-        curAccessKey = " - released - "
+        curAccessKey = releaseKey
     }
 
 
-    private fun <T> runWithPlayer(block: (ZPlayer) -> T): T? {
+    private fun <T> runWithPlayer(throwMust: Boolean = true, block: (ZPlayer) -> T): T? {
         return try {
             player?.let {
                 block(it) ?: return@runWithPlayer null
-            } ?: throw NullPointerException("are you`re forgot setting a Player in to the video view controller? ,now it used the default player.")
+            } ?: {
+                if (curAccessKey != releaseKey) {
+                    throw NullPointerException("are you forgot setting a Player in to the video view controller? ,now it used the default player.")
+                } else null
+            }.invoke()
         } catch (e: java.lang.Exception) {
-            ZPlayerLogs.onError("in VideoViewController.runWithPlayer error case: - ${e.message}")
+            if (throwMust) ZPlayerLogs.onError("in VideoViewController.runWithPlayer error case: - ${e.message}")
             null
         }
     }

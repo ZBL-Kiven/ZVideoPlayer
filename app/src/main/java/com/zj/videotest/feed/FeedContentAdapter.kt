@@ -3,6 +3,8 @@ package com.zj.videotest.feed
 import android.animation.Animator
 import android.animation.ObjectAnimator
 import android.annotation.SuppressLint
+import android.graphics.drawable.BitmapDrawable
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -23,6 +25,8 @@ import com.zj.videotest.feed.data.DataType
 import com.zj.videotest.controllers.CCVideoController
 import com.zj.views.list.holders.BaseViewHolder
 import java.lang.IllegalArgumentException
+import java.lang.ref.SoftReference
+import java.lang.ref.WeakReference
 
 class FeedContentAdapter<T : FeedDataIn> : ListenerAnimAdapter<T>(R.layout.r_main_fg_feed_item) {
 
@@ -78,12 +82,28 @@ class FeedContentAdapter<T : FeedDataIn> : ListenerAnimAdapter<T>(R.layout.r_mai
     override fun onViewDetachedFromWindow(holder: BaseViewHolder) {
         super.onViewDetachedFromWindow(holder)
         stopOrResumeGif(true, holder)
-        adapterDelegate?.onViewDetachedFromWindow(holder)
+        adapterDelegate?.onViewDetachedFromWindow(WeakReference(holder))
     }
 
     override fun onViewAttachedToWindow(holder: BaseViewHolder) {
         super.onViewAttachedToWindow(holder)
         stopOrResumeGif(false, holder)
+    }
+
+    override fun onViewRecycled(holder: BaseViewHolder) {
+        holder.getView<CCVideoController>(R.id.r_main_fg_feed_item_vc)?.let {
+            try {
+                context?.let { ctx ->
+                    val thumb = it.getThumbView() ?: return
+                    Glide.with(ctx).clear(thumb)
+                    val bg = it.getBackgroundView() ?: return
+                    Glide.with(ctx).clear(bg)
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+        super.onViewRecycled(holder)
     }
 
     private fun stopOrResumeGif(stop: Boolean, holder: BaseViewHolder) {
@@ -103,17 +123,18 @@ class FeedContentAdapter<T : FeedDataIn> : ListenerAnimAdapter<T>(R.layout.r_mai
             h.getView<View>(R.id.r_main_fg_feed_item_ll_claps)?.setOnClickListener {
                 adapterInterface?.clap(d, p)
             }
-            adapterDelegate?.bindData(holder, p, d, d?.getType() == DataType.VIDEO, pl)
+            adapterDelegate?.bindData(SoftReference(holder), p, d, d?.getType() == DataType.VIDEO, pl)
         }
     }
 
-    private var adapterDelegate: ListVideoAdapterDelegate<T, BaseListVideoController, BaseViewHolder>? = object : ListVideoAdapterDelegate<T, BaseListVideoController, BaseViewHolder>(this@FeedContentAdapter) {
-        override fun createZController(vc: BaseListVideoController): ZController {
+    private var adapterDelegate: ListVideoAdapterDelegate<T, CCVideoController, BaseViewHolder>? = object : ListVideoAdapterDelegate<T, CCVideoController, BaseViewHolder>(this@FeedContentAdapter) {
+
+        override fun createZController(vc: CCVideoController): ZController {
             return ZController.build(vc, VideoConfig.create().setCacheEnable(true).setDebugAble(BuildConfig.DEBUG).setCacheFileDir("feed/videos").updateMaxCacheSize(200L * 1024 * 1024))
         }
 
-        override fun getViewController(holder: BaseViewHolder?): BaseListVideoController? {
-            return holder?.getView<CCVideoController>(R.id.r_main_fg_feed_item_vc)
+        override fun getViewController(holder: BaseViewHolder?): CCVideoController? {
+            return holder?.getView(R.id.r_main_fg_feed_item_vc)
         }
 
         override fun getItem(p: Int): T? {
@@ -124,7 +145,7 @@ class FeedContentAdapter<T : FeedDataIn> : ListenerAnimAdapter<T>(R.layout.r_mai
             return Pair(d?.getVideoPath() ?: "", d?.getSourceId())
         }
 
-        override fun onBindData(holder: BaseViewHolder?, p: Int, d: T?, playAble: Boolean, vc: BaseListVideoController, pl: MutableList<Any>?) {
+        override fun onBindData(holder: SoftReference<BaseViewHolder>?, p: Int, d: T?, playAble: Boolean, vc: CCVideoController, pl: MutableList<Any>?) {
             vc.setOnCompletedListener(if (playAble) onVcCompletedListener else null)
             vc.setOnResetListener(if (playAble) onResetListener else null)
             onBindAdapterData(d, vc, pl)
@@ -193,7 +214,7 @@ class FeedContentAdapter<T : FeedDataIn> : ListenerAnimAdapter<T>(R.layout.r_mai
         this.adapterInterface = adapterInterface
     }
 
-    fun getDelegate(): ListVideoAdapterDelegate<T, BaseListVideoController, BaseViewHolder>? {
+    fun getDelegate(): ListVideoAdapterDelegate<T, CCVideoController, BaseViewHolder>? {
         return adapterDelegate
     }
 
@@ -206,13 +227,16 @@ class FeedContentAdapter<T : FeedDataIn> : ListenerAnimAdapter<T>(R.layout.r_mai
     }
 
     fun release() {
+        context?.let { Glide.get(it).clearMemory() }
+        System.gc()
+    }
+
+    fun destroy() {
         adapterDelegate?.release()
         adapterDelegate = null
-        onDataChange(null)
     }
 
     override fun onDataChange(data: MutableList<T>?) {
-        context?.let { Glide.get(it).clearMemory() }
-        System.gc()
+        release()
     }
 }
