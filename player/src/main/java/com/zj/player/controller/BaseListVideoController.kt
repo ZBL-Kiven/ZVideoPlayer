@@ -19,6 +19,7 @@ abstract class BaseListVideoController @JvmOverloads constructor(c: Context, att
     var isCompleted: Boolean = false
 
     private var completedListener: ((BaseListVideoController) -> Unit)? = null
+    private var fullScreenChangeListener: ((BaseListVideoController) -> Unit)? = null
     private var resetListener: ((BaseListVideoController) -> Unit)? = null
 
     val isBindingController: Boolean
@@ -63,6 +64,10 @@ abstract class BaseListVideoController @JvmOverloads constructor(c: Context, att
         this.reset()
     }
 
+    override fun onFullScreenChanged(isFull: Boolean) {
+        fullScreenChangeListener?.invoke(this)
+    }
+    
     open fun reset(isShowThumb: Boolean = true, isShowBackground: Boolean = true, isSinkBottomShader: Boolean = false) {
         isCompleted = false
         reset(true, isRegulate = true, isShowPlayBtn = isPlayable, isShowThumb = isShowThumb, isShowBackground = isShowBackground, isSinkBottomShader = isSinkBottomShader)
@@ -70,6 +75,10 @@ abstract class BaseListVideoController @JvmOverloads constructor(c: Context, att
 
     fun setOnCompletedListener(l: ((BaseListVideoController) -> Unit)? = null) {
         this.completedListener = l
+    }
+
+    fun setOnFullScreenChangedListener(l: ((BaseListVideoController) -> Unit)? = null) {
+        this.fullScreenChangeListener = l
     }
 
     fun setOnResetListener(l: ((BaseListVideoController) -> Unit)? = null) {

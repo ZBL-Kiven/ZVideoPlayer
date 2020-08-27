@@ -6,7 +6,6 @@ import android.annotation.SuppressLint
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
@@ -145,18 +144,27 @@ class FeedContentAdapter<T : FeedDataIn> : ListenerAnimAdapter<T>(R.layout.r_mai
         }
 
         override fun onBindData(holder: SoftReference<BaseViewHolder>?, p: Int, d: T?, playAble: Boolean, vc: CCVideoController, pl: MutableList<Any>?) {
+            vc.tag = p // important properties.
             vc.setOnCompletedListener(if (playAble) onVcCompletedListener else null)
             vc.setOnResetListener(if (playAble) onResetListener else null)
-            vc.tag = p // important properties.
+            vc.setOnFullScreenChangedListener(if (playAble) onFullScreenListener else null)
             onBindAdapterData(d, vc, pl)
+        }
+    }
+
+    private val onFullScreenListener: (BaseListVideoController) -> Unit = {
+        if (finishOverrideView?.tag == it.tag) {
+            it.getVideoRootView()?.let { root ->
+                if ((finishOverrideView?.parent as? ViewGroup) == root) finishOverrideView?.layoutParams = it.getOverlayValidParams()
+            }
         }
     }
 
     private val onVcCompletedListener: (BaseListVideoController) -> Unit = {
         finishOverrideView?.tag = it.tag
+        val lp = it.getOverlayValidParams()
         it.getVideoRootView()?.let { root ->
             removeIfNeed(it) {
-                val lp = FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
                 root.addView(finishOverrideView, lp)
             }
         }
@@ -216,7 +224,7 @@ class FeedContentAdapter<T : FeedDataIn> : ListenerAnimAdapter<T>(R.layout.r_mai
         this.adapterInterface = adapterInterface
     }
 
-    fun getDelegate(): ListVideoAdapterDelegate<T, CCVideoController, BaseViewHolder>? {
+    private fun getDelegate(): ListVideoAdapterDelegate<T, CCVideoController, BaseViewHolder>? {
         return adapterDelegate
     }
 

@@ -11,6 +11,7 @@ import android.content.res.Resources
 import android.graphics.drawable.GradientDrawable
 import android.media.AudioManager
 import android.util.AttributeSet
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
@@ -380,6 +381,25 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
         return videoRoot
     }
 
+    open fun getOverlayValidParams(): LayoutParams {
+        val match = MATCH_PARENT
+        var ivW: Int? = null
+        var ivH: Int? = null
+        getThumbView()?.let {
+            ivW = it.drawable.intrinsicWidth
+            ivH = it.drawable.intrinsicHeight
+            if ((ivW ?: 0) <= 0 || (ivH ?: 0) <= 0) {
+                ivW = it.width
+                ivH = it.height
+            }
+        }
+        val width = if (isFullScreen) ivW ?: match else width
+        val height = if (isFullScreen) ivH ?: match else height
+        val lp = LayoutParams(width, height)
+        lp.gravity = Gravity.CENTER
+        return lp
+    }
+
     open fun getThumbView(): ImageView? {
         return videoOverrideImageView
     }
@@ -393,9 +413,9 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
         this.onFullScreenLayoutInflateListener = onFullScreenLayoutInflateListener
     }
 
-    open fun onFullScreenListener(isFull: Boolean) {}
+    open fun onFullScreenChanged(isFull: Boolean) {}
 
-    open fun onFullMaxChangedListener(isFull: Boolean) {}
+    open fun onFullMaxScreenChanged(isFull: Boolean) {}
 
     open fun onPlayClick(v: View) {
         if (!isPlayable) return
@@ -685,13 +705,13 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
             lockScreen?.isSelected = false
         }
         isFullingOrDismissing = false
-        onFullScreenListener(isShow)
+        onFullScreenChanged(isShow)
     }
 
     protected fun onFocusChanged(dialog: BaseGestureFullScreenDialog, isMax: Boolean) {
         log("on full max screen $isMax", BehaviorLogsTable.onFullMaxScreen(isMax))
         if (isMax) lockScreen?.isSelected = dialog.isLockedCurrent()
-        onFullMaxChangedListener(isMax)
+        onFullMaxScreenChanged(isMax)
     }
 
     protected fun setChildZ(zIn: Float) {
