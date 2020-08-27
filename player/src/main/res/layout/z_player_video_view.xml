@@ -13,12 +13,10 @@
         android:translationZ="3dp"
         tools:ignore="ContentDescription" />
 
-    <FrameLayout
+    <com.zj.player.view.VideoRootView
         android:id="@+id/z_player_video_root"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:clickable="true"
-        android:focusable="true"
         android:translationZ="4dp">
 
         <SeekBar
@@ -159,5 +157,5 @@
             android:translationZ="8dp"
             tools:ignore="ContentDescription" />
 
-    </FrameLayout>
+    </com.zj.player.view.VideoRootView>
 </FrameLayout>

@@ -53,7 +53,6 @@ internal abstract class GestureTouchListener(private val intercepted: () -> Bool
             paddingX = it.measuredWidth * this.paddingX
             paddingY = it.measuredHeight * this.paddingY
         }
-
         when (event?.action) {
             MotionEvent.ACTION_DOWN -> {
                 noPaddingClickPointStart = PointF(event.rawX, event.rawY);init(v, event)
@@ -154,6 +153,12 @@ internal abstract class GestureTouchListener(private val intercepted: () -> Bool
     private fun easingInterpolator(`in`: Float, interpolator: Float, base: Float = 0.765f): Float {
         if (`in` == 0f) return 0f
         return `in` * (1f - (interpolator * 0.06f) / (interpolator * 0.06f + 1f)) * base
+    }
+
+    fun updateTargetXY(v: View, event: MotionEvent):Boolean {
+        val e = MotionEvent.obtain(event)
+        e.action = MotionEvent.ACTION_DOWN
+        return onTouch(v, e)
     }
 
     fun release() {

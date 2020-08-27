@@ -17,6 +17,11 @@ import android.view.ViewConfiguration;
 @SuppressWarnings("unused")
 public class ImageViewTouch extends ImageViewTouchBase {
 
+    public static final int left = 1;
+    public static final int top = 1 << 1;
+    public static final int right = 1 << 2;
+    public static final int bottom = 1 << 3;
+
     static final float SCROLL_DELTA_THRESHOLD = 1.0f;
     protected ScaleGestureDetector mScaleDetector;
     protected GestureDetector mGestureDetector;
@@ -114,9 +119,11 @@ public class ImageViewTouch extends ImageViewTouchBase {
     public boolean onTouchEvent(MotionEvent event) {
         if (!mTouchEnabled.enable()) return false;
         mScaleDetector.onTouchEvent(event);
+        boolean detect = true;
         if (!mScaleDetector.isInProgress()) {
             mGestureDetector.onTouchEvent(event);
         }
+
         int action = event.getAction();
         switch (action & MotionEvent.ACTION_MASK) {
             case MotionEvent.ACTION_UP:
@@ -143,7 +150,7 @@ public class ImageViewTouch extends ImageViewTouchBase {
             }
         } else {
             mDoubleTapDirection = 1;
-            return 1f;
+            return getMinScale();
         }
     }
 
@@ -162,7 +169,6 @@ public class ImageViewTouch extends ImageViewTouchBase {
     public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
         float diffX = e2.getX() - e1.getX();
         float diffY = e2.getY() - e1.getY();
-
         if (Math.abs(velocityX) > 800 || Math.abs(velocityY) > 800) {
             mUserScaled = true;
             scrollBy(diffX / 2, diffY / 2, durationMs);
@@ -180,7 +186,6 @@ public class ImageViewTouch extends ImageViewTouchBase {
         if (getScale() < getMinScale()) {
             zoomTo(getMinScale(), 50);
         }
-
         return true;
     }
 
@@ -201,29 +206,28 @@ public class ImageViewTouch extends ImageViewTouchBase {
         Rect imageViewRect = new Rect();
         getGlobalVisibleRect(imageViewRect);
 
+        boolean ltr = (direction & left) != 0;
+        boolean rtl = (direction & right) != 0;
+        boolean ttb = (direction & top) != 0;
+        boolean btt = (direction & bottom) != 0;
+
         if (null == bitmapRect) {
             return false;
         }
-
-        if (bitmapRect.right >= imageViewRect.right) {
-            if (direction < 0) {
-                return Math.abs(bitmapRect.right - imageViewRect.right) > SCROLL_DELTA_THRESHOLD;
-            }
-        }
-
-        double bitmapScrollRectDelta = Math.abs(bitmapRect.left - mScrollRect.left);
-        return bitmapScrollRectDelta > SCROLL_DELTA_THRESHOLD;
+        boolean spaceInRight = bitmapRect.right > imageViewRect.right;
+        boolean spaceInLeft = bitmapRect.left < imageViewRect.left;
+        boolean spaceInTop = bitmapRect.top < imageViewRect.top;
+        boolean spaceInBottom = bitmapRect.bottom > imageViewRect.bottom;
+        return (ltr && spaceInLeft) || (rtl && spaceInRight) || (ttb && spaceInTop) || (btt && spaceInBottom);
     }
 
     public class GestureListener extends GestureDetector.SimpleOnGestureListener {
 
         @Override
         public boolean onSingleTapConfirmed(MotionEvent e) {
-
             if (null != mSingleTapListener) {
                 mSingleTapListener.onSingleTapConfirmed();
             }
-
             return ImageViewTouch.this.onSingleTapConfirmed(e);
         }
 
@@ -256,7 +260,7 @@ public class ImageViewTouch extends ImageViewTouchBase {
 
         @Override
         public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
-            if (isScrollDisAble()) return false;
+            if (isScrollDisAble() || !scrollAble()) return false;
             if (e1 == null || e2 == null) return false;
             if (e1.getPointerCount() > 1 || e2.getPointerCount() > 1) return false;
             if (mScaleDetector.isInProgress()) return false;
@@ -307,6 +311,10 @@ public class ImageViewTouch extends ImageViewTouchBase {
             }
             return true;
         }
+    }
+
+    public boolean scrollAble() {
+        return canScroll(top | right | left | bottom);
     }
 
     public interface OnImageViewTouchDoubleTapListener {

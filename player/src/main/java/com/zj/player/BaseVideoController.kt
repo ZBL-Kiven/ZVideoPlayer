@@ -17,8 +17,6 @@ import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.animation.AccelerateDecelerateInterpolator
 import android.widget.*
 import androidx.annotation.LayoutRes
-import com.zj.player.ut.Constance
-import com.zj.player.ut.Controller
 import com.zj.player.anim.ZFullValueAnimator
 import com.zj.player.base.InflateInfo
 import com.zj.player.full.BaseGestureFullScreenDialog
@@ -30,8 +28,10 @@ import com.zj.player.img.scale.TouchScaleImageView
 import com.zj.player.logs.BehaviorData
 import com.zj.player.logs.BehaviorLogsTable
 import com.zj.player.logs.ZPlayerLogs
+import com.zj.player.ut.Constance
+import com.zj.player.ut.Controller
 import com.zj.player.view.BaseLoadingView
-import java.lang.NullPointerException
+import com.zj.player.view.VideoRootView
 import java.util.*
 import kotlin.math.roundToInt
 
@@ -61,7 +61,7 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
     protected var topToolsBar: View? = null
     protected var videoOverrideImageView: TouchScaleImageView? = null
     protected var videoOverrideImageShaderView: ImageView? = null
-    protected var videoRoot: FrameLayout? = null
+    protected var videoRoot: VideoRootView? = null
     protected var controller: ZController? = null
     protected var fullScreenDialog: BaseGestureFullScreenDialog? = null
     protected var autoPlay = false
@@ -112,7 +112,9 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
         }
 
         override fun onTracked(isStart: Boolean, offsetX: Float, offsetY: Float, easeY: Float, orientation: GradientDrawable.Orientation, formTrigDuration: Float) {
-            if (isFullScreen && fullScreenDialog?.isShowing == true) fullScreenDialog?.onTracked(isStart, offsetX, offsetY, easeY, formTrigDuration)
+            if (isFullScreen && fullScreenDialog?.isShowing == true) {
+                fullScreenDialog?.onTracked(isStart, offsetX, offsetY, easeY, formTrigDuration)
+            }
         }
     }
 
@@ -184,6 +186,12 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
             onPlayClick(it)
         }
 
+        videoRoot?.setTargetChangeListener { v, e ->
+            touchListener?.updateTargetXY(v, e)
+        }
+        videoRoot?.setTouchInterceptor {
+            (videoOverrideImageView?.scrollAble() ?: false) && isFullScreen
+        }
         videoRoot?.setOnTouchListener(touchListener)
 
         loadingView?.setRefreshListener {
@@ -604,7 +612,7 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
         }
 
         override fun onFullMaxChanged(dialog: BaseGestureFullScreenDialog, isMax: Boolean) {
-            lockScreen?.visibility = if (isMax) View.VISIBLE else GONE
+            lockScreen?.visibility = if (isPlayable && isMax) View.VISIBLE else GONE
             onFocusChanged(dialog, isMax)
         }
 
@@ -641,6 +649,7 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
     }
 
     open fun onTracked(isStart: Boolean, isEnd: Boolean, formTrigDuration: Float) {
+        if (!isPlayable) return
         if (isStart && this.isFull) {
             isStartTrack = true;full(false)
             if (!isInterruptPlayBtnAnim) {

@@ -241,8 +241,9 @@ abstract class ImageViewTouchBase extends AppCompatImageView implements IDisposa
                     } else {
                         if (Math.abs(old_scale - old_min_scale) > 0.001) {
                             scale = (old_matrix_scale / new_matrix_scale) * old_scale;
+                            zoomTo(scale);
                         }
-                        zoomTo(scale);
+                        //zoomTo(scale);  Move to the top because there will be an instant zoom jump when the minimum zoom
                     }
                 }
                 mUserScaled = false;
@@ -320,10 +321,8 @@ abstract class ImageViewTouchBase extends AppCompatImageView implements IDisposa
      * @see #setImageDrawable(Drawable, Matrix, float, float)
      */
     public void setImageBitmap(final Bitmap bitmap, Matrix matrix, float min_zoom, float max_zoom) {
-        if (bitmap != null)
-            setImageDrawable(new FastBitmapDrawable(bitmap), matrix, min_zoom, max_zoom);
-        else
-            setImageDrawable(null, matrix, min_zoom, max_zoom);
+        if (bitmap != null) setImageDrawable(new FastBitmapDrawable(bitmap), matrix, min_zoom, max_zoom);
+        else setImageDrawable(null, matrix, min_zoom, max_zoom);
     }
 
     @Override
@@ -734,13 +733,10 @@ abstract class ImageViewTouchBase extends AppCompatImageView implements IDisposa
 
         if (bitmapRect.top >= 0 && bitmapRect.bottom <= mThisHeight) scrollRect.top = 0;
         if (bitmapRect.left >= 0 && bitmapRect.right <= mThisWidth) scrollRect.left = 0;
-        if (bitmapRect.top + scrollRect.top >= 0 && bitmapRect.bottom > mThisHeight)
-            scrollRect.top = (int) (0 - bitmapRect.top);
-        if (bitmapRect.bottom + scrollRect.top <= (mThisHeight) && bitmapRect.top < 0)
-            scrollRect.top = (int) ((mThisHeight) - bitmapRect.bottom);
+        if (bitmapRect.top + scrollRect.top >= 0 && bitmapRect.bottom > mThisHeight) scrollRect.top = (int) (0 - bitmapRect.top);
+        if (bitmapRect.bottom + scrollRect.top <= (mThisHeight) && bitmapRect.top < 0) scrollRect.top = (int) ((mThisHeight) - bitmapRect.bottom);
         if (bitmapRect.left + scrollRect.left >= 0) scrollRect.left = (int) (0 - bitmapRect.left);
-        if (bitmapRect.right + scrollRect.left <= mThisWidth)
-            scrollRect.left = (int) (mThisWidth - bitmapRect.right);
+        if (bitmapRect.right + scrollRect.left <= mThisWidth) scrollRect.left = (int) (mThisWidth - bitmapRect.right);
     }
 
     protected void scrollBy(float distanceX, float distanceY, final double durationMs) {
