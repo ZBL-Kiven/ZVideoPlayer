@@ -162,7 +162,7 @@ open class ZPlayer(var config: VideoConfig? = null) : Player.EventListener {
 
     internal fun setViewController(c: PlayerEventController): String {
         curAccessKey = System.currentTimeMillis().toString()
-        this.controller?.onStop(currentPlayPath(), true)
+        this.controller?.onStop(true, currentPlayPath(), true)
         this.controller = c
         return curAccessKey
     }
@@ -254,10 +254,8 @@ open class ZPlayer(var config: VideoConfig? = null) : Player.EventListener {
             it.removeListener(this)
             it.release()
         }
-        if (notifyStop) {
-            if (e != null) controller?.onError(e)
-            else controller?.onStop(currentPlayPath(), isRegulate)
-        }
+        if (e != null) controller?.onError(e)
+        else controller?.onStop(notifyStop, currentPlayPath(), isRegulate)
         handler?.removeCallbacksAndMessages(null)
         player = null
         log("video finished , current progress at $_curLookedProgress%", BehaviorLogsTable.videoStopped(currentCallId(), _curLookedProgress / 100f))
@@ -458,7 +456,7 @@ open class ZPlayer(var config: VideoConfig? = null) : Player.EventListener {
                 VideoState.STOP, VideoState.DESTROY -> {
                     val e = (it.obj() as? ExoPlaybackException)
                     if (e != null) controller?.onError(e)
-                    else controller?.onStop(currentPlayPath(), true)
+                    else controller?.onStop(true, currentPlayPath(), true)
                 }
                 else -> {
                 }

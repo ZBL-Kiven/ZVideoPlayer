@@ -19,7 +19,7 @@ public interface PlayerEventController {
 
     void onPause(String path, boolean isRegulate);
 
-    void onStop(String path, boolean isRegulate);
+    void onStop(boolean notifyStop,String path, boolean isRegulate);
 
     void completing(String path, boolean isRegulate);
 

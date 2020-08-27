@@ -333,9 +333,10 @@ class ZController private constructor(private var player: ZPlayer?, viewControll
         checkRenderToken(true)?.onPlay(path, isRegulate)
     }
 
-    override fun onStop(path: String?, isRegulate: Boolean) {
+    override fun onStop(notifyStop: Boolean, path: String?, isRegulate: Boolean) {
         log("on video stop ...", BehaviorLogsTable.controllerState("onStop", getCallId(), getPath()))
-        checkRenderToken(false)?.onStop(path, isRegulate)
+        val c = checkRenderToken(false)
+        if (notifyStop) c?.onStop(path, isRegulate)
     }
 
     override fun onCompleted(path: String?, isRegulate: Boolean) {

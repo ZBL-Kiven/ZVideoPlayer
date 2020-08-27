@@ -4,7 +4,6 @@ import android.graphics.PointF
 import android.graphics.drawable.GradientDrawable.Orientation
 import android.os.Handler
 import android.os.Looper
-import android.os.Message
 import android.view.MotionEvent
 import android.view.View
 import androidx.annotation.FloatRange
@@ -32,17 +31,8 @@ internal abstract class GestureTouchListener(private val intercepted: () -> Bool
     private var noPaddingClickPointStart: PointF? = null
     private var isOnceTap = false
     private var handler: Handler? = Handler(Looper.getMainLooper()) {
-        when (it.what) {
-            0 -> {
-                isOnceTap = false
-                (it.obj as? View)?.performClick()
-            }
-            else -> {
-                if (!isOnceTap) return@Handler false
-                isOnceTap = false
-                onDoubleClick()
-            }
-        }
+        isOnceTap = false
+        onClick()
         return@Handler false
     }
 
@@ -73,12 +63,12 @@ internal abstract class GestureTouchListener(private val intercepted: () -> Bool
                     if (onEventEnd(min(triggerY, event.rawY - _y) / triggerY) && !isRemoved && (abs((noPaddingClickPointStart?.x ?: _x) - max(event.rawX, paddingX)) < 20f && abs((noPaddingClickPointStart?.y ?: _y) - event.rawY) < 20f)) {
                         if (isOnceTap) {
                             handler?.removeMessages(0)
-                            handler?.sendEmptyMessage(1)
+                            isOnceTap = false
+                            onDoubleClick()
                         } else {
                             isOnceTap = true
-                            handler?.sendMessageDelayed(Message.obtain().apply {
-                                what = 0;obj = v
-                            }, 200)
+                            handler?.removeMessages(0)
+                            handler?.sendEmptyMessageDelayed(0, 200)
                         }
                     }
                 } finally {
@@ -174,6 +164,8 @@ internal abstract class GestureTouchListener(private val intercepted: () -> Bool
     abstract fun onEventEnd(formTrigDuration: Float): Boolean
 
     abstract fun onDoubleClick()
+
+    abstract fun onClick()
 
     abstract fun onTracked(isStart: Boolean, offsetX: Float, offsetY: Float, easeY: Float, orientation: Orientation, formTrigDuration: Float)
 }

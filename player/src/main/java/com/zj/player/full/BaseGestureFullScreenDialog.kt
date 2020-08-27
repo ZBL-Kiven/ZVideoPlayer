@@ -12,7 +12,6 @@ import android.graphics.Point
 import android.graphics.PointF
 import android.graphics.RectF
 import android.graphics.drawable.ColorDrawable
-import android.graphics.drawable.GradientDrawable.Orientation
 import android.view.*
 import android.view.animation.DecelerateInterpolator
 import android.widget.FrameLayout
@@ -51,7 +50,6 @@ class BaseGestureFullScreenDialog private constructor(private var controllerView
     private var curScaleOffset: Float = 1.0f
     private var isAnimRun = false
     private var scaleAnim: ZFullValueAnimator? = null
-    private var touchListener: GestureTouchListener? = null
     private var isDismissing = false
     private val interpolator = DecelerateInterpolator(1.5f)
     private var isMaxFull = isDefaultMaxScreen
@@ -88,7 +86,7 @@ class BaseGestureFullScreenDialog private constructor(private var controllerView
         changeSystemWindowVisibility(true)
         setContent(isMaxFull)
         initListeners()
-        showAnim(getControllerView(), isMaxFull)
+        showAnim(isMaxFull)
     }
 
     private fun setContent(isMaxFull: Boolean, isResizeCalculate: Boolean = false) {
@@ -106,16 +104,15 @@ class BaseGestureFullScreenDialog private constructor(private var controllerView
                     v.clipChildren = false
                 } ?: (it as? ViewGroup)?.addView(getControllerView(), vlp) ?: throw IllegalArgumentException("the content layout view your set is not container a view group that id`s [R.id.playerFullScreenContent] ,and your content layout is not a view parent!")
                 this@BaseGestureFullScreenDialog.setContentView(it)
-                onFullContentListener?.onContentLayoutInflated(this@BaseGestureFullScreenDialog, it)
+                onFullContentListener?.onContentLayoutInflated(it)
             }
         } finally {
             if (isResizeCalculate) init(isMaxFull)
         }
     }
 
-    private fun showAnim(view: View, isMaxFull: Boolean) {
+    private fun showAnim(isMaxFull: Boolean) {
         fun start() {
-            view.setOnTouchListener(touchListener)
             init(isMaxFull)
             isAnimRun = true
             scaleAnim?.start(true)
@@ -138,13 +135,10 @@ class BaseGestureFullScreenDialog private constructor(private var controllerView
     private fun dismissed() {
         onDisplayChange(false)
         curScaleOffset = 0f
-        getControllerView().setOnTouchListener(null)
         if (getControllerView().parent != null) (getControllerView().parent as? ViewGroup)?.removeView(getControllerView())
         vp?.addView(getControllerView(), vlp)
         screenUtil?.release()
         screenUtil = null
-        touchListener?.release()
-        touchListener = null
         if (scaleAnim?.isRunning == true) scaleAnim?.cancel()
         scaleAnim = null
         calculateUtils = null
@@ -180,35 +174,37 @@ class BaseGestureFullScreenDialog private constructor(private var controllerView
         }, false).apply {
             duration = 220
         }
-        touchListener = object : GestureTouchListener({ isAnimRun || isDismissing }) {
-            override fun onEventEnd(formTrigDuration: Float): Boolean {
-                (getControllerView().parent as? ViewGroup)?.clipChildren = true
-                return isAutoScaleFromTouchEnd(formTrigDuration, true)
-            }
+        screenUtil = ScreenOrientationListener(WeakReference(context)) { if (isMaxFull) curScreenRotation = it }
+    }
 
-            override fun onTracked(isStart: Boolean, offsetX: Float, offsetY: Float, easeY: Float, orientation: Orientation, formTrigDuration: Float) {
-                (getControllerView().parent as? ViewGroup)?.clipChildren = false
-                setBackground(1f - formTrigDuration)
-                followWithFinger(offsetX, offsetY)
-                scaleWithOffset(easeY)
-                onTracked(isStart, false, formTrigDuration)
-            }
+    fun isInterruptTouchEvent(): Boolean {
+        return isAnimRun || isDismissing
+    }
 
-            override fun onDoubleClick() {
-                if (isDefaultMaxScreen || !fullMaxScreenEnable) return
-                contentLayoutView?.let {
-                    setContent(!isMaxFull, true)
-                    onFullContentListener?.onFullMaxChanged(this@BaseGestureFullScreenDialog, isMaxFull)
-                    if (isMaxFull) curScreenRotation = when (defaultScreenOrientation) {
-                        0 -> RotateOrientation.L0
-                        1 -> RotateOrientation.P0
-                        else -> null
-                    }
-                }
+    fun onEventEnd(formTrigDuration: Float): Boolean {
+        (getControllerView().parent as? ViewGroup)?.clipChildren = true
+        return isAutoScaleFromTouchEnd(formTrigDuration, true)
+    }
+
+    fun onDoubleClick() {
+        if (isDefaultMaxScreen || !fullMaxScreenEnable) return
+        contentLayoutView?.let {
+            setContent(!isMaxFull, true)
+            onFullContentListener?.onFullMaxChanged(this@BaseGestureFullScreenDialog, isMaxFull)
+            if (isMaxFull) curScreenRotation = when (defaultScreenOrientation) {
+                0 -> RotateOrientation.L0
+                1 -> RotateOrientation.P0
+                else -> null
             }
         }
-        touchListener?.setPadding(0.15f, 0.13f)
-        screenUtil = ScreenOrientationListener(WeakReference(context)) { if (isMaxFull) curScreenRotation = it }
+    }
+
+    fun onTracked(isStart: Boolean, offsetX: Float, offsetY: Float, easeY: Float, formTrigDuration: Float) {
+        (getControllerView().parent as? ViewGroup)?.clipChildren = false
+        setBackground(1f - formTrigDuration)
+        followWithFinger(offsetX, offsetY)
+        scaleWithOffset(easeY)
+        onTracked(isStart, false, formTrigDuration)
     }
 
     internal fun getControllerView(): View {
@@ -365,7 +361,7 @@ class BaseGestureFullScreenDialog private constructor(private var controllerView
     }
 
     private fun onDisplayChange(isShow: Boolean) {
-        onFullContentListener?.onDisplayChanged(this@BaseGestureFullScreenDialog, isShow) ?: onFullScreenListener?.onDisplayChanged(this@BaseGestureFullScreenDialog, isShow)
+        onFullContentListener?.onDisplayChanged(isShow) ?: onFullScreenListener?.onDisplayChanged(isShow)
     }
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {

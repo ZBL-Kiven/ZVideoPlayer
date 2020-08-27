@@ -3,11 +3,10 @@ package com.zj.videotest.feed
 import android.animation.Animator
 import android.animation.ObjectAnimator
 import android.annotation.SuppressLint
-import android.graphics.drawable.BitmapDrawable
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
@@ -42,9 +41,9 @@ class FeedContentAdapter<T : FeedDataIn> : ListenerAnimAdapter<T>(R.layout.r_mai
                 context?.let { ctx ->
                     val root = LayoutInflater.from(ctx).inflate(R.layout.r_main_fg_feed_item_finish_view, null, false)
                     root.findViewById<View>(R.id.r_main_fg_feed_item_share_replay).setOnClickListener {
-                        (root.parent as? CCVideoController)?.let {
-                            it.playIfReady()
-                            it.removeView(root)
+                        (root.parent as? ViewGroup)?.removeView(root)
+                        (root?.tag as? Int)?.let { p ->
+                            getDelegate()?.waitingForPlay(p)
                         }
                     }
                     root.findViewById<View>(R.id.r_main_fg_feed_item_share_facebook).setOnClickListener {
@@ -148,15 +147,18 @@ class FeedContentAdapter<T : FeedDataIn> : ListenerAnimAdapter<T>(R.layout.r_mai
         override fun onBindData(holder: SoftReference<BaseViewHolder>?, p: Int, d: T?, playAble: Boolean, vc: CCVideoController, pl: MutableList<Any>?) {
             vc.setOnCompletedListener(if (playAble) onVcCompletedListener else null)
             vc.setOnResetListener(if (playAble) onResetListener else null)
+            vc.tag = p // important properties.
             onBindAdapterData(d, vc, pl)
         }
     }
 
     private val onVcCompletedListener: (BaseListVideoController) -> Unit = {
         finishOverrideView?.tag = it.tag
-        removeIfNeed(it) { _ ->
-            val lp = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
-            it.addView(finishOverrideView, lp)
+        it.getVideoRootView()?.let { root ->
+            removeIfNeed(it) {
+                val lp = FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
+                root.addView(finishOverrideView, lp)
+            }
         }
     }
     private val onResetListener: (BaseListVideoController) -> Unit = {

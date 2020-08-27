@@ -76,15 +76,23 @@ public class ImageViewTouch extends ImageViewTouchBase {
     }
 
     public void setTouchEnabled(ImageViewTouchEnableIn func) {
-        mScaleEnabled = func;
+        mTouchEnabled = func;
     }
 
     public void setScrollEnabled(ImageViewTouchEnableIn func) {
         mScrollEnabled = func;
     }
 
-    public boolean getDoubleTapEnabled() {
+    public boolean getDoubleTapEnable() {
         return mTouchEnabled.enable() && mDoubleTapEnabled.enable();
+    }
+
+    public boolean getScaleEnable() {
+        return mTouchEnabled.enable() && mScaleEnabled.enable();
+    }
+
+    public boolean isScrollDisAble() {
+        return !mTouchEnabled.enable() || !mScrollEnabled.enable();
     }
 
     protected OnGestureListener getGestureListener() {
@@ -108,7 +116,6 @@ public class ImageViewTouch extends ImageViewTouchBase {
         mScaleDetector.onTouchEvent(event);
         if (!mScaleDetector.isInProgress()) {
             mGestureDetector.onTouchEvent(event);
-            return false;
         }
         int action = event.getAction();
         switch (action & MotionEvent.ACTION_MASK) {
@@ -118,7 +125,6 @@ public class ImageViewTouch extends ImageViewTouchBase {
         }
         return true;
     }
-
 
     @Override
     protected void onZoomAnimationCompleted(float scale) {
@@ -223,7 +229,7 @@ public class ImageViewTouch extends ImageViewTouchBase {
 
         @Override
         public boolean onDoubleTap(MotionEvent e) {
-            if (mDoubleTapEnabled.enable()) {
+            if (getDoubleTapEnable()) {
                 mUserScaled = true;
                 float targetScale = getScale();
                 targetScale = onDoubleTapPost(targetScale, getMaxScale());
@@ -250,7 +256,7 @@ public class ImageViewTouch extends ImageViewTouchBase {
 
         @Override
         public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
-            if (!mScrollEnabled.enable()) return false;
+            if (isScrollDisAble()) return false;
             if (e1 == null || e2 == null) return false;
             if (e1.getPointerCount() > 1 || e2.getPointerCount() > 1) return false;
             if (mScaleDetector.isInProgress()) return false;
@@ -259,8 +265,7 @@ public class ImageViewTouch extends ImageViewTouchBase {
 
         @Override
         public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
-            if (!mScrollEnabled.enable()) return false;
-
+            if (isScrollDisAble()) return false;
             if (e1.getPointerCount() > 1 || e2.getPointerCount() > 1) return false;
             if (mScaleDetector.isInProgress()) return false;
             if (getScale() == 1f) return false;
@@ -289,7 +294,7 @@ public class ImageViewTouch extends ImageViewTouchBase {
             float span = detector.getCurrentSpan() - detector.getPreviousSpan();
             float targetScale = getScale() * detector.getScaleFactor();
 
-            if (mScaleEnabled.enable()) {
+            if (getScaleEnable()) {
                 if (mScaled && span != 0) {
                     mUserScaled = true;
                     targetScale = Math.min(getMaxScale(), Math.max(targetScale, getMinScale() - 0.1f));
@@ -302,7 +307,6 @@ public class ImageViewTouch extends ImageViewTouchBase {
             }
             return true;
         }
-
     }
 
     public interface OnImageViewTouchDoubleTapListener {

@@ -81,12 +81,17 @@ abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : Rec
                 val pls = pl.last().toString()
                 if (pls.isNotEmpty()) {
                     if (pls.startsWith(DEFAULT_LOADER)) {
-                        val index = pls.split("#")[1].toInt()
+                        var index: Int
+                        var fromUser: Boolean
+                        pls.split("#").let {
+                            index = it[1].toInt()
+                            fromUser = it[2] == "true"
+                        }
                         if (p == index) {
                             vc.post {
                                 if (playAble && vc.isPlayable) {
                                     if (!vc.isBindingController) onBindVideoView(vc)
-                                    playOrResume(vc, p, d)
+                                    playOrResume(vc, p, d, fromUser)
                                 } else {
                                     if (controller?.isPlaying() == true) {
                                         controller?.stopNow(false, isRegulate = true)
@@ -170,12 +175,17 @@ abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : Rec
         }
     }
 
-    override fun waitingForPlay(curPlayingIndex: Int) {
+    open fun waitingForPlay(index: Int) {
+        waitingForPlay(index, true)
+    }
+
+    final override fun waitingForPlay(curPlayingIndex: Int, fromUser: Boolean) {
         if (curPlayingIndex !in 0 until adapter.itemCount) return
         handler?.removeMessages(0)
         handler?.sendMessage(Message.obtain().apply {
             this.what = 0
             this.arg1 = curPlayingIndex
+            this.obj = fromUser
         })
     }
 
@@ -214,7 +224,7 @@ abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : Rec
         }
     }
 
-    private fun playOrResume(vc: V?, p: Int, data: T?) {
+    private fun playOrResume(vc: V?, p: Int, data: T?, formUser: Boolean = false) {
         if (vc == null) {
             ZPlayerLogs.onError(NullPointerException("use a null view controller ,means show what?"))
             return
@@ -230,7 +240,7 @@ abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : Rec
                 if ((ctr.isLoadData() && p != curPlayingIndex) || (ctr.isLoadData() && ctr.getPath() != d.first)) {
                     ctr.stopNow(false)
                 }
-                if (p != curPlayingIndex || (!vc.isCompleted && !ctr.isLoadData()) || (ctr.isLoadData() && !ctr.isPlaying() && !ctr.isPause(true) && !vc.isCompleted)) {
+                if (formUser || p != curPlayingIndex || (!vc.isCompleted && !ctr.isLoadData()) || (ctr.isLoadData() && !ctr.isPlaying() && !ctr.isPause(true) && !vc.isCompleted)) {
                     play()
                 }
             }
@@ -241,7 +251,7 @@ abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : Rec
         when (it.what) {
             0 -> {
                 controller?.stopNow()
-                adapter.notifyItemRangeChanged(0, adapter.itemCount, String.format(LOAD_STR_DEFAULT_LOADER, it.arg1))
+                adapter.notifyItemRangeChanged(0, adapter.itemCount, String.format(LOAD_STR_DEFAULT_LOADER, it.arg1, it.obj.toString()))
             }
             1 -> onScrollIdle()
         }
@@ -261,6 +271,6 @@ abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : Rec
 
     companion object {
         private const val DEFAULT_LOADER = "loadOrReset"
-        private const val LOAD_STR_DEFAULT_LOADER = "$DEFAULT_LOADER#%d"
+        private const val LOAD_STR_DEFAULT_LOADER = "$DEFAULT_LOADER#%d#%s"
     }
 }

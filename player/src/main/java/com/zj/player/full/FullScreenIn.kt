@@ -4,14 +4,14 @@ import android.view.View
 
 interface FullContentListener : FullScreenListener {
 
-    fun onContentLayoutInflated(dialog: BaseGestureFullScreenDialog, content: View)
+    fun onContentLayoutInflated(content: View)
 
     fun onFullMaxChanged(dialog: BaseGestureFullScreenDialog, isMax: Boolean)
 }
 
 interface FullScreenListener {
 
-    fun onDisplayChanged(dialog: BaseGestureFullScreenDialog, isShow: Boolean)
+    fun onDisplayChanged(isShow: Boolean)
 
     fun onFocusChange(dialog: BaseGestureFullScreenDialog, isMax: Boolean)
 

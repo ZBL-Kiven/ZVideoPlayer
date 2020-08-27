@@ -8,13 +8,11 @@ import android.app.Service
 import android.content.Context
 import android.content.pm.ActivityInfo
 import android.content.res.Resources
+import android.graphics.drawable.GradientDrawable
 import android.media.AudioManager
-import android.os.Handler
-import android.os.Looper
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.animation.AccelerateDecelerateInterpolator
 import android.widget.*
@@ -26,6 +24,7 @@ import com.zj.player.base.InflateInfo
 import com.zj.player.full.BaseGestureFullScreenDialog
 import com.zj.player.full.FullContentListener
 import com.zj.player.full.FullScreenListener
+import com.zj.player.full.GestureTouchListener
 import com.zj.player.img.scale.ImageViewTouchEnableIn
 import com.zj.player.img.scale.TouchScaleImageView
 import com.zj.player.logs.BehaviorData
@@ -44,7 +43,8 @@ import kotlin.math.roundToInt
  * The operation interface does not need to carry the playback controller, renderer, decoder and other components at any time, which means that it is just a simple View when you are not playing.
  * At the same time, any operation interface you define based on the Controller interface is It can be used as a container for video reception and display at any time without interruption.
  * */
-@Suppress("unused", "MemberVisibilityCanBePrivate", "InflateParams")
+
+@Suppress("unused", "MemberVisibilityCanBePrivate", "InflateParams", "ClickableViewAccessibility")
 open class BaseVideoController @JvmOverloads constructor(context: Context, attributeSet: AttributeSet? = null, def: Int = 0) : FrameLayout(context, attributeSet, def), Controller {
 
     protected var vPlay: View? = null
@@ -80,22 +80,12 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
     protected var fullMaxScreenEnable: Boolean = true
     protected var lockScreenRotation: Int = -1
     protected var isLockScreenRotation: Boolean = false
-    private var isOnceTap = false
-    private var mHandler = Handler(Looper.getMainLooper()) {
-        when (it.what) {
-            0 -> {
-                isOnceTap = false
-                onRootClick()
-            }
-            else -> {
-                if (!isOnceTap) return@Handler false
-                isOnceTap = false
-                onRootDoubleClick()
-            }
+    protected var isFullScreen: Boolean = false
+        set(value) {
+            if (field == value) return
+            field = value
+            fullScreen?.isSelected = value
         }
-        return@Handler false
-    }
-
     var isPlayable = true
         set(value) {
             if (value != field) {
@@ -103,6 +93,32 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
                 field = value
             }
         }
+    private var touchListener: GestureTouchListener? = object : GestureTouchListener({ isInterrupted() }) {
+
+        override fun onEventEnd(formTrigDuration: Float): Boolean {
+            return fullScreenDialog?.onEventEnd(formTrigDuration) ?: true
+        }
+
+        override fun onClick() {
+            if (isPlayable) onRootClick() else onRootDoubleClick()
+        }
+
+        override fun onDoubleClick() {
+            if (isPlayable) if (isFullScreen) {
+                fullScreenDialog?.onDoubleClick()
+            } else {
+                onRootDoubleClick()
+            }
+        }
+
+        override fun onTracked(isStart: Boolean, offsetX: Float, offsetY: Float, easeY: Float, orientation: GradientDrawable.Orientation, formTrigDuration: Float) {
+            if (isFullScreen && fullScreenDialog?.isShowing == true) fullScreenDialog?.onTracked(isStart, offsetX, offsetY, easeY, formTrigDuration)
+        }
+    }
+
+    fun isInterrupted(): Boolean {
+        return fullScreenDialog?.isInterruptTouchEvent() ?: false
+    }
 
     init {
         initView(context, attributeSet)
@@ -151,9 +167,10 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
             videoOverrideImageView = view?.findViewById(R.id.z_player_video_thumb)
             videoOverrideImageShaderView = view?.findViewById(R.id.z_player_video_background)
             seekBar = view?.findViewById(R.id.z_player_video_preview_sb)
-            speedView?.text = context.getString(R.string.z_player_str_speed, 1)
             isLockScreenRotation = lockScreenRotation != -1
             isFull = bottomToolsBar?.visibility == View.VISIBLE
+            speedView?.text = context.getString(R.string.z_player_str_speed, 1)
+            touchListener?.setPadding(0.05f, 0.08f)
         } catch (e: Exception) {
             e.printStackTrace()
         } finally {
@@ -167,15 +184,7 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
             onPlayClick(it)
         }
 
-        videoRoot?.setOnClickListener {
-            if (isOnceTap) {
-                mHandler.removeMessages(0)
-                mHandler.sendEmptyMessage(1)
-            } else {
-                isOnceTap = true
-                mHandler.sendEmptyMessageDelayed(0, 200)
-            }
-        }
+        videoRoot?.setOnTouchListener(touchListener)
 
         loadingView?.setRefreshListener {
             reload(it)
@@ -200,8 +209,12 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
             if (!lockScreenRotate(!it.isSelected)) Toast.makeText(context, R.string.z_player_str_screen_locked_tint, Toast.LENGTH_SHORT).show()
         }
 
+        videoOverrideImageView?.setSingleTapListener {
+            fullScreenDialog?.onDoubleClick()
+        }
+
         videoOverrideImageView?.setTouchEnabled(ImageViewTouchEnableIn {
-            return@ImageViewTouchEnableIn !isPlayable && fullScreen?.isSelected == true
+            return@ImageViewTouchEnableIn !isPlayable && isFullScreen
         })
     }
 
@@ -247,8 +260,7 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
     }
 
     override fun getControllerInfo(): InflateInfo {
-        val vpThis = videoRoot ?: fullScreenDialog?.getControllerView() as? ViewGroup
-        return InflateInfo(vpThis, 2)
+        return InflateInfo(getVideoRootView(), 2)
     }
 
     override fun onLoading(path: String, isRegulate: Boolean) {
@@ -356,6 +368,10 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
         controller?.playOrResume()
     }
 
+    open fun getVideoRootView(): FrameLayout? {
+        return videoRoot
+    }
+
     open fun getThumbView(): ImageView? {
         return videoOverrideImageView
     }
@@ -395,7 +411,7 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
 
     open fun onRootClick() {
         log("on root view click", BehaviorLogsTable.onRootClick())
-        controller?.let {
+        if (isPlayable) controller?.let {
             val full = !isFull
             if (!isInterruptPlayBtnAnim) {
                 showOrHidePlayBtn(full, true)
@@ -565,8 +581,8 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
     }
 
     protected val fullScreenListener = object : FullScreenListener {
-        override fun onDisplayChanged(dialog: BaseGestureFullScreenDialog, isShow: Boolean) {
-            onDisplayChanged(fullScreen, isShow)
+        override fun onDisplayChanged(isShow: Boolean) {
+            this@BaseVideoController.onDisplayChanged(isShow)
         }
 
         override fun onFocusChange(dialog: BaseGestureFullScreenDialog, isMax: Boolean) {
@@ -579,11 +595,11 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
     }
 
     protected val fullContentListener = object : FullContentListener {
-        override fun onDisplayChanged(dialog: BaseGestureFullScreenDialog, isShow: Boolean) {
-            onDisplayChanged(fullScreen, isShow)
+        override fun onDisplayChanged(isShow: Boolean) {
+            this@BaseVideoController.onDisplayChanged(isShow)
         }
 
-        override fun onContentLayoutInflated(dialog: BaseGestureFullScreenDialog, content: View) {
+        override fun onContentLayoutInflated(content: View) {
             onFullScreenLayoutInflateListener?.invoke(content)
         }
 
@@ -603,7 +619,7 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
 
     @SuppressLint("SourceLockedOrientationActivity")
     protected fun onFullScreen(full: Boolean) {
-        videoRoot?.let {
+        getVideoRootView()?.let { root ->
             if (!full) {
                 lockScreen?.visibility = GONE
                 fullScreenDialog?.dismiss()
@@ -616,8 +632,8 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
                 if (fullScreenDialog == null) fullScreenDialog = BaseGestureFullScreenDialog.let { d ->
                     if (isDefaultMaxScreen) {
                         lockScreen?.visibility = View.VISIBLE
-                        d.showFull(it, lockScreenRotation, fullScreenListener)
-                    } else d.showInContent(it, fullScreenContentLayoutId, fullMaxScreenEnable, lockScreenRotation, fullContentListener)
+                        d.showFull(root, lockScreenRotation, fullScreenListener)
+                    } else d.showInContent(root, fullScreenContentLayoutId, fullMaxScreenEnable, lockScreenRotation, fullContentListener)
                 }
                 lockScreenRotate(isLockScreenRotation)
             }
@@ -652,9 +668,9 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
         full(false, isSetNow = isNow)
     }
 
-    protected fun onDisplayChanged(v: View?, isShow: Boolean) {
+    protected fun onDisplayChanged(isShow: Boolean) {
         log("on full screen $isShow", BehaviorLogsTable.onFullscreen(isShow))
-        v?.isSelected = isShow
+        isFullScreen = isShow
         if (!isShow) {
             fullScreenDialog = null
             lockScreen?.isSelected = false
