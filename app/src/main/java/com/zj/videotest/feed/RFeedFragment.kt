@@ -40,7 +40,7 @@ class RFeedFragment : BaseLinkageFragment() {
     }
 
     private fun initData(isLoadMore: Boolean) {
-        AppInitApi.getFeed { b, d, es ->
+        AppInitApi.getFeedMock { b, d, es ->
             if (!isLoadMore) adapter?.cancelAllPLay()
             if (b) setAdapterData(d?.toMutableList(), isLoadMore)
             else if (es != null) Toast.makeText(activity, es.message(), Toast.LENGTH_SHORT).show()

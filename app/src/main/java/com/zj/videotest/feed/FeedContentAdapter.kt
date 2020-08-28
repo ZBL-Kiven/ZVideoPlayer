@@ -3,6 +3,8 @@ package com.zj.videotest.feed
 import android.animation.Animator
 import android.animation.ObjectAnimator
 import android.annotation.SuppressLint
+import android.os.Handler
+import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -113,7 +115,7 @@ class FeedContentAdapter<T : FeedDataIn> : ListenerAnimAdapter<T>(R.layout.r_mai
     override fun bindData(holder: BaseViewHolder?, p: Int, d: T?, pl: MutableList<Any>?) {
         if (curLoadingTentaclePosition != maxPosition && p >= maxPosition - loadDistance) {
             curLoadingTentaclePosition = maxPosition
-            adapterInterface?.onLoadMore(maxPosition)
+            Handler(Looper.getMainLooper()).post {  adapterInterface?.onLoadMore(maxPosition)}
         }
         holder?.let { h ->
             val avatarPath = d?.getAvatarPath() ?: ""
