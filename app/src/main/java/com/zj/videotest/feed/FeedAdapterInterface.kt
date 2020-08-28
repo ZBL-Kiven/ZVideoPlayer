@@ -10,6 +10,6 @@ interface FeedAdapterInterface<T> {
 
     fun onShare(v: View, d: T?, p: Int)
 
-
+    fun onLoadMore(tag: Int)
 
 }

@@ -40,8 +40,7 @@ class RFeedFragment : BaseLinkageFragment() {
     }
 
     private fun initData(isLoadMore: Boolean) {
-        refreshLayout?.autoLoadMore(16)
-        AppInitApi.getFeedMock { b, d, es ->
+        AppInitApi.getFeed { b, d, es ->
             if (!isLoadMore) adapter?.cancelAllPLay()
             if (b) setAdapterData(d?.toMutableList(), isLoadMore)
             else if (es != null) Toast.makeText(activity, es.message(), Toast.LENGTH_SHORT).show()
@@ -86,6 +85,11 @@ class RFeedFragment : BaseLinkageFragment() {
 
             override fun onShare(v: View, d: FeedDataIn?, p: Int) {
                 Log.e("------- ", "onShare   ${d?.getSourceId()}")
+            }
+
+            override fun onLoadMore(tag: Int) {
+                Log.e("------- ", "onLoadMore   $tag")
+                initData(true)
             }
         })
     }

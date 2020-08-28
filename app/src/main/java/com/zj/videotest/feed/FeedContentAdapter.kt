@@ -33,6 +33,8 @@ class FeedContentAdapter<T : FeedDataIn> : ListenerAnimAdapter<T>(R.layout.r_mai
     }
 
     private var adapterInterface: FeedAdapterInterface<T>? = null
+    private var loadDistance: Int = 5
+    private var curLoadingTentaclePosition: Int = 5
 
     private var finishOverrideView: View? = null
         @SuppressLint("InflateParams") get() {
@@ -109,6 +111,10 @@ class FeedContentAdapter<T : FeedDataIn> : ListenerAnimAdapter<T>(R.layout.r_mai
     }
 
     override fun bindData(holder: BaseViewHolder?, p: Int, d: T?, pl: MutableList<Any>?) {
+        if (curLoadingTentaclePosition != maxPosition && p >= maxPosition - loadDistance) {
+            curLoadingTentaclePosition = maxPosition
+            adapterInterface?.onLoadMore(maxPosition)
+        }
         holder?.let { h ->
             val avatarPath = d?.getAvatarPath() ?: ""
             h.getView<ImageView>(R.id.r_main_fg_feed_item_iv_avatar)?.let {
@@ -182,6 +188,7 @@ class FeedContentAdapter<T : FeedDataIn> : ListenerAnimAdapter<T>(R.layout.r_mai
         }
     }
 
+    @Suppress("UNUSED_PARAMETER")
     private fun onBindAdapterData(d: T?, vc: BaseListVideoController, pl: MutableList<Any>?) {
         val imgPath = d?.getImagePath() ?: ""
         val videoWidth = d?.getViewWidth() ?: 1
