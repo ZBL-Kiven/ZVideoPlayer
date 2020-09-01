@@ -21,7 +21,7 @@ import kotlin.math.min
 /**
  * @author ZJJ on 2018/7/3.
  */
-internal class BaseLoadingView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) : FrameLayout(context, attrs, defStyleAttr) {
+internal class VideoLoadingView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) : FrameLayout(context, attrs, defStyleAttr) {
 
     private var oldMode = DisplayMode.NONE
     private var disPlayViews: MutableMap<DisplayMode, Float>? = null
@@ -61,13 +61,13 @@ internal class BaseLoadingView @JvmOverloads constructor(context: Context, attrs
     private val listener = object : BaseLoadingAnimatorListener {
 
         override fun onDurationChange(animation: ValueAnimator, duration: Float, mode: DisplayMode?, isShowOnAct: Boolean) {
-            synchronized(this@BaseLoadingView) {
+            synchronized(this@VideoLoadingView) {
                 onAnimationFraction(animation.animatedFraction, duration, mode)
             }
         }
 
         override fun onAnimEnd(animation: Animator, mode: DisplayMode?, isShowOnAct: Boolean) {
-            synchronized(this@BaseLoadingView) {
+            synchronized(this@VideoLoadingView) {
                 onAnimationFraction(1.0f, 1.0f, mode)
             }
         }
@@ -93,29 +93,29 @@ internal class BaseLoadingView @JvmOverloads constructor(context: Context, attrs
     fun setRefreshListener(refresh: (v: View) -> Unit) {
         this.refresh = refresh
         setOnClickListener {
-            if (refreshEnable && refreshEnableWithView && this@BaseLoadingView.refresh != null) {
-                this@BaseLoadingView.refresh?.invoke(it)
+            if (refreshEnable && refreshEnableWithView && this@VideoLoadingView.refresh != null) {
+                this@VideoLoadingView.refresh?.invoke(it)
             }
         }
     }
 
     private fun init(context: Context, attrs: AttributeSet?) {
         if (attrs != null) {
-            val array = context.obtainStyledAttributes(attrs, R.styleable.BaseLoadingView)
+            val array = context.obtainStyledAttributes(attrs, R.styleable.VideoLoadingView)
             try {
-                bgColor = array.getColor(R.styleable.BaseLoadingView_backgroundFill, -1)
-                bgColorOnAct = array.getColor(R.styleable.BaseLoadingView_backgroundOnAct, -1)
-                noDataRes = array.getResourceId(R.styleable.BaseLoadingView_noDataRes, -1)
-                noNetworkRes = array.getResourceId(R.styleable.BaseLoadingView_noNetworkRes, -1)
-                loadingRes = array.getResourceId(R.styleable.BaseLoadingView_loadingRes, -1)
-                hintTextColor = array.getColor(R.styleable.BaseLoadingView_hintColor, -1)
-                refreshTextColor = array.getColor(R.styleable.BaseLoadingView_refreshTextColor, -1)
-                loadingHint = array.getString(R.styleable.BaseLoadingView_loadingText) ?: ""
-                noDataHint = array.getString(R.styleable.BaseLoadingView_noDataText) ?: ""
-                networkErrorHint = array.getString(R.styleable.BaseLoadingView_networkErrorText) ?: ""
-                refreshHint = array.getString(R.styleable.BaseLoadingView_refreshText)
-                showOnActDefault = array.getBoolean(R.styleable.BaseLoadingView_showOnActDefault, false)
-                refreshEnable = array.getBoolean(R.styleable.BaseLoadingView_refreshEnable, true)
+                bgColor = array.getColor(R.styleable.VideoLoadingView_zPlayer_backgroundFill, -1)
+                bgColorOnAct = array.getColor(R.styleable.VideoLoadingView_zPlayer_backgroundOnAct, -1)
+                noDataRes = array.getResourceId(R.styleable.VideoLoadingView_zPlayer_noDataRes, -1)
+                noNetworkRes = array.getResourceId(R.styleable.VideoLoadingView_zPlayer_noNetworkRes, -1)
+                loadingRes = array.getResourceId(R.styleable.VideoLoadingView_zPlayer_loadingRes, -1)
+                hintTextColor = array.getColor(R.styleable.VideoLoadingView_zPlayer_hintColor, -1)
+                refreshTextColor = array.getColor(R.styleable.VideoLoadingView_zPlayer_refreshTextColor, -1)
+                loadingHint = array.getString(R.styleable.VideoLoadingView_zPlayer_loadingText) ?: ""
+                noDataHint = array.getString(R.styleable.VideoLoadingView_zPlayer_noDataText) ?: ""
+                networkErrorHint = array.getString(R.styleable.VideoLoadingView_zPlayer_networkErrorText) ?: ""
+                refreshHint = array.getString(R.styleable.VideoLoadingView_zPlayer_refreshText)
+                showOnActDefault = array.getBoolean(R.styleable.VideoLoadingView_zPlayer_showOnActDefault, false)
+                refreshEnable = array.getBoolean(R.styleable.VideoLoadingView_zPlayer_refreshEnable, true)
             } catch (e: Exception) {
                 ZPlayerLogs.onError(e)
             } finally {
@@ -154,19 +154,19 @@ internal class BaseLoadingView @JvmOverloads constructor(context: Context, attrs
      * @param drawableRes must be an animatorDrawable in progressBar;
      * @link call resetUi() after set this
      */
-    fun setLoadingDrawable(drawableRes: Int): BaseLoadingView {
+    fun setLoadingDrawable(drawableRes: Int): VideoLoadingView {
         this.loadingRes = drawableRes
         return this
     }
 
     //call resetUi() after set this
-    fun setNoDataDrawable(drawableRes: Int): BaseLoadingView {
+    fun setNoDataDrawable(drawableRes: Int): VideoLoadingView {
         this.noDataRes = drawableRes
         return this
     }
 
     //call resetUi() after set this
-    fun setNetErrorDrawable(drawableRes: Int): BaseLoadingView {
+    fun setNetErrorDrawable(drawableRes: Int): VideoLoadingView {
         this.noNetworkRes = drawableRes
         return this
     }

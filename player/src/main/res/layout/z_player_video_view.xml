@@ -130,7 +130,7 @@
 
         </LinearLayout>
 
-        <com.zj.player.view.BaseLoadingView
+        <com.zj.player.view.VideoLoadingView
             android:id="@+id/z_player_video_preview_loading"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
