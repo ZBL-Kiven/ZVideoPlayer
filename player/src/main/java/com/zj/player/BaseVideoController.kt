@@ -11,9 +11,9 @@ import android.content.res.Resources
 import android.graphics.drawable.GradientDrawable
 import android.media.AudioManager
 import android.util.AttributeSet
-import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.animation.AccelerateDecelerateInterpolator
 import android.widget.*
@@ -33,6 +33,8 @@ import com.zj.player.ut.Constance
 import com.zj.player.ut.Controller
 import com.zj.player.view.VideoLoadingView
 import com.zj.player.view.VideoRootView
+import java.lang.IllegalArgumentException
+import java.lang.ref.WeakReference
 import java.util.*
 import kotlin.math.roundToInt
 
@@ -46,11 +48,7 @@ import kotlin.math.roundToInt
  * */
 
 @Suppress("unused", "MemberVisibilityCanBePrivate", "InflateParams", "ClickableViewAccessibility")
-open class BaseVideoController @JvmOverloads constructor(
-    context: Context,
-    attributeSet: AttributeSet? = null,
-    def: Int = 0
-) : FrameLayout(context, attributeSet, def), Controller {
+open class BaseVideoController @JvmOverloads constructor(context: Context, attributeSet: AttributeSet? = null, def: Int = 0) : FrameLayout(context, attributeSet, def), Controller {
 
     protected var vPlay: View? = null
     protected var tvStart: TextView? = null
@@ -98,38 +96,30 @@ open class BaseVideoController @JvmOverloads constructor(
                 field = value
             }
         }
-    private var touchListener: GestureTouchListener? =
-        object : GestureTouchListener({ isInterrupted() }) {
+    private var touchListener: GestureTouchListener? = object : GestureTouchListener({ isInterrupted() }) {
 
-            override fun onEventEnd(formTrigDuration: Float): Boolean {
-                return fullScreenDialog?.onEventEnd(formTrigDuration) ?: true
-            }
+        override fun onEventEnd(formTrigDuration: Float): Boolean {
+            return fullScreenDialog?.onEventEnd(formTrigDuration) ?: true
+        }
 
-            override fun onClick() {
-                if (isPlayable) onRootClick() else onRootDoubleClick()
-            }
+        override fun onClick() {
+            if (isPlayable) onRootClick() else onRootDoubleClick()
+        }
 
-            override fun onDoubleClick() {
-                if (isPlayable) if (isFullScreen) {
-                    fullScreenDialog?.onDoubleClick()
-                } else {
-                    onRootDoubleClick()
-                }
-            }
-
-            override fun onTracked(
-                isStart: Boolean,
-                offsetX: Float,
-                offsetY: Float,
-                easeY: Float,
-                orientation: GradientDrawable.Orientation,
-                formTrigDuration: Float
-            ) {
-                if (isFullScreen && fullScreenDialog?.isShowing == true) {
-                    fullScreenDialog?.onTracked(isStart, offsetX, offsetY, easeY, formTrigDuration)
-                }
+        override fun onDoubleClick() {
+            if (isPlayable) if (isFullScreen) {
+                fullScreenDialog?.onDoubleClick()
+            } else {
+                onRootDoubleClick()
             }
         }
+
+        override fun onTracked(isStart: Boolean, offsetX: Float, offsetY: Float, easeY: Float, orientation: GradientDrawable.Orientation, formTrigDuration: Float) {
+            if (isFullScreen && fullScreenDialog?.isShowing == true) {
+                fullScreenDialog?.onTracked(isStart, offsetX, offsetY, easeY, formTrigDuration)
+            }
+        }
+    }
 
     fun isInterrupted(): Boolean {
         return fullScreenDialog?.isInterruptTouchEvent() ?: false
@@ -157,54 +147,23 @@ open class BaseVideoController @JvmOverloads constructor(
             }
         }
         try {
-            val defaultControllerVisibility = ta.getInt(
-                R.styleable.BaseVideoController_defaultControllerVisibility,
-                Constance.defaultControllerVisibility
-            )
-            val muteIconEnable =
-                ta.getInt(R.styleable.BaseVideoController_muteIconEnable, Constance.muteIconEnable)
-            val speedIconEnable = ta.getInt(
-                R.styleable.BaseVideoController_speedIconEnable,
-                Constance.speedIconEnable
-            )
-            val secondarySeekBarEnable = ta.getInt(
-                R.styleable.BaseVideoController_secondarySeekBarEnable,
-                Constance.secondarySeekBarEnable
-            )
-            val fullScreenEnable = ta.getInt(
-                R.styleable.BaseVideoController_fullScreenEnable,
-                Constance.fullScreenEnAble
-            )
-            fullMaxScreenEnable = ta.getBoolean(
-                R.styleable.BaseVideoController_fullMaxScreenEnable,
-                Constance.fullMaxScreenEnable
-            )
-            isDefaultMaxScreen = ta.getBoolean(
-                R.styleable.BaseVideoController_isDefaultMaxScreen,
-                Constance.isDefaultMaxScreen
-            )
+            val defaultControllerVisibility = ta.getInt(R.styleable.BaseVideoController_defaultControllerVisibility, Constance.defaultControllerVisibility)
+            val muteIconEnable = ta.getInt(R.styleable.BaseVideoController_muteIconEnable, Constance.muteIconEnable)
+            val speedIconEnable = ta.getInt(R.styleable.BaseVideoController_speedIconEnable, Constance.speedIconEnable)
+            val secondarySeekBarEnable = ta.getInt(R.styleable.BaseVideoController_secondarySeekBarEnable, Constance.secondarySeekBarEnable)
+            val fullScreenEnable = ta.getInt(R.styleable.BaseVideoController_fullScreenEnable, Constance.fullScreenEnAble)
+            fullMaxScreenEnable = ta.getBoolean(R.styleable.BaseVideoController_fullMaxScreenEnable, Constance.fullMaxScreenEnable)
+            isDefaultMaxScreen = ta.getBoolean(R.styleable.BaseVideoController_isDefaultMaxScreen, Constance.isDefaultMaxScreen)
             lockScreenRotation = ta.getInt(R.styleable.BaseVideoController_lockScreenRotation, -1)
-            val view =
-                LayoutInflater.from(context).inflate(R.layout.z_player_video_view, null, false)
+            val view = LayoutInflater.from(context).inflate(R.layout.z_player_video_view, null, false)
             addView(view, LayoutParams(MATCH_PARENT, MATCH_PARENT))
             vPlay = view?.findViewById(R.id.z_player_video_preview_iv_play)
             videoRoot = view?.findViewById(R.id.z_player_video_root)
-            muteView =
-                setDefaultControllerStyle(R.id.z_player_video_preview_iv_mute, muteIconEnable)
-            speedView =
-                setDefaultControllerStyle(R.id.z_player_video_preview_tv_speed, speedIconEnable)
-            fullScreen = setDefaultControllerStyle(
-                R.id.z_player_video_preview_iv_full_screen,
-                fullScreenEnable
-            )
-            seekBarSmall = setDefaultControllerStyle(
-                R.id.z_player_video_preview_sb_small,
-                secondarySeekBarEnable
-            )
-            bottomToolsBar = setDefaultControllerStyle(
-                R.id.z_player_video_preview_tools_bar,
-                defaultControllerVisibility
-            )
+            muteView = setDefaultControllerStyle(R.id.z_player_video_preview_iv_mute, muteIconEnable)
+            speedView = setDefaultControllerStyle(R.id.z_player_video_preview_tv_speed, speedIconEnable)
+            fullScreen = setDefaultControllerStyle(R.id.z_player_video_preview_iv_full_screen, fullScreenEnable)
+            seekBarSmall = setDefaultControllerStyle(R.id.z_player_video_preview_sb_small, secondarySeekBarEnable)
+            bottomToolsBar = setDefaultControllerStyle(R.id.z_player_video_preview_tools_bar, defaultControllerVisibility)
             lockScreen = view?.findViewById(R.id.z_player_video_preview_iv_lock_screen)
             tvStart = view?.findViewById(R.id.z_player_video_preview_tv_start)
             tvEnd = view?.findViewById(R.id.z_player_video_preview_tv_end)
@@ -258,11 +217,7 @@ open class BaseVideoController @JvmOverloads constructor(
 
         lockScreen?.setOnClickListener {
             log("on lock screen btn click", BehaviorLogsTable.onLockScreenClick())
-            if (!lockScreenRotate(!it.isSelected)) Toast.makeText(
-                context,
-                R.string.z_player_str_screen_locked_tint,
-                Toast.LENGTH_SHORT
-            ).show()
+            if (!lockScreenRotate(!it.isSelected)) Toast.makeText(context, R.string.z_player_str_screen_locked_tint, Toast.LENGTH_SHORT).show()
         }
 
         videoOverrideImageView?.setSingleTapListener {
@@ -350,10 +305,7 @@ open class BaseVideoController @JvmOverloads constructor(
     override fun updateCurPlayerInfo(volume: Float, speed: Float) {
         muteView?.isSelected = volume <= 0
         curSpeedIndex = supportedSpeedList.indexOfLast { it in (speed - 0.4f)..(speed + 0.5f) }
-        speedView?.text = context.getString(
-            R.string.z_player_str_speed,
-            supportedSpeedList[curSpeedIndex].roundToInt()
-        )
+        speedView?.text = context.getString(R.string.z_player_str_speed, supportedSpeedList[curSpeedIndex].roundToInt())
     }
 
     override fun onStop(path: String, isRegulate: Boolean) {
@@ -364,7 +316,7 @@ open class BaseVideoController @JvmOverloads constructor(
     override fun completing(path: String, isRegulate: Boolean) {
         isInterruptPlayBtnAnim = true
         showOrHidePlayBtn(true, withState = false)
-        if (isRegulate) full(false)
+        full(false)
     }
 
     override fun onCompleted(path: String, isRegulate: Boolean) {
@@ -427,32 +379,11 @@ open class BaseVideoController @JvmOverloads constructor(
         controller?.playOrResume()
     }
 
-    open fun getVideoRootView(): FrameLayout? {
+    protected fun getVideoRootView(): RelativeLayout? {
         return videoRoot
     }
 
-    open fun getOverlayValidParams(): LayoutParams {
-        val match = MATCH_PARENT
-        var ivW: Int? = null
-        var ivH: Int? = null
-        getThumbView()?.let {
-            it.drawable?.let { d ->
-                ivW = d.intrinsicWidth
-                ivH = d.intrinsicHeight
-            }
-            if ((ivW ?: 0) <= 0 || (ivH ?: 0) <= 0) {
-                ivW = it.width
-                ivH = it.height
-            }
-        }
-        val width = if (isFullScreen) ivW ?: match else width
-        val height = if (isFullScreen) ivH ?: match else height
-        val lp = LayoutParams(width, height)
-        lp.gravity = Gravity.CENTER
-        return lp
-    }
-
-    open fun getThumbView(): ImageView? {
+    open fun getThumbView(): TouchScaleImageView? {
         return videoOverrideImageView
     }
 
@@ -460,10 +391,7 @@ open class BaseVideoController @JvmOverloads constructor(
         return videoOverrideImageShaderView
     }
 
-    open fun setScreenContentLayout(
-        @LayoutRes layoutId: Int,
-        onFullScreenLayoutInflateListener: ((v: View) -> Unit)? = null
-    ) {
+    open fun setScreenContentLayout(@LayoutRes layoutId: Int, onFullScreenLayoutInflateListener: ((v: View) -> Unit)? = null) {
         this.fullScreenContentLayoutId = layoutId
         this.onFullScreenLayoutInflateListener = onFullScreenLayoutInflateListener
     }
@@ -471,6 +399,8 @@ open class BaseVideoController @JvmOverloads constructor(
     open fun onFullScreenChanged(isFull: Boolean) {}
 
     open fun onFullMaxScreenChanged(isFull: Boolean) {}
+
+    open fun onTrack(playAble: Boolean, start: Boolean, end: Boolean, formTrigDuration: Float) {}
 
     open fun onPlayClick(v: View) {
         if (!isPlayable) return
@@ -493,6 +423,8 @@ open class BaseVideoController @JvmOverloads constructor(
     }
 
     open fun onRootClick() {
+        if (!isPlayable) return
+        if (controller?.isLoadData() != true) return
         log("on root view click", BehaviorLogsTable.onRootClick())
         if (isPlayable) controller?.let {
             val full = !isFull
@@ -529,6 +461,70 @@ open class BaseVideoController @JvmOverloads constructor(
         v.isSelected = nextState
     }
 
+
+    open fun removeView(tag: Any, nullAbleView: WeakReference<View?>? = null) {
+        getVideoRootView()?.let { v ->
+            v.post {
+                val view = v.findViewWithTag<View>(tag)
+                if (view != null) getVideoRootView()?.removeView(view)
+                else try {
+                    getVideoRootView()?.removeView(nullAbleView?.get())
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }
+        }
+    }
+
+    open fun addOverlayView(tag: Any, view: WeakReference<View?>?, paramsBuilder: ((RelativeLayout.LayoutParams) -> RelativeLayout.LayoutParams)? = null) {
+
+        fun generateLp(invoke: (RelativeLayout.LayoutParams) -> Unit) {
+            getThumbView()?.let {
+                it.post {
+                    val match = MATCH_PARENT
+                    var ivW: Int? = null
+                    var ivH: Int? = null
+                    try {
+                        val bounds = it.getRealBounds()
+                        ivW = bounds[0]
+                        ivH = bounds[1]
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
+                    if ((ivW ?: 0) <= 0 || (ivH ?: 0) <= 0) {
+                        ivW = it.width
+                        ivH = it.height
+                    }
+                    val width = if (isFullScreen) ivW ?: match else width
+                    val height = if (isFullScreen) ivH ?: match else height
+                    val lp = RelativeLayout.LayoutParams(width, height)
+                    lp.addRule(RelativeLayout.CENTER_IN_PARENT)
+                    invoke(lp)
+                }
+            }
+        }
+        getVideoRootView()?.let { rv ->
+            var isAdd = true
+            rv.post {
+                rv.findViewWithTag<View>(tag)?.let { exi ->
+                    if (exi != view) throw IllegalArgumentException("the tag $tag is already added with view[$exi]")
+                    else isAdd = false
+                } ?: (view?.get()?.parent as? ViewGroup)?.let {
+                    if (it != getVideoRootView()) it.removeView(view.get())
+                    else isAdd = false
+                }
+                if (isAdd) {
+                    view?.get()?.tag = tag
+                    generateLp {
+                        val nlp = paramsBuilder?.invoke(it) ?: it
+                        rv.addView(view?.get() ?: return@generateLp, nlp)
+                    }
+                }
+            }
+        }
+    }
+
+
     /**
      * even though you called it and set the lock to FALSE ,
      * it also merge with the system screen rotate settings.
@@ -546,12 +542,7 @@ open class BaseVideoController @JvmOverloads constructor(
         val duration = mediaDuration / 1000
         val minute = duration / 60
         val second = duration % 60
-        return String.format(
-            Locale.getDefault(),
-            "${if (minute < 10) "0%d" else "%d"}:${if (second < 10) "0%d" else "%d"}",
-            minute,
-            second
-        )
+        return String.format(Locale.getDefault(), "${if (minute < 10) "0%d" else "%d"}:${if (second < 10) "0%d" else "%d"}", minute, second)
     }
 
     protected fun showOrHidePlayBtn(isShow: Boolean, withState: Boolean = false) {
@@ -611,19 +602,11 @@ open class BaseVideoController @JvmOverloads constructor(
         }
     }
 
-    protected fun setOverlayViews(
-        isShowThumb: Boolean,
-        isShowBackground: Boolean,
-        isSinkBottomShader: Boolean
-    ) {
-        log(
-            "on overlay views visibility  thumb = $isShowThumb  bg = $isShowBackground",
-            BehaviorLogsTable.thumbImgVisible(isShowThumb, isShowBackground)
-        )
+    protected fun setOverlayViews(isShowThumb: Boolean, isShowBackground: Boolean, isSinkBottomShader: Boolean) {
+        log("on overlay views visibility  thumb = $isShowThumb  bg = $isShowBackground", BehaviorLogsTable.thumbImgVisible(isShowThumb, isShowBackground))
         videoOverrideImageView?.visibility = if (isShowThumb) View.VISIBLE else View.GONE
         videoOverrideImageShaderView?.visibility = if (isShowBackground) View.VISIBLE else View.GONE
-        videoOverrideImageShaderView?.z =
-            if (isSinkBottomShader) 0f else Resources.getSystem().displayMetrics.density * 3 + 0.5f
+        videoOverrideImageShaderView?.z = if (isSinkBottomShader) 0f else Resources.getSystem().displayMetrics.density * 3 + 0.5f
     }
 
     private var anim: ZFullValueAnimator? = null
@@ -667,10 +650,7 @@ open class BaseVideoController @JvmOverloads constructor(
                 it.translationY = if (isFull) 0f else toolsBottomHeight
                 it.alpha = if (isFull) 1f else 0f
                 if (!isFull) it.visibility = View.GONE
-                if (!isFull && !isStartTrack && (controller?.isPlaying() == true || controller?.isPause(
-                        true
-                    ) == true)
-                ) seekBarSmall?.visibility = View.VISIBLE
+                if (!isFull && !isStartTrack && (controller?.isPlaying() == true || controller?.isPause(true) == true)) seekBarSmall?.visibility = View.VISIBLE
             }
             topToolsBar?.let {
                 it.alpha = if (isFull) 1f else 0f
@@ -695,6 +675,7 @@ open class BaseVideoController @JvmOverloads constructor(
 
     protected val fullContentListener = object : FullContentListener {
         override fun onDisplayChanged(isShow: Boolean) {
+            onTrack(isPlayable, start = false, end = true, formTrigDuration = 1.0f)
             this@BaseVideoController.onDisplayChanged(isShow)
         }
 
@@ -728,48 +709,39 @@ open class BaseVideoController @JvmOverloads constructor(
                         it.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
                     }
                 }
-                if (fullScreenDialog == null) fullScreenDialog =
-                    BaseGestureFullScreenDialog.let { d ->
-                        if (isDefaultMaxScreen) {
-                            lockScreen?.visibility = View.VISIBLE
-                            d.showFull(root, lockScreenRotation, fullScreenListener)
-                        } else d.showInContent(
-                            root,
-                            fullScreenContentLayoutId,
-                            fullMaxScreenEnable,
-                            lockScreenRotation,
-                            fullContentListener
-                        )
-                    }
+                if (fullScreenDialog == null) fullScreenDialog = BaseGestureFullScreenDialog.let { d ->
+                    if (isDefaultMaxScreen) {
+                        lockScreen?.visibility = View.VISIBLE
+                        d.showFull(root, lockScreenRotation, fullScreenListener)
+                    } else d.showInContent(root, fullScreenContentLayoutId, fullMaxScreenEnable, lockScreenRotation, fullContentListener)
+                }
                 lockScreenRotate(isLockScreenRotation)
             }
         }
     }
 
-    open fun onTracked(isStart: Boolean, isEnd: Boolean, formTrigDuration: Float) {
-        if (!isPlayable) return
-        if (isStart && this.isFull) {
-            isStartTrack = true;full(false)
-            if (!isInterruptPlayBtnAnim) {
-                showOrHidePlayBtn(isShow = false, withState = true)
+    private var lastIsFull = false
+    private fun onTracked(isStart: Boolean, isEnd: Boolean, formTrigDuration: Float) {
+        if (isPlayable) {
+            if (isStart) lastIsFull = this.isFull
+            if (isStart && this.isFull) {
+                isStartTrack = true;full(false)
+                if (!isInterruptPlayBtnAnim) {
+                    showOrHidePlayBtn(isShow = false, withState = true)
+                }
+            }
+            if (isEnd && !this.isFull) {
+                isStartTrack = false
+                if (lastIsFull) {
+                    if (controller?.isLoadData() == true) full(true)
+                    if (!isInterruptPlayBtnAnim) showOrHidePlayBtn(isShow = true, withState = true)
+                }
             }
         }
-        if (isEnd && !this.isFull) {
-            isStartTrack = false;full(true)
-            if (!isInterruptPlayBtnAnim) {
-                showOrHidePlayBtn(isShow = true, withState = true)
-            }
-        }
+        onTrack(isPlayable, isStart, isEnd, formTrigDuration)
     }
 
-    open fun reset(
-        isNow: Boolean,
-        isRegulate: Boolean,
-        isShowPlayBtn: Boolean,
-        isShowThumb: Boolean = true,
-        isShowBackground: Boolean = true,
-        isSinkBottomShader: Boolean = false
-    ) {
+    open fun reset(isNow: Boolean, isRegulate: Boolean, isShowPlayBtn: Boolean, isShowThumb: Boolean = true, isShowBackground: Boolean = true, isSinkBottomShader: Boolean = false) {
         vPlay?.isEnabled = isShowPlayBtn
         loadingView?.setMode(VideoLoadingView.DisplayMode.DISMISS, "", false, setNow = true)
         setOverlayViews(isShowThumb, isShowBackground, isSinkBottomShader)
@@ -812,12 +784,6 @@ open class BaseVideoController @JvmOverloads constructor(
     }
 
     protected fun recordLogs(s: String, modeName: String, vararg params: Pair<String, Any>) {
-        if (Constance.CORE_LOG_ABLE) ZPlayerLogs.onLog(
-            s,
-            controller?.getPath() ?: "",
-            "",
-            modeName,
-            *params
-        )
+        if (Constance.CORE_LOG_ABLE) ZPlayerLogs.onLog(s, controller?.getPath() ?: "", "", modeName, *params)
     }
 }

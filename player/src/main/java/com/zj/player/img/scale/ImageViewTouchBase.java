@@ -429,19 +429,6 @@ abstract class ImageViewTouchBase extends AppCompatImageView implements IDisposa
         return Math.max(fw, fh) * 8;
     }
 
-    protected float computeMinZoom() {
-        final Drawable drawable = getDrawable();
-
-        if (drawable == null) {
-            return 1F;
-        }
-        float scale = getScale(mBaseMatrix);
-        scale = Math.min(1f, 1f / scale);
-
-
-        return scale;
-    }
-
     /**
      * Returns the current maximum allowed image scale
      */
@@ -456,10 +443,7 @@ abstract class ImageViewTouchBase extends AppCompatImageView implements IDisposa
      * Returns the current minimum allowed image scale
      */
     public float getMinScale() {
-        if (mMinZoom == ZOOM_INVALID) {
-            mMinZoom = computeMinZoom();
-        }
-        return mMinZoom;
+        return 1f;
     }
 
     /**

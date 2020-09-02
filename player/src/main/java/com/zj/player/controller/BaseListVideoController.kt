@@ -10,6 +10,7 @@ import com.zj.player.list.VideoControllerIn
  * the view controller and adapt use in list view,
  * implements the data binder interfaces.
  **/
+@Suppress("unused")
 abstract class BaseListVideoController @JvmOverloads constructor(c: Context, attr: AttributeSet? = null, def: Int = 0) : BackgroundVideoController(c, attr, def) {
 
     private var videoControllerIn: VideoControllerIn? = null
@@ -21,6 +22,7 @@ abstract class BaseListVideoController @JvmOverloads constructor(c: Context, att
     private var completedListener: ((BaseListVideoController) -> Unit)? = null
     private var fullScreenChangeListener: ((BaseListVideoController) -> Unit)? = null
     private var resetListener: ((BaseListVideoController) -> Unit)? = null
+    private var onTrackListener: ((playAble: Boolean, start: Boolean, end: Boolean, formTrigDuration: Float) -> Unit)? = null
 
     val isBindingController: Boolean
         get() {
@@ -67,7 +69,11 @@ abstract class BaseListVideoController @JvmOverloads constructor(c: Context, att
     override fun onFullScreenChanged(isFull: Boolean) {
         fullScreenChangeListener?.invoke(this)
     }
-    
+
+    override fun onTrack(playAble: Boolean, start: Boolean, end: Boolean, formTrigDuration: Float) {
+        onTrackListener?.invoke(playAble, start, end, formTrigDuration)
+    }
+
     open fun reset(isShowThumb: Boolean = true, isShowBackground: Boolean = true, isSinkBottomShader: Boolean = false) {
         isCompleted = false
         reset(true, isRegulate = true, isShowPlayBtn = isPlayable, isShowThumb = isShowThumb, isShowBackground = isShowBackground, isSinkBottomShader = isSinkBottomShader)
@@ -79,6 +85,10 @@ abstract class BaseListVideoController @JvmOverloads constructor(c: Context, att
 
     fun setOnFullScreenChangedListener(l: ((BaseListVideoController) -> Unit)? = null) {
         this.fullScreenChangeListener = l
+    }
+
+    fun setOnTrackListener(l: ((playAble: Boolean, start: Boolean, end: Boolean, formTrigDuration: Float) -> Unit)? = null) {
+        this.onTrackListener = l
     }
 
     fun setOnResetListener(l: ((BaseListVideoController) -> Unit)? = null) {

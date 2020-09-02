@@ -5,9 +5,10 @@ import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
 import android.widget.FrameLayout
+import android.widget.RelativeLayout
 import kotlin.math.abs
 
-class VideoRootView @JvmOverloads constructor(context: Context, attributeSet: AttributeSet? = null, def: Int = 0) : FrameLayout(context, attributeSet, def) {
+class VideoRootView @JvmOverloads constructor(context: Context, attributeSet: AttributeSet? = null, def: Int = 0) : RelativeLayout(context, attributeSet, def) {
 
     private var isInterceptOtherTouch: (() -> Boolean)? = null
     private var onTargetChanged: ((v: View, e: MotionEvent) -> Boolean?)? = null

@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="special_feed_adapter_tag_id_position" type="id" />
+    <item name="special_feed_adapter_tag_id_add_overlay" type="id" />
+</resources>

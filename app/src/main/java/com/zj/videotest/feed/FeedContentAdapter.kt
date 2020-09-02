@@ -9,6 +9,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
+import android.widget.RelativeLayout
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
@@ -38,6 +39,11 @@ class FeedContentAdapter<T : FeedDataIn> : ListenerAnimAdapter<T>(R.layout.r_mai
     private var loadDistance: Int = 5
     private var curLoadingTentaclePosition: Int = 5
 
+    private companion object {
+        const val TAG_POSITION = R.id.special_feed_adapter_tag_id_position
+        const val TAG_OVERLAY_VIEW = R.id.special_feed_adapter_tag_id_add_overlay
+    }
+
     private var finishOverrideView: View? = null
         @SuppressLint("InflateParams") get() {
             if (field == null) {
@@ -45,22 +51,22 @@ class FeedContentAdapter<T : FeedDataIn> : ListenerAnimAdapter<T>(R.layout.r_mai
                     val root = LayoutInflater.from(ctx).inflate(R.layout.r_main_fg_feed_item_finish_view, null, false)
                     root.findViewById<View>(R.id.r_main_fg_feed_item_share_replay).setOnClickListener {
                         (root.parent as? ViewGroup)?.removeView(root)
-                        (root?.tag as? Int)?.let { p ->
+                        (root?.getTag(TAG_POSITION) as? Int)?.let { p ->
                             getDelegate()?.waitingForPlay(p)
                         }
                     }
                     root.findViewById<View>(R.id.r_main_fg_feed_item_share_facebook).setOnClickListener {
-                        (root?.tag as? Int)?.let { p ->
+                        (root?.getTag(TAG_POSITION) as? Int)?.let { p ->
                             onShare(it, p)
                         }
                     }
                     root.findViewById<View>(R.id.r_main_fg_feed_item_share_message).setOnClickListener {
-                        (root?.tag as? Int)?.let { p ->
+                        (root?.getTag(TAG_POSITION) as? Int)?.let { p ->
                             onShare(it, p)
                         }
                     }
                     root.findViewById<View>(R.id.r_main_fg_feed_item_share_whats_app).setOnClickListener {
-                        (root?.tag as? Int)?.let { p ->
+                        (root?.getTag(TAG_POSITION) as? Int)?.let { p ->
                             onShare(it, p)
                         }
                     }
@@ -115,7 +121,7 @@ class FeedContentAdapter<T : FeedDataIn> : ListenerAnimAdapter<T>(R.layout.r_mai
     override fun bindData(holder: BaseViewHolder?, p: Int, d: T?, pl: MutableList<Any>?) {
         if (curLoadingTentaclePosition != maxPosition && p >= maxPosition - loadDistance) {
             curLoadingTentaclePosition = maxPosition
-            Handler(Looper.getMainLooper()).post {  adapterInterface?.onLoadMore(maxPosition)}
+            Handler(Looper.getMainLooper()).post { adapterInterface?.onLoadMore(maxPosition) }
         }
         holder?.let { h ->
             val avatarPath = d?.getAvatarPath() ?: ""
@@ -152,42 +158,46 @@ class FeedContentAdapter<T : FeedDataIn> : ListenerAnimAdapter<T>(R.layout.r_mai
         }
 
         override fun onBindData(holder: SoftReference<BaseViewHolder>?, p: Int, d: T?, playAble: Boolean, vc: CCVideoController, pl: MutableList<Any>?) {
-            vc.tag = p // important properties.
+            vc.setTag(TAG_POSITION, p) // important properties.
+            vc.setTag(TAG_OVERLAY_VIEW, d?.getSourceId() ?: "TAG_OVERLAY_VIEW$p")
             vc.setOnCompletedListener(if (playAble) onVcCompletedListener else null)
             vc.setOnResetListener(if (playAble) onResetListener else null)
-            vc.setOnFullScreenChangedListener(if (playAble) onFullScreenListener else null)
+            vc.setOnTrackListener(if (playAble) onTrackListener else null)
             onBindAdapterData(d, vc, pl)
         }
     }
 
-    private val onFullScreenListener: (BaseListVideoController) -> Unit = {
-        if (finishOverrideView?.tag == it.tag) {
-            it.getVideoRootView()?.let { root ->
-                if ((finishOverrideView?.parent as? ViewGroup) == root) finishOverrideView?.layoutParams = it.getOverlayValidParams()
+    private val onTrackListener: (playAble: Boolean, start: Boolean, end: Boolean, formTrigDuration: Float) -> Unit = { playAble, start, end, _ ->
+        if (playAble) {
+            finishOverrideView?.let {
+                if (start) {
+                    it.animate().cancel()
+                    it.animate().alpha(0.0f).setDuration(200).start()
+                }
+                if (end) {
+                    it.animate().cancel()
+                    it.animate().alpha(1.0f).setDuration(200).start()
+                }
             }
         }
     }
 
     private val onVcCompletedListener: (BaseListVideoController) -> Unit = {
-        finishOverrideView?.tag = it.tag
-        val lp = it.getOverlayValidParams()
-        it.getVideoRootView()?.let { root ->
-            removeIfNeed(it) {
-                root.addView(finishOverrideView, lp)
+        finishOverrideView?.setTag(TAG_POSITION, it.getTag(TAG_POSITION))
+        it.addOverlayView(it.getTag(TAG_OVERLAY_VIEW), WeakReference(finishOverrideView)) { rl ->
+            rl.apply {
+                addRule(RelativeLayout.CENTER_IN_PARENT)
+                it.getThumbView()?.id?.let { idRes ->
+                    addRule(RelativeLayout.ALIGN_END, idRes)
+                    addRule(RelativeLayout.ALIGN_START, idRes)
+                    addRule(RelativeLayout.ALIGN_TOP, idRes)
+                    addRule(RelativeLayout.ALIGN_BOTTOM, idRes)
+                }
             }
         }
     }
     private val onResetListener: (BaseListVideoController) -> Unit = {
-        removeIfNeed(it)
-    }
-
-    private fun removeIfNeed(vc: BaseListVideoController, onNext: ((View) -> Unit)? = null) {
-        finishOverrideView?.let { v ->
-            if (v.tag == vc.tag) {
-                (v.parent as? ViewGroup)?.removeView(v)
-                onNext?.invoke(v)
-            }
-        }
+        it.getTag(TAG_OVERLAY_VIEW)?.let { tag -> it.removeView(tag, WeakReference(finishOverrideView)) }
     }
 
     @Suppress("UNUSED_PARAMETER")

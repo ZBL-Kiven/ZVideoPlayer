@@ -2,12 +2,10 @@ package com.zj.videotest
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
 import com.zj.cf.managers.BaseFragmentManager
 import com.zj.player.logs.VideoEventListener
 import com.zj.player.logs.ZPlayerLogs
 import com.zj.videotest.feed.RFeedFragment
-import com.zj.videotest.feed.apis.init.AppInitApi
 import com.zj.views.DrawableTextView
 
 class MainActivity : AppCompatActivity() {
