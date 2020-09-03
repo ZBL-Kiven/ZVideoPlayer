@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+
     <declare-styleable name="VideoLoadingView">
         <attr name="zPlayer_backgroundFill" format="color|reference" />
         <attr name="zPlayer_backgroundOnAct" format="color|reference" />
@@ -49,5 +50,10 @@
             <enum name="LANDSCAPE" value="0" />
             <enum name="PORTRAIT" value="1" />
         </attr>
+
+        <attr name="muteDefault" format="boolean" />
+        <attr name="useMuteGlobal" format="boolean" />
+        <attr name="loadingViewLayoutId" format="reference" />
+        <attr name="loadingViewId" format="reference" />
     </declare-styleable>
 </resources>

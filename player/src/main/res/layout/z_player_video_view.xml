@@ -130,21 +130,10 @@
 
         </LinearLayout>
 
-        <com.zj.player.view.VideoLoadingView
-            android:id="@+id/z_player_video_preview_loading"
+        <ViewStub
+            android:id="@+id/z_player_video_preview_vs_loading"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:translationZ="7dp"
-            android:visibility="gone"
-            app:zPlayer_backgroundFill="@color/z_player_color_trans_50"
-            app:zPlayer_backgroundOnAct="@color/z_player_color_trans_50"
-            app:zPlayer_hintColor="@color/z_player_color_loading"
-            app:zPlayer_loadingRes="@drawable/z_player_loading_progressbar"
-            app:zPlayer_loadingText="@string/z_player_str_loading_video_progress"
-            app:zPlayer_noDataRes="@mipmap/z_player_video_loading_fail"
-            app:zPlayer_noDataText="@string/z_player_str_loading_video_error"
-            app:zPlayer_refreshText="@string/z_player_str_loading_video_error_tint"
-            app:zPlayer_refreshTextColor="@color/z_player_color_gray" />
+            android:layout_height="match_parent" />
 
         <ImageView
             android:id="@+id/z_player_video_preview_iv_play"

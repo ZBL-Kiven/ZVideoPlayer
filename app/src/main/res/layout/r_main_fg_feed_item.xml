@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -54,7 +55,11 @@
         android:layout_height="276dp"
         android:layout_below="@id/r_main_fg_feed_item_tv_desc"
         android:layout_marginTop="5dp"
-        android:background="#eee" />
+        android:background="#eee"
+        app:loadingViewId="@id/r_main_fg_feed_item_finish_ll_parent"
+        app:loadingViewLayoutId="@layout/r_main_fg_feed_item_finish_view"
+        app:muteDefault="true"
+        app:useMuteGlobal="true" />
 
     <LinearLayout
         android:id="@+id/r_main_fg_feed_item_ll_claps"

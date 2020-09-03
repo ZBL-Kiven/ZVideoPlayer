@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.zj.player.view.VideoLoadingView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/z_player_video_blv_loading"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    app:zPlayer_backgroundFill="@color/z_player_color_trans_50"
+    app:zPlayer_backgroundOnAct="@color/z_player_color_trans_50"
+    app:zPlayer_hintColor="@color/z_player_color_loading"
+    app:zPlayer_loadingRes="@drawable/z_player_loading_progressbar"
+    app:zPlayer_loadingText="@string/z_player_str_loading_video_progress"
+    app:zPlayer_noDataRes="@mipmap/z_player_video_loading_fail"
+    app:zPlayer_noDataText="@string/z_player_str_loading_video_error"
+    app:zPlayer_refreshText="@string/z_player_str_loading_video_error_tint"
+    app:zPlayer_refreshTextColor="@color/z_player_color_gray">
+
+</com.zj.player.view.VideoLoadingView>

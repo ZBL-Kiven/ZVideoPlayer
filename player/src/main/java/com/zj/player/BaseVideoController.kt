@@ -15,11 +15,13 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
+import android.view.ViewStub
 import android.view.animation.AccelerateDecelerateInterpolator
 import android.widget.*
 import androidx.annotation.LayoutRes
 import com.zj.player.anim.ZFullValueAnimator
 import com.zj.player.base.InflateInfo
+import com.zj.player.base.LoadingMode
 import com.zj.player.full.BaseGestureFullScreenDialog
 import com.zj.player.full.FullContentListener
 import com.zj.player.full.FullScreenListener
@@ -34,6 +36,7 @@ import com.zj.player.ut.Controller
 import com.zj.player.view.VideoLoadingView
 import com.zj.player.view.VideoRootView
 import java.lang.IllegalArgumentException
+import java.lang.RuntimeException
 import java.lang.ref.WeakReference
 import java.util.*
 import kotlin.math.roundToInt
@@ -50,6 +53,19 @@ import kotlin.math.roundToInt
 @Suppress("unused", "MemberVisibilityCanBePrivate", "InflateParams", "ClickableViewAccessibility")
 open class BaseVideoController @JvmOverloads constructor(context: Context, attributeSet: AttributeSet? = null, def: Int = 0) : FrameLayout(context, attributeSet, def), Controller {
 
+    companion object {
+
+        private var muteGlobalDefault: Boolean = false
+
+        /**
+         * After setting this property, all ViewController instances configured with app:useMuteGlobal in xml take effect。
+         * @see muteIsUseGlobal  bind to [muteGlobalDefault]
+         * */
+        internal fun setGlobalMuteDefault(isMute: Boolean) {
+            muteGlobalDefault = isMute
+        }
+    }
+
     protected var vPlay: View? = null
     protected var tvStart: TextView? = null
     protected var tvEnd: TextView? = null
@@ -59,7 +75,7 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
     protected var speedView: TextView? = null
     protected var muteView: View? = null
     protected var lockScreen: View? = null
-    private var loadingView: VideoLoadingView? = null
+    private var loadingView: View? = null
     protected var bottomToolsBar: View? = null
     protected var topToolsBar: View? = null
     protected var videoOverrideImageView: TouchScaleImageView? = null
@@ -83,6 +99,10 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
     protected var fullMaxScreenEnable: Boolean = true
     protected var lockScreenRotation: Int = -1
     protected var isLockScreenRotation: Boolean = false
+    private var muteDefault: Boolean = false
+    private var muteIsUseGlobal: Boolean = false
+    private var loadingViewInflateId: Int = -1
+    private var loadingViewId: Int = -1
     protected var isFullScreen: Boolean = false
         set(value) {
             if (field == value) return
@@ -152,9 +172,20 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
             val speedIconEnable = ta.getInt(R.styleable.BaseVideoController_speedIconEnable, Constance.speedIconEnable)
             val secondarySeekBarEnable = ta.getInt(R.styleable.BaseVideoController_secondarySeekBarEnable, Constance.secondarySeekBarEnable)
             val fullScreenEnable = ta.getInt(R.styleable.BaseVideoController_fullScreenEnable, Constance.fullScreenEnAble)
+            val defaultLoadingLayoutId = R.layout.z_player_loading_layout
+            val defaultLoadingId = R.id.z_player_video_blv_loading
             fullMaxScreenEnable = ta.getBoolean(R.styleable.BaseVideoController_fullMaxScreenEnable, Constance.fullMaxScreenEnable)
             isDefaultMaxScreen = ta.getBoolean(R.styleable.BaseVideoController_isDefaultMaxScreen, Constance.isDefaultMaxScreen)
             lockScreenRotation = ta.getInt(R.styleable.BaseVideoController_lockScreenRotation, -1)
+            muteIsUseGlobal = ta.getBoolean(R.styleable.BaseVideoController_useMuteGlobal, false)
+            muteDefault = ta.getBoolean(R.styleable.BaseVideoController_muteDefault, false)
+            loadingViewInflateId = ta.getResourceId(R.styleable.BaseVideoController_loadingViewLayoutId, -1)
+            loadingViewId = if (loadingViewInflateId == defaultLoadingLayoutId) {
+                defaultLoadingId
+            } else {
+                ta.getResourceId(R.styleable.BaseVideoController_loadingViewId, -1)
+            }
+            if (loadingViewId == -1) throw RuntimeException("you must set a loading view id in the attrs and it must in contains of loading layout which your set.")
             val view = LayoutInflater.from(context).inflate(R.layout.z_player_video_view, null, false)
             addView(view, LayoutParams(MATCH_PARENT, MATCH_PARENT))
             vPlay = view?.findViewById(R.id.z_player_video_preview_iv_play)
@@ -167,10 +198,13 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
             lockScreen = view?.findViewById(R.id.z_player_video_preview_iv_lock_screen)
             tvStart = view?.findViewById(R.id.z_player_video_preview_tv_start)
             tvEnd = view?.findViewById(R.id.z_player_video_preview_tv_end)
-            loadingView = view?.findViewById(R.id.z_player_video_preview_loading)
             topToolsBar = view?.findViewById(R.id.z_player_video_preview_top_bar)
             videoOverrideImageView = view?.findViewById(R.id.z_player_video_thumb)
             videoOverrideImageShaderView = view?.findViewById(R.id.z_player_video_background)
+            val viewStub = view?.findViewById<ViewStub>(R.id.z_player_video_preview_vs_loading)
+            viewStub?.layoutResource = loadingViewInflateId
+            viewStub?.inflate()
+            loadingView = view?.findViewById(loadingViewId)
             seekBar = view?.findViewById(R.id.z_player_video_preview_sb)
             isLockScreenRotation = lockScreenRotation != -1
             isFull = bottomToolsBar?.visibility == View.VISIBLE
@@ -197,7 +231,7 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
         }
         videoRoot?.setOnTouchListener(touchListener)
 
-        loadingView?.setRefreshListener {
+        (loadingView as? VideoLoadingView)?.setRefreshListener {
             reload(it)
         }
 
@@ -277,13 +311,18 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
     override fun onLoading(path: String, isRegulate: Boolean) {
         seekBar?.isEnabled = false
         showOrHidePlayBtn(false)
-        loadingView?.setMode(VideoLoadingView.DisplayMode.LOADING)
+        onLoadingEvent(LoadingMode.Loading)
     }
 
     override fun onPrepare(path: String, videoSize: Long, isRegulate: Boolean) {
         seekBar?.isEnabled = true
         tvEnd?.text = getDuration(videoSize)
-        initVolume(muteView?.isSelected == true)
+        if (muteIsUseGlobal) {
+            if (muteView?.isSelected != muteGlobalDefault) muteView?.isSelected = muteGlobalDefault
+        } else {
+            if (muteView?.isSelected != muteDefault) muteView?.isSelected = muteDefault
+        }
+        initVolume(muteDefault)
     }
 
     override fun onPlay(path: String, isRegulate: Boolean) {
@@ -292,7 +331,7 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
         seekBar?.isEnabled = true
         isInterruptPlayBtnAnim = false
         showOrHidePlayBtn(false)
-        loadingView?.setMode(VideoLoadingView.DisplayMode.DISMISS)
+        onLoadingEvent(LoadingMode.None)
         full(false)
         seekBarSmall?.visibility = View.VISIBLE
     }
@@ -303,7 +342,7 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
     }
 
     override fun updateCurPlayerInfo(volume: Float, speed: Float) {
-        muteView?.isSelected = volume <= 0
+        syncMute(volume <= 0)
         curSpeedIndex = supportedSpeedList.indexOfLast { it in (speed - 0.4f)..(speed + 0.5f) }
         speedView?.text = context.getString(R.string.z_player_str_speed, supportedSpeedList[curSpeedIndex].roundToInt())
     }
@@ -321,7 +360,7 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
 
     override fun onCompleted(path: String, isRegulate: Boolean) {
         if (loadingView?.visibility == View.VISIBLE) {
-            loadingView?.setMode(VideoLoadingView.DisplayMode.NONE)
+            onLoadingEvent(LoadingMode.None)
             completing(path, isRegulate)
         }
         seekBar?.isSelected = false
@@ -346,7 +385,7 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
 
     override fun onSeekingLoading(path: String?) {
         isInterruptPlayBtnAnim = true
-        loadingView?.setMode(VideoLoadingView.DisplayMode.LOADING)
+        onLoadingEvent(LoadingMode.Loading)
         showOrHidePlayBtn(false)
     }
 
@@ -356,7 +395,7 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
         seekBarSmall?.visibility = View.GONE
         onSeekChanged(0, 0, false, 0)
         showOrHidePlayBtn(false)
-        loadingView?.setMode(VideoLoadingView.DisplayMode.NO_DATA)
+        onLoadingEvent(LoadingMode.Fail)
     }
 
     override fun onLifecycleResume() {
@@ -402,6 +441,8 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
 
     open fun onTrack(playAble: Boolean, start: Boolean, end: Boolean, formTrigDuration: Float) {}
 
+    open fun loadingEventDispatch(view: View, loadingMode: LoadingMode, isSetInNow: Boolean = false) {}
+
     open fun onPlayClick(v: View) {
         if (!isPlayable) return
         v.isEnabled = false
@@ -415,7 +456,7 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
     open fun reload(v: View) {
         val path = controller?.getPath()
         if (path.isNullOrEmpty()) {
-            loadingView?.setMode(VideoLoadingView.DisplayMode.LOADING)
+            onLoadingEvent(LoadingMode.Loading)
             postDelayed({
                 onError(NullPointerException("video path is null"))
             }, 300)
@@ -457,10 +498,13 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
 
     open fun onMuteClick(v: View) {
         val nextState = !v.isSelected
-        initVolume(nextState)
-        v.isSelected = nextState
+        try {
+            initVolume(nextState)
+            syncMute(nextState)
+        } catch (e: Exception) {
+            error("the mute click to $nextState failed , trying to check the system audio manager as device type: ${android.os.Build.MANUFACTURER}")
+        }
     }
-
 
     open fun removeView(tag: Any, nullAbleView: WeakReference<View?>? = null) {
         getVideoRootView()?.let { v ->
@@ -743,7 +787,7 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
 
     open fun reset(isNow: Boolean, isRegulate: Boolean, isShowPlayBtn: Boolean, isShowThumb: Boolean = true, isShowBackground: Boolean = true, isSinkBottomShader: Boolean = false) {
         vPlay?.isEnabled = isShowPlayBtn
-        loadingView?.setMode(VideoLoadingView.DisplayMode.DISMISS, "", false, setNow = true)
+        onLoadingEvent(LoadingMode.None, true)
         setOverlayViews(isShowThumb, isShowBackground, isSinkBottomShader)
         seekBar?.isSelected = false
         seekBar?.isEnabled = false
@@ -752,6 +796,7 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
         onSeekChanged(0, 0, false, 0)
         if (isRegulate) showOrHidePlayBtn(isShowPlayBtn, withState = false)
         full(false, isSetNow = isNow)
+        muteView?.isSelected = if (muteIsUseGlobal) muteGlobalDefault else muteDefault
     }
 
     protected fun onDisplayChanged(isShow: Boolean) {
@@ -775,8 +820,31 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
         videoOverrideImageShaderView?.z = zIn
     }
 
+    protected fun setMuteIsGlobal(isGlobal: Boolean) {
+        muteIsUseGlobal = isGlobal
+    }
+
     protected fun checkActIsFinished(): Boolean {
         return (context as? Activity)?.isFinishing == true
+    }
+
+    private fun onLoadingEvent(loadingMode: LoadingMode, isSetInNow: Boolean = false) {
+        loadingView?.let { lv ->
+            (lv as? VideoLoadingView)?.let {
+                val mod = when (loadingMode) {
+                    LoadingMode.None -> VideoLoadingView.DisplayMode.NONE
+                    LoadingMode.Loading -> VideoLoadingView.DisplayMode.LOADING
+                    LoadingMode.Fail -> VideoLoadingView.DisplayMode.NO_DATA
+                }
+                it.setMode(mod, isSetInNow)
+            } ?: loadingEventDispatch(lv, loadingMode, isSetInNow)
+        }
+    }
+
+    private fun syncMute(nextState: Boolean) {
+        if (muteIsUseGlobal) muteGlobalDefault = nextState
+        muteDefault = nextState
+        muteView?.isSelected = nextState
     }
 
     private fun log(s: String, bd: BehaviorData? = null) {

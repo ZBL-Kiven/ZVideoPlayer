@@ -2,8 +2,10 @@ package com.zj.videotest.controllers
 
 import android.content.Context
 import android.util.AttributeSet
+import android.view.View
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.gif.GifDrawable
+import com.zj.player.base.LoadingMode
 import com.zj.player.controller.BaseListVideoController
 import com.zj.player.img.ImgLoader
 
@@ -35,6 +37,10 @@ class CCVideoController @JvmOverloads constructor(c: Context, attr: AttributeSet
         isInterruptPlayBtnAnim = true
         showOrHidePlayBtn(false, withState = false)
         full(false)
+    }
+
+    override fun loadingEventDispatch(view: View, loadingMode: LoadingMode, isSetInNow: Boolean) {
+        super.loadingEventDispatch(view, loadingMode, isSetInNow)
     }
 
 }

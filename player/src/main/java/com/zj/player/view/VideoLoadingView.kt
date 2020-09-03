@@ -6,7 +6,6 @@ import android.animation.Animator
 import android.animation.ArgbEvaluator
 import android.animation.ValueAnimator
 import android.content.Context
-import android.text.TextUtils
 import android.util.AttributeSet
 import android.view.View
 import android.widget.FrameLayout
@@ -28,45 +27,31 @@ internal class VideoLoadingView @JvmOverloads constructor(context: Context, attr
     private var contentView: View? = null
     private var vLoading: ProgressBar? = null
     private var vNoData: View? = null
-    private var vNoNetWork: View? = null
-    private var blvChildBg: View? = null
-    private var curBackgroundView: View? = null
     private var tvHint: TextView? = null
     private var tvRefresh: TextView? = null
     private var refresh: ((View) -> Unit)? = null
-
     private var bgColor: Int = 0
-    private var bgColorOnAct: Int = 0
     private var needBackgroundColor: Int = 0
     private var oldBackgroundColor: Int = 0
     private var noDataRes = -1
-    private var noNetworkRes = -1
     private var loadingRes = -1
     private var hintTextColor: Int = 0
     private var refreshTextColor: Int = 0
-
-    private var showOnActDefault: Boolean = false
-
     private var loadingHint: String = ""
     private var noDataHint: String = ""
-    private var networkErrorHint: String = ""
     private var refreshHint: String? = ""
-
     private var argbEvaluator: ArgbEvaluator? = null
-    private var refreshEnable = true
     private var refreshEnableWithView = false
-
     private var valueAnimator: BaseLoadingValueAnimator? = null
-
     private val listener = object : BaseLoadingAnimatorListener {
 
-        override fun onDurationChange(animation: ValueAnimator, duration: Float, mode: DisplayMode?, isShowOnAct: Boolean) {
+        override fun onDurationChange(animation: ValueAnimator, duration: Float, mode: DisplayMode?) {
             synchronized(this@VideoLoadingView) {
                 onAnimationFraction(animation.animatedFraction, duration, mode)
             }
         }
 
-        override fun onAnimEnd(animation: Animator, mode: DisplayMode?, isShowOnAct: Boolean) {
+        override fun onAnimEnd(animation: Animator, mode: DisplayMode?) {
             synchronized(this@VideoLoadingView) {
                 onAnimationFraction(1.0f, 1.0f, mode)
             }
@@ -75,14 +60,11 @@ internal class VideoLoadingView @JvmOverloads constructor(context: Context, attr
 
     init {
         init(context, attrs)
-    }
-
-    fun setRefreshEnable(enable: Boolean) {
-        this.refreshEnable = enable
+        initView(context)
     }
 
     enum class DisplayMode(internal val value: Int) {
-        NONE(0), LOADING(1), NO_DATA(2), NET_ERROR(3), DISMISS(4)
+        NONE(0), LOADING(1), NO_DATA(2)
     }
 
     /**
@@ -93,7 +75,7 @@ internal class VideoLoadingView @JvmOverloads constructor(context: Context, attr
     fun setRefreshListener(refresh: (v: View) -> Unit) {
         this.refresh = refresh
         setOnClickListener {
-            if (refreshEnable && refreshEnableWithView && this@VideoLoadingView.refresh != null) {
+            if (refreshEnableWithView && this@VideoLoadingView.refresh != null) {
                 this@VideoLoadingView.refresh?.invoke(it)
             }
         }
@@ -104,18 +86,13 @@ internal class VideoLoadingView @JvmOverloads constructor(context: Context, attr
             val array = context.obtainStyledAttributes(attrs, R.styleable.VideoLoadingView)
             try {
                 bgColor = array.getColor(R.styleable.VideoLoadingView_zPlayer_backgroundFill, -1)
-                bgColorOnAct = array.getColor(R.styleable.VideoLoadingView_zPlayer_backgroundOnAct, -1)
                 noDataRes = array.getResourceId(R.styleable.VideoLoadingView_zPlayer_noDataRes, -1)
-                noNetworkRes = array.getResourceId(R.styleable.VideoLoadingView_zPlayer_noNetworkRes, -1)
                 loadingRes = array.getResourceId(R.styleable.VideoLoadingView_zPlayer_loadingRes, -1)
                 hintTextColor = array.getColor(R.styleable.VideoLoadingView_zPlayer_hintColor, -1)
                 refreshTextColor = array.getColor(R.styleable.VideoLoadingView_zPlayer_refreshTextColor, -1)
                 loadingHint = array.getString(R.styleable.VideoLoadingView_zPlayer_loadingText) ?: ""
                 noDataHint = array.getString(R.styleable.VideoLoadingView_zPlayer_noDataText) ?: ""
-                networkErrorHint = array.getString(R.styleable.VideoLoadingView_zPlayer_networkErrorText) ?: ""
                 refreshHint = array.getString(R.styleable.VideoLoadingView_zPlayer_refreshText)
-                showOnActDefault = array.getBoolean(R.styleable.VideoLoadingView_zPlayer_showOnActDefault, false)
-                refreshEnable = array.getBoolean(R.styleable.VideoLoadingView_zPlayer_refreshEnable, true)
             } catch (e: Exception) {
                 ZPlayerLogs.onError(e)
             } finally {
@@ -128,11 +105,9 @@ internal class VideoLoadingView @JvmOverloads constructor(context: Context, attr
     private fun initView(context: Context) {
         contentView = View.inflate(context, R.layout.z_player_loading_view, this)
         vNoData = f(R.id.blv_vNoData)
-        vNoNetWork = f(R.id.blv_vNoNetwork)
         vLoading = f(R.id.blv_pb)
         tvHint = f(R.id.blv_tvHint)
         tvRefresh = f(R.id.blv_tvRefresh)
-        blvChildBg = f(R.id.blv_child_bg)
         if (refreshHint != null && !refreshHint.isNullOrEmpty()) tvRefresh?.text = refreshHint
         if (hintTextColor != 0) tvHint?.setTextColor(hintTextColor)
         if (refreshTextColor != 0) tvRefresh?.setTextColor(refreshTextColor)
@@ -140,14 +115,10 @@ internal class VideoLoadingView @JvmOverloads constructor(context: Context, attr
         disPlayViews = EnumMap(DisplayMode::class.java)
         disPlayViews?.put(DisplayMode.LOADING, 0.0f)
         tvHint?.text = loadingHint
-        resetUi()
-        resetBackground(showOnActDefault)
     }
 
-    private fun resetBackground(showOnAct: Boolean) {
-        curBackgroundView = if (showOnAct) blvChildBg else this
-        blvChildBg?.setBackgroundColor(if (showOnAct) bgColorOnAct else 0)
-        setBackgroundColor(if (showOnAct) 0 else bgColor)
+    private fun resetBackground() {
+        setBackgroundColor(bgColor)
     }
 
     /**
@@ -165,12 +136,6 @@ internal class VideoLoadingView @JvmOverloads constructor(context: Context, attr
         return this
     }
 
-    //call resetUi() after set this
-    fun setNetErrorDrawable(drawableRes: Int): VideoLoadingView {
-        this.noNetworkRes = drawableRes
-        return this
-    }
-
     //reset LOADING/NO_DATA/NET_ERROR drawable
     private fun resetUi() {
         if (loadingRes > 0) {
@@ -184,33 +149,18 @@ internal class VideoLoadingView @JvmOverloads constructor(context: Context, attr
         if (noDataRes > 0) {
             vNoData?.setBackgroundResource(noDataRes)
         }
-        if (noNetworkRes > 0) {
-            vNoNetWork?.setBackgroundResource(noNetworkRes)
-        }
     }
 
     /**
      * just call setMode after this View got,
-     *
      * @param m      the current display mode you need;
-     * @param showOnContent is showing on content? or hide content?
-     * @param hint      show something when it`s change a mode;
      */
     @JvmOverloads
-    fun setMode(m: DisplayMode, hint: String = "", showOnContent: Boolean? = null, setNow: Boolean = false) {
-        var mode = m
-        var showOnAct = showOnContent
-        if (showOnAct == null) showOnAct = showOnActDefault
-        if (mode == DisplayMode.NONE) mode = DisplayMode.DISMISS
-        val newCode = (if (showOnAct) -10 else 10) + mode.value
-        val oldCode = (if (showOnAct) -10 else 10) + oldMode.value
-        oldMode = mode
-        val isSameMode = newCode == oldCode
-        val hintText = if (!TextUtils.isEmpty(hint)) hint else getHintString(mode)
-        if (hintText.isNotEmpty()) {
-            tvHint?.text = hintText
-        }
-        refreshEnableWithView = refreshEnable && (mode == DisplayMode.NO_DATA || mode == DisplayMode.NET_ERROR)
+    fun setMode(m: DisplayMode, setNow: Boolean = false) {
+        oldMode = m
+        val isSameMode = m.value == oldMode.value
+        tvHint?.text = getHintString(m)
+        refreshEnableWithView = m == DisplayMode.NO_DATA
         tvRefresh?.visibility = if (refreshEnableWithView) View.VISIBLE else View.INVISIBLE
         if (setNow) {
             valueAnimator?.end()
@@ -223,11 +173,11 @@ internal class VideoLoadingView @JvmOverloads constructor(context: Context, attr
             } else {
                 valueAnimator?.end()
             }
-            disPlayViews?.put(mode, 0.0f)
+            disPlayViews?.put(m, 0.0f)
             if (!isSameMode) {
-                resetBackground(showOnAct)
-                needBackgroundColor = if (showOnAct) bgColorOnAct else bgColor
-                valueAnimator?.start(mode, showOnAct)
+                resetBackground()
+                needBackgroundColor = bgColor
+                valueAnimator?.start(m)
             }
         }
     }
@@ -236,15 +186,13 @@ internal class VideoLoadingView @JvmOverloads constructor(context: Context, attr
         return when (mode) {
             DisplayMode.LOADING -> if (loadingHint.isEmpty()) "LOADING" else loadingHint
             DisplayMode.NO_DATA -> if (noDataHint.isEmpty()) "no data found" else noDataHint
-            DisplayMode.NET_ERROR -> if (networkErrorHint.isEmpty()) "no network access" else networkErrorHint
             else -> ""
         }
     }
 
     fun hideDelay(delayDismissTime: Int) {
-        postDelayed({ setMode(DisplayMode.DISMISS, "", false) }, delayDismissTime.toLong())
+        postDelayed({ setMode(DisplayMode.NONE, false) }, delayDismissTime.toLong())
     }
-
 
     @Synchronized
     private fun onAnimationFraction(duration: Float, offset: Float, curMode: DisplayMode?) {
@@ -278,14 +226,14 @@ internal class VideoLoadingView @JvmOverloads constructor(context: Context, attr
     }
 
     private fun setBackground(duration: Float, curMode: DisplayMode?) {
-        if (curMode != DisplayMode.DISMISS) {
+        if (curMode != DisplayMode.NONE) {
             if (visibility != View.VISIBLE) {
                 alpha = 0f
                 visibility = View.VISIBLE
             }
             if (alpha >= 1.0f) {
                 if (oldBackgroundColor != needBackgroundColor) {
-                    curBackgroundView?.setBackgroundColor(needBackgroundColor)
+                    setBackgroundColor(needBackgroundColor)
                     oldBackgroundColor = needBackgroundColor
                 }
             } else {
@@ -293,7 +241,7 @@ internal class VideoLoadingView @JvmOverloads constructor(context: Context, attr
                 if (oldBackgroundColor != needBackgroundColor) {
                     val curBackgroundColor = argbEvaluator?.evaluate(duration, oldBackgroundColor, needBackgroundColor) as Int
                     oldBackgroundColor = curBackgroundColor
-                    curBackgroundView?.setBackgroundColor(curBackgroundColor)
+                    setBackgroundColor(curBackgroundColor)
                 }
             }
         } else {
@@ -311,7 +259,6 @@ internal class VideoLoadingView @JvmOverloads constructor(context: Context, attr
         return when (mode) {
             DisplayMode.NO_DATA -> vNoData
             DisplayMode.LOADING -> vLoading
-            DisplayMode.NET_ERROR -> vNoNetWork
             else -> null
         }
     }
@@ -323,14 +270,12 @@ internal class VideoLoadingView @JvmOverloads constructor(context: Context, attr
     private class BaseLoadingValueAnimator constructor(private var listener: BaseLoadingAnimatorListener?) : ValueAnimator() {
 
         private var curMode: DisplayMode? = null
-        private var isShowOnAct: Boolean = false
         private var curDuration: Float = 0.toFloat()
         private var isCancel: Boolean = false
 
-        fun start(mode: DisplayMode, isShowOnAct: Boolean) {
+        fun start(mode: DisplayMode) {
             if (isRunning) cancel()
             this.curMode = mode
-            this.isShowOnAct = isShowOnAct
             super.start()
         }
 
@@ -351,7 +296,7 @@ internal class VideoLoadingView @JvmOverloads constructor(context: Context, attr
                 override fun onAnimationEnd(animation: Animator) {
                     curDuration = 0f
                     if (isCancel) return
-                    if (listener != null) listener?.onAnimEnd(animation, curMode, isShowOnAct)
+                    if (listener != null) listener?.onAnimEnd(animation, curMode)
                 }
 
                 override fun onAnimationCancel(animation: Animator) {
@@ -368,7 +313,7 @@ internal class VideoLoadingView @JvmOverloads constructor(context: Context, attr
                 if (listener != null) {
                     val duration = animation.animatedValue as Float
                     val offset = duration - curDuration
-                    listener?.onDurationChange(animation, offset, curMode, isShowOnAct)
+                    listener?.onDurationChange(animation, offset, curMode)
                     curDuration = duration
                 }
             })
@@ -381,9 +326,9 @@ internal class VideoLoadingView @JvmOverloads constructor(context: Context, attr
 
     interface BaseLoadingAnimatorListener {
 
-        fun onDurationChange(animation: ValueAnimator, duration: Float, mode: DisplayMode?, isShowOnAct: Boolean)
+        fun onDurationChange(animation: ValueAnimator, duration: Float, mode: DisplayMode?)
 
-        fun onAnimEnd(animation: Animator, mode: DisplayMode?, isShowOnAct: Boolean)
+        fun onAnimEnd(animation: Animator, mode: DisplayMode?)
     }
 
     companion object {
