@@ -22,7 +22,7 @@ import kotlin.math.min
  */
 internal class VideoLoadingView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) : FrameLayout(context, attrs, defStyleAttr) {
 
-    private var oldMode = DisplayMode.NONE
+    private var oldMode = DisplayMode.INIT
     private var disPlayViews: MutableMap<DisplayMode, Float>? = null
     private var contentView: View? = null
     private var vLoading: ProgressBar? = null
@@ -60,11 +60,10 @@ internal class VideoLoadingView @JvmOverloads constructor(context: Context, attr
 
     init {
         init(context, attrs)
-        initView(context)
     }
 
     enum class DisplayMode(internal val value: Int) {
-        NONE(0), LOADING(1), NO_DATA(2)
+        INIT(-1), NONE(0), LOADING(1), NO_DATA(2)
     }
 
     /**
@@ -115,6 +114,8 @@ internal class VideoLoadingView @JvmOverloads constructor(context: Context, attr
         disPlayViews = EnumMap(DisplayMode::class.java)
         disPlayViews?.put(DisplayMode.LOADING, 0.0f)
         tvHint?.text = loadingHint
+        resetUi()
+        resetBackground()
     }
 
     private fun resetBackground() {
@@ -157,8 +158,12 @@ internal class VideoLoadingView @JvmOverloads constructor(context: Context, attr
      */
     @JvmOverloads
     fun setMode(m: DisplayMode, setNow: Boolean = false) {
-        oldMode = m
-        val isSameMode = m.value == oldMode.value
+        var mode = m
+        if (mode == DisplayMode.NONE) mode = DisplayMode.NONE
+        val newCode = mode.value
+        val oldCode = oldMode.value
+        oldMode = mode
+        val isSameMode = newCode == oldCode
         tvHint?.text = getHintString(m)
         refreshEnableWithView = m == DisplayMode.NO_DATA
         tvRefresh?.visibility = if (refreshEnableWithView) View.VISIBLE else View.INVISIBLE

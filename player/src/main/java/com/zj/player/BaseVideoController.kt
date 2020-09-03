@@ -179,7 +179,7 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
             lockScreenRotation = ta.getInt(R.styleable.BaseVideoController_lockScreenRotation, -1)
             muteIsUseGlobal = ta.getBoolean(R.styleable.BaseVideoController_useMuteGlobal, false)
             muteDefault = ta.getBoolean(R.styleable.BaseVideoController_muteDefault, false)
-            loadingViewInflateId = ta.getResourceId(R.styleable.BaseVideoController_loadingViewLayoutId, -1)
+            loadingViewInflateId = ta.getResourceId(R.styleable.BaseVideoController_loadingViewLayoutId, defaultLoadingLayoutId)
             loadingViewId = if (loadingViewInflateId == defaultLoadingLayoutId) {
                 defaultLoadingId
             } else {
@@ -188,8 +188,8 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
             if (loadingViewId == -1) throw RuntimeException("you must set a loading view id in the attrs and it must in contains of loading layout which your set.")
             val view = LayoutInflater.from(context).inflate(R.layout.z_player_video_view, null, false)
             addView(view, LayoutParams(MATCH_PARENT, MATCH_PARENT))
-            vPlay = view?.findViewById(R.id.z_player_video_preview_iv_play)
             videoRoot = view?.findViewById(R.id.z_player_video_root)
+            vPlay = view?.findViewById(R.id.z_player_video_preview_iv_play)
             muteView = setDefaultControllerStyle(R.id.z_player_video_preview_iv_mute, muteIconEnable)
             speedView = setDefaultControllerStyle(R.id.z_player_video_preview_tv_speed, speedIconEnable)
             fullScreen = setDefaultControllerStyle(R.id.z_player_video_preview_iv_full_screen, fullScreenEnable)
@@ -205,13 +205,15 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
             viewStub?.layoutResource = loadingViewInflateId
             viewStub?.inflate()
             loadingView = view?.findViewById(loadingViewId)
+            loadingView?.z = 7f
             seekBar = view?.findViewById(R.id.z_player_video_preview_sb)
             isLockScreenRotation = lockScreenRotation != -1
             isFull = bottomToolsBar?.visibility == View.VISIBLE
             speedView?.text = context.getString(R.string.z_player_str_speed, 1)
             touchListener?.setPadding(0.05f, 0.08f)
         } catch (e: Exception) {
-            e.printStackTrace()
+            if (e is RuntimeException) throw e
+            else e.printStackTrace()
         } finally {
             ta.recycle()
         }
