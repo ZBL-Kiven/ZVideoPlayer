@@ -165,7 +165,13 @@ abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : Rec
         this.isAutoScrollToVisible = `is`
     }
 
+    fun pause() {
+        controller?.pause()
+        isAutoPlayWhenItemAttached = false
+    }
+
     fun resume() {
+        controller?.playOrResume()
         isAutoPlayWhenItemAttached = true
     }
 
