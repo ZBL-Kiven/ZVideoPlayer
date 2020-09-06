@@ -24,7 +24,9 @@ import kotlin.math.min
  * of course ZPlayer running in the list adapter as so well.
  * create an instance of [BaseListVideoController] in your data Adapter ,and see [AdapterDelegateIn]
  **/
-abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : RecyclerView.ViewHolder>(private val adapter: RecyclerView.Adapter<VH>) : AdapterDelegateIn<T, VH>, VideoControllerIn {
+abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : RecyclerView.ViewHolder>(
+    private val adapter: RecyclerView.Adapter<VH>
+) : AdapterDelegateIn<T, VH>, VideoControllerIn {
 
     private var controller: ZController? = null
     private var curPlayingIndex: Int = -1
@@ -36,7 +38,14 @@ abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : Rec
     protected abstract fun getViewController(holder: VH?): V?
     protected abstract fun getItem(p: Int): T?
     protected abstract fun getPathAndLogsCallId(d: T?): Pair<String, Any?>?
-    protected abstract fun onBindData(holder: SoftReference<VH>?, p: Int, d: T?, playAble: Boolean, vc: V, pl: MutableList<Any>?)
+    protected abstract fun onBindData(
+        holder: SoftReference<VH>?,
+        p: Int,
+        d: T?,
+        playAble: Boolean,
+        vc: V,
+        pl: MutableList<Any>?
+    )
 
     /**
      * overridden your data adapter and call;
@@ -65,14 +74,22 @@ abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : Rec
                     val pac = getPathAndLogsCallId(p)
                     pac?.let { pv -> it.onBehaviorDetached(pv.first, pv.second) }
                 }
-                if (isStopWhenItemDetached && position == curPlayingIndex) if (it.isBindingController) controller?.stopNow(false)
+                if (isStopWhenItemDetached && position == curPlayingIndex) if (it.isBindingController) controller?.stopNow(
+                    false
+                )
                 it.resetWhenDisFocus()
             }
         }
         holder?.clear()
     }
 
-    override fun bindData(holder: SoftReference<VH>?, p: Int, d: T?, playAble: Boolean, pl: MutableList<Any>?) {
+    override fun bindData(
+        holder: SoftReference<VH>?,
+        p: Int,
+        d: T?,
+        playAble: Boolean,
+        pl: MutableList<Any>?
+    ) {
         WeakReference(getViewController(holder?.get())).get()?.let { vc ->
             vc.onBindHolder(p)
             vc.setControllerIn(this)
@@ -175,18 +192,18 @@ abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : Rec
         }
     }
 
-    open fun waitingForPlay(index: Int) {
-        waitingForPlay(index, true)
+    open fun waitingForPlay(index: Int, delay: Long = 16L) {
+        waitingForPlay(index, delay, true)
     }
 
-    final override fun waitingForPlay(curPlayingIndex: Int, fromUser: Boolean) {
+    final override fun waitingForPlay(curPlayingIndex: Int, delay: Long, fromUser: Boolean) {
         if (curPlayingIndex !in 0 until adapter.itemCount) return
         handler?.removeMessages(0)
-        handler?.sendMessage(Message.obtain().apply {
+        handler?.sendMessageDelayed(Message.obtain().apply {
             this.what = 0
             this.arg1 = curPlayingIndex
             this.obj = fromUser
-        })
+        }, delay)
     }
 
     private fun onScrollIdle() {
@@ -203,8 +220,10 @@ abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : Rec
             val cp = Rect()
             recyclerView?.getLocalVisibleRect(cp)
             val tr = if (fv == lv) fv else if (fv >= 0 && lv >= 0) {
-                @Suppress("UNCHECKED_CAST") val vft = (recyclerView?.findViewHolderForAdapterPosition(fv) as? VH)?.itemView?.top ?: 0
-                @Suppress("UNCHECKED_CAST") val vlt = (recyclerView?.findViewHolderForAdapterPosition(lv) as? VH)?.itemView
+                @Suppress("UNCHECKED_CAST") val vft =
+                    (recyclerView?.findViewHolderForAdapterPosition(fv) as? VH)?.itemView?.top ?: 0
+                @Suppress("UNCHECKED_CAST") val vlt =
+                    (recyclerView?.findViewHolderForAdapterPosition(lv) as? VH)?.itemView
                 val fvo = vft - cp.top
                 val lvo = vlt?.let { min(vlt.bottom - cp.bottom, vlt.top - cp.top) } ?: 0
                 val trv = min(abs(fvo), abs(lvo))
@@ -212,12 +231,18 @@ abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : Rec
                 offsetPositions = if (isFo) fvo else lvo
                 if (isFo) fv else lv
             } else if (fv <= 0) lv else fv
-            @Suppress("UNCHECKED_CAST") (getViewController(recyclerView?.findViewHolderForAdapterPosition(tr) as? VH)?.let {
+            @Suppress("UNCHECKED_CAST") (getViewController(
+                recyclerView?.findViewHolderForAdapterPosition(
+                    tr
+                ) as? VH
+            )?.let {
                 if (!it.isBindingController) it.clickPlayBtn()
             })
             if (!scrollAuto) return@let
             val offset = offsetPositions ?: {
-                val itemOffset = @Suppress("UNCHECKED_CAST") (recyclerView?.findViewHolderForAdapterPosition(tr) as? VH)?.itemView?.top ?: 0
+                val itemOffset =
+                    @Suppress("UNCHECKED_CAST") (recyclerView?.findViewHolderForAdapterPosition(tr) as? VH)?.itemView?.top
+                        ?: 0
                 itemOffset - cp.top
             }.invoke()
             recyclerView?.smoothScrollBy(0, offset, AccelerateInterpolator(), 600)
@@ -240,18 +265,26 @@ abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : Rec
                 if ((ctr.isLoadData() && p != curPlayingIndex) || (ctr.isLoadData() && ctr.getPath() != d.first)) {
                     ctr.stopNow(false)
                 }
-                if (formUser || p != curPlayingIndex || (!vc.isCompleted && !ctr.isLoadData()) || (ctr.isLoadData() && !ctr.isPlaying() && !ctr.isPause(true) && !vc.isCompleted)) {
+                if (formUser || p != curPlayingIndex || (!vc.isCompleted && !ctr.isLoadData()) || (ctr.isLoadData() && !ctr.isPlaying() && !ctr.isPause(
+                        true
+                    ) && !vc.isCompleted)
+                ) {
                     play()
                 }
             }
-        } ?: ZPlayerLogs.onError(NullPointerException("where is the thread call crashed, make the ZController to be null?"))
+        }
+            ?: ZPlayerLogs.onError(NullPointerException("where is the thread call crashed, make the ZController to be null?"))
     }
 
     private var handler: Handler? = Handler(Looper.getMainLooper()) {
         when (it.what) {
             0 -> {
                 controller?.stopNow()
-                adapter.notifyItemRangeChanged(0, adapter.itemCount, String.format(LOAD_STR_DEFAULT_LOADER, it.arg1, it.obj.toString()))
+                adapter.notifyItemRangeChanged(
+                    0,
+                    adapter.itemCount,
+                    String.format(LOAD_STR_DEFAULT_LOADER, it.arg1, it.obj.toString())
+                )
             }
             1 -> onScrollIdle()
         }

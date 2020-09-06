@@ -11,7 +11,11 @@ import com.zj.player.list.VideoControllerIn
  * implements the data binder interfaces.
  **/
 @Suppress("unused")
-abstract class BaseListVideoController @JvmOverloads constructor(c: Context, attr: AttributeSet? = null, def: Int = 0) : BackgroundVideoController(c, attr, def) {
+abstract class BaseListVideoController @JvmOverloads constructor(
+    c: Context,
+    attr: AttributeSet? = null,
+    def: Int = 0
+) : BackgroundVideoController(c, attr, def) {
 
     private var videoControllerIn: VideoControllerIn? = null
 
@@ -22,7 +26,8 @@ abstract class BaseListVideoController @JvmOverloads constructor(c: Context, att
     private var completedListener: ((BaseListVideoController) -> Unit)? = null
     private var fullScreenChangeListener: ((BaseListVideoController) -> Unit)? = null
     private var resetListener: ((BaseListVideoController) -> Unit)? = null
-    private var onTrackListener: ((playAble: Boolean, start: Boolean, end: Boolean, formTrigDuration: Float) -> Unit)? = null
+    private var onTrackListener: ((playAble: Boolean, start: Boolean, end: Boolean, formTrigDuration: Float) -> Unit)? =
+        null
 
     val isBindingController: Boolean
         get() {
@@ -45,7 +50,7 @@ abstract class BaseListVideoController @JvmOverloads constructor(c: Context, att
         if (controller?.isPlaying() == true) if (reload) super.reload(v) else super.onPlayClick(v) else {
             controller?.let {
                 if (reload) super.reload(v) else super.onPlayClick(v)
-            } ?: videoControllerIn?.waitingForPlay(curPlayingIndex)
+            } ?: videoControllerIn?.waitingForPlay(curPlayingIndex, 20L)
         }
     }
 
@@ -74,9 +79,20 @@ abstract class BaseListVideoController @JvmOverloads constructor(c: Context, att
         onTrackListener?.invoke(playAble, start, end, formTrigDuration)
     }
 
-    open fun reset(isShowThumb: Boolean = true, isShowBackground: Boolean = true, isSinkBottomShader: Boolean = false) {
+    open fun reset(
+        isShowThumb: Boolean = true,
+        isShowBackground: Boolean = true,
+        isSinkBottomShader: Boolean = false
+    ) {
         isCompleted = false
-        reset(true, isRegulate = true, isShowPlayBtn = isPlayable, isShowThumb = isShowThumb, isShowBackground = isShowBackground, isSinkBottomShader = isSinkBottomShader)
+        reset(
+            true,
+            isRegulate = true,
+            isShowPlayBtn = isPlayable,
+            isShowThumb = isShowThumb,
+            isShowBackground = isShowBackground,
+            isSinkBottomShader = isSinkBottomShader
+        )
     }
 
     fun setOnCompletedListener(l: ((BaseListVideoController) -> Unit)? = null) {
@@ -96,10 +112,22 @@ abstract class BaseListVideoController @JvmOverloads constructor(c: Context, att
     }
 
     fun onBehaviorDetached(p: String, callId: Any?) {
-        recordLogs("the data $p detached form window", this::class.java.simpleName, Pair("path", p), Pair("callId", callId ?: ""), Pair("name", "videoDetached"))
+        recordLogs(
+            "the data $p detached form window",
+            this::class.java.simpleName,
+            Pair("path", p),
+            Pair("callId", callId ?: ""),
+            Pair("name", "videoDetached")
+        )
     }
 
     fun onBehaviorAttached(p: String, callId: Any?) {
-        recordLogs("the data $p attached form window", this::class.java.simpleName, Pair("path", p), Pair("callId", callId ?: ""), Pair("name", "videoAttached"))
+        recordLogs(
+            "the data $p attached form window",
+            this::class.java.simpleName,
+            Pair("path", p),
+            Pair("callId", callId ?: ""),
+            Pair("name", "videoAttached")
+        )
     }
 }

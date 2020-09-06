@@ -7,6 +7,6 @@ package com.zj.player.list
  **/
 internal interface VideoControllerIn {
 
-    fun waitingForPlay(curPlayingIndex: Int, fromUser: Boolean = false)
+    fun waitingForPlay(curPlayingIndex: Int, delay: Long, fromUser: Boolean = false)
 
 }
