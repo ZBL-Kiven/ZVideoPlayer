@@ -50,7 +50,6 @@ class RFeedFragment : BaseLinkageFragment() {
             } else {
                 refreshLayout?.finishRefresh(1700)
             }
-            if (!isLoadMore) adapter?.resume()
         }
     }
 
@@ -102,11 +101,6 @@ class RFeedFragment : BaseLinkageFragment() {
     override fun onResumed() {
         super.onResumed()
         adapter?.resume()
-    }
-
-    override fun onStopped() {
-        super.onStopped()
-        adapter?.release()
     }
 
     override fun onDestroyed() {

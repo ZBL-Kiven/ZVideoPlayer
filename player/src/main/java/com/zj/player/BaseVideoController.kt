@@ -320,11 +320,10 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
         seekBar?.isEnabled = true
         tvEnd?.text = getDuration(videoSize)
         if (muteIsUseGlobal) {
-            if (muteView?.isSelected != muteGlobalDefault) muteView?.isSelected = muteGlobalDefault
+            if (muteView?.isSelected != muteGlobalDefault) muteView?.isSelected = muteGlobalDefault;initVolume(muteGlobalDefault)
         } else {
-            if (muteView?.isSelected != muteDefault) muteView?.isSelected = muteDefault
+            if (muteView?.isSelected != muteDefault) muteView?.isSelected = muteDefault;initVolume(muteDefault)
         }
-        initVolume(muteDefault)
     }
 
     override fun onPlay(path: String, isRegulate: Boolean) {
@@ -508,7 +507,7 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
         }
     }
 
-    open fun removeView(tag: Any, nullAbleView: WeakReference<View?>? = null) {
+    open fun removeView(tag: Any?, nullAbleView: WeakReference<View?>? = null) {
         getVideoRootView()?.let { v ->
             v.post {
                 val view = v.findViewWithTag<View>(tag)
@@ -520,6 +519,13 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
                 }
             }
         }
+    }
+
+    open fun containsOverlayView(tag: Any?, view: WeakReference<View?>?): Boolean {
+        getVideoRootView()?.let { rv ->
+            return rv.findViewWithTag<View>(tag) != null || (view?.get()?.parent == rv)
+        }
+        return false
     }
 
     open fun addOverlayView(tag: Any, view: WeakReference<View?>?, paramsBuilder: ((RelativeLayout.LayoutParams) -> RelativeLayout.LayoutParams)? = null) {

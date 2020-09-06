@@ -74,7 +74,7 @@ class ZController private constructor(private var player: ZPlayer?, viewControll
 
         /**
          * After setting this property, all ViewController instances configured with app:useMuteGlobal in xml take effect。
-         * @see BaseVideoController.muteIsUseGlobal  bind to [muteGlobalDefault]
+         * @see BaseVideoController.muteIsUseGlobal  bind to [BaseVideoController.muteGlobalDefault]
          * */
         fun setGlobalMuteDefault(isMute: Boolean) {
             BaseVideoController.setGlobalMuteDefault(isMute)
@@ -262,6 +262,7 @@ class ZController private constructor(private var player: ZPlayer?, viewControll
         (render?.parent as? ViewGroup)?.removeView(render)
         render?.release()
         render = null
+        player?.stopNow(false, isRegulate = false)
         player?.release()
         viewController?.let {
             it.onStop("", true)

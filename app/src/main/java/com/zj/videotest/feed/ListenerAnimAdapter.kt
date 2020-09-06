@@ -6,6 +6,10 @@ abstract class ListenerAnimAdapter<T>(id: Int) : AnimationAdapter<T>(id) {
 
     abstract fun onDataChange(data: MutableList<T>?)
 
+    open fun onDataFullChange() {
+
+    }
+
     override fun add(data: MutableList<T>?) {
         onDataChange(getData())
         super.add(data)
@@ -44,5 +48,6 @@ abstract class ListenerAnimAdapter<T>(id: Int) : AnimationAdapter<T>(id) {
     override fun change(data: MutableList<T>?) {
         onDataChange(data)
         super.change(data)
+        onDataFullChange()
     }
 }

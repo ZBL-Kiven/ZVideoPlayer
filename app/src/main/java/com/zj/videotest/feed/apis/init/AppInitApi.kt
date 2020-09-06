@@ -1,5 +1,7 @@
 package com.zj.videotest.feed.apis.init
 
+import android.os.Handler
+import android.os.Looper
 import com.zj.videotest.feed.apis.config.ApiErrorHandler
 import com.zj.videotest.feed.apis.config.Constance
 import com.zj.api.BaseApi
@@ -40,6 +42,6 @@ object AppInitApi {
     }
 
     fun getFeedMock(r: (b: Boolean, d: List<FeedDataIn>?, es: HttpException?) -> Unit) {
-        r(true, FeedMockImpl.createMock(), null)
+        Handler(Looper.getMainLooper()).postDelayed({ r(true, FeedMockImpl.createMock(), null) }, 3000)
     }
 }
