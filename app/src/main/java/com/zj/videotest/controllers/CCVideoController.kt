@@ -3,11 +3,15 @@ package com.zj.videotest.controllers
 import android.content.Context
 import android.util.AttributeSet
 import android.view.View
+import android.widget.RelativeLayout
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.gif.GifDrawable
+import com.zj.loading.BaseLoadingView
+import com.zj.loading.DisplayMode
 import com.zj.player.base.LoadingMode
 import com.zj.player.controller.BaseListVideoController
 import com.zj.player.img.ImgLoader
+import com.zj.videotest.R
 
 class CCVideoController @JvmOverloads constructor(c: Context, attr: AttributeSet? = null, def: Int = 0) : BaseListVideoController(c, attr, def) {
 
@@ -41,6 +45,26 @@ class CCVideoController @JvmOverloads constructor(c: Context, attr: AttributeSet
 
     override fun loadingEventDispatch(view: View, loadingMode: LoadingMode, isSetInNow: Boolean) {
         super.loadingEventDispatch(view, loadingMode, isSetInNow)
+        view.post {
+            var hintText = ""
+            val refresh = context.getString(R.string.z_player_str_loading_video_error_tint)
+            (view as? BaseLoadingView)?.let {
+                val lp = RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.MATCH_PARENT)
+                it.layoutParams = lp
+                val mod = when (loadingMode) {
+                    LoadingMode.None -> DisplayMode.NORMAL
+                    LoadingMode.Fail -> {
+                        hintText = context.getString(R.string.z_player_str_loading_video_error);DisplayMode.NO_DATA
+                    }
+                    LoadingMode.Loading -> {
+                        hintText = context.getString(R.string.z_player_str_loading_video_progress);DisplayMode.LOADING.delay(500)
+                    }
+                    else -> DisplayMode.NORMAL
+                }
+
+                it.setMode(mod, hintText, refresh, isSetInNow)
+            }
+        }
     }
 
 }

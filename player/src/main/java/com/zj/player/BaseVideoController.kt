@@ -205,7 +205,7 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
             viewStub?.layoutResource = loadingViewInflateId
             viewStub?.inflate()
             loadingView = view?.findViewById(loadingViewId)
-            loadingView?.z = 7f
+            loadingView?.z = Resources.getSystem().displayMetrics.density * 7 + 0.5f
             seekBar = view?.findViewById(R.id.z_player_video_preview_sb)
             isLockScreenRotation = lockScreenRotation != -1
             isFull = bottomToolsBar?.visibility == View.VISIBLE

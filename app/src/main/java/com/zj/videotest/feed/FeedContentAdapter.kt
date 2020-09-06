@@ -280,7 +280,6 @@ class FeedContentAdapter<T : FeedDataIn> : ListenerAnimAdapter<T>(R.layout.r_mai
         return adapterDelegate
     }
 
-
     fun pause() {
         adapterDelegate?.pause()
     }
@@ -291,7 +290,7 @@ class FeedContentAdapter<T : FeedDataIn> : ListenerAnimAdapter<T>(R.layout.r_mai
 
     fun release() {
         context?.let { Glide.get(it).clearMemory() }
-        System.gc()
+        Runtime.getRuntime().gc()
     }
 
     fun cancelAllPLay() {
