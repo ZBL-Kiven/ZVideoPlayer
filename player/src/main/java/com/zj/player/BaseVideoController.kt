@@ -35,7 +35,6 @@ import com.zj.player.ut.Constance
 import com.zj.player.ut.Controller
 import com.zj.player.view.VideoLoadingView
 import com.zj.player.view.VideoRootView
-import java.lang.IllegalArgumentException
 import java.lang.RuntimeException
 import java.lang.ref.WeakReference
 import java.util.*
@@ -558,10 +557,11 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
         getVideoRootView()?.let { rv ->
             var isAdd = true
             rv.post {
+                val vp = view?.get()?.parent as? ViewGroup
                 rv.findViewWithTag<View>(tag)?.let { exi ->
-                    if (exi != view) throw IllegalArgumentException("the tag $tag is already added with view[$exi]")
+                    if (vp != getVideoRootView()) vp?.removeView(exi)
                     else isAdd = false
-                } ?: (view?.get()?.parent as? ViewGroup)?.let {
+                } ?: vp?.let {
                     if (it != getVideoRootView()) it.removeView(view.get())
                     else isAdd = false
                 }

@@ -57,6 +57,7 @@ class BaseGestureFullScreenDialog private constructor(private var controllerView
     private val vlp: ViewGroup.LayoutParams? = getControllerView().layoutParams
     private val originViewRectF: RectF
     private var contentLayoutView: View? = null
+    private var backgroundView: View? = null
     private var realWindowSize = Point()
     private var screenUtil: ScreenOrientationListener? = null
     private var isScreenRotateLocked: Boolean = false
@@ -79,6 +80,7 @@ class BaseGestureFullScreenDialog private constructor(private var controllerView
     init {
         this.setCanceledOnTouchOutside(false)
         this.setCancelable(false)
+        window?.setDimAmount(0f)
         val cps = getViewPoint(getControllerView())
         originViewRectF = RectF(cps.x, cps.y, cps.x + originWidth, cps.y + originHeight)
         (getControllerView().context.applicationContext.getSystemService(Context.WINDOW_SERVICE) as? WindowManager)?.defaultDisplay?.getRealSize(realWindowSize)
@@ -103,6 +105,10 @@ class BaseGestureFullScreenDialog private constructor(private var controllerView
                     v.addView(getControllerView(), vlp)
                     v.clipChildren = false
                 } ?: (it as? ViewGroup)?.addView(getControllerView(), vlp) ?: throw IllegalArgumentException("the content layout view your set is not container a view group that id`s [R.id.playerFullScreenContent] ,and your content layout is not a view parent!")
+                backgroundView = View(it.context)
+                backgroundView?.setBackgroundColor(Color.BLACK)
+                backgroundView?.layoutParams = ViewGroup.LayoutParams(-1, -1)
+                (it as? ViewGroup)?.addView(backgroundView, 0)
                 this@BaseGestureFullScreenDialog.setContentView(it)
                 onFullContentListener?.onContentLayoutInflated(it)
             }
@@ -174,7 +180,9 @@ class BaseGestureFullScreenDialog private constructor(private var controllerView
         }, false).apply {
             duration = 220
         }
-        screenUtil = ScreenOrientationListener(WeakReference(context)) { if (isMaxFull) curScreenRotation = it }
+        screenUtil = ScreenOrientationListener(WeakReference(context)) {
+            if (isMaxFull) curScreenRotation = it
+        }
     }
 
     fun isInterruptTouchEvent(): Boolean {
@@ -286,13 +294,15 @@ class BaseGestureFullScreenDialog private constructor(private var controllerView
     }
 
     private fun getActivity(): Activity? {
-        return ((getControllerView().context as? Activity) ?: ownerActivity)?.let { return WeakReference(it).get() }
+        return ((getControllerView().context as? Activity) ?: ownerActivity)?.let {
+            return WeakReference(it).get()
+        }
     }
 
     private fun setBackground(@FloatRange(from = 0.0, to = 1.0) duration: Float) {
         if (isMaxFull) return
         val d = interpolator.getInterpolation(duration)
-        window?.setDimAmount((duration * 0.85f) + 0.15f)
+        backgroundView?.alpha = ((duration * 0.85f) + 0.15f)
         (contentLayoutView as? ViewGroup)?.let {
             it.children.forEach { cv ->
                 if (cv.id != R.id.player_gesture_full_screen_content) {

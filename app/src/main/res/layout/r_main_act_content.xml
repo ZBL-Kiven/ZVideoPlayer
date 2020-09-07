@@ -5,7 +5,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#fff"
-    android:clipChildren="false">
+    android:clipChildren="false"
+    android:paddingTop="24dp">
 
     <com.zj.views.DrawableTextView
         android:id="@+id/r_main_act_gold_view"

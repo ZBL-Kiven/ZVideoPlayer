@@ -159,7 +159,6 @@ abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : Rec
     }
 
     fun cancelAll() {
-        isAutoPlayWhenItemAttached = false
         handler?.removeCallbacksAndMessages(null)
         controller?.stopNow(true, isRegulate = true)
     }

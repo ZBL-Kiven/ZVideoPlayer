@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <com.zj.loading.BaseLoadingView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/r_main_frg_feed_list_item_blv"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    app:zPlayer_hintColor="#333"
-    app:zPlayer_loadingRes="@drawable/z_player_loading_progressbar"
-    app:zPlayer_loadingText="asscasds"
-    app:zPlayer_noDataRes="@mipmap/ic_launcher"
-    app:zPlayer_noDataText="86719" />
+    app:hintColor="#ccc"
+    app:hintTextSize="39sp"
+    app:loadingRes="@drawable/z_player_loading_progressbar"
+    app:loadingText="asscasds"
+    app:noDataRes="@mipmap/ic_launcher"
+    app:noDataText="iuhasniuhq"
+    app:refreshTextColor="#faa" />
