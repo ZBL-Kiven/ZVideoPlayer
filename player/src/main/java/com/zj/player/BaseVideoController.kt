@@ -10,6 +10,8 @@ import android.content.pm.ActivityInfo
 import android.content.res.Resources
 import android.graphics.drawable.GradientDrawable
 import android.media.AudioManager
+import android.os.Handler
+import android.os.Looper
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.View
@@ -54,6 +56,7 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
 
     companion object {
 
+        private const val dismissFullTools = 7817
         private var muteGlobalDefault: Boolean = false
 
         /**
@@ -65,6 +68,12 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
         }
     }
 
+    private val mHandler = Handler(Looper.getMainLooper()) {
+        if (it.what == dismissFullTools) onFullTools(false)
+        return@Handler false
+    }
+    protected var autoFullTools = true
+    protected var autoFullInterval = 3000
     protected var vPlay: View? = null
     protected var tvStart: TextView? = null
     protected var tvEnd: TextView? = null
@@ -173,6 +182,8 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
             val fullScreenEnable = ta.getInt(R.styleable.BaseVideoController_fullScreenEnable, Constance.fullScreenEnAble)
             val defaultLoadingLayoutId = R.layout.z_player_loading_layout
             val defaultLoadingId = R.id.z_player_video_blv_loading
+            autoFullTools = ta.getBoolean(R.styleable.BaseVideoController_autoFullTools, false)
+            autoFullInterval = ta.getInt(R.styleable.BaseVideoController_autoFullInterval, 3000)
             fullMaxScreenEnable = ta.getBoolean(R.styleable.BaseVideoController_fullMaxScreenEnable, Constance.fullMaxScreenEnable)
             isDefaultMaxScreen = ta.getBoolean(R.styleable.BaseVideoController_isDefaultMaxScreen, Constance.isDefaultMaxScreen)
             lockScreenRotation = ta.getInt(R.styleable.BaseVideoController_lockScreenRotation, -1)
@@ -441,7 +452,8 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
 
     open fun onTrack(playAble: Boolean, start: Boolean, end: Boolean, formTrigDuration: Float) {}
 
-    open fun loadingEventDispatch(view: View, loadingMode: LoadingMode, isSetInNow: Boolean = false) {}
+    open fun loadingEventDispatch(view: View, loadingMode: LoadingMode, isSetInNow: Boolean = false) {
+    }
 
     open fun onPlayClick(v: View) {
         if (!isPlayable) return
@@ -467,13 +479,7 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
         if (!isPlayable) return
         if (controller?.isLoadData() != true) return
         log("on root view click", BehaviorLogsTable.onRootClick())
-        if (isPlayable) controller?.let {
-            val full = !isFull
-            if (!isInterruptPlayBtnAnim) {
-                showOrHidePlayBtn(full, true)
-            }
-            full(full)
-        }
+        onFullTools(!isFull)
     }
 
     open fun onRootDoubleClick() {
@@ -576,7 +582,6 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
         }
     }
 
-
     /**
      * even though you called it and set the lock to FALSE ,
      * it also merge with the system screen rotate settings.
@@ -630,6 +635,7 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
     }
 
     protected fun full(isFull: Boolean, isSetNow: Boolean = false) {
+        if (autoFullTools) mHandler.removeMessages(dismissFullTools)
         if (isSetNow) {
             anim?.end()
             bottomToolsBar?.let {
@@ -652,6 +658,7 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
             }
             if (isFull) seekBarSmall?.visibility = View.GONE
         }
+        if (autoFullTools && isFull) mHandler.sendEmptyMessageDelayed(dismissFullTools, autoFullInterval.toLong())
     }
 
     protected fun setOverlayViews(isShowThumb: Boolean, isShowBackground: Boolean, isSinkBottomShader: Boolean) {
@@ -846,6 +853,15 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
                 }
                 it.setMode(mod, isSetInNow)
             } ?: loadingEventDispatch(lv, loadingMode, isSetInNow)
+        }
+    }
+
+    private fun onFullTools(isFull: Boolean) {
+        controller?.let {
+            if (!isInterruptPlayBtnAnim) {
+                showOrHidePlayBtn(isFull, true)
+            }
+            full(isFull)
         }
     }
 

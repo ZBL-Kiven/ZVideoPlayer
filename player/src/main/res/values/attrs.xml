@@ -18,7 +18,8 @@
     </declare-styleable>
 
     <declare-styleable name="BaseVideoController">
-
+        <attr name="autoFullTools" format="boolean" />
+        <attr name="autoFullInterval" format="integer" />
         <attr name="muteIconEnable" format="enum">
             <enum name="DISPLAY_VISIBLE" value="2" />
             <enum name="DISPLAY_GONE" value="1" />

@@ -26,17 +26,54 @@ import kotlin.math.roundToInt
 
 
 @Suppress("unused")
-class BaseGestureFullScreenDialog private constructor(private var controllerView: WeakReference<View>?, contentLayout: Int, private val fullMaxScreenEnable: Boolean, private val isDefaultMaxScreen: Boolean, private val defaultScreenOrientation: Int, private val onFullScreenListener: FullScreenListener?, private val onFullContentListener: FullContentListener?) : Dialog(WeakReference(controllerView?.get()?.context).get() ?: throw NullPointerException(), R.style.BaseGestureFullScreenDialogStyle) {
+class BaseGestureFullScreenDialog private constructor(
+    private var controllerView: WeakReference<View>?,
+    contentLayout: Int,
+    private val fullMaxScreenEnable: Boolean,
+    private val isDefaultMaxScreen: Boolean,
+    private val defaultScreenOrientation: Int,
+    private val onFullScreenListener: FullScreenListener?,
+    private val onFullContentListener: FullContentListener?
+) : Dialog(
+    WeakReference(controllerView?.get()?.context).get() ?: throw NullPointerException(),
+    R.style.BaseGestureFullScreenDialogStyle
+) {
 
     companion object {
         private const val MAX_DEEP_RATIO = 0.55f
 
-        fun showInContent(view: View, @LayoutRes contentLayout: Int, fullMaxScreenEnable: Boolean, defaultScreenOrientation: Int, onFullContentListener: FullContentListener): BaseGestureFullScreenDialog {
-            return BaseGestureFullScreenDialog(WeakReference(view), contentLayout, fullMaxScreenEnable, false, defaultScreenOrientation, null, onFullContentListener)
+        fun showInContent(
+            view: View,
+            @LayoutRes contentLayout: Int,
+            fullMaxScreenEnable: Boolean,
+            defaultScreenOrientation: Int,
+            onFullContentListener: FullContentListener
+        ): BaseGestureFullScreenDialog {
+            return BaseGestureFullScreenDialog(
+                WeakReference(view),
+                contentLayout,
+                fullMaxScreenEnable,
+                false,
+                defaultScreenOrientation,
+                null,
+                onFullContentListener
+            )
         }
 
-        fun showFull(view: View, defaultScreenOrientation: Int, onFullScreenListener: FullScreenListener): BaseGestureFullScreenDialog {
-            return BaseGestureFullScreenDialog(WeakReference(view), -1, fullMaxScreenEnable = false, isDefaultMaxScreen = true, defaultScreenOrientation = defaultScreenOrientation, onFullScreenListener = onFullScreenListener, onFullContentListener = null)
+        fun showFull(
+            view: View,
+            defaultScreenOrientation: Int,
+            onFullScreenListener: FullScreenListener
+        ): BaseGestureFullScreenDialog {
+            return BaseGestureFullScreenDialog(
+                WeakReference(view),
+                -1,
+                fullMaxScreenEnable = false,
+                isDefaultMaxScreen = true,
+                defaultScreenOrientation = defaultScreenOrientation,
+                onFullScreenListener = onFullScreenListener,
+                onFullContentListener = null
+            )
         }
     }
 
@@ -83,8 +120,11 @@ class BaseGestureFullScreenDialog private constructor(private var controllerView
         window?.setDimAmount(0f)
         val cps = getViewPoint(getControllerView())
         originViewRectF = RectF(cps.x, cps.y, cps.x + originWidth, cps.y + originHeight)
-        (getControllerView().context.applicationContext.getSystemService(Context.WINDOW_SERVICE) as? WindowManager)?.defaultDisplay?.getRealSize(realWindowSize)
-        if (!isDefaultMaxScreen && contentLayout > 0) contentLayoutView = View.inflate(getControllerView().context, contentLayout, null)
+        (getControllerView().context.applicationContext.getSystemService(Context.WINDOW_SERVICE) as? WindowManager)?.defaultDisplay?.getRealSize(
+            realWindowSize
+        )
+        if (!isDefaultMaxScreen && contentLayout > 0) contentLayoutView =
+            View.inflate(getControllerView().context, contentLayout, null)
         changeSystemWindowVisibility(true)
         setContent(isMaxFull)
         initListeners()
@@ -104,7 +144,8 @@ class BaseGestureFullScreenDialog private constructor(private var controllerView
                 it.findViewById<ViewGroup>(R.id.player_gesture_full_screen_content)?.let { v ->
                     v.addView(getControllerView(), vlp)
                     v.clipChildren = false
-                } ?: (it as? ViewGroup)?.addView(getControllerView(), vlp) ?: throw IllegalArgumentException("the content layout view your set is not container a view group that id`s [R.id.playerFullScreenContent] ,and your content layout is not a view parent!")
+                } ?: (it as? ViewGroup)?.addView(getControllerView(), vlp)
+                ?: throw IllegalArgumentException("the content layout view your set is not container a view group that id`s [R.id.playerFullScreenContent] ,and your content layout is not a view parent!")
                 backgroundView = View(it.context)
                 backgroundView?.setBackgroundColor(Color.BLACK)
                 backgroundView?.layoutParams = ViewGroup.LayoutParams(-1, -1)
@@ -141,7 +182,9 @@ class BaseGestureFullScreenDialog private constructor(private var controllerView
     private fun dismissed() {
         onDisplayChange(false)
         curScaleOffset = 0f
-        if (getControllerView().parent != null) (getControllerView().parent as? ViewGroup)?.removeView(getControllerView())
+        if (getControllerView().parent != null) (getControllerView().parent as? ViewGroup)?.removeView(
+            getControllerView()
+        )
         vp?.addView(getControllerView(), vlp)
         screenUtil?.release()
         screenUtil = null
@@ -149,17 +192,23 @@ class BaseGestureFullScreenDialog private constructor(private var controllerView
         scaleAnim = null
         calculateUtils = null
         isDismissing = false
+        backgroundView = null
         controllerView = null
         super.dismiss()
     }
 
     private fun initListeners() {
         scaleAnim = ZFullValueAnimator(object : ZFullValueAnimator.FullAnimatorListener {
-            override fun onDurationChange(animation: ValueAnimator, duration: Float, isFull: Boolean) {
+            override fun onDurationChange(
+                animation: ValueAnimator,
+                duration: Float,
+                isFull: Boolean
+            ) {
                 if (isFull) {
                     updateContent(1 - duration)
                 } else {
-                    if (originInScreen == null) originInScreen = Point(getControllerView().scrollX, getControllerView().scrollY)
+                    if (originInScreen == null) originInScreen =
+                        Point(getControllerView().scrollX, getControllerView().scrollY)
                     originInScreen?.let {
                         val sx = (it.x * (1f - duration)).roundToInt()
                         val sy = (it.y * (1f - duration)).roundToInt()
@@ -207,7 +256,13 @@ class BaseGestureFullScreenDialog private constructor(private var controllerView
         }
     }
 
-    fun onTracked(isStart: Boolean, offsetX: Float, offsetY: Float, easeY: Float, formTrigDuration: Float) {
+    fun onTracked(
+        isStart: Boolean,
+        offsetX: Float,
+        offsetY: Float,
+        easeY: Float,
+        formTrigDuration: Float
+    ) {
         (getControllerView().parent as? ViewGroup)?.clipChildren = false
         setBackground(1f - formTrigDuration)
         followWithFinger(offsetX, offsetY)
@@ -216,7 +271,8 @@ class BaseGestureFullScreenDialog private constructor(private var controllerView
     }
 
     internal fun getControllerView(): View {
-        return controllerView?.get() ?: throw java.lang.NullPointerException("case the controller view is null ,so what`s your displaying wishes")
+        return controllerView?.get()
+            ?: throw java.lang.NullPointerException("case the controller view is null ,so what`s your displaying wishes")
     }
 
     private fun updateContent(offset: Float) {
@@ -257,7 +313,10 @@ class BaseGestureFullScreenDialog private constructor(private var controllerView
         val pt: Int = ref.top.roundToInt()
         val pr: Int = ref.right.roundToInt()
         val pb: Int = ref.bottom.roundToInt()
-        val flp = FrameLayout.LayoutParams((_width - (pl + pr)).roundToInt(), (_height - (pt + pb)).roundToInt())
+        val flp = FrameLayout.LayoutParams(
+            (_width - (pl + pr)).roundToInt(),
+            (_height - (pt + pb)).roundToInt()
+        )
         flp.setMargins(pl, pt, pr, pb)
         view.layoutParams = flp
     }
@@ -275,8 +334,10 @@ class BaseGestureFullScreenDialog private constructor(private var controllerView
 
     @SuppressLint("SourceLockedOrientationActivity")
     private fun changeSystemWindowVisibility(visible: Boolean) {
-        val flag: Int = WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN or WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS or WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS or WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION
-        val flagSystem: Int = View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION or View.SYSTEM_UI_FLAG_LAYOUT_STABLE or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION or View.SYSTEM_UI_FLAG_FULLSCREEN or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+        val flag: Int =
+            WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN or WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS or WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS or WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION
+        val flagSystem: Int =
+            View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION or View.SYSTEM_UI_FLAG_LAYOUT_STABLE or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION or View.SYSTEM_UI_FLAG_FULLSCREEN or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
         if (visible) {
             window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
             window?.addFlags(flag)
@@ -367,11 +428,14 @@ class BaseGestureFullScreenDialog private constructor(private var controllerView
     }
 
     private fun onTracked(isStart: Boolean, isEnd: Boolean, formTrigDuration: Float) {
-        if (!isMaxFull) onFullContentListener?.onTrack(isStart, isEnd, formTrigDuration) ?: onFullScreenListener?.onTrack(isStart, isEnd, formTrigDuration)
+        if (!isMaxFull) onFullContentListener?.onTrack(isStart, isEnd, formTrigDuration)
+            ?: onFullScreenListener?.onTrack(isStart, isEnd, formTrigDuration)
     }
 
     private fun onDisplayChange(isShow: Boolean) {
-        onFullContentListener?.onDisplayChanged(isShow) ?: onFullScreenListener?.onDisplayChanged(isShow)
+        onFullContentListener?.onDisplayChanged(isShow) ?: onFullScreenListener?.onDisplayChanged(
+            isShow
+        )
     }
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {

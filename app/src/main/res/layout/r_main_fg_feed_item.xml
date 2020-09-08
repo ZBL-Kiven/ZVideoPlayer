@@ -56,6 +56,8 @@
         android:layout_below="@id/r_main_fg_feed_item_tv_desc"
         android:layout_marginTop="5dp"
         android:background="#eee"
+        app:autoFullInterval="3000"
+        app:autoFullTools="true"
         app:loadingViewId="@id/r_main_frg_feed_list_item_blv"
         app:loadingViewLayoutId="@layout/r_main_fg_feed_list_item_loading"
         app:muteDefault="false"
