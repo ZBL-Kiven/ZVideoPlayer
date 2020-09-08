@@ -278,7 +278,7 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
     private fun initVolume(isMute: Boolean) {
         val volume = if (isMute) 0f else {
             val audioManager = context.getSystemService(Service.AUDIO_SERVICE) as AudioManager
-            audioManager.getStreamVolume(AudioManager.STREAM_SYSTEM) * 1.0f
+            audioManager.getStreamVolume(AudioManager.STREAM_MUSIC) * 1.0f
         }
         controller?.setVolume(volume)
     }
