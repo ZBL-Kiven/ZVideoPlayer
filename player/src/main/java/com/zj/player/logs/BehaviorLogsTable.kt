@@ -107,4 +107,12 @@ internal object BehaviorLogsTable {
         return RenderBaseData(detail = "on renderer core frame set", name = "rendererCore", params = mapOf(Pair("curRenderer", renderCoreName), Pair("resizeMode", resizeMode)))
     }
 
+    const val TYPE_Logs = "dev_logs"
+
+    class LogsData(detail: String, name: String, params: Map<String, Any>? = null) : BehaviorData(TYPE_Logs, detail, name, params)
+
+    fun onLog(s: String, params: Map<String, Any>? = null): BehaviorData {
+        return LogsData(detail = s, name = "logs", params = params)
+    }
+
 }

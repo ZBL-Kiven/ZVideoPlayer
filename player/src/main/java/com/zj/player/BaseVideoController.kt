@@ -17,10 +17,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
-import android.view.ViewStub
 import android.view.animation.AccelerateDecelerateInterpolator
 import android.widget.*
 import androidx.annotation.LayoutRes
+import androidx.core.content.ContextCompat
 import com.zj.player.anim.ZFullValueAnimator
 import com.zj.player.base.InflateInfo
 import com.zj.player.base.LoadingMode
@@ -57,6 +57,7 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
     companion object {
 
         private const val dismissFullTools = 7817
+        private const val loadingModeDelay = 7716
         private var muteGlobalDefault: Boolean = false
 
         /**
@@ -69,11 +70,15 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
     }
 
     private val mHandler = Handler(Looper.getMainLooper()) {
-        if (it.what == dismissFullTools) onFullTools(false)
+        when (it.what) {
+            dismissFullTools -> onFullTools(false)
+            loadingModeDelay -> loadingView?.setMode(VideoLoadingView.DisplayMode.LOADING)
+        }
         return@Handler false
     }
     protected var autoFullTools = true
     protected var autoFullInterval = 3000
+    protected var loadingIgnoreInterval = 0
     protected var vPlay: View? = null
     protected var tvStart: TextView? = null
     protected var tvEnd: TextView? = null
@@ -83,7 +88,7 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
     protected var speedView: TextView? = null
     protected var muteView: View? = null
     protected var lockScreen: View? = null
-    private var loadingView: View? = null
+    private var loadingView: VideoLoadingView? = null
     protected var bottomToolsBar: View? = null
     protected var topToolsBar: View? = null
     protected var videoOverrideImageView: TouchScaleImageView? = null
@@ -109,8 +114,6 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
     protected var isLockScreenRotation: Boolean = false
     private var muteDefault: Boolean = false
     private var muteIsUseGlobal: Boolean = false
-    private var loadingViewInflateId: Int = -1
-    private var loadingViewId: Int = -1
     protected var isFullScreen: Boolean = false
         set(value) {
             if (field == value) return
@@ -180,8 +183,6 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
             val speedIconEnable = ta.getInt(R.styleable.BaseVideoController_speedIconEnable, Constance.speedIconEnable)
             val secondarySeekBarEnable = ta.getInt(R.styleable.BaseVideoController_secondarySeekBarEnable, Constance.secondarySeekBarEnable)
             val fullScreenEnable = ta.getInt(R.styleable.BaseVideoController_fullScreenEnable, Constance.fullScreenEnAble)
-            val defaultLoadingLayoutId = R.layout.z_player_loading_layout
-            val defaultLoadingId = R.id.z_player_video_blv_loading
             autoFullTools = ta.getBoolean(R.styleable.BaseVideoController_autoFullTools, false)
             autoFullInterval = ta.getInt(R.styleable.BaseVideoController_autoFullInterval, 3000)
             fullMaxScreenEnable = ta.getBoolean(R.styleable.BaseVideoController_fullMaxScreenEnable, Constance.fullMaxScreenEnable)
@@ -189,13 +190,6 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
             lockScreenRotation = ta.getInt(R.styleable.BaseVideoController_lockScreenRotation, -1)
             muteIsUseGlobal = ta.getBoolean(R.styleable.BaseVideoController_useMuteGlobal, false)
             muteDefault = ta.getBoolean(R.styleable.BaseVideoController_muteDefault, false)
-            loadingViewInflateId = ta.getResourceId(R.styleable.BaseVideoController_loadingViewLayoutId, defaultLoadingLayoutId)
-            loadingViewId = if (loadingViewInflateId == defaultLoadingLayoutId) {
-                defaultLoadingId
-            } else {
-                ta.getResourceId(R.styleable.BaseVideoController_loadingViewId, -1)
-            }
-            if (loadingViewId == -1) throw RuntimeException("you must set a loading view id in the attrs and it must in contains of loading layout which your set.")
             val view = LayoutInflater.from(context).inflate(R.layout.z_player_video_view, null, false)
             addView(view, LayoutParams(MATCH_PARENT, MATCH_PARENT))
             videoRoot = view?.findViewById(R.id.z_player_video_root)
@@ -211,16 +205,42 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
             topToolsBar = view?.findViewById(R.id.z_player_video_preview_top_bar)
             videoOverrideImageView = view?.findViewById(R.id.z_player_video_thumb)
             videoOverrideImageShaderView = view?.findViewById(R.id.z_player_video_background)
-            val viewStub = view?.findViewById<ViewStub>(R.id.z_player_video_preview_vs_loading)
-            viewStub?.layoutResource = loadingViewInflateId
-            viewStub?.inflate()
-            loadingView = view?.findViewById(loadingViewId)
-            loadingView?.z = Resources.getSystem().displayMetrics.density * 7 + 0.5f
+            loadingView = view?.findViewById(R.id.z_player_video_preview_vs_loading)
             seekBar = view?.findViewById(R.id.z_player_video_preview_sb)
             isLockScreenRotation = lockScreenRotation != -1
             isFull = bottomToolsBar?.visibility == View.VISIBLE
             speedView?.text = context.getString(R.string.z_player_str_speed, 1)
             touchListener?.setPadding(0.05f, 0.08f)
+
+            loadingView?.let {
+                loadingIgnoreInterval = ta.getInt(R.styleable.BaseVideoController_loadingIgnoreTs, 0)
+                val loadingBackgroundColor = ta.getColor(R.styleable.BaseVideoController_loadingBackgroundColor, ContextCompat.getColor(context, R.color.z_player_color_trans_50))
+                val loadingRes = ta.getResourceId(R.styleable.BaseVideoController_loadingRes, R.drawable.z_player_loading_progressbar)
+                val failRes = ta.getResourceId(R.styleable.BaseVideoController_failRes, R.mipmap.z_player_video_loading_fail)
+                val loadingIconWidth = ta.getDimension(R.styleable.BaseVideoController_loadingIconWidth, 0f)
+                val loadingIconHeight = ta.getDimension(R.styleable.BaseVideoController_loadingIconHeight, 0f)
+                val failIconWidth = ta.getDimension(R.styleable.BaseVideoController_failIconWidth, 0f)
+                val failIconHeight = ta.getDimension(R.styleable.BaseVideoController_failIconHeight, 0f)
+                val hintTextColor = ta.getColor(R.styleable.BaseVideoController_hintTextColor, ContextCompat.getColor(context, R.color.z_player_color_loading))
+                val refreshTextColor = ta.getColor(R.styleable.BaseVideoController_refreshTextColor, ContextCompat.getColor(context, R.color.z_player_color_gray))
+                val loadingText = ta.getString(R.styleable.BaseVideoController_loadingText)
+                val failText = ta.getString(R.styleable.BaseVideoController_failText)
+                val refreshHintText = ta.getString(R.styleable.BaseVideoController_refreshHintText)
+                val density = context.resources.displayMetrics.density
+                val hintTextSize = ta.getDimension(R.styleable.BaseVideoController_hintTextSize, density * 14f)
+                val refreshTextSize = ta.getDimension(R.styleable.BaseVideoController_refreshTextSize, density * 14f)
+                it.setBackground(loadingBackgroundColor)
+                it.setLoadingDrawable(loadingRes)
+                it.setNoDataDrawable(failRes)
+                it.setHintTextColor(hintTextColor)
+                it.setRefreshTextColor(refreshTextColor)
+                it.setLoadingText(if (!loadingText.isNullOrEmpty()) loadingText else context.getString(R.string.z_player_str_loading_video_progress))
+                it.setFailText(if (!failText.isNullOrEmpty()) failText else context.getString(R.string.z_player_str_loading_video_error))
+                it.setRefreshText(if (!refreshHintText.isNullOrEmpty()) refreshHintText else context.getString(R.string.z_player_str_loading_video_error_tint))
+                if (hintTextSize > 0) it.setHintTextSize(hintTextSize)
+                if (refreshTextSize > 0) it.setHintTextSize(refreshTextSize)
+                it.setDrawableSize(loadingIconWidth, loadingIconHeight, failIconWidth, failIconHeight)
+            }
         } catch (e: Exception) {
             if (e is RuntimeException) throw e
             else e.printStackTrace()
@@ -239,11 +259,11 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
             touchListener?.updateTargetXY(v, e)
         }
         videoRoot?.setTouchInterceptor {
-            (videoOverrideImageView?.scrollAble() ?: false) && isFullScreen
+            (!isPlayable && (videoOverrideImageView?.scrollAble() ?: false)) && isFullScreen
         }
         videoRoot?.setOnTouchListener(touchListener)
 
-        (loadingView as? VideoLoadingView)?.setRefreshListener {
+        loadingView?.setRefreshListener {
             reload(it)
         }
 
@@ -370,7 +390,7 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
     }
 
     override fun onCompleted(path: String, isRegulate: Boolean) {
-        if (loadingView?.visibility == View.VISIBLE) {
+        if (loadingView?.visibility != View.GONE) {
             onLoadingEvent(LoadingMode.None)
             completing(path, isRegulate)
         }
@@ -452,9 +472,6 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
 
     open fun onTrack(playAble: Boolean, start: Boolean, end: Boolean, formTrigDuration: Float) {}
 
-    open fun loadingEventDispatch(view: View, loadingMode: LoadingMode, isSetInNow: Boolean = false) {
-    }
-
     open fun onPlayClick(v: View) {
         if (!isPlayable) return
         v.isEnabled = false
@@ -476,8 +493,14 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
     }
 
     open fun onRootClick() {
-        if (!isPlayable) return
-        if (controller?.isLoadData() != true) return
+        if (!isPlayable) {
+            ZPlayerLogs.debug("on video root click , cur status is disable play")
+            return
+        }
+        if (controller?.isLoadData() != true) {
+            ZPlayerLogs.debug("on video root click , and controller is not load data")
+            return
+        }
         log("on root view click", BehaviorLogsTable.onRootClick())
         onFullTools(!isFull)
     }
@@ -844,15 +867,14 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
     }
 
     private fun onLoadingEvent(loadingMode: LoadingMode, isSetInNow: Boolean = false) {
-        loadingView?.let { lv ->
-            (lv as? VideoLoadingView)?.let {
-                val mod = when (loadingMode) {
-                    LoadingMode.None -> VideoLoadingView.DisplayMode.NONE
-                    LoadingMode.Loading -> VideoLoadingView.DisplayMode.LOADING
-                    LoadingMode.Fail -> VideoLoadingView.DisplayMode.NO_DATA
-                }
-                it.setMode(mod, isSetInNow)
-            } ?: loadingEventDispatch(lv, loadingMode, isSetInNow)
+        mHandler.removeMessages(loadingModeDelay)
+        loadingView?.let {
+            when (loadingMode) {
+                LoadingMode.None -> it.setMode(VideoLoadingView.DisplayMode.NONE, isSetInNow)
+                LoadingMode.Loading -> if (isSetInNow || loadingIgnoreInterval <= 0) it.setMode(VideoLoadingView.DisplayMode.LOADING, isSetInNow)
+                else mHandler.sendEmptyMessageDelayed(loadingModeDelay, loadingIgnoreInterval.toLong())
+                LoadingMode.Fail -> it.setMode(VideoLoadingView.DisplayMode.NO_DATA, isSetInNow)
+            }
         }
     }
 

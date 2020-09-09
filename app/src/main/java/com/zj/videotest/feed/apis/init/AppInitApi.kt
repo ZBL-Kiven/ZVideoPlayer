@@ -33,8 +33,13 @@ object AppInitApi {
      *
      * */
 
-    private inline fun <reified T : Any> getDefaultApi(baseUrl: UrlProvider = Constance.getApiBaseUrl(), header: HeaderProvider = Constance.getApiHeader(), timeOut: Long = 5000): BaseApi<T> {
-        return BaseApi.create<T>(ApiErrorHandler).baseUrl(baseUrl).header(header).timeOut(timeOut).build()
+    private inline fun <reified T : Any> getDefaultApi(
+        baseUrl: UrlProvider = Constance.getApiBaseUrl(),
+        header: HeaderProvider = Constance.getApiHeader(),
+        timeOut: Long = 5000
+    ): BaseApi<T> {
+        return BaseApi.create<T>(ApiErrorHandler).baseUrl(baseUrl).header(header).timeOut(timeOut)
+            .build()
     }
 
     fun getFeed(r: (b: Boolean, d: List<VideoSource>?, es: HttpException?) -> Unit) {
@@ -42,6 +47,6 @@ object AppInitApi {
     }
 
     fun getFeedMock(r: (b: Boolean, d: List<FeedDataIn>?, es: HttpException?) -> Unit) {
-        Handler(Looper.getMainLooper()).postDelayed({ r(true, FeedMockImpl.createMock(), null) }, 3000)
+        r(true, FeedMockImpl.createMock(), null)
     }
 }

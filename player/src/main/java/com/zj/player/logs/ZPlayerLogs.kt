@@ -1,5 +1,6 @@
 package com.zj.player.logs
 
+import android.util.Log
 import java.lang.IllegalStateException
 
 object ZPlayerLogs {
@@ -24,6 +25,10 @@ object ZPlayerLogs {
             if (debugAble && !soft) throw e
             videoEventListener?.onError(e)
         }
+    }
+
+    internal fun debug(s: String) {
+        if (debugAble) Log.d("ZPlayer.logs ---> ", "\ncase:$s")
     }
 
     internal fun onLog(s: String, curPath: String, accessKey: String, modeName: String, data: BehaviorData?) {

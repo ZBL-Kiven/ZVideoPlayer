@@ -7,12 +7,13 @@ import android.animation.ArgbEvaluator
 import android.animation.ValueAnimator
 import android.content.Context
 import android.util.AttributeSet
+import android.util.TypedValue
 import android.view.View
 import android.widget.FrameLayout
 import android.widget.ProgressBar
 import android.widget.TextView
+import androidx.core.content.ContextCompat
 import com.zj.player.R
-import com.zj.player.logs.ZPlayerLogs
 import java.util.*
 import kotlin.math.max
 import kotlin.math.min
@@ -22,27 +23,35 @@ import kotlin.math.min
  */
 internal class VideoLoadingView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) : FrameLayout(context, attrs, defStyleAttr) {
 
-    private var oldMode = DisplayMode.INIT
-    private var disPlayViews: MutableMap<DisplayMode, Float>? = null
     private var contentView: View? = null
     private var vLoading: ProgressBar? = null
     private var vNoData: View? = null
     private var tvHint: TextView? = null
     private var tvRefresh: TextView? = null
+
+    private var oldMode = DisplayMode.INIT
+    private var disPlayViews: MutableMap<DisplayMode, Float>? = null
     private var refresh: ((View) -> Unit)? = null
+
     private var bgColor: Int = 0
     private var needBackgroundColor: Int = 0
     private var oldBackgroundColor: Int = 0
-    private var noDataRes = -1
-    private var loadingRes = -1
-    private var hintTextColor: Int = 0
-    private var refreshTextColor: Int = 0
+    private var loadingDrawableRes: Int = 0
+    private var noDataDrawableRes: Int = 0
+
     private var loadingHint: String = ""
     private var noDataHint: String = ""
     private var refreshHint: String? = ""
+
     private var argbEvaluator: ArgbEvaluator? = null
     private var refreshEnableWithView = false
     private var valueAnimator: BaseLoadingValueAnimator? = null
+
+    private var loadingWidth = 0f
+    private var loadingHeight = 0f
+    private var noDataWidth = 0f
+    private var noDataHeight = 0f
+
     private val listener = object : BaseLoadingAnimatorListener {
 
         override fun onDurationChange(animation: ValueAnimator, duration: Float, mode: DisplayMode?) {
@@ -59,11 +68,11 @@ internal class VideoLoadingView @JvmOverloads constructor(context: Context, attr
     }
 
     init {
-        init(context, attrs)
+        initView(context)
     }
 
     enum class DisplayMode(internal val value: Int) {
-        INIT(-1), NONE(0), LOADING(1), NO_DATA(2)
+        INIT(-1), NONE(0), LOADING(1), NO_DATA(2), DISMISS(3)
     }
 
     /**
@@ -80,75 +89,97 @@ internal class VideoLoadingView @JvmOverloads constructor(context: Context, attr
         }
     }
 
-    private fun init(context: Context, attrs: AttributeSet?) {
-        if (attrs != null) {
-            val array = context.obtainStyledAttributes(attrs, R.styleable.VideoLoadingView)
-            try {
-                bgColor = array.getColor(R.styleable.VideoLoadingView_zPlayer_backgroundFill, -1)
-                noDataRes = array.getResourceId(R.styleable.VideoLoadingView_zPlayer_noDataRes, -1)
-                loadingRes = array.getResourceId(R.styleable.VideoLoadingView_zPlayer_loadingRes, -1)
-                hintTextColor = array.getColor(R.styleable.VideoLoadingView_zPlayer_hintColor, -1)
-                refreshTextColor = array.getColor(R.styleable.VideoLoadingView_zPlayer_refreshTextColor, -1)
-                loadingHint = array.getString(R.styleable.VideoLoadingView_zPlayer_loadingText) ?: ""
-                noDataHint = array.getString(R.styleable.VideoLoadingView_zPlayer_noDataText) ?: ""
-                refreshHint = array.getString(R.styleable.VideoLoadingView_zPlayer_refreshText)
-            } catch (e: Exception) {
-                ZPlayerLogs.onError(e)
-            } finally {
-                array.recycle()
-            }
-        }
-        initView(context)
-    }
-
     private fun initView(context: Context) {
         contentView = View.inflate(context, R.layout.z_player_loading_view, this)
         vNoData = f(R.id.blv_vNoData)
         vLoading = f(R.id.blv_pb)
         tvHint = f(R.id.blv_tvHint)
         tvRefresh = f(R.id.blv_tvRefresh)
-        if (refreshHint != null && !refreshHint.isNullOrEmpty()) tvRefresh?.text = refreshHint
-        if (hintTextColor != 0) tvHint?.setTextColor(hintTextColor)
-        if (refreshTextColor != 0) tvRefresh?.setTextColor(refreshTextColor)
         argbEvaluator = ArgbEvaluator()
         disPlayViews = EnumMap(DisplayMode::class.java)
         disPlayViews?.put(DisplayMode.LOADING, 0.0f)
-        tvHint?.text = loadingHint
-        resetUi()
-        resetBackground()
     }
 
-    private fun resetBackground() {
+    fun setBackground(c: Int) {
+        val color = try {
+            ContextCompat.getColor(context, c)
+        } catch (e: Exception) {
+            c
+        }
+        bgColor = color
         setBackgroundColor(bgColor)
     }
 
-    /**
-     * @param drawableRes must be an animatorDrawable in progressBar;
-     * @link call resetUi() after set this
-     */
-    fun setLoadingDrawable(drawableRes: Int): VideoLoadingView {
-        this.loadingRes = drawableRes
-        return this
-    }
-
-    //call resetUi() after set this
-    fun setNoDataDrawable(drawableRes: Int): VideoLoadingView {
-        this.noDataRes = drawableRes
-        return this
-    }
-
-    //reset LOADING/NO_DATA/NET_ERROR drawable
-    private fun resetUi() {
-        if (loadingRes > 0) {
-            val drawable = context.getDrawable(loadingRes)
-            if (drawable != null) {
-                val rect = vLoading?.indeterminateDrawable?.bounds
-                if (rect != null) drawable.bounds = rect
-                vLoading?.indeterminateDrawable = drawable
-            }
+    fun setHintTextColor(c: Int) {
+        val color = try {
+            ContextCompat.getColor(context, c)
+        } catch (e: Exception) {
+            c
         }
-        if (noDataRes > 0) {
-            vNoData?.setBackgroundResource(noDataRes)
+        if (color != -1) tvHint?.setTextColor(color)
+    }
+
+    fun setRefreshTextColor(c: Int) {
+        val color = try {
+            ContextCompat.getColor(context, c)
+        } catch (e: Exception) {
+            c
+        }
+        if (color != -1) tvRefresh?.setTextColor(color)
+    }
+
+    fun setLoadingText(txt: String) {
+        this.loadingHint = txt
+    }
+
+    fun setFailText(txt: String) {
+        this.noDataHint = txt
+    }
+
+    fun setHintTextSize(size: Float) {
+        tvHint?.setTextSize(TypedValue.COMPLEX_UNIT_PX, size)
+    }
+
+    fun setRefreshText(txt: String) {
+        this.refreshHint = txt
+    }
+
+    fun setRefreshTextSize(size: Float) {
+        tvRefresh?.setTextSize(TypedValue.COMPLEX_UNIT_PX, size)
+    }
+
+    fun setDrawableSize(loadingWidth: Float, loadingHeight: Float, noDataWith: Float, noDataHeight: Float) {
+        val dst = context.resources.displayMetrics.density
+        this.loadingWidth = (dst * if (loadingWidth > 0) loadingWidth else 45f) + 0.5f
+        this.loadingHeight = (dst * (if (loadingHeight > 0) loadingHeight else 45f)) + 0.5f
+        this.noDataWidth = (dst * if (noDataWith > 0) noDataWith else 45f) + 0.5f
+        this.noDataHeight = (dst * if (noDataHeight > 0) noDataHeight else 45f) + 0.5f
+        resetBg()
+    }
+
+    fun setLoadingDrawable(loadingDrawableRes: Int) {
+        this.loadingDrawableRes = loadingDrawableRes
+    }
+
+    fun setNoDataDrawable(noDataDrawableRes: Int) {
+        this.noDataDrawableRes = noDataDrawableRes
+    }
+
+    private fun resetBg() {
+        if (noDataDrawableRes > 0) {
+            val lp = vNoData?.layoutParams
+            lp?.width = noDataWidth.toInt()
+            lp?.height = noDataHeight.toInt()
+            vNoData?.layoutParams = lp
+            vNoData?.setBackgroundResource(noDataDrawableRes)
+        }
+        if (loadingDrawableRes > 0) {
+            val lp = vLoading?.layoutParams
+            lp?.width = loadingWidth.toInt()
+            lp?.height = loadingHeight.toInt()
+            vLoading?.layoutParams = lp
+            val drawable = context.getDrawable(loadingDrawableRes)
+            vLoading?.indeterminateDrawable = drawable
         }
     }
 
@@ -158,19 +189,20 @@ internal class VideoLoadingView @JvmOverloads constructor(context: Context, attr
      */
     @JvmOverloads
     fun setMode(m: DisplayMode, setNow: Boolean = false) {
+        if (m == DisplayMode.INIT) return
         var mode = m
-        if (mode == DisplayMode.NONE) mode = DisplayMode.NONE
-        val newCode = mode.value
-        val oldCode = oldMode.value
-        oldMode = mode
-        val isSameMode = newCode == oldCode
-        tvHint?.text = getHintString(m)
-        refreshEnableWithView = m == DisplayMode.NO_DATA
-        tvRefresh?.visibility = if (refreshEnableWithView) View.VISIBLE else View.INVISIBLE
+        if (m == DisplayMode.NONE) mode = DisplayMode.DISMISS
+        val isSameMode = mode.value == oldMode.value
+        if (isSameMode) return
+        oldMode = m
+        tvHint?.text = getHintString(mode)
+        refreshEnableWithView = mode == DisplayMode.NO_DATA
+        tvRefresh?.visibility = if (refreshEnableWithView) View.VISIBLE else View.GONE
+        if (refreshEnableWithView) tvRefresh?.text = refreshHint
         if (setNow) {
             valueAnimator?.end()
-            setViews(1f, m)
-            setBackground(1f, m)
+            setViews(1f, mode)
+            setBackground(1f, mode)
         } else {
             if (valueAnimator == null) {
                 valueAnimator = BaseLoadingValueAnimator(listener)
@@ -178,11 +210,10 @@ internal class VideoLoadingView @JvmOverloads constructor(context: Context, attr
             } else {
                 valueAnimator?.end()
             }
-            disPlayViews?.put(m, 0.0f)
+            disPlayViews?.put(mode, 0.0f)
             if (!isSameMode) {
-                resetBackground()
                 needBackgroundColor = bgColor
-                valueAnimator?.start(m)
+                valueAnimator?.start(mode)
             }
         }
     }
@@ -195,16 +226,11 @@ internal class VideoLoadingView @JvmOverloads constructor(context: Context, attr
         }
     }
 
-    fun hideDelay(delayDismissTime: Int) {
-        postDelayed({ setMode(DisplayMode.NONE, false) }, delayDismissTime.toLong())
-    }
-
     @Synchronized
     private fun onAnimationFraction(duration: Float, offset: Float, curMode: DisplayMode?) {
         setViews(offset, curMode)
         setBackground(duration, curMode)
     }
-
 
     private fun setViews(offset: Float, curMode: DisplayMode?) {
         disPlayViews?.forEach { (key, curAlpha) ->
@@ -231,7 +257,7 @@ internal class VideoLoadingView @JvmOverloads constructor(context: Context, attr
     }
 
     private fun setBackground(duration: Float, curMode: DisplayMode?) {
-        if (curMode != DisplayMode.NONE) {
+        if (curMode != DisplayMode.DISMISS) {
             if (visibility != View.VISIBLE) {
                 alpha = 0f
                 visibility = View.VISIBLE
@@ -253,8 +279,7 @@ internal class VideoLoadingView @JvmOverloads constructor(context: Context, attr
             alpha = 1.0f - duration
             if (alpha <= 0.05f) {
                 alpha = 0f
-                oldBackgroundColor = 0
-                setBackgroundColor(oldBackgroundColor)
+                setBackgroundColor({ oldBackgroundColor = 0;oldBackgroundColor }.invoke())
                 visibility = View.GONE
             }
         }

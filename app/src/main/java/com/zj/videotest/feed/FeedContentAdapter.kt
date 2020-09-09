@@ -48,28 +48,33 @@ class FeedContentAdapter<T : FeedDataIn> : ListenerAnimAdapter<T>(R.layout.r_mai
         @SuppressLint("InflateParams") get() {
             if (field == null) {
                 context?.let { ctx ->
-                    val root = LayoutInflater.from(ctx).inflate(R.layout.r_main_fg_feed_item_finish_view, null, false)
-                    root.findViewById<View>(R.id.r_main_fg_feed_item_share_replay).setOnClickListener {
-                        (root.parent as? ViewGroup)?.removeView(root)
-                        (root?.getTag(TAG_POSITION) as? Int)?.let { p ->
-                            getDelegate()?.waitingForPlay(p)
+                    val root = LayoutInflater.from(ctx)
+                        .inflate(R.layout.r_main_fg_feed_item_finish_view, null, false)
+                    root.findViewById<View>(R.id.r_main_fg_feed_item_share_replay)
+                        .setOnClickListener {
+                            (root.parent as? ViewGroup)?.removeView(root)
+                            (root?.getTag(TAG_POSITION) as? Int)?.let { p ->
+                                getDelegate()?.waitingForPlay(p)
+                            }
                         }
-                    }
-                    root.findViewById<View>(R.id.r_main_fg_feed_item_share_facebook).setOnClickListener {
-                        (root?.getTag(TAG_POSITION) as? Int)?.let { p ->
-                            onShare(it, p)
+                    root.findViewById<View>(R.id.r_main_fg_feed_item_share_facebook)
+                        .setOnClickListener {
+                            (root?.getTag(TAG_POSITION) as? Int)?.let { p ->
+                                onShare(it, p)
+                            }
                         }
-                    }
-                    root.findViewById<View>(R.id.r_main_fg_feed_item_share_message).setOnClickListener {
-                        (root?.getTag(TAG_POSITION) as? Int)?.let { p ->
-                            onShare(it, p)
+                    root.findViewById<View>(R.id.r_main_fg_feed_item_share_message)
+                        .setOnClickListener {
+                            (root?.getTag(TAG_POSITION) as? Int)?.let { p ->
+                                onShare(it, p)
+                            }
                         }
-                    }
-                    root.findViewById<View>(R.id.r_main_fg_feed_item_share_whats_app).setOnClickListener {
-                        (root?.getTag(TAG_POSITION) as? Int)?.let { p ->
-                            onShare(it, p)
+                    root.findViewById<View>(R.id.r_main_fg_feed_item_share_whats_app)
+                        .setOnClickListener {
+                            (root?.getTag(TAG_POSITION) as? Int)?.let { p ->
+                                onShare(it, p)
+                            }
                         }
-                    }
                     root.z = 100f
                     field = root
                 }
@@ -131,59 +136,81 @@ class FeedContentAdapter<T : FeedDataIn> : ListenerAnimAdapter<T>(R.layout.r_mai
             }
             h.getView<TextView>(R.id.r_main_fg_feed_item_tv_nickname)?.text = d?.getNickname()
             h.getView<TextView>(R.id.r_main_fg_feed_item_tv_desc)?.text = d?.getDesc()
-            h.getView<TextView>(R.id.r_main_fg_feed_item_tv_claps)?.text = "${d?.getClapsCount() ?: 0}"
+            h.getView<TextView>(R.id.r_main_fg_feed_item_tv_claps)?.text =
+                "${d?.getClapsCount() ?: 0}"
             h.getView<View>(R.id.r_main_fg_feed_item_ll_claps)?.setOnClickListener {
                 adapterInterface?.clap(d, p)
             }
-            adapterDelegate?.bindData(SoftReference(holder), p, d, d?.getType() == DataType.VIDEO, pl)
+            adapterDelegate?.bindData(
+                SoftReference(holder),
+                p,
+                d,
+                d?.getType() == DataType.VIDEO,
+                pl
+            )
         }
     }
 
-    private var adapterDelegate: ListVideoAdapterDelegate<T, CCVideoController, BaseViewHolder>? = object : ListVideoAdapterDelegate<T, CCVideoController, BaseViewHolder>(this@FeedContentAdapter) {
+    private var adapterDelegate: ListVideoAdapterDelegate<T, CCVideoController, BaseViewHolder>? =
+        object :
+            ListVideoAdapterDelegate<T, CCVideoController, BaseViewHolder>(this@FeedContentAdapter) {
 
-        override fun createZController(vc: CCVideoController): ZController {
-            return ZController.build(vc, VideoConfig.create().setCacheEnable(true).setDebugAble(BuildConfig.DEBUG).setCacheFileDir("feed/videos").updateMaxCacheSize(200L * 1024 * 1024))
+            override fun createZController(vc: CCVideoController): ZController {
+                return ZController.build(
+                    vc,
+                    VideoConfig.create().setCacheEnable(true).setDebugAble(BuildConfig.DEBUG)
+                        .setCacheFileDir("feed/videos").updateMaxCacheSize(200L * 1024 * 1024)
+                )
+            }
+
+            override fun getViewController(holder: BaseViewHolder?): CCVideoController? {
+                return holder?.getView(R.id.r_main_fg_feed_item_vc)
+            }
+
+            override fun getItem(p: Int): T? {
+                return this@FeedContentAdapter.getItem(p)
+            }
+
+            override fun getPathAndLogsCallId(d: T?): Pair<String, Any?>? {
+                return Pair(d?.getVideoPath() ?: "", d?.getSourceId())
+            }
+
+            override fun onBindData(
+                holder: SoftReference<BaseViewHolder>?,
+                p: Int,
+                d: T?,
+                playAble: Boolean,
+                vc: CCVideoController,
+                pl: MutableList<Any>?
+            ) {
+                vc.setTag(TAG_POSITION, p) // important properties.
+                vc.setTag(TAG_OVERLAY_VIEW, d?.getSourceId() ?: "TAG_OVERLAY_VIEW$p")
+                vc.setOnCompletedListener(if (playAble) onVcCompletedListener else null)
+                vc.setPlayingStateListener(if (playAble) onPlayingStateChangedListener else null)
+                vc.setOnResetListener(if (playAble) onResetListener else null)
+                vc.setOnTrackListener(if (playAble) onTrackListener else null)
+                onBindAdapterData(d, vc, pl)
+            }
         }
 
-        override fun getViewController(holder: BaseViewHolder?): CCVideoController? {
-            return holder?.getView(R.id.r_main_fg_feed_item_vc)
-        }
-
-        override fun getItem(p: Int): T? {
-            return this@FeedContentAdapter.getItem(p)
-        }
-
-        override fun getPathAndLogsCallId(d: T?): Pair<String, Any?>? {
-            return Pair(d?.getVideoPath() ?: "", d?.getSourceId())
-        }
-
-        override fun onBindData(holder: SoftReference<BaseViewHolder>?, p: Int, d: T?, playAble: Boolean, vc: CCVideoController, pl: MutableList<Any>?) {
-            vc.setTag(TAG_POSITION, p) // important properties.
-            vc.setTag(TAG_OVERLAY_VIEW, d?.getSourceId() ?: "TAG_OVERLAY_VIEW$p")
-            vc.setOnCompletedListener(if (playAble) onVcCompletedListener else null)
-            vc.setPlayingStateListener(if (playAble) onPlayingStateChangedListener else null)
-            vc.setOnResetListener(if (playAble) onResetListener else null)
-            vc.setOnTrackListener(if (playAble) onTrackListener else null)
-            onBindAdapterData(d, vc, pl)
-        }
-    }
-
-    private val onTrackListener: (playAble: Boolean, start: Boolean, end: Boolean, formTrigDuration: Float) -> Unit = { playAble, start, end, _ ->
-        if (playAble) {
-            finishOverrideView?.let {
-                if (start) {
-                    it.animate().cancel()
-                    it.animate().alpha(0.0f).setDuration(200).start()
-                }
-                if (end) {
-                    it.animate().cancel()
-                    it.animate().alpha(1.0f).setDuration(200).start()
+    private val onTrackListener: (playAble: Boolean, start: Boolean, end: Boolean, formTrigDuration: Float) -> Unit =
+        { playAble, start, end, _ ->
+            if (playAble) {
+                finishOverrideView?.let {
+                    if (start) {
+                        it.animate().cancel()
+                        it.animate().alpha(0.0f).setDuration(200).start()
+                    }
+                    if (end) {
+                        it.animate().cancel()
+                        it.animate().alpha(1.0f).setDuration(200).start()
+                    }
                 }
             }
         }
-    }
 
     private val onPlayingStateChangedListener: (BaseListVideoController) -> Unit = {
+        if (!isAutoPlayAble) adapterDelegate?.pause()
         val tag = finishOverrideView?.getTag(TAG_OVERLAY_VIEW)
         if (it.containsOverlayView(tag, WeakReference(finishOverrideView))) {
             it.removeView(tag, WeakReference(finishOverrideView))
@@ -205,7 +232,8 @@ class FeedContentAdapter<T : FeedDataIn> : ListenerAnimAdapter<T>(R.layout.r_mai
         }
     }
     private val onResetListener: (BaseListVideoController) -> Unit = {
-        it.getTag(TAG_OVERLAY_VIEW)?.let { tag -> it.removeView(tag, WeakReference(finishOverrideView)) }
+        it.getTag(TAG_OVERLAY_VIEW)
+            ?.let { tag -> it.removeView(tag, WeakReference(finishOverrideView)) }
     }
 
     @Suppress("UNUSED_PARAMETER")
@@ -227,7 +255,13 @@ class FeedContentAdapter<T : FeedDataIn> : ListenerAnimAdapter<T>(R.layout.r_mai
         Glide.with(iv).load(url).override(width, height).circleCrop().into(iv)
     }
 
-    private fun loadThumbImage(videoWidth: Int, videoHeight: Int, imgPath: String, vc: BaseListVideoController, d: T?) {
+    private fun loadThumbImage(
+        videoWidth: Int,
+        videoHeight: Int,
+        imgPath: String,
+        vc: BaseListVideoController,
+        d: T?
+    ) {
         val tag = d?.getSourceId() ?: return
         val imgType = when (val type = d.getType()) {
             DataType.VIDEO, DataType.IMG -> ImgLoader.ImgType.IMG

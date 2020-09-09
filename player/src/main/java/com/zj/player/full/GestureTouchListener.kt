@@ -4,6 +4,7 @@ import android.graphics.PointF
 import android.graphics.drawable.GradientDrawable.Orientation
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import androidx.annotation.FloatRange
@@ -135,7 +136,9 @@ internal abstract class GestureTouchListener(private val intercepted: () -> Bool
             else max(0f, elasticStep(max(_x - x, triggerX), triggerX))
         }
         val easeY = easingInterpolator(1f - _y / y, 9.8f, 1f)
-        curOrientation?.let { onTracked(startTrack, rx, ry, easeY, it, min(triggerY, y - _y) / triggerY);startTrack = false }
+        curOrientation?.let {
+            onTracked(startTrack, rx, ry, easeY, it, min(triggerY, y - _y) / triggerY);startTrack = false
+        }
     }
 
     private fun isTouchInPadding(v: View?, x: Float, y: Float, px: Float, py: Float): Boolean {
@@ -155,7 +158,7 @@ internal abstract class GestureTouchListener(private val intercepted: () -> Bool
         return `in` * (1f - (interpolator * 0.06f) / (interpolator * 0.06f + 1f)) * base
     }
 
-    fun updateTargetXY(v: View, event: MotionEvent):Boolean {
+    fun updateTargetXY(v: View, event: MotionEvent): Boolean {
         val e = MotionEvent.obtain(event)
         e.action = MotionEvent.ACTION_DOWN
         return onTouch(v, e)

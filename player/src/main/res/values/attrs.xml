@@ -1,23 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <declare-styleable name="VideoLoadingView">
-        <attr name="zPlayer_backgroundFill" format="color|reference" />
-        <attr name="zPlayer_backgroundOnAct" format="color|reference" />
-        <attr name="zPlayer_loadingRes" format="reference" />
-        <attr name="zPlayer_noDataRes" format="reference" />
-        <attr name="zPlayer_noNetworkRes" format="reference" />
-        <attr name="zPlayer_hintColor" format="color|reference" />
-        <attr name="zPlayer_refreshTextColor" format="color|reference" />
-        <attr name="zPlayer_loadingText" format="string" />
-        <attr name="zPlayer_noDataText" format="string" />
-        <attr name="zPlayer_networkErrorText" format="string" />
-        <attr name="zPlayer_refreshText" format="string" />
-        <attr name="zPlayer_showOnActDefault" format="boolean" />
-        <attr name="zPlayer_refreshEnable" format="boolean" />
-    </declare-styleable>
-
     <declare-styleable name="BaseVideoController">
+        <attr name="loadingIgnoreTs" format="integer" />
+        <attr name="loadingBackgroundColor" format="color|reference" />
+        <attr name="loadingRes" format="reference" />
+        <attr name="failRes" format="reference" />
+        <attr name="loadingIconWidth" format="dimension" />
+        <attr name="loadingIconHeight" format="dimension" />
+        <attr name="failIconWidth" format="dimension" />
+        <attr name="failIconHeight" format="dimension" />
+
+        <attr name="hintTextColor" format="color|reference" />
+        <attr name="refreshTextColor" format="color|reference" />
+        <attr name="loadingText" format="string" />
+        <attr name="failText" format="string" />
+        <attr name="refreshHintText" format="string" />
+        <attr name="hintTextSize" format="dimension" />
+        <attr name="refreshTextSize" format="dimension" />
+
         <attr name="autoFullTools" format="boolean" />
         <attr name="autoFullInterval" format="integer" />
         <attr name="muteIconEnable" format="enum">
@@ -54,7 +55,5 @@
 
         <attr name="muteDefault" format="boolean" />
         <attr name="useMuteGlobal" format="boolean" />
-        <attr name="loadingViewLayoutId" format="reference" />
-        <attr name="loadingViewId" format="reference" />
     </declare-styleable>
 </resources>

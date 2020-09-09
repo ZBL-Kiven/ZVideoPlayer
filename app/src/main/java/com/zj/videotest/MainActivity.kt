@@ -7,14 +7,15 @@ import com.zj.cf.managers.BaseFragmentManager
 import com.zj.player.logs.VideoEventListener
 import com.zj.player.logs.ZPlayerLogs
 import com.zj.videotest.feed.RFeedFragment
+import com.zj.videotest.frg.OtherFragment
 import com.zj.views.DrawableTextView
 
 class MainActivity : AppCompatActivity() {
 
     private var fragmentManager: BaseFragmentManager? = null
     private var mRFeedFragment: RFeedFragment? = null
-    private var mRewardFragmentR: RFeedFragment? = null
-    private var mMeFragmentR: RFeedFragment? = null
+    private var mRewardFragmentR: OtherFragment? = null
+    private var mMeFragmentR: OtherFragment? = null
 
     private var mFeedNavView: DrawableTextView? = null
     private var mRewardNavView: DrawableTextView? = null
@@ -29,11 +30,11 @@ class MainActivity : AppCompatActivity() {
         initFrg()
         ZPlayerLogs.setVideoEventListener(object : VideoEventListener() {
             override fun onError(e: Exception) {
-//                Log.e("------ ", " ================ error !!     ${e.message}")
+                //                Log.e("------ ", " ================ error !!     ${e.message}")
             }
 
             override fun onLog(s: String, curPath: String, accessKey: String, modeName: String, params: Map<String, Any>?) {
-//                if (params != null) Log.e("------ ", s)
+                //                if (params != null) Log.e("------ ", s)
             }
         })
     }
@@ -46,8 +47,8 @@ class MainActivity : AppCompatActivity() {
 
     private fun initFrg() {
         mRFeedFragment = RFeedFragment()
-        mRewardFragmentR = RFeedFragment()
-        mMeFragmentR = RFeedFragment()
+        mRewardFragmentR = OtherFragment()
+        mMeFragmentR = OtherFragment()
         fragmentManager = object : BaseFragmentManager(this, R.id.r_main_act_fragment_content, 0, listOfNotNull(mFeedNavView, mRewardNavView, mMeNavView), mRFeedFragment, mRewardFragmentR, mMeFragmentR) {
             override fun syncSelectState(selectId: String) {
                 super.syncSelectState(selectId)
