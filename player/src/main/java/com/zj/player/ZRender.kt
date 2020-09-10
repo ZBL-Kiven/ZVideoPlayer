@@ -5,6 +5,7 @@ import android.graphics.Matrix
 import android.graphics.RectF
 import android.os.Looper
 import android.util.AttributeSet
+import android.util.Log
 import android.view.*
 import androidx.annotation.Nullable
 import com.google.android.exoplayer2.Player
@@ -42,14 +43,11 @@ open class ZRender @JvmOverloads constructor(context: Context, attrs: AttributeS
      * set [Player] to looper and binding the event listeners to media client
      * */
     fun setPlayer(@Nullable player: Player?, @SurfaceType surfaceType: Int = SURFACE_TYPE_SURFACE_VIEW, @ResizeMode resizeMode: Int = RESIZE_MODE_FIT) {
+        if (this.player === player) return
         setVideoFrame(surfaceType, resizeMode)
         descendantFocusability = ViewGroup.FOCUS_AFTER_DESCENDANTS
         Assertions.checkState(Looper.myLooper() == Looper.getMainLooper())
         Assertions.checkArgument(player == null || player.applicationLooper == Looper.getMainLooper())
-        if (this.player === player) {
-            return
-        }
-
         player?.let {
             val oldVideoComponent = it.videoComponent
             if (oldVideoComponent != null) {

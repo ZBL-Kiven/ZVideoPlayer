@@ -2,6 +2,7 @@ package com.zj.player
 
 import android.content.Context
 import android.content.res.Resources
+import android.util.Log
 import android.view.Gravity
 import android.view.ViewGroup
 import android.widget.FrameLayout
@@ -91,10 +92,9 @@ class ZController private constructor(private var player: ZPlayer?, viewControll
                 stopNow(false, isRegulate = false)
                 return null
             }
-            val ctx = context ?: throw NullPointerException("context should not be null!")
-            if (render == null) render = ZRender(ctx)
             val info = c.controllerInfo ?: throw NullPointerException("the controller view is required")
             val ctr = info.container ?: throw NullPointerException("the view controller post a null container parent , which the renderer add to?")
+            if (render == null) render = ZRender(ctr.context ?: throw NullPointerException("context should not be null!"))
             render?.let { r ->
                 val parent = (r.parent as? ViewGroup) ?: if (r.parent != null) throw IllegalArgumentException("the renderer added in and without a viewGroup?") else null
                 if (parent == ctr) {

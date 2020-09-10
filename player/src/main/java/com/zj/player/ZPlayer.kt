@@ -168,17 +168,12 @@ open class ZPlayer(var config: VideoConfig? = null) : Player.EventListener {
     }
 
     private fun loading(videoUrl: String) {
-        handler?.removeCallbacksAndMessages(null)
         val context = controller?.context ?: return
-        val control: LoadControl = config?.let {
-            VideoLoadControl.Builder().createDefaultLoadControl(it.minBufferMs, it.maxBufferMs, it.bufferForPlaybackMs, it.bufferForPlaybackAfterBufferMs)
-        } ?: DefaultLoadControl.Builder().createDefaultLoadControl()
-        val renderFactory = DefaultRenderersFactory(context)
+        handler?.removeCallbacksAndMessages(null)
         if (player == null) {
             log("new player create")
-            player = ExoPlayerFactory.newSimpleInstance(context, renderFactory, DefaultTrackSelector(), control)
+            createPlayer(context)
         }
-        player?.videoScalingMode = config?.videoScaleMod ?: C.VIDEO_SCALING_MODE_SCALE_TO_FIT
         log("video $videoUrl in loading...")
         controller?.playerView?.let {
             it.setPlayer(player, Constance.SURFACE_TYPE_TEXTURE_VIEW)
@@ -194,6 +189,15 @@ open class ZPlayer(var config: VideoConfig? = null) : Player.EventListener {
             it.prepare(dataSource)
             it.addListener(this)
         }
+    }
+
+    private fun createPlayer(context: Context) {
+        val control: LoadControl = config?.let {
+            VideoLoadControl.Builder().createDefaultLoadControl(it.minBufferMs, it.maxBufferMs, it.bufferForPlaybackMs, it.bufferForPlaybackAfterBufferMs)
+        } ?: DefaultLoadControl.Builder().createDefaultLoadControl()
+        val renderFactory = DefaultRenderersFactory(context)
+        player = ExoPlayerFactory.newSimpleInstance(context, renderFactory, DefaultTrackSelector(), control)
+        player?.videoScalingMode = config?.videoScaleMod ?: C.VIDEO_SCALING_MODE_SCALE_TO_FIT
     }
 
     private fun createDefaultDataSource(context: Context, path: Uri?): MediaSource {

@@ -2,6 +2,7 @@ package com.zj.videotest
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import com.gyf.immersionbar.ImmersionBar
 import com.zj.cf.managers.BaseFragmentManager
 import com.zj.player.logs.VideoEventListener
@@ -34,7 +35,7 @@ class MainActivity : AppCompatActivity() {
             }
 
             override fun onLog(s: String, curPath: String, accessKey: String, modeName: String, params: Map<String, Any>?) {
-                //                if (params != null) Log.e("------ ", s)
+                Log.e("------ ", s)
             }
         })
     }

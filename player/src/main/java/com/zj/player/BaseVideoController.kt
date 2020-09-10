@@ -12,11 +12,13 @@ import android.graphics.drawable.GradientDrawable
 import android.media.AudioManager
 import android.os.Handler
 import android.os.Looper
+import android.os.PowerManager
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
+import android.view.WindowManager
 import android.view.animation.AccelerateDecelerateInterpolator
 import android.widget.*
 import androidx.annotation.LayoutRes
@@ -112,6 +114,7 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
     protected var fullMaxScreenEnable: Boolean = true
     protected var lockScreenRotation: Int = -1
     protected var isLockScreenRotation: Boolean = false
+    protected var keepScreenOnWhenPlaying: Boolean = false
     private var muteDefault: Boolean = false
     private var muteIsUseGlobal: Boolean = false
     protected var isFullScreen: Boolean = false
@@ -127,6 +130,9 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
                 field = value
             }
         }
+
+    private val isPlaying: Boolean; get() = controller?.isPlaying() ?: false
+
     private var touchListener: GestureTouchListener? = object : GestureTouchListener({ isInterrupted() }) {
 
         override fun onEventEnd(formTrigDuration: Float): Boolean {
@@ -155,6 +161,8 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
     fun isInterrupted(): Boolean {
         return fullScreenDialog?.isInterruptTouchEvent() ?: false
     }
+
+    private var mWakeLock: PowerManager.WakeLock? = null
 
     init {
         initView(context, attributeSet)
@@ -190,6 +198,7 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
             lockScreenRotation = ta.getInt(R.styleable.BaseVideoController_lockScreenRotation, -1)
             muteIsUseGlobal = ta.getBoolean(R.styleable.BaseVideoController_useMuteGlobal, false)
             muteDefault = ta.getBoolean(R.styleable.BaseVideoController_muteDefault, false)
+            keepScreenOnWhenPlaying = ta.getBoolean(R.styleable.BaseVideoController_keepScreenOnWhenPlaying, false)
             val view = LayoutInflater.from(context).inflate(R.layout.z_player_video_view, null, false)
             addView(view, LayoutParams(MATCH_PARENT, MATCH_PARENT))
             videoRoot = view?.findViewById(R.id.z_player_video_root)
@@ -241,12 +250,21 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
                 if (refreshTextSize > 0) it.setHintTextSize(refreshTextSize)
                 it.setDrawableSize(loadingIconWidth, loadingIconHeight, failIconWidth, failIconHeight)
             }
+            if (keepScreenOnWhenPlaying) initLock()
         } catch (e: Exception) {
             if (e is RuntimeException) throw e
             else e.printStackTrace()
         } finally {
             ta.recycle()
         }
+    }
+
+    @Suppress("DEPRECATION")
+    @SuppressLint("InvalidWakeLockTag")
+    private fun initLock() {
+        val powerManager = context.getSystemService(Context.POWER_SERVICE) as PowerManager
+        mWakeLock = powerManager.newWakeLock(PowerManager.FULL_WAKE_LOCK, "keep_screen_on_tag")
+        mWakeLock?.setReferenceCounted(false)
     }
 
     private fun initListener() {
@@ -365,11 +383,13 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
         onLoadingEvent(LoadingMode.None)
         full(false)
         seekBarSmall?.visibility = View.VISIBLE
+        checkIsMakeScreenOn()
     }
 
     override fun onPause(path: String, isRegulate: Boolean) {
         seekBar?.isSelected = false
         showOrHidePlayBtn(true)
+        checkIsMakeScreenOn()
     }
 
     override fun updateCurPlayerInfo(volume: Float, speed: Float) {
@@ -380,6 +400,7 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
 
     override fun onStop(path: String, isRegulate: Boolean) {
         reset(false, isRegulate = isRegulate, isShowPlayBtn = true)
+        checkIsMakeScreenOn()
     }
 
     override fun completing(path: String, isRegulate: Boolean) {
@@ -401,6 +422,7 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
             full(false)
         }
         onSeekChanged(0, 0, false, 0)
+        checkIsMakeScreenOn()
     }
 
     override fun onSeekChanged(seek: Int, buffered: Int, fromUser: Boolean, videoSize: Long) {
@@ -426,6 +448,7 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
         onSeekChanged(0, 0, false, 0)
         showOrHidePlayBtn(false)
         onLoadingEvent(LoadingMode.Fail)
+        checkIsMakeScreenOn()
     }
 
     override fun onLifecycleResume() {
@@ -845,6 +868,7 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
         }
         isFullingOrDismissing = false
         onFullScreenChanged(isShow)
+        checkIsMakeScreenOn()
     }
 
     protected fun onFocusChanged(dialog: BaseGestureFullScreenDialog, isMax: Boolean) {
@@ -883,6 +907,20 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
                 showOrHidePlayBtn(isFull, true)
             }
             full(isFull)
+        }
+    }
+
+    private fun checkIsMakeScreenOn() {
+        if (keepScreenOnWhenPlaying) {
+            try {
+                if (isPlaying) {
+                    mWakeLock?.acquire(10 * 60 * 1000L /*10 minutes*/)
+                } else {
+                    mWakeLock?.release()
+                }
+            } catch (e: java.lang.Exception) {
+                e.printStackTrace()
+            }
         }
     }
 

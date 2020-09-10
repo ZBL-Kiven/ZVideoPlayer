@@ -19,6 +19,7 @@
         <attr name="hintTextSize" format="dimension" />
         <attr name="refreshTextSize" format="dimension" />
 
+        <attr name="keepScreenOnWhenPlaying" format="boolean" />
         <attr name="autoFullTools" format="boolean" />
         <attr name="autoFullInterval" format="integer" />
         <attr name="muteIconEnable" format="enum">

@@ -2,4 +2,6 @@
     package="com.zj.player">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+
 </manifest>
