@@ -34,7 +34,7 @@ abstract class BaseListVideoController @JvmOverloads constructor(c: Context, att
         curPlayingIndex = index
     }
 
-    override fun onPlayClick(v: View) {
+    override fun onPlayClick(v: View, formUser: Boolean) {
         load(v, false)
     }
 
@@ -53,9 +53,9 @@ abstract class BaseListVideoController @JvmOverloads constructor(c: Context, att
     }
 
     private fun load(v: View, reload: Boolean) {
-        if (controller?.isPlaying() == true) if (reload) super.reload(v) else super.onPlayClick(v) else {
+        if (controller?.isPlaying() == true) if (reload) super.reload(v) else super.onPlayClick(v, false) else {
             controller?.let {
-                if (reload) super.reload(v) else super.onPlayClick(v)
+                if (reload) super.reload(v) else super.onPlayClick(v, false)
             } ?: videoControllerIn?.waitingForPlay(curPlayingIndex, 20L)
         }
     }

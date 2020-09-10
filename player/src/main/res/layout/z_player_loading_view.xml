@@ -12,8 +12,7 @@
 
     <FrameLayout
         android:layout_width="55dp"
-        android:layout_height="55dp"
-        android:layout_marginBottom="8dp">
+        android:layout_height="55dp">
 
         <ProgressBar
             android:id="@+id/blv_pb"
@@ -44,7 +43,7 @@
         android:id="@+id/blv_tvRefresh"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="8dp"
         android:textColor="#A3A3A3"
         android:textSize="12sp"
         android:visibility="invisible" />

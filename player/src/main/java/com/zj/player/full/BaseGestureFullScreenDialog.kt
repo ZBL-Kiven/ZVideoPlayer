@@ -350,7 +350,6 @@ class BaseGestureFullScreenDialog private constructor(
         } else {
             window?.decorView?.systemUiVisibility = systemUiFlags ?: 0
             window?.clearFlags(flag)
-            getActivity()?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
         }
     }
 

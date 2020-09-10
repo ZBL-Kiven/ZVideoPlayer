@@ -252,7 +252,7 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
     private fun initListener() {
         vPlay?.setOnClickListener {
             log("on play btn click", BehaviorLogsTable.onPlayClick())
-            onPlayClick(it)
+            onPlayClick(it, true)
         }
 
         videoRoot?.setTargetChangeListener { v, e ->
@@ -268,7 +268,7 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
         }
 
         fullScreen?.setOnClickListener {
-            onFullScreenClick(it)
+            onFullScreenClick(it, true)
         }
 
         speedView?.setOnClickListener {
@@ -380,7 +380,6 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
 
     override fun onStop(path: String, isRegulate: Boolean) {
         reset(false, isRegulate = isRegulate, isShowPlayBtn = true)
-        updateCurPlayerInfo(1f, supportedSpeedList[0])
     }
 
     override fun completing(path: String, isRegulate: Boolean) {
@@ -442,7 +441,7 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
     }
 
     internal fun clickPlayBtn() {
-        vPlay?.callOnClick()
+        onPlayClick(vPlay ?: return, false)
     }
 
     open fun playIfReady() {
@@ -472,7 +471,7 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
 
     open fun onTrack(playAble: Boolean, start: Boolean, end: Boolean, formTrigDuration: Float) {}
 
-    open fun onPlayClick(v: View) {
+    open fun onPlayClick(v: View, formUser: Boolean) {
         if (!isPlayable) return
         v.isEnabled = false
         if (!v.isSelected) {
@@ -485,7 +484,7 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
     open fun reload(v: View) {
         val path = controller?.getPath()
         if (path.isNullOrEmpty()) {
-            onLoadingEvent(LoadingMode.Loading)
+            onLoadingEvent(LoadingMode.Loading, isSetInNow = false, ignoreInterval = true)
             postDelayed({
                 onError(NullPointerException("video path is null"))
             }, 300)
@@ -507,10 +506,10 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
 
     open fun onRootDoubleClick() {
         log("on root view double click", BehaviorLogsTable.onRootDoubleClick())
-        fullScreen?.let { onFullScreenClick(it) }
+        fullScreen?.let { onFullScreenClick(it, false) }
     }
 
-    open fun onFullScreenClick(v: View) {
+    open fun onFullScreenClick(v: View, formUser: Boolean) {
         log("on full screen", BehaviorLogsTable.onFullScreen())
         if (!isFullingOrDismissing) {
             isFullingOrDismissing = true
@@ -866,12 +865,12 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
         return (context as? Activity)?.isFinishing == true
     }
 
-    private fun onLoadingEvent(loadingMode: LoadingMode, isSetInNow: Boolean = false) {
+    private fun onLoadingEvent(loadingMode: LoadingMode, isSetInNow: Boolean = false, ignoreInterval: Boolean = false) {
         mHandler.removeMessages(loadingModeDelay)
         loadingView?.let {
             when (loadingMode) {
                 LoadingMode.None -> it.setMode(VideoLoadingView.DisplayMode.NONE, isSetInNow)
-                LoadingMode.Loading -> if (isSetInNow || loadingIgnoreInterval <= 0) it.setMode(VideoLoadingView.DisplayMode.LOADING, isSetInNow)
+                LoadingMode.Loading -> if (isSetInNow || loadingIgnoreInterval <= 0 || ignoreInterval) it.setMode(VideoLoadingView.DisplayMode.LOADING, isSetInNow)
                 else mHandler.sendEmptyMessageDelayed(loadingModeDelay, loadingIgnoreInterval.toLong())
                 LoadingMode.Fail -> it.setMode(VideoLoadingView.DisplayMode.NO_DATA, isSetInNow)
             }
