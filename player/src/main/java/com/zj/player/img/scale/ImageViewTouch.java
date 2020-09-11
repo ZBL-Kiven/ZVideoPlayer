@@ -200,7 +200,7 @@ public class ImageViewTouch extends ImageViewTouchBase {
      *                  negative value means scroll from left to right
      * @return true if there is some more place to scroll, false - otherwise.
      */
-    public boolean canScroll(int direction) {
+    public boolean canScroll(int direction, boolean elastic) {
         RectF bitmapRect = getBitmapRect();
         updateRect(bitmapRect, mScrollRect);
         Rect imageViewRect = new Rect();
@@ -214,10 +214,10 @@ public class ImageViewTouch extends ImageViewTouchBase {
         if (null == bitmapRect) {
             return false;
         }
-        boolean spaceInRight = bitmapRect.right > imageViewRect.right;
-        boolean spaceInLeft = bitmapRect.left < imageViewRect.left;
-        boolean spaceInTop = bitmapRect.top < imageViewRect.top;
-        boolean spaceInBottom = bitmapRect.bottom > imageViewRect.bottom;
+        boolean spaceInRight = bitmapRect.right - (elastic ? 30 : 0) > imageViewRect.right;
+        boolean spaceInLeft = bitmapRect.left + (elastic ? 30 : 0) < imageViewRect.left;
+        boolean spaceInTop = bitmapRect.top + (elastic ? 30 : 0) < imageViewRect.top;
+        boolean spaceInBottom = bitmapRect.bottom - (elastic ? 30 : 0) > imageViewRect.bottom;
         return (ltr && spaceInLeft) || (rtl && spaceInRight) || (ttb && spaceInTop) || (btt && spaceInBottom);
     }
 
@@ -314,7 +314,7 @@ public class ImageViewTouch extends ImageViewTouchBase {
     }
 
     public boolean scrollAble() {
-        return canScroll(top | right | left | bottom);
+        return canScroll(top | right | left | bottom, false);
     }
 
     public interface OnImageViewTouchDoubleTapListener {
