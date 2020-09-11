@@ -149,7 +149,7 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
         }
 
         override fun onTracked(isStart: Boolean, offsetX: Float, offsetY: Float, easeY: Float, orientation: GradientDrawable.Orientation, formTrigDuration: Float) {
-            if (isFullScreen && fullScreenDialog?.isShowing == true) {
+            if (isFullScreen && fullScreenDialog?.parent != null) {
                 fullScreenDialog?.onTracked(isStart, offsetX, offsetY, easeY, formTrigDuration)
             }
         }
@@ -344,7 +344,7 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
 
     override fun onDestroy(path: String?, isRegulate: Boolean) {
         fullScreenDialog?.let {
-            if (it.isShowing) it.dismiss()
+            if (it.parent != null) it.dismiss()
         }
         controller = null
     }

@@ -61,7 +61,7 @@ open class ZPlayer(var config: VideoConfig? = null) : Player.EventListener {
         private const val HANDLE_PROGRESS = 10102
         private const val HANDLE_STATE = 10103
         private const val clearFlag = 78916
-        @Suppress("DEPRECATION") val stableFlag = WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD
+        @Suppress("DEPRECATION") val stableFlag = WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD
         @Suppress("DEPRECATION") val flag = WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON or WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON
     }
 
