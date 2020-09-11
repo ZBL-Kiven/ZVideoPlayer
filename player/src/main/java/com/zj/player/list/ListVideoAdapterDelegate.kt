@@ -187,6 +187,7 @@ abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : Rec
 
     final override fun waitingForPlay(curPlayingIndex: Int, delay: Long, fromUser: Boolean) {
         if (curPlayingIndex !in 0 until adapter.itemCount) return
+        if (fromUser) recyclerView?.smoothScrollToPosition(curPlayingIndex)
         handler?.removeMessages(0)
         handler?.sendMessageDelayed(Message.obtain().apply {
             this.what = 0
@@ -215,7 +216,7 @@ abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : Rec
                 val lvo = vlt?.let { min(vlt.bottom - cp.bottom, vlt.top - cp.top) } ?: 0
                 val trv = min(abs(fvo), abs(lvo))
                 val isFo = abs(fvo) == trv
-                offsetPositions = if (isFo) fvo else lvo
+                offsetPositions = if (isFo) fvo - 20 else lvo + 20
                 if (isFo) fv else lv
             } else if (fv <= 0) lv else fv
             @Suppress("UNCHECKED_CAST") (getViewController(recyclerView?.findViewHolderForAdapterPosition(tr) as? VH)?.let {
@@ -278,6 +279,7 @@ abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : Rec
         override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
             if (!isAutoPlayWhenItemAttached) return
             handler?.removeMessages(1)
+            handler?.removeMessages(0)
             if (newState == RecyclerView.SCROLL_STATE_IDLE) {
                 handler?.sendEmptyMessageDelayed(1, 150)
             }

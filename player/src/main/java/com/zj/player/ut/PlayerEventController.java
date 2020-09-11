@@ -19,7 +19,7 @@ public interface PlayerEventController {
 
     void onPause(String path, boolean isRegulate);
 
-    void onStop(boolean notifyStop,String path, boolean isRegulate);
+    void onStop(boolean notifyStop, String path, boolean isRegulate);
 
     void completing(String path, boolean isRegulate);
 
@@ -36,6 +36,8 @@ public interface PlayerEventController {
 
     @Nullable
     Context getContext();
+
+    boolean keepScreenOnWhenPlaying();
 
     void onError(Exception e);
 

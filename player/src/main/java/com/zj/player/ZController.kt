@@ -2,7 +2,6 @@ package com.zj.player
 
 import android.content.Context
 import android.content.res.Resources
-import android.util.Log
 import android.view.Gravity
 import android.view.ViewGroup
 import android.widget.FrameLayout
@@ -314,6 +313,10 @@ class ZController private constructor(private var player: ZPlayer?, viewControll
 
     override fun getPlayerView(): ZRender? {
         return render
+    }
+
+    override fun keepScreenOnWhenPlaying(): Boolean {
+        return getController()?.keepScreenOnWhenPlaying() ?: true
     }
 
     override fun onLoading(path: String?, isRegulate: Boolean) {

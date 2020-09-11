@@ -13,13 +13,13 @@ import android.widget.RelativeLayout
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.zj.player.BaseVideoController
 import com.zj.videotest.feed.data.FeedDataIn
 import com.zj.player.ZController
 import com.zj.player.config.VideoConfig
 import com.zj.player.controller.BaseListVideoController
 import com.zj.player.img.ImgLoader
 import com.zj.player.list.ListVideoAdapterDelegate
-import com.zj.videotest.BuildConfig
 import com.zj.videotest.R
 import com.zj.videotest.controllers.CCImageLoader
 import com.zj.videotest.feed.data.DataType
@@ -38,6 +38,7 @@ class FeedContentAdapter<T : FeedDataIn> : ListenerAnimAdapter<T>(R.layout.r_mai
     private var adapterInterface: FeedAdapterInterface<T>? = null
     private var loadDistance: Int = 5
     private var curLoadingTentaclePosition: Int = 5
+    private var controller: ZController? = null
 
     private companion object {
         const val TAG_POSITION = R.id.special_feed_adapter_tag_id_position
@@ -100,6 +101,10 @@ class FeedContentAdapter<T : FeedDataIn> : ListenerAnimAdapter<T>(R.layout.r_mai
 
     override fun onViewRecycled(holder: BaseViewHolder) {
         holder.getView<CCVideoController>(R.id.r_main_fg_feed_item_vc)?.let {
+            it.setOnCompletedListener(null)
+            it.setOnResetListener(null)
+            it.setOnTrackListener(null)
+            it.setOnFullScreenChangedListener(null)
             try {
                 context?.let { ctx ->
                     val thumb = it.getThumbView() ?: return
@@ -142,7 +147,9 @@ class FeedContentAdapter<T : FeedDataIn> : ListenerAnimAdapter<T>(R.layout.r_mai
     private var adapterDelegate: ListVideoAdapterDelegate<T, CCVideoController, BaseViewHolder>? = object : ListVideoAdapterDelegate<T, CCVideoController, BaseViewHolder>(this@FeedContentAdapter) {
 
         override fun createZController(vc: CCVideoController): ZController {
-            return ZController.build(vc, VideoConfig.create().setCacheEnable(false).setDebugAble(BuildConfig.DEBUG).setCacheFileDir("feed/videos").updateMaxCacheSize(200L * 1024 * 1024))
+            if (controller == null) controller = ZController.build(vc, VideoConfig.create().setCacheEnable(true).setDebugAble(false).setCacheFileDir("feed/videos").updateMaxCacheSize(200L * 1024 * 1024))
+            else controller?.updateViewController(vc)
+            return controller!!
         }
 
         override fun getViewController(holder: BaseViewHolder?): CCVideoController? {
@@ -164,6 +171,7 @@ class FeedContentAdapter<T : FeedDataIn> : ListenerAnimAdapter<T>(R.layout.r_mai
             vc.setPlayingStateListener(if (playAble) onPlayingStateChangedListener else null)
             vc.setOnResetListener(if (playAble) onResetListener else null)
             vc.setOnTrackListener(if (playAble) onTrackListener else null)
+            vc.setOnFullScreenChangedListener(onFullScreenListener)
             onBindAdapterData(d, vc, pl)
         }
     }
@@ -205,6 +213,17 @@ class FeedContentAdapter<T : FeedDataIn> : ListenerAnimAdapter<T>(R.layout.r_mai
             }
         }
     }
+
+    private val onFullScreenListener: (BaseVideoController) -> Unit = { vc ->
+        controller?.let {
+            (vc.getTag(TAG_POSITION) as? Int)?.let { p ->
+                getItem(p)?.getVideoPath()?.let { path -> cancelIfNotCurrent(path) }
+                resumeIfVisible(p)
+            }
+        }
+    }
+
+
     private val onResetListener: (BaseListVideoController) -> Unit = {
         it.getTag(TAG_OVERLAY_VIEW)?.let { tag -> it.removeView(tag, WeakReference(finishOverrideView)) }
     }
@@ -272,6 +291,12 @@ class FeedContentAdapter<T : FeedDataIn> : ListenerAnimAdapter<T>(R.layout.r_mai
         adapterDelegate?.cancelAll()
     }
 
+    private fun cancelIfNotCurrent(path: String) {
+        if (controller?.getPath() != path) {
+            cancelAllPLay()
+        }
+    }
+
     fun destroy() {
         isAutoPlayAble = false
         adapterDelegate?.release()
@@ -291,10 +316,10 @@ class FeedContentAdapter<T : FeedDataIn> : ListenerAnimAdapter<T>(R.layout.r_mai
         Runtime.getRuntime().gc()
     }
 
-    private fun resumeIfVisible() {
+    private fun resumeIfVisible(position: Int = -1) {
         if (!data.isNullOrEmpty()) {
             adapterDelegate?.resume()
-            if (isAutoPlayAble) adapterDelegate?.idle()
+            if (isAutoPlayAble) adapterDelegate?.idle(position)
         }
     }
 }

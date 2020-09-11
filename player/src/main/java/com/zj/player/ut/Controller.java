@@ -17,6 +17,8 @@ public interface Controller {
 
     Context getContext();
 
+    boolean keepScreenOnWhenPlaying();
+
     InflateInfo getControllerInfo();
 
     void onLoading(String path, boolean isRegulate);

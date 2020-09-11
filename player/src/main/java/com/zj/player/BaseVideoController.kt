@@ -12,13 +12,11 @@ import android.graphics.drawable.GradientDrawable
 import android.media.AudioManager
 import android.os.Handler
 import android.os.Looper
-import android.os.Message
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
-import android.view.WindowManager
 import android.view.animation.AccelerateDecelerateInterpolator
 import android.widget.*
 import androidx.annotation.LayoutRes
@@ -56,10 +54,8 @@ import kotlin.math.roundToInt
 open class BaseVideoController @JvmOverloads constructor(context: Context, attributeSet: AttributeSet? = null, def: Int = 0) : FrameLayout(context, attributeSet, def), Controller {
 
     companion object {
-
         private const val dismissFullTools = 7817
         private const val loadingModeDelay = 7716
-        private const val clearFlag = 7186
         private var muteGlobalDefault: Boolean = false
 
         /**
@@ -75,7 +71,6 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
         when (it.what) {
             dismissFullTools -> onFullTools(false)
             loadingModeDelay -> loadingView?.setMode(VideoLoadingView.DisplayMode.LOADING)
-            clearFlag -> checkIsMakeScreenOn(it.arg1 == 1)
         }
         return@Handler false
     }
@@ -335,6 +330,14 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
         })
     }
 
+    override fun keepScreenOnWhenPlaying(): Boolean {
+        return keepScreenOnWhenPlaying
+    }
+
+    override fun getKeepScreenOn(): Boolean {
+        return keepScreenOnWhenPlaying
+    }
+
     override fun onControllerBind(controller: ZController?) {
         this.controller = controller
     }
@@ -375,13 +378,11 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
         onLoadingEvent(LoadingMode.None)
         full(false)
         seekBarSmall?.visibility = View.VISIBLE
-        setScreenOnMode(false, 100)
     }
 
     override fun onPause(path: String, isRegulate: Boolean) {
         seekBar?.isSelected = false
         showOrHidePlayBtn(true)
-        setScreenOnMode(false)
     }
 
     override fun updateCurPlayerInfo(volume: Float, speed: Float) {
@@ -392,7 +393,6 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
 
     override fun onStop(path: String, isRegulate: Boolean) {
         reset(false, isRegulate = isRegulate, isShowPlayBtn = true)
-        setScreenOnMode(false)
     }
 
     override fun completing(path: String, isRegulate: Boolean) {
@@ -414,7 +414,6 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
             full(false)
         }
         onSeekChanged(0, 0, false, 0)
-        setScreenOnMode(false)
     }
 
     override fun onSeekChanged(seek: Int, buffered: Int, fromUser: Boolean, videoSize: Long) {
@@ -440,7 +439,6 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
         onSeekChanged(0, 0, false, 0)
         showOrHidePlayBtn(false)
         onLoadingEvent(LoadingMode.Fail)
-        setScreenOnMode(false)
     }
 
     override fun onLifecycleResume() {
@@ -718,7 +716,7 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
             return field
         }
 
-    private val fullListener = object : ZFullValueAnimator.FullAnimatorListener {
+    private val fullListener = object : ZFullValueAnimator.FullAnimatorListener() {
 
         override fun onDurationChange(animation: ValueAnimator, duration: Float, isFull: Boolean) {
             if (checkActIsFinished()) return
@@ -903,33 +901,6 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
                 showOrHidePlayBtn(isFull, true)
             }
             full(isFull)
-        }
-    }
-
-    private fun setScreenOnMode(isScreenOn: Boolean, delay: Long = 10000) {
-        mHandler.removeMessages(clearFlag)
-        mHandler.sendMessageDelayed(Message.obtain().apply {
-            this.what = clearFlag
-            this.arg1 = if (isScreenOn) 1 else 0
-        }, delay)
-    }
-
-    private fun checkIsMakeScreenOn(isScreen: Boolean) {
-        @Suppress("DEPRECATION") val stableFlag = WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD
-        @Suppress("DEPRECATION") val flag = WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON or WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON
-        try {
-            (context as? Activity)?.window?.let {
-                it.addFlags(stableFlag)
-                if (keepScreenOnWhenPlaying) {
-                    if (isScreen) {
-                        it.addFlags(flag)
-                    } else {
-                        it.clearFlags(flag)
-                    }
-                }
-            }
-        } catch (e: java.lang.Exception) {
-            e.printStackTrace()
         }
     }
 

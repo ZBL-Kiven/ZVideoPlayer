@@ -55,7 +55,7 @@ class BaseGestureFullScreenDialog private constructor(private var controllerView
     private var isMaxFull = isDefaultMaxScreen
     private val vp: ViewGroup? = getControllerView().parent as? ViewGroup
     private val vlp: ViewGroup.LayoutParams? = getControllerView().layoutParams
-    private val originViewRectF: RectF
+    private var originViewRectF: RectF? = null
     private var contentLayoutView: View? = null
     private var backgroundView: View? = null
     private var realWindowSize = Point()
@@ -81,14 +81,12 @@ class BaseGestureFullScreenDialog private constructor(private var controllerView
         this.setCanceledOnTouchOutside(false)
         this.setCancelable(false)
         window?.setDimAmount(0f)
-        val cps = getViewPoint(getControllerView())
-        originViewRectF = RectF(cps.x, cps.y, cps.x + originWidth, cps.y + originHeight)
         (getControllerView().context.applicationContext.getSystemService(Context.WINDOW_SERVICE) as? WindowManager)?.defaultDisplay?.getRealSize(realWindowSize)
         if (!isDefaultMaxScreen && contentLayout > 0) contentLayoutView = View.inflate(getControllerView().context, contentLayout, null)
         changeSystemWindowVisibility(true)
         setContent(isMaxFull)
         initListeners()
-        showAnim(isMaxFull)
+        showAnim()
     }
 
     private fun setContent(isMaxFull: Boolean, isResizeCalculate: Boolean = false) {
@@ -113,13 +111,13 @@ class BaseGestureFullScreenDialog private constructor(private var controllerView
                 onFullContentListener?.onContentLayoutInflated(it)
             }
         } finally {
-            if (isResizeCalculate) init(isMaxFull)
+            if (isResizeCalculate) init()
         }
     }
 
-    private fun showAnim(isMaxFull: Boolean) {
+    private fun showAnim() {
         fun start() {
-            init(isMaxFull)
+            init()
             isAnimRun = true
             scaleAnim?.start(true)
         }
@@ -128,14 +126,20 @@ class BaseGestureFullScreenDialog private constructor(private var controllerView
         (contentLayoutView ?: window?.decorView)?.post { start() }
     }
 
-    private fun init(isMaxFull: Boolean) {
+    private fun init() {
+        initCalculate()
+        updateContent(0f)
+        screenRotationsChanged(true)
+        setBackground(1f)
+    }
+
+    private fun initCalculate() {
+        val cps = getViewPoint(vp)
+        originViewRectF = RectF(cps.x, cps.y, cps.x + originWidth, cps.y + originHeight)
         val viewRectF = getWindowSize(isMaxFull)
         _width = viewRectF.right - viewRectF.left
         _height = viewRectF.bottom - viewRectF.top
         calculateUtils = RectFCalculateUtil(viewRectF, RectF(originViewRectF))
-        updateContent(0f)
-        screenRotationsChanged(true)
-        setBackground(1f)
     }
 
     private fun dismissed() {
@@ -155,7 +159,12 @@ class BaseGestureFullScreenDialog private constructor(private var controllerView
     }
 
     private fun initListeners() {
-        scaleAnim = ZFullValueAnimator(object : ZFullValueAnimator.FullAnimatorListener {
+        scaleAnim = ZFullValueAnimator(object : ZFullValueAnimator.FullAnimatorListener() {
+
+            override fun onStart() {
+                initCalculate()
+            }
+
             override fun onDurationChange(animation: ValueAnimator, duration: Float, isFull: Boolean) {
                 if (isFull) {
                     updateContent(1 - duration)
@@ -276,11 +285,11 @@ class BaseGestureFullScreenDialog private constructor(private var controllerView
 
     @SuppressLint("SourceLockedOrientationActivity")
     private fun changeSystemWindowVisibility(visible: Boolean) {
-        val flag: Int = WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN or WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS or WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS or WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION
+        val flag: Int = WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN or WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS or WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS or WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION or WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS
         val flagSystem: Int = View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION or View.SYSTEM_UI_FLAG_LAYOUT_STABLE or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION or View.SYSTEM_UI_FLAG_FULLSCREEN or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
         if (visible) {
             window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
-            window?.addFlags(flag)
+            window?.addFlags((systemUiFlags ?: 0) or flag)
             window?.decorView?.systemUiVisibility = flagSystem
             getActivity()?.let {
                 if (it.requestedOrientation != ActivityInfo.SCREEN_ORIENTATION_PORTRAIT) {

@@ -32,6 +32,7 @@ internal class ZFullValueAnimator(private var listener: FullAnimatorListener?, p
         addListener(object : AnimatorListener {
             override fun onAnimationStart(animation: Animator) {
                 if (curDuration != 0f) curDuration = 0f
+                listener?.onStart()
             }
 
             override fun onAnimationEnd(animation: Animator) {
@@ -60,10 +61,12 @@ internal class ZFullValueAnimator(private var listener: FullAnimatorListener?, p
         })
     }
 
-    interface FullAnimatorListener {
+    abstract class FullAnimatorListener {
 
-        fun onDurationChange(animation: ValueAnimator, duration: Float, isFull: Boolean)
+        open fun onStart() {}
 
-        fun onAnimEnd(animation: Animator, isFull: Boolean)
+        abstract fun onDurationChange(animation: ValueAnimator, duration: Float, isFull: Boolean)
+
+        abstract fun onAnimEnd(animation: Animator, isFull: Boolean)
     }
 }
