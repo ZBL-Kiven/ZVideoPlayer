@@ -911,7 +911,7 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
             (context as? Activity)?.window?.let {
                 it.addFlags(stableFlag)
                 if (keepScreenOnWhenPlaying) {
-                    if (isPlaying || isFullScreen) {
+                    if (isPlaying) {
                         it.addFlags(flag)
                     } else {
                         it.clearFlags(flag)
