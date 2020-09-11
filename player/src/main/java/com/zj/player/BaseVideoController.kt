@@ -12,12 +12,12 @@ import android.graphics.drawable.GradientDrawable
 import android.media.AudioManager
 import android.os.Handler
 import android.os.Looper
-import android.os.PowerManager
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
+import android.view.WindowManager
 import android.view.animation.AccelerateDecelerateInterpolator
 import android.widget.*
 import androidx.annotation.LayoutRes
@@ -38,7 +38,6 @@ import com.zj.player.ut.Constance
 import com.zj.player.ut.Controller
 import com.zj.player.view.VideoLoadingView
 import com.zj.player.view.VideoRootView
-import java.lang.RuntimeException
 import java.lang.ref.WeakReference
 import java.util.*
 import kotlin.math.roundToInt
@@ -162,8 +161,6 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
         return fullScreenDialog?.isInterruptTouchEvent() ?: false
     }
 
-    private var mWakeLock: PowerManager.WakeLock? = null
-
     init {
         initView(context, attributeSet)
         initListener()
@@ -251,21 +248,12 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
                 if (refreshTextSize > 0) it.setHintTextSize(refreshTextSize)
                 it.setDrawableSize(loadingIconWidth, loadingIconHeight, failIconWidth, failIconHeight)
             }
-            if (keepScreenOnWhenPlaying) initLock()
         } catch (e: Exception) {
             if (e is RuntimeException) throw e
             else e.printStackTrace()
         } finally {
             ta.recycle()
         }
-    }
-
-    @Suppress("DEPRECATION")
-    @SuppressLint("InvalidWakeLockTag")
-    private fun initLock() {
-        val powerManager = context.getSystemService(Context.POWER_SERVICE) as PowerManager
-        mWakeLock = powerManager.newWakeLock(PowerManager.FULL_WAKE_LOCK, "keep_screen_on_tag")
-        mWakeLock?.setReferenceCounted(false)
     }
 
     private fun initListener() {
@@ -660,7 +648,7 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
                 if (isShow && it.tag == 0) return
                 if (!isShow && it.tag == 1) return
                 isNeedSetFreePlayBtn = false
-                if(enablePlayAnimation) {
+                if (enablePlayAnimation) {
                     it.tag = if (isShow) 0 else 1
                     val start = if (isShow) 0.0f else 1.0f
                     val end = if (isShow) 1.0f else 0.0f
@@ -675,7 +663,7 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
                         it.tag = null
                         it.isEnabled = true
                     }?.start()
-                }else{
+                } else {
                     it.visibility = if (isShow) View.VISIBLE else View.GONE
                     it.isEnabled = true
                 }
@@ -917,16 +905,21 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
     }
 
     private fun checkIsMakeScreenOn() {
-        if (keepScreenOnWhenPlaying) {
-            try {
-                if (isPlaying) {
-                    mWakeLock?.acquire(10 * 60 * 1000L /*10 minutes*/)
-                } else {
-                    mWakeLock?.release()
+        @Suppress("DEPRECATION") val stableFlag = WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD
+        @Suppress("DEPRECATION") val flag = WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON or WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON
+        try {
+            (context as? Activity)?.window?.let {
+                it.addFlags(stableFlag)
+                if (keepScreenOnWhenPlaying) {
+                    if (isPlaying || isFullScreen) {
+                        it.addFlags(flag)
+                    } else {
+                        it.clearFlags(flag)
+                    }
                 }
-            } catch (e: java.lang.Exception) {
-                e.printStackTrace()
             }
+        } catch (e: java.lang.Exception) {
+            e.printStackTrace()
         }
     }
 
