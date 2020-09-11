@@ -907,6 +907,7 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
     }
 
     private fun setScreenOnMode(isScreenOn: Boolean, delay: Long = 10000) {
+        mHandler.removeMessages(clearFlag)
         mHandler.sendMessageDelayed(Message.obtain().apply {
             this.what = clearFlag
             this.arg1 = if (isScreenOn) 1 else 0
