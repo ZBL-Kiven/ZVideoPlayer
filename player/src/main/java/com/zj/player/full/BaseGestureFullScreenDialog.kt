@@ -40,7 +40,6 @@ class BaseGestureFullScreenDialog private constructor(private var controllerView
         }
     }
 
-    private val systemUiFlags = getActivity()?.window?.decorView?.systemUiVisibility
     private var _width: Float = 0f
     private var _height: Float = 0f
     private val originWidth: Int = getControllerView().measuredWidth
@@ -78,7 +77,6 @@ class BaseGestureFullScreenDialog private constructor(private var controllerView
         }
 
     init {
-        fitsSystemWindows = true
         (getControllerView().context.applicationContext.getSystemService(Context.WINDOW_SERVICE) as? WindowManager)?.defaultDisplay?.getRealSize(realWindowSize)
         if (!isDefaultMaxScreen && contentLayout > 0) contentLayoutView = View.inflate(getControllerView().context, contentLayout, null)
         changeSystemWindowVisibility(true)
@@ -270,7 +268,7 @@ class BaseGestureFullScreenDialog private constructor(private var controllerView
             onTracked(false, isEnd = true, formTrigDuration = 0f)
         } else {
             isAnimRun = true
-            //            changeSystemWindowVisibility(false)
+            changeSystemWindowVisibility(false)
             scaleAnim?.start(false)
         }
         return isScaleAuto
@@ -298,22 +296,22 @@ class BaseGestureFullScreenDialog private constructor(private var controllerView
         }
     }
 
-    @Suppress("DEPRECATION")
     @SuppressLint("SourceLockedOrientationActivity")
     private fun changeSystemWindowVisibility(visible: Boolean) {
         val flag: Int = WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS or WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS or WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION
         val flagSystem: Int = View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION or View.SYSTEM_UI_FLAG_LAYOUT_STABLE or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION or View.SYSTEM_UI_FLAG_FULLSCREEN or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-        if (visible) {
-            systemUiVisibility = flagSystem or View.KEEP_SCREEN_ON
-            getActivity()?.let {
+        getActivity()?.let {
+            val visibility = this.systemUiVisibility
+            if (visible) {
                 if (it.requestedOrientation != ActivityInfo.SCREEN_ORIENTATION_PORTRAIT) {
                     it.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
                 }
+                this.systemUiVisibility = visibility.or(flagSystem)
                 it.window?.addFlags(flag)
+            } else {
+                this.systemUiVisibility = visibility.and(flagSystem)
+                it.window?.clearFlags(flag)
             }
-        } else {
-            systemUiVisibility = systemUiFlags ?: 0
-            getActivity()?.window?.clearFlags(flag)
         }
     }
 
