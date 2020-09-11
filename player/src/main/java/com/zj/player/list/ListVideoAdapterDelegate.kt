@@ -4,7 +4,6 @@ import android.graphics.Rect
 import android.os.Handler
 import android.os.Looper
 import android.os.Message
-import android.util.Log
 import android.view.View
 import android.view.animation.AccelerateInterpolator
 import androidx.annotation.MainThread
@@ -265,10 +264,13 @@ abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : Rec
         return@Handler false
     }
 
-    fun idle() {
-        if (!isAutoPlayWhenItemAttached) return
-        handler?.removeMessages(1)
-        handler?.sendEmptyMessageDelayed(1, 150)
+    fun idle(position: Int = -1) {
+        if (position == -1) {
+            handler?.removeMessages(1)
+            handler?.sendEmptyMessageDelayed(1, 150)
+        } else {
+            if (position in 0 until adapter.itemCount) recyclerView?.smoothScrollToPosition(position)
+        }
     }
 
     private val recyclerScrollerListener = object : RecyclerView.OnScrollListener() {

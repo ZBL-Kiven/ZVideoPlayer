@@ -50,26 +50,26 @@ class FeedContentAdapter<T : FeedDataIn> : ListenerAnimAdapter<T>(R.layout.r_mai
                 context?.let { ctx ->
                     val root = LayoutInflater.from(ctx).inflate(R.layout.r_main_fg_feed_item_finish_view, null, false)
                     root.findViewById<View>(R.id.r_main_fg_feed_item_share_replay).setOnClickListener {
-                            (root.parent as? ViewGroup)?.removeView(root)
-                            (root?.getTag(TAG_POSITION) as? Int)?.let { p ->
-                                getDelegate()?.waitingForPlay(p)
-                            }
+                        (root.parent as? ViewGroup)?.removeView(root)
+                        (root?.getTag(TAG_POSITION) as? Int)?.let { p ->
+                            getDelegate()?.waitingForPlay(p)
                         }
+                    }
                     root.findViewById<View>(R.id.r_main_fg_feed_item_share_facebook).setOnClickListener {
-                            (root?.getTag(TAG_POSITION) as? Int)?.let { p ->
-                                onShare(it, p)
-                            }
+                        (root?.getTag(TAG_POSITION) as? Int)?.let { p ->
+                            onShare(it, p)
                         }
+                    }
                     root.findViewById<View>(R.id.r_main_fg_feed_item_share_message).setOnClickListener {
-                            (root?.getTag(TAG_POSITION) as? Int)?.let { p ->
-                                onShare(it, p)
-                            }
+                        (root?.getTag(TAG_POSITION) as? Int)?.let { p ->
+                            onShare(it, p)
                         }
+                    }
                     root.findViewById<View>(R.id.r_main_fg_feed_item_share_whats_app).setOnClickListener {
-                            (root?.getTag(TAG_POSITION) as? Int)?.let { p ->
-                                onShare(it, p)
-                            }
+                        (root?.getTag(TAG_POSITION) as? Int)?.let { p ->
+                            onShare(it, p)
                         }
+                    }
                     root.z = 100f
                     field = root
                 }
