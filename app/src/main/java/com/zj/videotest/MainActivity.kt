@@ -3,6 +3,7 @@ package com.zj.videotest
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import android.view.WindowManager
 import com.gyf.immersionbar.ImmersionBar
 import com.zj.cf.managers.BaseFragmentManager
 import com.zj.player.logs.VideoEventListener
@@ -26,7 +27,6 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.r_main_act_content)
         ImmersionBar.with(this).transparentStatusBar().statusBarDarkFont(true).init()
-
         initView()
         initFrg()
         ZPlayerLogs.setVideoEventListener(object : VideoEventListener() {

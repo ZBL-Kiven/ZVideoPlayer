@@ -18,7 +18,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
-import android.view.WindowManager
 import android.view.animation.AccelerateDecelerateInterpolator
 import android.widget.*
 import androidx.annotation.LayoutRes
@@ -115,6 +114,7 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
     protected var lockScreenRotation: Int = -1
     protected var isLockScreenRotation: Boolean = false
     protected var keepScreenOnWhenPlaying: Boolean = false
+    protected var enablePlayAnimation: Boolean = true
     private var muteDefault: Boolean = false
     private var muteIsUseGlobal: Boolean = false
     protected var isFullScreen: Boolean = false
@@ -199,6 +199,7 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
             muteIsUseGlobal = ta.getBoolean(R.styleable.BaseVideoController_useMuteGlobal, false)
             muteDefault = ta.getBoolean(R.styleable.BaseVideoController_muteDefault, false)
             keepScreenOnWhenPlaying = ta.getBoolean(R.styleable.BaseVideoController_keepScreenOnWhenPlaying, false)
+            enablePlayAnimation = ta.getBoolean(R.styleable.BaseVideoController_enablePlayAnimation, true)
             val view = LayoutInflater.from(context).inflate(R.layout.z_player_video_view, null, false)
             addView(view, LayoutParams(MATCH_PARENT, MATCH_PARENT))
             videoRoot = view?.findViewById(R.id.z_player_video_root)
@@ -659,20 +660,25 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
                 if (isShow && it.tag == 0) return
                 if (!isShow && it.tag == 1) return
                 isNeedSetFreePlayBtn = false
-                it.tag = if (isShow) 0 else 1
-                val start = if (isShow) 0.0f else 1.0f
-                val end = if (isShow) 1.0f else 0.0f
-                it.alpha = start
-                if (isShow) it.visibility = View.VISIBLE
-                it.animation?.cancel()
-                it.clearAnimation()
-                it.animate()?.alpha(end)?.setDuration(Constance.ANIMATE_DURATION)?.withEndAction {
-                    it.alpha = end
+                if(enablePlayAnimation) {
+                    it.tag = if (isShow) 0 else 1
+                    val start = if (isShow) 0.0f else 1.0f
+                    val end = if (isShow) 1.0f else 0.0f
+                    it.alpha = start
+                    if (isShow) it.visibility = View.VISIBLE
+                    it.animation?.cancel()
+                    it.clearAnimation()
+                    it.animate()?.alpha(end)?.setDuration(Constance.ANIMATE_DURATION)?.withEndAction {
+                        it.alpha = end
+                        it.visibility = if (isShow) View.VISIBLE else View.GONE
+                        it.animation = null
+                        it.tag = null
+                        it.isEnabled = true
+                    }?.start()
+                }else{
                     it.visibility = if (isShow) View.VISIBLE else View.GONE
-                    it.animation = null
-                    it.tag = null
                     it.isEnabled = true
-                }?.start()
+                }
             } finally {
                 if (isNeedSetFreePlayBtn) it.isEnabled = true
             }

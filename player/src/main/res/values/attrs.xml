@@ -18,7 +18,7 @@
         <attr name="refreshHintText" format="string" />
         <attr name="hintTextSize" format="dimension" />
         <attr name="refreshTextSize" format="dimension" />
-
+        <attr name="enablePlayAnimation" format="boolean" />
         <attr name="keepScreenOnWhenPlaying" format="boolean" />
         <attr name="autoFullTools" format="boolean" />
         <attr name="autoFullInterval" format="integer" />

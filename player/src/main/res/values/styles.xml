@@ -30,6 +30,7 @@
 
     <style name="BaseGestureFullScreenDialogStyle" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="windowNoTitle">true</item>
+        <item name="android:keepScreenOn">true</item>
         <item name="android:windowIsTranslucent">true</item>
         <item name="android:windowBackground">@android:color/transparent</item>
         <item name="android:backgroundDimEnabled">false</item>
