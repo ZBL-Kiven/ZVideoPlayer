@@ -214,7 +214,7 @@ class FeedContentAdapter<T : FeedDataIn> : ListenerAnimAdapter<T>(R.layout.r_mai
         }
     }
 
-    private val onFullScreenListener: (BaseVideoController) -> Unit = { vc ->
+    private val onFullScreenListener: (BaseVideoController, Boolean) -> Unit = { vc, _ ->
         controller?.let {
             (vc.getTag(TAG_POSITION) as? Int)?.let { p ->
                 getItem(p)?.getVideoPath()?.let { path -> cancelIfNotCurrent(path) }

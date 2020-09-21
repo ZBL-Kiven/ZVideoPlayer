@@ -43,7 +43,7 @@ abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : Rec
      * record and set a scroller when recycler is attached
      * */
     override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
-        if (isAutoPlayWhenItemAttached && (this.recyclerView == null || this.recyclerView != recyclerView)) {
+        if (this.recyclerView == null || this.recyclerView != recyclerView) {
             recyclerView.setHasFixedSize(true)
             recyclerView.clearOnScrollListeners()
             recyclerView.addOnScrollListener(recyclerScrollerListener)
