@@ -77,6 +77,9 @@ class BaseGestureFullScreenDialog private constructor(private var controllerView
         }
 
     init {
+        isFocusable = true
+        isFocusableInTouchMode = true
+        requestFocus()
         (getControllerView().context.applicationContext.getSystemService(Context.WINDOW_SERVICE) as? WindowManager)?.defaultDisplay?.getRealSize(realWindowSize)
         if (!isDefaultMaxScreen && contentLayout > 0) contentLayoutView = View.inflate(getControllerView().context, contentLayout, null)
         changeSystemWindowVisibility(true)
@@ -152,7 +155,7 @@ class BaseGestureFullScreenDialog private constructor(private var controllerView
         val viewRectF = getWindowSize(isMaxFull)
         _width = viewRectF.right - viewRectF.left
         _height = viewRectF.bottom - viewRectF.top
-        calculateUtils = RectFCalculateUtil(viewRectF, RectF(originViewRectF))
+        calculateUtils = RectFCalculateUtil(viewRectF, originViewRectF ?: return)
     }
 
     private fun dismissed() {

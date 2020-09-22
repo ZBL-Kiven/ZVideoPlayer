@@ -1,6 +1,8 @@
 package com.zj.player.full
 
 import android.graphics.RectF
+import com.zj.player.BuildConfig
+import kotlin.math.abs
 
 internal class RectFCalculateUtil(bv: RectF, sv: RectF) {
 
@@ -12,11 +14,11 @@ internal class RectFCalculateUtil(bv: RectF, sv: RectF) {
     private var lastRectF: RectF? = null
 
     init {
-        if ((bv.right - bv.left) < (sv.right - sv.left) || (bv.bottom - bv.top) < (sv.bottom - sv.top)) throw IllegalArgumentException("invalid params, the named 's' must be small than named 'b' !")
-        ol = (sv.left - bv.left) * 1.0f
-        or = (bv.right - sv.right) * 1.0f
-        tr = (sv.top - bv.top) * 1.0f
-        br = (bv.bottom - sv.bottom) * 1.0f
+        if (BuildConfig.DEBUG && ((bv.right - bv.left) < (sv.right - sv.left) || (bv.bottom - bv.top) < (sv.bottom - sv.top))) throw IllegalArgumentException("invalid params, the named 's' must be small than named 'b' !")
+        ol = abs((sv.left - bv.left) * 1.0f)
+        or = abs((bv.right - sv.right) * 1.0f)
+        tr = abs((sv.top - bv.top) * 1.0f)
+        br = abs((bv.bottom - sv.bottom) * 1.0f)
     }
 
     fun calculate(offset: Float): RectF {
