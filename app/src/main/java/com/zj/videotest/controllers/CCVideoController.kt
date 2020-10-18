@@ -2,6 +2,7 @@ package com.zj.videotest.controllers
 
 import android.content.Context
 import android.util.AttributeSet
+import android.view.KeyEvent
 import android.view.View
 import android.widget.RelativeLayout
 import com.bumptech.glide.Glide
@@ -41,5 +42,10 @@ class CCVideoController @JvmOverloads constructor(c: Context, attr: AttributeSet
         isInterruptPlayBtnAnim = true
         showOrHidePlayBtn(false, withState = false)
         full(false)
+    }
+
+    override fun onFullKeyEvent(code: Int, event: KeyEvent): Boolean {
+
+        return true
     }
 }

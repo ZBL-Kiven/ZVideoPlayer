@@ -13,6 +13,7 @@ import android.media.AudioManager
 import android.os.Handler
 import android.os.Looper
 import android.util.AttributeSet
+import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -770,6 +771,10 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
         override fun onTrack(isStart: Boolean, isEnd: Boolean, formTrigDuration: Float) {
             onTracked(isStart, isEnd, formTrigDuration)
         }
+
+        override fun onKeyEvent(code: Int, event: KeyEvent): Boolean {
+            return onFullKeyEvent(code, event)
+        }
     }
 
     protected val fullContentListener = object : FullContentListener {
@@ -793,6 +798,10 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
 
         override fun onTrack(isStart: Boolean, isEnd: Boolean, formTrigDuration: Float) {
             onTracked(isStart, isEnd, formTrigDuration)
+        }
+
+        override fun onKeyEvent(code: Int, event: KeyEvent): Boolean {
+            return onFullKeyEvent(code, event)
         }
     }
 
@@ -863,6 +872,10 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
         }
         isFullingOrDismissing = false
         onFullScreenChanged(isShow)
+    }
+
+    open fun onFullKeyEvent(code: Int, event: KeyEvent): Boolean {
+        return false
     }
 
     protected fun onFocusChanged(dialog: BaseGestureFullScreenDialog, isMax: Boolean) {

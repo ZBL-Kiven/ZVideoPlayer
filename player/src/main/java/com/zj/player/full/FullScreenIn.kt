@@ -1,5 +1,6 @@
 package com.zj.player.full
 
+import android.view.KeyEvent
 import android.view.View
 
 interface FullContentListener : FullScreenListener {
@@ -16,6 +17,8 @@ interface FullScreenListener {
     fun onFocusChange(dialog: BaseGestureFullScreenDialog, isMax: Boolean)
 
     fun onTrack(isStart: Boolean, isEnd: Boolean, formTrigDuration: Float)
+
+    fun onKeyEvent(code: Int, event: KeyEvent): Boolean
 }
 
 enum class RotateOrientation(val degree: Float) {

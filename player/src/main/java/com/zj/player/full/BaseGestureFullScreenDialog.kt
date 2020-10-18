@@ -10,7 +10,6 @@ import android.graphics.Color
 import android.graphics.Point
 import android.graphics.PointF
 import android.graphics.RectF
-import android.graphics.drawable.ColorDrawable
 import android.view.*
 import android.view.animation.DecelerateInterpolator
 import android.widget.FrameLayout
@@ -60,6 +59,7 @@ class BaseGestureFullScreenDialog private constructor(private var controllerView
     private var realWindowSize = Point()
     private var screenUtil: ScreenOrientationListener? = null
     private var isScreenRotateLocked: Boolean = false
+
     private var curScreenRotation: RotateOrientation? = null
         set(value) {
             if (field == value && getControllerView().rotation == value?.degree) return
@@ -398,6 +398,7 @@ class BaseGestureFullScreenDialog private constructor(private var controllerView
     }
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
+        if (onFullContentListener?.onKeyEvent(keyCode, event) == true) return true
         if (keyCode == KeyEvent.KEYCODE_BACK) {
             dismiss();return true
         }
