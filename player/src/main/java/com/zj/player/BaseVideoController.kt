@@ -762,7 +762,7 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
         }
     }
 
-    protected val fullScreenListener = object : FullScreenListener {
+    private val fullScreenListener = object : FullScreenListener {
         override fun onDisplayChanged(isShow: Boolean) {
             this@BaseVideoController.onDisplayChanged(isShow)
         }
@@ -780,7 +780,7 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
         }
     }
 
-    protected val fullContentListener = object : FullContentListener {
+    private val fullContentListener = object : FullContentListener {
         override fun onDisplayChanged(isShow: Boolean) {
             onTrack(isPlayable, start = false, end = true, formTrigDuration = 1.0f)
             this@BaseVideoController.onDisplayChanged(isShow)

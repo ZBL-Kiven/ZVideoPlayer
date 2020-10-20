@@ -3,14 +3,14 @@ package com.zj.player.full
 import android.view.KeyEvent
 import android.view.View
 
-interface FullContentListener : FullScreenListener {
+internal interface FullContentListener : FullScreenListener {
 
     fun onContentLayoutInflated(content: View)
 
     fun onFullMaxChanged(dialog: BaseGestureFullScreenDialog, isMax: Boolean)
 }
 
-interface FullScreenListener {
+internal interface FullScreenListener {
 
     fun onDisplayChanged(isShow: Boolean)
 
