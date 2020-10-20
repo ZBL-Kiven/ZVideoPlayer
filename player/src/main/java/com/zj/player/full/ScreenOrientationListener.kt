@@ -9,7 +9,7 @@ import com.zj.player.logs.ZPlayerLogs
 import java.lang.ref.WeakReference
 
 @Suppress("unused")
-class ScreenOrientationListener(private var c: WeakReference<Context>?, private var gravityListener: ((RotateOrientation?) -> Unit)?) : OrientationEventListener(c?.get(), SensorManager.SENSOR_DELAY_NORMAL) {
+internal class ScreenOrientationListener(private var c: WeakReference<Context>?, private var gravityListener: ((RotateOrientation?) -> Unit)?) : OrientationEventListener(c?.get(), SensorManager.SENSOR_DELAY_NORMAL) {
 
     private var isPortLock = false
     private var isLandLock = false

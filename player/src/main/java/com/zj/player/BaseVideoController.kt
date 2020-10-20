@@ -115,6 +115,7 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
     protected var enablePlayAnimation: Boolean = true
     private var muteDefault: Boolean = false
     private var muteIsUseGlobal: Boolean = false
+    private var isTransactionNavigation: Boolean = false
     protected var isFullScreen: Boolean = false
         set(value) {
             if (field == value) return
@@ -195,6 +196,7 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
             muteIsUseGlobal = ta.getBoolean(R.styleable.BaseVideoController_useMuteGlobal, false)
             muteDefault = ta.getBoolean(R.styleable.BaseVideoController_muteDefault, false)
             keepScreenOnWhenPlaying = ta.getBoolean(R.styleable.BaseVideoController_keepScreenOnWhenPlaying, false)
+            isTransactionNavigation = ta.getBoolean(R.styleable.BaseVideoController_isTransactionNavigation, false)
             enablePlayAnimation = ta.getBoolean(R.styleable.BaseVideoController_enablePlayAnimation, true)
             val view = LayoutInflater.from(context).inflate(R.layout.z_player_video_view, null, false)
             addView(view, LayoutParams(MATCH_PARENT, MATCH_PARENT))
@@ -699,6 +701,7 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
             }
             if (isFull) seekBarSmall?.visibility = View.GONE
         }
+        onToolsBarChanged(isFull, isSetNow)
         if (autoFullTools && isFull) mHandler.sendEmptyMessageDelayed(dismissFullTools, autoFullInterval.toLong())
     }
 
@@ -820,8 +823,8 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
                 if (fullScreenDialog == null) fullScreenDialog = BaseGestureFullScreenDialog.let { d ->
                     if (isDefaultMaxScreen) {
                         lockScreen?.visibility = View.VISIBLE
-                        d.showFull(root, lockScreenRotation, fullScreenListener)
-                    } else d.showInContent(root, fullScreenContentLayoutId, fullMaxScreenEnable, lockScreenRotation, fullContentListener)
+                        d.showFull(root, isTransactionNavigation, lockScreenRotation, fullScreenListener)
+                    } else d.showInContent(root, fullScreenContentLayoutId, fullMaxScreenEnable, isTransactionNavigation, lockScreenRotation, fullContentListener)
                 }
                 lockScreenRotate(isLockScreenRotation)
             }
@@ -876,6 +879,10 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
 
     open fun onFullKeyEvent(code: Int, event: KeyEvent): Boolean {
         return false
+    }
+
+    open fun onToolsBarChanged(isFullExpand: Boolean, isResetNow: Boolean) {
+
     }
 
     protected fun onFocusChanged(dialog: BaseGestureFullScreenDialog, isMax: Boolean) {

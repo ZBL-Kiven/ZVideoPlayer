@@ -23,22 +23,22 @@ import java.lang.ref.WeakReference
 import kotlin.math.roundToInt
 
 
-@Suppress("unused")
 @SuppressLint("ViewConstructor")
-class BaseGestureFullScreenDialog private constructor(private var controllerView: WeakReference<View>?, contentLayout: Int, private val fullMaxScreenEnable: Boolean, private val isDefaultMaxScreen: Boolean, private val defaultScreenOrientation: Int, private val onFullScreenListener: FullScreenListener?, private val onFullContentListener: FullContentListener?) : FrameLayout(WeakReference(controllerView?.get()?.context).get() ?: throw NullPointerException()) {
+internal class BaseGestureFullScreenDialog private constructor(private var controllerView: WeakReference<View>?, contentLayout: Int, private val fullMaxScreenEnable: Boolean, private val isDefaultMaxScreen: Boolean, private val translateNavigation: Boolean, private val defaultScreenOrientation: Int, private val onFullScreenListener: FullScreenListener?, private val onFullContentListener: FullContentListener?) : FrameLayout(WeakReference(controllerView?.get()?.context).get() ?: throw NullPointerException()) {
 
     companion object {
         private const val MAX_DEEP_RATIO = 0.55f
 
-        fun showInContent(view: View, @LayoutRes contentLayout: Int, fullMaxScreenEnable: Boolean, defaultScreenOrientation: Int, onFullContentListener: FullContentListener): BaseGestureFullScreenDialog {
-            return BaseGestureFullScreenDialog(WeakReference(view), contentLayout, fullMaxScreenEnable, false, defaultScreenOrientation, null, onFullContentListener)
+        fun showInContent(view: View, @LayoutRes contentLayout: Int, fullMaxScreenEnable: Boolean, translateNavigation: Boolean, defaultScreenOrientation: Int, onFullContentListener: FullContentListener): BaseGestureFullScreenDialog {
+            return BaseGestureFullScreenDialog(WeakReference(view), contentLayout, fullMaxScreenEnable, false, translateNavigation = translateNavigation, defaultScreenOrientation = defaultScreenOrientation, onFullScreenListener = null, onFullContentListener = onFullContentListener)
         }
 
-        fun showFull(view: View, defaultScreenOrientation: Int, onFullScreenListener: FullScreenListener): BaseGestureFullScreenDialog {
-            return BaseGestureFullScreenDialog(WeakReference(view), -1, fullMaxScreenEnable = false, isDefaultMaxScreen = true, defaultScreenOrientation = defaultScreenOrientation, onFullScreenListener = onFullScreenListener, onFullContentListener = null)
+        fun showFull(view: View, translateNavigation: Boolean, defaultScreenOrientation: Int, onFullScreenListener: FullScreenListener): BaseGestureFullScreenDialog {
+            return BaseGestureFullScreenDialog(WeakReference(view), -1, fullMaxScreenEnable = false, isDefaultMaxScreen = true, translateNavigation = translateNavigation, defaultScreenOrientation = defaultScreenOrientation, onFullScreenListener = onFullScreenListener, onFullContentListener = null)
         }
     }
 
+    private val mDecorView by lazy { (getActivity()?.findViewById<FrameLayout>(android.R.id.content) as? ViewGroup) }
     private var _width: Float = 0f
     private var _height: Float = 0f
     private val originWidth: Int = getControllerView().measuredWidth
@@ -132,7 +132,7 @@ class BaseGestureFullScreenDialog private constructor(private var controllerView
 
     private fun showAnim() {
         fun start() {
-            (getActivity()?.window?.decorView as? ViewGroup)?.addView(this, LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT))
+            mDecorView?.addView(this, LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT))
             post {
                 init()
                 isAnimRun = true
@@ -171,7 +171,7 @@ class BaseGestureFullScreenDialog private constructor(private var controllerView
         isDismissing = false
         backgroundView = null
         controllerView = null
-        (getActivity()?.window?.decorView as? ViewGroup)?.removeView(this)
+        mDecorView?.removeView(this)
     }
 
     private fun initListeners() {
@@ -291,7 +291,7 @@ class BaseGestureFullScreenDialog private constructor(private var controllerView
     fun dismiss() {
         screenRotationsChanged(false)
         if (getActivity()?.isFinishing == true) {
-            dismissed();(getActivity()?.window?.decorView as? ViewGroup)?.removeView(this)
+            dismissed();mDecorView?.removeView(this)
         } else {
             if (isDismissing) return
             isDismissing = true
@@ -301,8 +301,9 @@ class BaseGestureFullScreenDialog private constructor(private var controllerView
 
     @SuppressLint("SourceLockedOrientationActivity")
     private fun changeSystemWindowVisibility(visible: Boolean) {
+        val flagSystemDefault: Int = View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY or View.SYSTEM_UI_FLAG_LAYOUT_STABLE or View.SYSTEM_UI_FLAG_FULLSCREEN or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
         val flag: Int = WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS or WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS or WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION
-        val flagSystem: Int = View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION or View.SYSTEM_UI_FLAG_LAYOUT_STABLE or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION or View.SYSTEM_UI_FLAG_FULLSCREEN or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+        val flagSystem = if (translateNavigation) flagSystemDefault or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION else flagSystemDefault
         getActivity()?.let {
             val visibility = this.systemUiVisibility
             if (visible) {
@@ -310,10 +311,10 @@ class BaseGestureFullScreenDialog private constructor(private var controllerView
                     it.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
                 }
                 this.systemUiVisibility = visibility.or(flagSystem)
-                it.window?.addFlags(flag)
+                if (translateNavigation) it.window?.addFlags(flag)
             } else {
                 this.systemUiVisibility = visibility.and(flagSystem)
-                it.window?.clearFlags(flag)
+                if (translateNavigation) it.window?.clearFlags(flag)
             }
         }
     }
@@ -337,9 +338,9 @@ class BaseGestureFullScreenDialog private constructor(private var controllerView
 
     private fun getWindowSize(isMaxFull: Boolean): RectF {
         return if (isMaxFull || contentLayoutView == null) {
-            val rp = getViewPoint(getActivity()?.window?.decorView)
-            val w = getActivity()?.window?.decorView?.width ?: 0
-            val h = getActivity()?.window?.decorView?.height ?: 0
+            val rp = getViewPoint(mDecorView)
+            val w = mDecorView?.width ?: 0
+            val h = mDecorView?.height ?: 0
             RectF(rp.x, rp.y, rp.x + w, rp.y + h)
         } else {
             contentLayoutView?.let { cv ->

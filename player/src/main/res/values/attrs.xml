@@ -21,6 +21,7 @@
         <attr name="enablePlayAnimation" format="boolean" />
         <attr name="keepScreenOnWhenPlaying" format="boolean" />
         <attr name="autoFullTools" format="boolean" />
+        <attr name="isTransactionNavigation" format="boolean" />
         <attr name="autoFullInterval" format="integer" />
         <attr name="muteIconEnable" format="enum">
             <enum name="DISPLAY_VISIBLE" value="2" />
