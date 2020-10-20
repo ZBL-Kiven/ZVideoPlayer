@@ -94,7 +94,6 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
     protected var videoOverrideImageShaderView: ImageView? = null
     protected var videoRoot: VideoRootView? = null
     protected var controller: ZController? = null
-    protected var fullScreenDialog: BaseGestureFullScreenDialog? = null
     protected var autoPlay = false
     protected var isFull = false
     protected var isStartTrack = false
@@ -104,7 +103,6 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
     protected var fullScreenContentLayoutId: Int = -1
     protected var fullScreenSupported = false
     protected val supportedSpeedList = floatArrayOf(1f, 2f, 4f)
-    private var curSpeedIndex = 0
     protected var alphaAnimViewsGroup: MutableList<View?>? = null
     protected var onFullScreenLayoutInflateListener: ((v: View) -> Unit)? = null
     protected var isDefaultMaxScreen: Boolean = false
@@ -113,6 +111,8 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
     protected var isLockScreenRotation: Boolean = false
     protected var keepScreenOnWhenPlaying: Boolean = false
     protected var enablePlayAnimation: Boolean = true
+    private var curSpeedIndex = 0
+    private var fullScreenDialog: BaseGestureFullScreenDialog? = null
     private var muteDefault: Boolean = false
     private var muteIsUseGlobal: Boolean = false
     private var isTransactionNavigation: Boolean = false
@@ -885,7 +885,7 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
 
     }
 
-    protected fun onFocusChanged(dialog: BaseGestureFullScreenDialog, isMax: Boolean) {
+    private fun onFocusChanged(dialog: BaseGestureFullScreenDialog, isMax: Boolean) {
         log("on full max screen $isMax", BehaviorLogsTable.onFullMaxScreen(isMax))
         if (isMax) lockScreen?.isSelected = dialog.isLockedCurrent()
         onFullMaxScreenChanged(isMax)
