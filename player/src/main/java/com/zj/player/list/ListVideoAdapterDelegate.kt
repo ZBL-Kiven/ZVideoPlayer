@@ -280,10 +280,10 @@ abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : Rec
 
         override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
             if (!isAutoPlayWhenItemAttached) return
-            handler?.removeMessages(waitingForPlayScrolled)
             handler?.removeMessages(waitingForPlayClicked)
+            handler?.removeMessages(waitingForPlayScrolled)
             if (newState == RecyclerView.SCROLL_STATE_IDLE) {
-                handler?.sendEmptyMessageDelayed(1, 150)
+                handler?.sendEmptyMessageDelayed(waitingForPlayScrolled, 150)
             }
         }
     }

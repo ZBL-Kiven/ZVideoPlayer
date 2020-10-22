@@ -424,6 +424,7 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
             seekBar?.progress = seek
             seekBar?.secondaryProgress = buffered
             seekBarSmall?.progress = seek
+            onLoadingEvent(LoadingMode.None, true)
         }
         val startProgress = videoSize / 100f * seek
         tvStart?.text = getDuration(startProgress.toLong())
