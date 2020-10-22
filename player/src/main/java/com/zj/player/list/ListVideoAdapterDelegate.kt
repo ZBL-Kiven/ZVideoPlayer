@@ -32,6 +32,8 @@ abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : Rec
     private var isAutoPlayWhenItemAttached = true
     private var isAutoScrollToVisible = false
     private var recyclerView: RecyclerView? = null
+    private val waitingForPlayClicked = 9871662
+    private val waitingForPlayScrolled = 632573
     protected abstract fun createZController(vc: V): ZController
     protected abstract fun getViewController(holder: VH?): V?
     protected abstract fun getItem(p: Int): T?
@@ -188,9 +190,9 @@ abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : Rec
     final override fun waitingForPlay(curPlayingIndex: Int, delay: Long, fromUser: Boolean) {
         if (curPlayingIndex !in 0 until adapter.itemCount) return
         if (fromUser) recyclerView?.smoothScrollToPosition(curPlayingIndex)
-        handler?.removeMessages(0)
+        handler?.removeMessages(waitingForPlayClicked)
         handler?.sendMessageDelayed(Message.obtain().apply {
-            this.what = 0
+            this.what = waitingForPlayClicked
             this.arg1 = curPlayingIndex
             this.obj = fromUser
         }, delay)
@@ -256,19 +258,19 @@ abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : Rec
 
     private var handler: Handler? = Handler(Looper.getMainLooper()) {
         when (it.what) {
-            0 -> {
+            waitingForPlayClicked -> {
                 controller?.stopNow()
                 adapter.notifyItemRangeChanged(0, adapter.itemCount, String.format(LOAD_STR_DEFAULT_LOADER, it.arg1, it.obj.toString()))
             }
-            1 -> onScrollIdle()
+            waitingForPlayScrolled -> onScrollIdle()
         }
         return@Handler false
     }
 
     fun idle(position: Int = -1) {
         if (position == -1) {
-            handler?.removeMessages(1)
-            handler?.sendEmptyMessageDelayed(1, 150)
+            handler?.removeMessages(waitingForPlayScrolled)
+            handler?.sendEmptyMessageDelayed(waitingForPlayScrolled, 150)
         } else {
             if (position in 0 until adapter.itemCount) recyclerView?.smoothScrollToPosition(position)
         }
@@ -278,8 +280,8 @@ abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : Rec
 
         override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
             if (!isAutoPlayWhenItemAttached) return
-            handler?.removeMessages(1)
-            handler?.removeMessages(0)
+            handler?.removeMessages(waitingForPlayScrolled)
+            handler?.removeMessages(waitingForPlayClicked)
             if (newState == RecyclerView.SCROLL_STATE_IDLE) {
                 handler?.sendEmptyMessageDelayed(1, 150)
             }
