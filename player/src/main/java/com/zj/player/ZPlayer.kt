@@ -496,7 +496,6 @@ open class ZPlayer(var config: VideoConfig? = null) : Player.EventListener {
         try {
             (controller?.context as? Activity)?.window?.let {
                 if (controller?.keepScreenOnWhenPlaying() != false) {
-                    Log.e("====== ", "$isScreen")
                     if (isScreen) {
                         it.addFlags(flag or stableFlag)
                     } else {
