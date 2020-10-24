@@ -40,6 +40,7 @@ import com.zj.player.view.VideoLoadingView
 import com.zj.player.view.VideoRootView
 import java.lang.ref.WeakReference
 import java.util.*
+import kotlin.math.max
 import kotlin.math.roundToInt
 
 /**
@@ -71,7 +72,7 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
     private val mHandler = Handler(Looper.getMainLooper()) {
         when (it.what) {
             dismissFullTools -> onFullTools(false)
-            loadingModeDelay -> loadingView?.setMode(VideoLoadingView.DisplayMode.LOADING)
+            loadingModeDelay -> if (controller?.isLoading(true) == true) loadingView?.setMode(VideoLoadingView.DisplayMode.LOADING)
         }
         return@Handler false
     }
@@ -573,6 +574,15 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
     }
 
     open fun addOverlayView(tag: Any, view: WeakReference<View?>?, paramsBuilder: ((RelativeLayout.LayoutParams) -> RelativeLayout.LayoutParams)? = null) {
+        addOverlayView(tag, getVideoRootView()?.childCount ?: 0, view, paramsBuilder)
+    }
+
+    /**
+     * For information about [zPoint], see [BaseVideoController.addViewWithZPoint].
+     * The difference is that calling this method provides a stable width and height under various conditions,
+     * suitable for covering the full layout of the covered view, and can follow the full screen animation zoom
+     * */
+    open fun addOverlayView(tag: Any, zPoint: Int, view: WeakReference<View?>?, paramsBuilder: ((RelativeLayout.LayoutParams) -> RelativeLayout.LayoutParams)? = null) {
 
         fun generateLp(invoke: (RelativeLayout.LayoutParams) -> Unit) {
             getThumbView()?.let {
@@ -599,22 +609,50 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
                 }
             }
         }
+        generateLp {
+            val nlp = paramsBuilder?.invoke(it) ?: it
+            addViewWithZPoint(view, zPoint, nlp)
+        }
+    }
+
+    /**
+     * @param zPoint This value will determine the Z-axis position after trying to be added to the Controller,
+     * that is, the height. If [zPoint] is less than the number of child controls,
+     * [zPoint] has the same effect as [addView::index].
+     * [zPoint] can be passed in one A larger value to ensure that the View is always at the top of the control,
+     * of course, additional calls [RelativeLayout.bringChildToFront] or [View.bringToFront] will only take effect when the layout is stable
+     * */
+    open fun addViewWithZPoint(view: WeakReference<View?>?, zPoint: Int, nlp: RelativeLayout.LayoutParams? = null) {
         getVideoRootView()?.let { rv ->
-            var isAdd = true
             rv.post {
+                var isAdd = true
                 val vp = view?.get()?.parent as? ViewGroup
                 rv.findViewWithTag<View>(tag)?.let { exi ->
-                    if (vp != getVideoRootView()) vp?.removeView(exi)
+                    if (vp != rv) vp?.removeView(exi)
                     else isAdd = false
                 } ?: vp?.let {
-                    if (it != getVideoRootView()) it.removeView(view.get())
+                    if (it != rv) it.removeView(view.get())
                     else isAdd = false
                 }
                 if (isAdd) {
                     view?.get()?.tag = tag
-                    generateLp {
-                        val nlp = paramsBuilder?.invoke(it) ?: it
-                        rv.addView(view?.get() ?: return@generateLp, nlp)
+                    view?.get()?.setTag(R.id.tag_view_point_z, zPoint)
+                    if (zPoint <= 0 || rv.childCount <= 0) {
+                        rv.addView(view?.get() ?: return@post, 0, nlp)
+                    } else {
+                        val indexes = mutableListOf<Pair<Int, Int>>()
+                        for (i in 0 until rv.childCount) {
+                            indexes.add(Pair(i, max(i, (rv.getChildAt(i).getTag(R.id.tag_view_point_z) as? Int) ?: 0)))
+                        }
+                        indexes.sortBy { i -> i.second }
+                        var added = false
+                        indexes.forEach { pair ->
+                            if (zPoint < pair.second) {
+                                rv.addView(view?.get() ?: return@post, pair.first, nlp)
+                                added = true
+                            }
+                        }
+                        if (!added) rv.addView(view?.get() ?: return@post, rv.childCount, nlp)
                     }
                 }
             }
