@@ -1,10 +1,12 @@
 package com.zj.videotest.controllers
 
 import android.content.Context
+import android.graphics.Color
 import android.util.AttributeSet
 import android.view.KeyEvent
 import android.view.View
 import android.widget.RelativeLayout
+import android.widget.TextView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.gif.GifDrawable
 import com.zj.loading.BaseLoadingView
@@ -13,6 +15,7 @@ import com.zj.player.base.LoadingMode
 import com.zj.player.controller.BaseListVideoController
 import com.zj.player.img.ImgLoader
 import com.zj.videotest.R
+import java.lang.ref.WeakReference
 
 class CCVideoController @JvmOverloads constructor(c: Context, attr: AttributeSet? = null, def: Int = 0) : BaseListVideoController(c, attr, def) {
 

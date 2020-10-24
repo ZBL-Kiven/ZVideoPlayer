@@ -13,6 +13,7 @@ import android.media.AudioManager
 import android.os.Handler
 import android.os.Looper
 import android.util.AttributeSet
+import android.util.TypedValue
 import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
@@ -574,7 +575,7 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
     }
 
     open fun addOverlayView(tag: Any, view: WeakReference<View?>?, paramsBuilder: ((RelativeLayout.LayoutParams) -> RelativeLayout.LayoutParams)? = null) {
-        addOverlayView(tag, getVideoRootView()?.childCount ?: 0, view, paramsBuilder)
+        addOverlayView(tag, (getVideoRootView()?.childCount ?: 0) * 1.0f, view, paramsBuilder)
     }
 
     /**
@@ -582,7 +583,7 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
      * The difference is that calling this method provides a stable width and height under various conditions,
      * suitable for covering the full layout of the covered view, and can follow the full screen animation zoom
      * */
-    open fun addOverlayView(tag: Any, zPoint: Int, view: WeakReference<View?>?, paramsBuilder: ((RelativeLayout.LayoutParams) -> RelativeLayout.LayoutParams)? = null) {
+    open fun addOverlayView(tag: Any, zPoint: Float, view: WeakReference<View?>?, paramsBuilder: ((RelativeLayout.LayoutParams) -> RelativeLayout.LayoutParams)? = null) {
 
         fun generateLp(invoke: (RelativeLayout.LayoutParams) -> Unit) {
             getThumbView()?.let {
@@ -611,18 +612,17 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
         }
         generateLp {
             val nlp = paramsBuilder?.invoke(it) ?: it
-            addViewWithZPoint(view, zPoint, nlp)
+            addViewWithZPoint(tag, view, zPoint, nlp)
         }
     }
 
     /**
-     * @param zPoint This value will determine the Z-axis position after trying to be added to the Controller,
-     * that is, the height. If [zPoint] is less than the number of child controls,
-     * [zPoint] has the same effect as [addView::index].
+     * @param zPoint This value will determine the Z-axis position after trying to be added to the Controller,that is, the height.
      * [zPoint] can be passed in one A larger value to ensure that the View is always at the top of the control,
      * of course, additional calls [RelativeLayout.bringChildToFront] or [View.bringToFront] will only take effect when the layout is stable
+     * if current [zPoint] less tha 6 ,the adding view may below of the video controller children.
      * */
-    open fun addViewWithZPoint(view: WeakReference<View?>?, zPoint: Int, nlp: RelativeLayout.LayoutParams? = null) {
+    open fun addViewWithZPoint(tag: Any?, view: WeakReference<View?>?, zPoint: Float, nlp: RelativeLayout.LayoutParams? = null) {
         getVideoRootView()?.let { rv ->
             rv.post {
                 var isAdd = true
@@ -640,19 +640,10 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
                     if (zPoint <= 0 || rv.childCount <= 0) {
                         rv.addView(view?.get() ?: return@post, 0, nlp)
                     } else {
-                        val indexes = mutableListOf<Pair<Int, Int>>()
-                        for (i in 0 until rv.childCount) {
-                            indexes.add(Pair(i, max(i, (rv.getChildAt(i).getTag(R.id.tag_view_point_z) as? Int) ?: 0)))
+                        view?.get()?.let { v ->
+                            v.translationZ = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, zPoint, resources.displayMetrics)
+                            rv.addView(v, nlp)
                         }
-                        indexes.sortBy { i -> i.second }
-                        var added = false
-                        indexes.forEach { pair ->
-                            if (zPoint < pair.second) {
-                                rv.addView(view?.get() ?: return@post, pair.first, nlp)
-                                added = true
-                            }
-                        }
-                        if (!added) rv.addView(view?.get() ?: return@post, rv.childCount, nlp)
                     }
                 }
             }
