@@ -4,7 +4,6 @@ import android.graphics.Rect
 import android.os.Handler
 import android.os.Looper
 import android.os.Message
-import android.util.Log
 import android.view.View
 import android.view.animation.AccelerateInterpolator
 import androidx.annotation.MainThread
@@ -78,7 +77,6 @@ abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : Rec
     override fun bindData(holder: SoftReference<VH>?, p: Int, d: T?, playAble: Boolean, pl: MutableList<Any>?) {
         WeakReference(getViewController(holder?.get())).get()?.let { vc ->
             vc.onBindHolder(p)
-            Log.e("=====", "77777  ${pl?.joinToString { it.toString() }}")
             vc.setControllerIn(this)
             if (playAble != vc.isPlayable) vc.isPlayable = playAble
             if (pl?.isNullOrEmpty() == false) {
@@ -93,13 +91,10 @@ abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : Rec
                         }
                         if (p == index) {
                             vc.post {
-                                Log.e("=====", "88888")
                                 if (playAble && vc.isPlayable) {
-                                    Log.e("=====", "999999")
                                     if (!vc.isBindingController) onBindVideoView(vc)
                                     playOrResume(vc, p, d, fromUser)
                                 } else {
-                                    Log.e("=====", "100000000")
                                     if (controller?.isPlaying() == true) {
                                         controller?.stopNow(false, isRegulate = true)
                                     }
@@ -171,7 +166,6 @@ abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : Rec
     }
 
     fun release() {
-        Log.e("=====", "55555")
         handler?.removeCallbacksAndMessages(null)
         controller?.stopNow()
         controller?.release()
@@ -195,7 +189,6 @@ abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : Rec
 
     final override fun waitingForPlay(curPlayingIndex: Int, delay: Long, fromUser: Boolean) {
         if (curPlayingIndex !in 0 until adapter.itemCount) return
-        Log.e("=====", "666666")
         if (fromUser) recyclerView?.smoothScrollToPosition(curPlayingIndex)
         handler?.removeMessages(waitingForPlayClicked)
         handler?.sendMessageDelayed(Message.obtain().apply {
@@ -241,18 +234,14 @@ abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : Rec
     }
 
     private fun playOrResume(vc: V?, p: Int, data: T?, formUser: Boolean = false) {
-        Log.e("=====", "11,11,11")
         if (vc == null) {
             ZPlayerLogs.onError(NullPointerException("use a null view controller ,means show what?"))
             return
         }
-        Log.e("=====", "12")
         controller = controller ?: createZController(vc)
         controller?.let { ctr ->
-            Log.e("=====", "13")
             getPathAndLogsCallId(data ?: getItem(p))?.let { d ->
                 fun play() {
-                    Log.e("=====", "14")
                     ctr.playOrResume(d.first, d.second)
                     vc.onBehaviorAttached(d.first, d.second)
                 }
@@ -260,9 +249,7 @@ abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : Rec
                 if ((ctr.isLoadData() && p != curPlayingIndex) || (ctr.isLoadData() && ctr.getPath() != d.first)) {
                     ctr.stopNow(false)
                 }
-                Log.e("=====", "15")
                 if (formUser || p != curPlayingIndex || (!vc.isCompleted && !ctr.isLoadData()) || (ctr.isLoadData() && !ctr.isPlaying() && !ctr.isPause(true) && !vc.isCompleted)) {
-                    Log.e("=====", "16")
                     play()
                 }
             }
@@ -272,7 +259,6 @@ abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : Rec
     private var handler: Handler? = Handler(Looper.getMainLooper()) {
         when (it.what) {
             waitingForPlayClicked -> {
-                Log.e("=====", "111111")
                 controller?.stopNow()
                 adapter.notifyItemRangeChanged(0, adapter.itemCount, String.format(LOAD_STR_DEFAULT_LOADER, it.arg1, it.obj.toString()))
             }
@@ -294,9 +280,9 @@ abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : Rec
 
         override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
             if (!isAutoPlayWhenItemAttached) return
-            handler?.removeMessages(waitingForPlayClicked)
             handler?.removeMessages(waitingForPlayScrolled)
             if (newState == RecyclerView.SCROLL_STATE_IDLE) {
+                handler?.removeMessages(waitingForPlayClicked)
                 handler?.sendEmptyMessageDelayed(waitingForPlayScrolled, 150)
             }
         }
