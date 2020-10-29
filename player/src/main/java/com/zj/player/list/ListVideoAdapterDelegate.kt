@@ -30,7 +30,8 @@ abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : Rec
     private var curPlayingIndex: Int = -1
     private var isStopWhenItemDetached = true
     private var isAutoPlayWhenItemAttached = true
-    private var isAutoScrollToVisible = false
+    private var isPausedToAutoPlay = false
+    private var isAutoScrollToVisible = true
     private var recyclerView: RecyclerView? = null
     private val waitingForPlayClicked = 9871662
     private val waitingForPlayScrolled = 632573
@@ -151,12 +152,12 @@ abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : Rec
     }
 
     fun resume() {
-        isAutoPlayWhenItemAttached = true
+        isPausedToAutoPlay = false
         controller?.playOrResume()
     }
 
     fun pause() {
-        isAutoPlayWhenItemAttached = false
+        isPausedToAutoPlay = true
         controller?.pause()
     }
 
@@ -229,7 +230,9 @@ abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : Rec
                 val itemOffset = @Suppress("UNCHECKED_CAST") (recyclerView?.findViewHolderForAdapterPosition(tr) as? VH)?.itemView?.top ?: 0
                 itemOffset - cp.top
             }.invoke()
-            recyclerView?.smoothScrollBy(0, offset, AccelerateInterpolator(), 600)
+            if (isAutoScrollToVisible) {
+                recyclerView?.smoothScrollBy(0, offset, AccelerateInterpolator(), 600)
+            }
         }
     }
 
@@ -279,7 +282,7 @@ abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : Rec
     private val recyclerScrollerListener = object : RecyclerView.OnScrollListener() {
 
         override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
-            if (!isAutoPlayWhenItemAttached) return
+            if (isPausedToAutoPlay || !isAutoPlayWhenItemAttached) return
             handler?.removeMessages(waitingForPlayScrolled)
             if (newState == RecyclerView.SCROLL_STATE_IDLE) {
                 handler?.removeMessages(waitingForPlayClicked)
