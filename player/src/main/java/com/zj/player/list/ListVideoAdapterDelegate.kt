@@ -204,7 +204,7 @@ abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : Rec
             var fv = lm.findFirstCompletelyVisibleItemPosition()
             var lv = lm.findLastCompletelyVisibleItemPosition()
             var offsetPositions: Int? = null
-            var scrollAuto = isAutoScrollToVisible
+            var scrollAuto = false
             if (fv < 0 && lv < 0) {
                 fv = lm.findFirstVisibleItemPosition()
                 lv = lm.findLastVisibleItemPosition()
@@ -230,7 +230,7 @@ abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : Rec
                 val itemOffset = @Suppress("UNCHECKED_CAST") (recyclerView?.findViewHolderForAdapterPosition(tr) as? VH)?.itemView?.top ?: 0
                 itemOffset - cp.top
             }.invoke()
-            if (isAutoScrollToVisible) {
+            if (scrollAuto && isAutoScrollToVisible) {
                 recyclerView?.smoothScrollBy(0, offset, AccelerateInterpolator(), 600)
             }
         }
