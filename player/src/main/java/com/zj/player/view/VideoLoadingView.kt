@@ -98,6 +98,7 @@ internal class VideoLoadingView @JvmOverloads constructor(context: Context, attr
         argbEvaluator = ArgbEvaluator()
         disPlayViews = EnumMap(DisplayMode::class.java)
         disPlayViews?.put(DisplayMode.LOADING, 0.0f)
+        tvHint?.text = getHintString(DisplayMode.LOADING)
     }
 
     fun setBackground(c: Int) {
@@ -178,7 +179,7 @@ internal class VideoLoadingView @JvmOverloads constructor(context: Context, attr
             lp?.width = loadingWidth.toInt()
             lp?.height = loadingHeight.toInt()
             vLoading?.layoutParams = lp
-            val drawable = context.getDrawable(loadingDrawableRes)
+            val drawable = ContextCompat.getDrawable(context, loadingDrawableRes)
             vLoading?.indeterminateDrawable = drawable
         }
     }
@@ -294,7 +295,7 @@ internal class VideoLoadingView @JvmOverloads constructor(context: Context, attr
     }
 
     private fun <T : View> f(id: Int): T? {
-        return contentView?.findViewById<T>(id)
+        return contentView?.findViewById(id)
     }
 
     private class BaseLoadingValueAnimator constructor(private var listener: BaseLoadingAnimatorListener?) : ValueAnimator() {

@@ -41,7 +41,6 @@ import com.zj.player.view.VideoLoadingView
 import com.zj.player.view.VideoRootView
 import java.lang.ref.WeakReference
 import java.util.*
-import kotlin.math.max
 import kotlin.math.roundToInt
 
 /**
@@ -911,18 +910,12 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
         return false
     }
 
-    open fun onToolsBarChanged(isFullExpand: Boolean, isResetNow: Boolean) {
-
-    }
+    open fun onToolsBarChanged(isFullExpand: Boolean, isResetNow: Boolean) {}
 
     private fun onFocusChanged(dialog: BaseGestureFullScreenDialog, isMax: Boolean) {
         log("on full max screen $isMax", BehaviorLogsTable.onFullMaxScreen(isMax))
         if (isMax) lockScreen?.isSelected = dialog.isLockedCurrent()
         onFullMaxScreenChanged(isMax)
-    }
-
-    protected fun setChildZ(zIn: Float) {
-        videoOverrideImageShaderView?.z = zIn
     }
 
     protected fun setMuteIsGlobal(isGlobal: Boolean) {
@@ -966,5 +959,33 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
 
     protected fun recordLogs(s: String, modeName: String, vararg params: Pair<String, Any>) {
         if (Constance.CORE_LOG_ABLE) ZPlayerLogs.onLog(s, controller?.getPath() ?: "", "", modeName, *params)
+    }
+
+    fun isPause(accurate: Boolean = false): Boolean {
+        return controller?.isPause(accurate) ?: false
+    }
+
+    fun isStop(accurate: Boolean = false): Boolean {
+        return controller?.isStop(accurate) ?: true
+    }
+
+    fun isPlaying(accurate: Boolean = false): Boolean {
+        return controller?.isPlaying(accurate) ?: false
+    }
+
+    fun isReady(accurate: Boolean = false): Boolean {
+        return controller?.isReady(accurate) ?: false
+    }
+
+    fun isLoading(accurate: Boolean = false): Boolean {
+        return controller?.isLoading(accurate) ?: false
+    }
+
+    fun isLoadData(): Boolean {
+        return controller?.isLoadData() ?: false
+    }
+
+    fun isDestroyed(accurate: Boolean = false): Boolean {
+        return controller?.isDestroyed(accurate) ?: true
     }
 }

@@ -5,7 +5,6 @@ import android.graphics.Matrix
 import android.graphics.RectF
 import android.os.Looper
 import android.util.AttributeSet
-import android.util.Log
 import android.view.*
 import androidx.annotation.Nullable
 import com.google.android.exoplayer2.Player

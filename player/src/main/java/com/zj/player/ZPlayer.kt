@@ -6,7 +6,6 @@ import android.net.Uri
 import android.os.Handler
 import android.os.Looper
 import android.os.Message
-import android.util.Log
 import android.view.WindowManager
 import androidx.annotation.UiThread
 import com.google.android.exoplayer2.*
@@ -119,6 +118,8 @@ open class ZPlayer(var config: VideoConfig? = null) : Player.EventListener {
                         player?.playWhenReady
                         setPlayerState(VideoState.PLAY)
                         autoPlay(false)
+                    } else if (field == VideoState.SEEK_LOADING) {
+                        controller?.onPlay(currentPlayPath(), false)
                     }
                 }
                 VideoState.PLAY -> {

@@ -3,7 +3,6 @@ package com.zj.videotest
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
-import android.view.WindowManager
 import com.gyf.immersionbar.ImmersionBar
 import com.zj.cf.managers.BaseFragmentManager
 import com.zj.player.logs.VideoEventListener

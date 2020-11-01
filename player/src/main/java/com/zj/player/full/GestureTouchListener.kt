@@ -4,7 +4,6 @@ import android.graphics.PointF
 import android.graphics.drawable.GradientDrawable.Orientation
 import android.os.Handler
 import android.os.Looper
-import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import androidx.annotation.FloatRange
