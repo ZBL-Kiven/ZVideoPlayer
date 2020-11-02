@@ -10,6 +10,7 @@ import android.view.WindowManager
 import androidx.annotation.UiThread
 import com.google.android.exoplayer2.*
 import com.google.android.exoplayer2.ExoPlaybackException.*
+import com.google.android.exoplayer2.mediacodec.MediaCodecRenderer
 import com.google.android.exoplayer2.source.ExtractorMediaSource
 import com.google.android.exoplayer2.source.MediaSource
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector
@@ -22,16 +23,16 @@ import com.google.android.exoplayer2.upstream.cache.CacheDataSourceFactory
 import com.google.android.exoplayer2.upstream.cache.LeastRecentlyUsedCacheEvictor
 import com.google.android.exoplayer2.upstream.cache.SimpleCache
 import com.google.android.exoplayer2.util.Util
-import com.zj.player.ut.Constance
-import com.zj.player.ut.Constance.CORE_LOG_ABLE
-import com.zj.player.ut.PlayerEventController
-import com.zj.player.ut.RenderEvent
 import com.zj.player.base.VideoLoadControl
 import com.zj.player.base.VideoState
 import com.zj.player.config.VideoConfig
 import com.zj.player.logs.BehaviorData
 import com.zj.player.logs.BehaviorLogsTable
 import com.zj.player.logs.ZPlayerLogs
+import com.zj.player.ut.Constance
+import com.zj.player.ut.Constance.CORE_LOG_ABLE
+import com.zj.player.ut.PlayerEventController
+import com.zj.player.ut.RenderEvent
 import java.io.File
 import kotlin.math.max
 import kotlin.math.min
@@ -108,7 +109,7 @@ open class ZPlayer(var config: VideoConfig? = null) : Player.EventListener {
                 VideoState.LOADING -> {
                     isReady = false
                     controller?.onLoading(currentPlayPath(), false)
-                    loading(currentPlayPath())
+                    loading()
                 }
                 VideoState.READY -> {
                     duration = player?.duration ?: 0
@@ -179,7 +180,7 @@ open class ZPlayer(var config: VideoConfig? = null) : Player.EventListener {
         return curAccessKey
     }
 
-    private fun loading(videoUrl: String) {
+    private fun loading(videoUrl: String = currentPlayPath()) {
         val context = controller?.context ?: return
         handler?.removeCallbacksAndMessages(null)
         if (player == null) {
@@ -330,7 +331,17 @@ open class ZPlayer(var config: VideoConfig? = null) : Player.EventListener {
             if (it.type == TYPE_UNEXPECTED) sb.append("unexpectedException : ").append(it.unexpectedException?.message)
         }
         log("video on play error case : $sb", BehaviorLogsTable.playError(currentCallId(), "$sb"))
-        setPlayerState(VideoState.STOP.setObj(error))
+        if (error?.rendererException is MediaCodecRenderer.DecoderInitializationException) {
+            player?.release()
+            player = null
+            if (currentPlayPath().isNotEmpty()) {
+                loading()
+            } else {
+                setPlayerState(VideoState.STOP)
+            }
+        } else {
+            setPlayerState(VideoState.STOP.setObj(error))
+        }
     }
 
     open fun isLoadData(): Boolean {
