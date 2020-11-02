@@ -1,7 +1,6 @@
 package com.zj.player.full
 
 import android.graphics.PointF
-import android.graphics.drawable.GradientDrawable.Orientation
 import android.os.Handler
 import android.os.Looper
 import android.view.MotionEvent
@@ -12,8 +11,8 @@ import kotlin.math.*
 @Suppress("unused")
 internal abstract class GestureTouchListener(private val intercepted: () -> Boolean) : View.OnTouchListener {
 
-    private var curOrientation: Orientation? = null
-    private var lastOrientation: Orientation? = null
+    private var curOrientation: TrackOrientation? = null
+    private var lastOrientation: TrackOrientation? = null
     private var lstX: Float = 0.0f
     private var lstY: Float = 0.0f
     private var _x = 0f
@@ -109,11 +108,11 @@ internal abstract class GestureTouchListener(private val intercepted: () -> Bool
         if (lstX != 0f && lstY != 0f) {
             val absX = abs(stepX)
             val absY = abs(stepY)
-            val orientation = if (absX > absY && stepX > 0) Orientation.LEFT_RIGHT
-            else if (absX > absY && stepX < 0) Orientation.RIGHT_LEFT
-            else if (absX < absY && stepY > 0) Orientation.TOP_BOTTOM
-            else Orientation.BOTTOM_TOP
-            if (lastOrientation == null && orientation != Orientation.TOP_BOTTOM) return true
+            val orientation = if (absX > absY && stepX > 0) TrackOrientation.LEFT_RIGHT
+            else if (absX > absY && stepX < 0) TrackOrientation.RIGHT_LEFT
+            else if (absX < absY && stepY > 0) TrackOrientation.TOP_BOTTOM
+            else TrackOrientation.BOTTOM_TOP
+            if (lastOrientation == null && orientation != TrackOrientation.TOP_BOTTOM) return true
             lastOrientation = orientation
             if (orientation != curOrientation) {
                 curOrientation = orientation
@@ -174,5 +173,5 @@ internal abstract class GestureTouchListener(private val intercepted: () -> Bool
 
     abstract fun onClick()
 
-    abstract fun onTracked(isStart: Boolean, offsetX: Float, offsetY: Float, easeY: Float, orientation: Orientation, formTrigDuration: Float)
+    abstract fun onTracked(isStart: Boolean, offsetX: Float, offsetY: Float, easeY: Float, orientation: TrackOrientation, formTrigDuration: Float)
 }

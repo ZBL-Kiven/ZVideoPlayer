@@ -8,7 +8,6 @@ import android.app.Service
 import android.content.Context
 import android.content.pm.ActivityInfo
 import android.content.res.Resources
-import android.graphics.drawable.GradientDrawable
 import android.media.AudioManager
 import android.os.Handler
 import android.os.Looper
@@ -26,6 +25,7 @@ import androidx.core.content.ContextCompat
 import com.zj.player.anim.ZFullValueAnimator
 import com.zj.player.base.InflateInfo
 import com.zj.player.base.LoadingMode
+import com.zj.player.full.*
 import com.zj.player.full.BaseGestureFullScreenDialog
 import com.zj.player.full.FullContentListener
 import com.zj.player.full.FullScreenListener
@@ -151,7 +151,7 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
             }
         }
 
-        override fun onTracked(isStart: Boolean, offsetX: Float, offsetY: Float, easeY: Float, orientation: GradientDrawable.Orientation, formTrigDuration: Float) {
+        override fun onTracked(isStart: Boolean, offsetX: Float, offsetY: Float, easeY: Float, orientation: TrackOrientation, formTrigDuration: Float) {
             if (isFullScreen && fullScreenDialog?.parent != null) {
                 fullScreenDialog?.onTracked(isStart, offsetX, offsetY, easeY, formTrigDuration)
             }
