@@ -3,6 +3,7 @@ package com.zj.videotest.controllers
 import android.content.Context
 import android.graphics.Color
 import android.util.AttributeSet
+import android.util.Log
 import android.view.KeyEvent
 import android.view.View
 import android.widget.RelativeLayout
@@ -39,6 +40,11 @@ class CCVideoController @JvmOverloads constructor(c: Context, attr: AttributeSet
         (thumb.drawable as? GifDrawable)?.let {
             if (stop) it.stop() else it.start()
         }
+    }
+
+    override fun onSeekChanged(seek: Int, buffered: Int, fromUser: Boolean, videoSize: Long) {
+        super.onSeekChanged(seek, buffered, fromUser, videoSize)
+        if (fromUser) Log.e("=-=-=", "$seek")
     }
 
     override fun completing(path: String, isRegulate: Boolean) {

@@ -40,7 +40,6 @@ import com.zj.player.ut.Controller
 import com.zj.player.view.VideoLoadingView
 import com.zj.player.view.VideoRootView
 import java.lang.ref.WeakReference
-import java.util.*
 import kotlin.math.roundToInt
 
 /**
@@ -103,7 +102,6 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
     protected var isTickingSeekBarFromUser: Boolean = false
     protected var fullScreenContentLayoutId: Int = -1
     protected var fullScreenSupported = false
-    protected val supportedSpeedList = floatArrayOf(1f, 2f, 4f)
     protected var alphaAnimViewsGroup: MutableList<View?>? = null
     protected var onFullScreenLayoutInflateListener: ((v: View) -> Unit)? = null
     protected var isDefaultMaxScreen: Boolean = false
@@ -117,6 +115,7 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
     private var muteDefault: Boolean = false
     private var muteIsUseGlobal: Boolean = false
     private var isTransactionNavigation: Boolean = false
+    open val supportedSpeedList = floatArrayOf(1f, 2f, 4f)
     protected var isFullScreen: Boolean = false
         set(value) {
             if (field == value) return
@@ -319,7 +318,8 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
         seekBar?.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(p0: SeekBar?, p1: Int, p2: Boolean) {
                 if (isTickingSeekBarFromUser && p2) {
-                    controller?.seekTo(p0?.progress ?: 0)
+                    controller?.seekTo(p0?.progress ?: 0, true)
+                    if (autoFullTools) mHandler.removeMessages(dismissFullTools)
                 }
             }
 
@@ -330,6 +330,7 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
             override fun onStopTrackingTouch(p0: SeekBar?) {
                 isTickingSeekBarFromUser = false
                 controller?.autoPlayWhenReady(true)
+                if (autoFullTools && isFull) mHandler.sendEmptyMessageDelayed(dismissFullTools, autoFullInterval.toLong())
             }
         })
     }
@@ -378,10 +379,12 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
         seekBar?.isSelected = true
         seekBar?.isEnabled = true
         isInterruptPlayBtnAnim = false
-        showOrHidePlayBtn(false)
         onLoadingEvent(LoadingMode.None)
-        full(false)
-        seekBarSmall?.visibility = View.VISIBLE
+        if (!isTickingSeekBarFromUser) {
+            showOrHidePlayBtn(false)
+            full(false)
+            seekBarSmall?.visibility = View.VISIBLE
+        }
     }
 
     override fun onPause(path: String, isRegulate: Boolean) {
@@ -666,7 +669,7 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
         val duration = mediaDuration / 1000
         val minute = duration / 60
         val second = duration % 60
-        return String.format(Locale.getDefault(), "${if (minute < 10) "0%d" else "%d"}:${if (second < 10) "0%d" else "%d"}", minute, second)
+        return String.format("${if (minute < 10) "0%d" else "%d"}:${if (second < 10) "0%d" else "%d"}", minute, second)
     }
 
     protected fun showOrHidePlayBtn(isShow: Boolean, withState: Boolean = false) {
@@ -939,6 +942,7 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
     }
 
     private fun onFullTools(isFull: Boolean) {
+        if (isTickingSeekBarFromUser) return
         controller?.let {
             if (!isInterruptPlayBtnAnim) {
                 showOrHidePlayBtn(isFull, true)

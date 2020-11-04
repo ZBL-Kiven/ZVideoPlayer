@@ -153,9 +153,9 @@ class ZController private constructor(private var player: ZPlayer?, viewControll
     /**
      * Retrieve the video playback position, [i] can only between 0-100.
      * */
-    fun seekTo(@IntRange(from = 0, to = 100) i: Int) {
+    fun seekTo(@IntRange(from = 0, to = 100) i: Int, fromUser: Boolean) {
         log("user seek the video on $i%")
-        runWithPlayer { it.seekTo(i, true) }
+        runWithPlayer { it.seekTo(i, fromUser) }
     }
 
     /**
