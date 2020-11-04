@@ -50,7 +50,7 @@ import kotlin.math.min
  * */
 
 @Suppress("unused", "MemberVisibilityCanBePrivate")
-open class ZPlayer(var config: VideoConfig? = null) : Player.EventListener {
+open class ZPlayer(var config: VideoConfig = VideoConfig.create()) : Player.EventListener {
 
     companion object {
         const val DEFAULT_VIDEO_CACHED_PATH = "videoCache"
@@ -192,6 +192,10 @@ open class ZPlayer(var config: VideoConfig? = null) : Player.EventListener {
             it.setPlayer(player, Constance.SURFACE_TYPE_TEXTURE_VIEW)
             it.setRenderListener(renderListener)
         }
+        if (videoUrl.isEmpty()) {
+            controller?.onError(NullPointerException("the video path should not be null or empty !!"))
+            return
+        }
         val f = File(videoUrl)
         val dataSource = if (f.exists() && f.isFile) {
             createDefaultDataSource(context, Uri.parse(f.path))
@@ -205,12 +209,12 @@ open class ZPlayer(var config: VideoConfig? = null) : Player.EventListener {
     }
 
     private fun createPlayer(context: Context) {
-        val control: LoadControl = config?.let {
+        val control: LoadControl = config.let {
             VideoLoadControl.Builder().createDefaultLoadControl(it.minBufferMs, it.maxBufferMs, it.bufferForPlaybackMs, it.bufferForPlaybackAfterBufferMs)
-        } ?: DefaultLoadControl.Builder().createDefaultLoadControl()
+        }
         val renderFactory = DefaultRenderersFactory(context)
         player = ExoPlayerFactory.newSimpleInstance(context, renderFactory, DefaultTrackSelector(), control)
-        player?.videoScalingMode = config?.videoScaleMod ?: C.VIDEO_SCALING_MODE_SCALE_TO_FIT
+        player?.videoScalingMode = config.videoScaleMod
     }
 
     private fun createDefaultDataSource(context: Context, path: Uri?): MediaSource {
@@ -221,17 +225,17 @@ open class ZPlayer(var config: VideoConfig? = null) : Player.EventListener {
 
     private fun createCachedDataSource(context: Context, videoUrl: String): MediaSource? {
         val httpFactory = DefaultHttpDataSourceFactory(Util.getUserAgent(context, context.packageName), DefaultBandwidthMeter())
-        config?.requestProperty?.let {
+        config.requestProperty?.let {
             log("set request property $it", BehaviorLogsTable.requestParams(currentCallId(), it.toMap()))
             httpFactory.defaultRequestProperties.set(it.toMap())
         }
         if (cache == null) {
             val cachePath = context.applicationContext.externalCacheDir
-            val cacheDir = File(cachePath, config?.cacheFileDir ?: DEFAULT_VIDEO_CACHED_PATH)
-            cache = SimpleCache(cacheDir, LeastRecentlyUsedCacheEvictor((config?.maxCacheSize) ?: DEFAULT_VIDEO_MAX_CACHED_SIZE))
+            val cacheDir = File(cachePath, config.cacheFileDir)
+            cache = SimpleCache(cacheDir, LeastRecentlyUsedCacheEvictor(config.maxCacheSize))
         }
         val cachedDataSourceFactory = CacheDataSourceFactory(cache, httpFactory)
-        return ExtractorMediaSource.Factory(if (config?.cacheEnable == true) {
+        return ExtractorMediaSource.Factory(if (config.cacheEnable) {
             log("create [http cache media data source] media data source");cachedDataSourceFactory
         } else {
             log("create [http media data source] media data source"); httpFactory
@@ -325,22 +329,27 @@ open class ZPlayer(var config: VideoConfig? = null) : Player.EventListener {
 
     override fun onPlayerError(error: ExoPlaybackException?) {
         val sb = StringBuilder()
-        error?.let {
-            if (it.type == TYPE_RENDERER) sb.append("rendererException : ").append(it.rendererException?.message).append(" \n")
-            if (it.type == TYPE_SOURCE) sb.append("sourceException : ").append(it.sourceException?.message).append(" \n")
-            if (it.type == TYPE_UNEXPECTED) sb.append("unexpectedException : ").append(it.unexpectedException?.message)
-        }
-        log("video on play error case : $sb", BehaviorLogsTable.playError(currentCallId(), "$sb"))
-        if (error?.rendererException is MediaCodecRenderer.DecoderInitializationException) {
-            player?.release()
-            player = null
-            if (currentPlayPath().isNotEmpty()) {
-                loading()
-            } else {
-                setPlayerState(VideoState.STOP)
+        try {
+            error?.let {
+                if (it.type == TYPE_RENDERER) sb.append("rendererException : ").append(it.rendererException?.message).append(" \n")
+                if (it.type == TYPE_SOURCE) sb.append("sourceException : ").append(it.sourceException?.message).append(" \n")
+                if (it.type == TYPE_UNEXPECTED) sb.append("unexpectedException : ").append(it.unexpectedException?.message)
             }
-        } else {
-            setPlayerState(VideoState.STOP.setObj(error))
+            log("video on play error case : $sb", BehaviorLogsTable.playError(currentCallId(), "$sb"))
+            if (error?.type == TYPE_RENDERER && error.rendererException is MediaCodecRenderer.DecoderInitializationException) {
+                player?.release()
+                player = null
+                if (currentPlayPath().isNotEmpty()) {
+                    setPlayerState(VideoState.LOADING)
+                } else {
+                    setPlayerState(VideoState.STOP)
+                }
+            } else {
+                setPlayerState(VideoState.STOP.setObj(error))
+            }
+        } catch (e: Exception) {
+            log("video on play error and uncaught exception: type =  ${error?.type} some message: $sb", BehaviorLogsTable.playError(currentCallId(), "$sb"))
+            setPlayerState(VideoState.STOP)
         }
     }
 
