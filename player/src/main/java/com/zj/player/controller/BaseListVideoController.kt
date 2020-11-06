@@ -3,6 +3,7 @@ package com.zj.player.controller
 import android.content.Context
 import android.util.AttributeSet
 import android.view.View
+import androidx.annotation.CallSuper
 import com.zj.player.list.VideoControllerIn
 
 /**
@@ -30,6 +31,7 @@ abstract class BaseListVideoController @JvmOverloads constructor(c: Context, att
             return controller != null
         }
 
+    @CallSuper
     open fun onBindHolder(index: Int) {
         curPlayingIndex = index
     }
@@ -70,6 +72,7 @@ abstract class BaseListVideoController @JvmOverloads constructor(c: Context, att
         this.videoControllerIn = ci
     }
 
+    @CallSuper
     open fun resetWhenDisFocus() {
         controller?.updateViewController(null)
         controller = null
@@ -85,8 +88,13 @@ abstract class BaseListVideoController @JvmOverloads constructor(c: Context, att
         onTrackListener?.invoke(playAble, start, end, formTrigDuration)
     }
 
-    open fun reset(isShowThumb: Boolean = true, isShowBackground: Boolean = true, isSinkBottomShader: Boolean = false) {
-        super.reset(true, isRegulate = true, isShowPlayBtn = isPlayable, isShowThumb = isShowThumb, isShowBackground = isShowBackground, isSinkBottomShader = isSinkBottomShader)
+    /**
+     * It should be noted that this method will be called in [resetWhenDisFocus],
+     * [com.zj.player.list.ListVideoAdapterDelegate] is mainly the way to reset the Controller in the list
+     * Therefore, this method cannot be exposed or overridden.
+     * */
+    private fun reset(isShowThumb: Boolean = true, isShowBackground: Boolean = true, isSinkBottomShader: Boolean = false) {
+        reset(true, isRegulate = true, isShowPlayBtn = isPlayable, isShowThumb = isShowThumb, isShowBackground = isShowBackground, isSinkBottomShader = isSinkBottomShader)
         isCompleted = false
     }
 

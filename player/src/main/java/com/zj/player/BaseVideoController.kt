@@ -20,6 +20,7 @@ import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.animation.AccelerateDecelerateInterpolator
 import android.widget.*
+import androidx.annotation.CallSuper
 import androidx.annotation.LayoutRes
 import androidx.core.content.ContextCompat
 import com.zj.player.anim.ZFullValueAnimator
@@ -555,6 +556,7 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
         }
     }
 
+    @CallSuper
     open fun removeView(tag: Any?, nullAbleView: WeakReference<View?>? = null) {
         getVideoRootView()?.let { v ->
             v.post {
@@ -585,6 +587,7 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
      * The difference is that calling this method provides a stable width and height under various conditions,
      * suitable for covering the full layout of the covered view, and can follow the full screen animation zoom
      * */
+    @CallSuper
     open fun addOverlayView(tag: Any, zPoint: Float, view: WeakReference<View?>?, paramsBuilder: ((RelativeLayout.LayoutParams) -> RelativeLayout.LayoutParams)? = null) {
 
         fun generateLp(invoke: (RelativeLayout.LayoutParams) -> Unit) {
@@ -624,6 +627,7 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
      * of course, additional calls [RelativeLayout.bringChildToFront] or [View.bringToFront] will only take effect when the layout is stable
      * if current [zPoint] less tha 6 ,the adding view may below of the video controller children.
      * */
+    @CallSuper
     open fun addViewWithZPoint(tag: Any?, view: WeakReference<View?>?, zPoint: Float, nlp: RelativeLayout.LayoutParams? = null) {
         getVideoRootView()?.let { rv ->
             rv.post {
@@ -657,6 +661,7 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
      * it also merge with the system screen rotate settings.
      * @return the status form this operation
      * */
+    @CallSuper
     open fun lockScreenRotate(isLock: Boolean): Boolean {
         return if (fullScreenDialog?.lockScreenRotation(isLock) == true) {
             isLockScreenRotation = isLock
@@ -884,6 +889,7 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
         onTrack(isPlayable, isStart, isEnd, formTrigDuration)
     }
 
+    @CallSuper
     open fun reset(isNow: Boolean, isRegulate: Boolean, isShowPlayBtn: Boolean, isShowThumb: Boolean = true, isShowBackground: Boolean = true, isSinkBottomShader: Boolean = false) {
         vPlay?.isEnabled = isShowPlayBtn
         onLoadingEvent(LoadingMode.None, true)

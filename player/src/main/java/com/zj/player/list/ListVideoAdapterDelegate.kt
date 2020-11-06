@@ -90,8 +90,8 @@ abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : Rec
                             index = it[1].toInt()
                             fromUser = it[2] == "true"
                         }
-                        if (p == index) {
-                            vc.post {
+                        vc.post {
+                            if (p == index) {
                                 if (playAble && vc.isPlayable) {
                                     if (!vc.isBindingController) onBindVideoView(vc)
                                     playOrResume(vc, p, d, fromUser)
@@ -101,9 +101,9 @@ abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : Rec
                                     }
                                 }
                                 curPlayingIndex = p
+                            } else {
+                                vc.resetWhenDisFocus()
                             }
-                        } else {
-                            vc.resetWhenDisFocus()
                         }
                         return@let
                     }

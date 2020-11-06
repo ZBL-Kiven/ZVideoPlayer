@@ -20,6 +20,12 @@ import java.lang.ref.WeakReference
 
 class CCVideoController @JvmOverloads constructor(c: Context, attr: AttributeSet? = null, def: Int = 0) : BaseListVideoController(c, attr, def) {
 
+    val v = View(context)
+
+    init {
+        addViewWithZPoint("testTag", WeakReference(v), 100f, RelativeLayout.LayoutParams(200, 200))
+    }
+
     override fun onImgGot(path: String, type: ImgLoader.ImgType, tag: String, e: Exception?) {
         val thumb = getThumbView() ?: return
         val background = getBackgroundView() ?: return
@@ -51,6 +57,21 @@ class CCVideoController @JvmOverloads constructor(c: Context, attr: AttributeSet
         isInterruptPlayBtnAnim = true
         showOrHidePlayBtn(false, withState = false)
         full(false)
+    }
+
+    override fun reset(isNow: Boolean, isRegulate: Boolean, isShowPlayBtn: Boolean, isShowThumb: Boolean, isShowBackground: Boolean, isSinkBottomShader: Boolean) {
+        super.reset(isNow, isRegulate, isShowPlayBtn, isShowThumb, isShowBackground, isSinkBottomShader)
+        v.setBackgroundColor(Color.CYAN)
+    }
+
+    override fun onPlay(path: String, isRegulate: Boolean) {
+        super.onPlay(path, isRegulate)
+        v.setBackgroundColor(Color.YELLOW)
+    }
+
+    override fun onStop(path: String, isRegulate: Boolean) {
+        super.onStop(path, isRegulate)
+        Log.e("=====", "2222222   $path")
     }
 
     override fun onFullKeyEvent(code: Int, event: KeyEvent): Boolean {
