@@ -327,10 +327,17 @@ internal class BaseGestureFullScreenDialog private constructor(private var contr
         if (isMaxFull) return
         val d = interpolator.getInterpolation(duration)
         backgroundView?.alpha = ((duration * 0.85f) + 0.15f)
-        (contentLayoutView as? ViewGroup)?.let {
+        hiddenAllChildIfNotScreenContent(contentLayoutView, d)
+    }
+
+    private fun hiddenAllChildIfNotScreenContent(child: View?, alpha: Float) {
+        (child as? ViewGroup)?.let {
             it.children.forEach { cv ->
                 if (cv.id != R.id.player_gesture_full_screen_content) {
-                    cv.alpha = d
+                    cv.alpha = alpha
+                    (cv as? ViewGroup)?.let {
+                        hiddenAllChildIfNotScreenContent(cv, alpha)
+                    }
                 }
             }
         }
