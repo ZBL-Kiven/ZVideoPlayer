@@ -333,10 +333,11 @@ internal class BaseGestureFullScreenDialog private constructor(private var contr
     private fun hiddenAllChildIfNotScreenContent(child: View?, alpha: Float) {
         (child as? ViewGroup)?.let {
             it.children.forEach { cv ->
-                if (cv.id != R.id.player_gesture_full_screen_content) {
-                    cv.alpha = alpha
-                    (cv as? ViewGroup)?.let {
-                        hiddenAllChildIfNotScreenContent(cv, alpha)
+                if (cv is ViewGroup && cv.id != R.id.player_gesture_full_screen_content) {
+                    hiddenAllChildIfNotScreenContent(cv, alpha)
+                } else {
+                    if (cv.id != R.id.player_gesture_full_screen_content) {
+                        cv.alpha = alpha
                     }
                 }
             }
