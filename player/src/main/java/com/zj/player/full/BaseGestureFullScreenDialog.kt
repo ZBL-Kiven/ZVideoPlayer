@@ -323,24 +323,46 @@ internal class BaseGestureFullScreenDialog private constructor(private var contr
         return (context as? Activity)
     }
 
+    /**
+     * Reduce the transparency of background and other unimportant (non-playing components) views when sliding
+     * */
     private fun setBackground(@FloatRange(from = 0.0, to = 1.0) duration: Float) {
         if (isMaxFull) return
         val d = interpolator.getInterpolation(duration)
         backgroundView?.alpha = ((duration * 0.85f) + 0.15f)
-        hiddenAllChildIfNotScreenContent(contentLayoutView, d)
+        val actionViews = mutableMapOf<Int, View>()
+        hiddenAllChildIfNotScreenContent(contentLayoutView, actionViews)
+        actionViews.forEach { (_, u) ->
+            u.alpha = d
+        }
     }
 
-    private fun hiddenAllChildIfNotScreenContent(child: View?, alpha: Float) {
+    /**
+     * Return all other views and their parents that are not player views to [views],
+     * which needs to be noted that this View is not included when view.id is not set.
+     * The function considers that the View without ID is not used as a display estimate, and improves performance.
+     * */
+    private fun hiddenAllChildIfNotScreenContent(child: View?, views: MutableMap<Int, View>) {
         (child as? ViewGroup)?.let {
             it.children.forEach { cv ->
-                if (cv is ViewGroup && cv.id != R.id.player_gesture_full_screen_content) {
-                    hiddenAllChildIfNotScreenContent(cv, alpha)
+                if (cv.id == R.id.player_gesture_full_screen_content) {
+                    removeSelfActionParent(cv, views)
                 } else {
-                    if (cv.id != R.id.player_gesture_full_screen_content) {
-                        cv.alpha = alpha
-                    }
+                    views[cv.id] = cv
+                    hiddenAllChildIfNotScreenContent(cv, views)
                 }
             }
+        }
+    }
+
+    /**
+     * only used by [hiddenAllChildIfNotScreenContent]
+     * */
+    private fun removeSelfActionParent(view: View, views: MutableMap<Int, View>) {
+        if (view == contentLayoutView) return
+        (view.parent as? ViewGroup)?.let {
+            views.remove(it.id)
+            removeSelfActionParent(it, views)
         }
     }
 
