@@ -105,7 +105,7 @@ class FeedContentAdapter<T : FeedDataIn> : ListenerAnimAdapter<T>(R.layout.r_mai
             it.setOnResetListener(null)
             it.setOnTrackListener(null)
             it.setOnFullScreenChangedListener(null)
-//            it.actionListener = null
+            //            it.actionListener = null
             try {
                 context?.let { ctx ->
                     val thumb = it.getThumbView() ?: return
@@ -172,7 +172,7 @@ class FeedContentAdapter<T : FeedDataIn> : ListenerAnimAdapter<T>(R.layout.r_mai
             vc.setPlayingStateListener(if (playAble) onPlayingStateChangedListener else null)
             vc.setOnResetListener(if (playAble) onResetListener else null)
             vc.setOnTrackListener(if (playAble) onTrackListener else null)
-//            vc.actionListener = if (playAble) actionListener else null
+            //            vc.actionListener = if (playAble) actionListener else null
             vc.setOnFullScreenChangedListener(onFullScreenListener)
             onBindAdapterData(d, vc, pl)
         }
@@ -216,7 +216,7 @@ class FeedContentAdapter<T : FeedDataIn> : ListenerAnimAdapter<T>(R.layout.r_mai
         }
     }
 
-    private val onFullScreenListener: (BaseVideoController, Boolean) -> Unit = { vc, _ ->
+    private val onFullScreenListener: (BaseVideoController, Boolean, pl: Map<String, Any?>?) -> Unit = { vc, _, _ ->
         controller?.let {
             (vc.getTag(TAG_POSITION) as? Int)?.let { p ->
                 getItem(p)?.getVideoPath()?.let { path -> cancelIfNotCurrent(path) }

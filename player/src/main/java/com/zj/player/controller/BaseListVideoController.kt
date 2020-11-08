@@ -22,7 +22,7 @@ abstract class BaseListVideoController @JvmOverloads constructor(c: Context, att
 
     private var completedListener: ((BaseListVideoController) -> Unit)? = null
     private var playingStateListener: ((BaseListVideoController) -> Unit)? = null
-    private var fullScreenChangeListener: ((BaseListVideoController, Boolean) -> Unit)? = null
+    private var fullScreenChangeListener: ((BaseListVideoController, Boolean, payloads: Map<String, Any?>?) -> Unit)? = null
     private var resetListener: ((BaseListVideoController) -> Unit)? = null
     private var onTrackListener: ((playAble: Boolean, start: Boolean, end: Boolean, formTrigDuration: Float) -> Unit)? = null
 
@@ -80,8 +80,8 @@ abstract class BaseListVideoController @JvmOverloads constructor(c: Context, att
         this.reset()
     }
 
-    override fun onFullScreenChanged(isFull: Boolean) {
-        fullScreenChangeListener?.invoke(this, isFull)
+    override fun onFullScreenChanged(isFull: Boolean, payloads: Map<String, Any?>?) {
+        fullScreenChangeListener?.invoke(this, isFull, payloads)
     }
 
     override fun onTrack(playAble: Boolean, start: Boolean, end: Boolean, formTrigDuration: Float) {
@@ -106,7 +106,7 @@ abstract class BaseListVideoController @JvmOverloads constructor(c: Context, att
         this.playingStateListener = l
     }
 
-    fun setOnFullScreenChangedListener(l: ((BaseListVideoController, Boolean) -> Unit)? = null) {
+    fun setOnFullScreenChangedListener(l: ((BaseListVideoController, Boolean, payloads: Map<String, Any?>?) -> Unit)? = null) {
         this.fullScreenChangeListener = l
     }
 

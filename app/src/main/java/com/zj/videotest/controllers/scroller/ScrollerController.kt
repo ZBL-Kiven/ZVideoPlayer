@@ -15,10 +15,34 @@ abstract class ScrollerController @JvmOverloads constructor(c: Context, attr: At
     private var parseCancel = false
     private var viewScroller: ViewScroller? = null
 
-    override fun onFullScreenChanged(isFull: Boolean) {
-        super.onFullScreenChanged(isFull)
+    override fun onFullScreenChanged(isFull: Boolean, payloads: Map<String, Any?>?) {
+        super.onFullScreenChanged(isFull, payloads)
+        //        if (isFull && payloads?.get("isExpand") != null) {
+        //            videoRoot?.let {
+        //                it.post {
+        //                    val h = (it.height - DPUtils.dp2px(246f)).toFloat()
+        //                    scrolled = h
+        //                    lastHeight = it.height
+        //                    val anim = ValueAnimator.ofFloat(0.0f, 1.0f)
+        //                    anim.addUpdateListener { a ->
+        //                        onMoving(it, (-scrolled).toInt(), TrackOrientation.BOTTOM_TOP)
+        //                    }
+        //                    anim.duration = 1000
+        //                    anim.start()
+        //                }
+        //            }
+        //        } else {
+        viewScroller?.clear()
         scrolled = 0f
         lastHeight = 0
+        //        }
+    }
+
+    override fun onFullScreenClick(v: View, formUser: Boolean, payloads: Map<String, Any?>?) {
+        var pl: MutableMap<String, Any?>? = payloads?.toMutableMap()
+        if (pl == null) pl = mutableMapOf()
+        pl["isExpand"] = 0
+        super.onFullScreenClick(v, formUser, pl)
     }
 
     override fun onTouchActionEvent(videoRoot: View?, event: MotionEvent, lastX: Float, lastY: Float, orientation: TrackOrientation?): Boolean {
@@ -73,7 +97,7 @@ abstract class ScrollerController @JvmOverloads constructor(c: Context, attr: At
     }
 
     private fun instanceScroller(videoRoot: View?) {
-        viewScroller = object : ViewScroller(videoRoot ?: this@ScrollerController) {
+        viewScroller = object : ViewScroller(videoRoot ?: this@ScrollerController.videoRoot ?: this@ScrollerController) {
             override fun constrainScrollBy(dx: Int, dy: Int) {
                 val or = if (dy > 0) TrackOrientation.TOP_BOTTOM else TrackOrientation.BOTTOM_TOP
                 onMoving(videoRoot, dy, or)

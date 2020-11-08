@@ -177,41 +177,30 @@ abstract class ImageViewTouchBase extends AppCompatImageView implements IDisposa
         if (changed) {
             int oldW = mThisWidth;
             int oldH = mThisHeight;
-
             mThisWidth = right - left;
             mThisHeight = bottom - top;
-
             deltaX = mThisWidth - oldW;
             deltaY = mThisHeight - oldH;
-
             // update center point
             mCenter.x = mThisWidth / 2f;
             mCenter.y = mThisHeight / 2f;
         }
 
         Runnable r = mLayoutRunnable;
-
         if (r != null) {
             mLayoutRunnable = null;
             r.run();
         }
-
         final Drawable drawable = getDrawable();
-
         if (drawable != null) {
-
             if (changed || mScaleTypeChanged || mBitmapChanged) {
-
                 float scale = 1;
-
                 // retrieve the old values
                 float old_default_scale = getDefaultScale(mScaleType);
                 float old_matrix_scale = getScale(mBaseMatrix);
                 float old_scale = getScale();
                 float old_min_scale = Math.min(1f, 1f / old_matrix_scale);
-
                 getProperBaseMatrix(drawable, mBaseMatrix);
-
                 float new_matrix_scale = getScale(mBaseMatrix);
                 // 1. bitmap changed or scale type changed
                 if (mBitmapChanged || mScaleTypeChanged) {
@@ -223,7 +212,6 @@ abstract class ImageViewTouchBase extends AppCompatImageView implements IDisposa
                         mSuppMatrix.reset();
                         scale = getDefaultScale(mScaleType);
                     }
-
                     setImageMatrix(getImageViewMatrix());
 
                     if (scale != getScale()) {
@@ -235,15 +223,11 @@ abstract class ImageViewTouchBase extends AppCompatImageView implements IDisposa
                     if (!mMaxZoomDefined) mMaxZoom = ZOOM_INVALID;
                     setImageMatrix(getImageViewMatrix());
                     postTranslate(-deltaX, -deltaY);
-                    if (!mUserScaled) {
-                        scale = getDefaultScale(mScaleType);
-                        zoomTo(scale);
-                    } else {
+                    if (mUserScaled) {
                         if (Math.abs(old_scale - old_min_scale) > 0.001) {
                             scale = (old_matrix_scale / new_matrix_scale) * old_scale;
                             zoomTo(scale);
                         }
-                        //zoomTo(scale);  Move to the top because there will be an instant zoom jump when the minimum zoom
                     }
                 }
                 mUserScaled = false;
@@ -262,10 +246,8 @@ abstract class ImageViewTouchBase extends AppCompatImageView implements IDisposa
             // drawable is null
             if (mBitmapChanged) onDrawableChanged(null);
             if (changed || mBitmapChanged || mScaleTypeChanged) onLayoutChanged(left, top, right, bottom);
-
             if (mBitmapChanged) mBitmapChanged = false;
             if (mScaleTypeChanged) mScaleTypeChanged = false;
-
         }
     }
 
@@ -703,7 +685,6 @@ abstract class ImageViewTouchBase extends AppCompatImageView implements IDisposa
 
     protected void updateRect(RectF bitmapRect, RectF scrollRect) {
         if (bitmapRect == null) return;
-
         if (bitmapRect.top >= 0 && bitmapRect.bottom <= mThisHeight) scrollRect.top = 0;
         if (bitmapRect.left >= 0 && bitmapRect.right <= mThisWidth) scrollRect.left = 0;
         if (bitmapRect.top + scrollRect.top >= 0 && bitmapRect.bottom > mThisHeight) scrollRect.top = (int) (0 - bitmapRect.top);

@@ -150,13 +150,15 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
         }
 
         override fun onTracked(isStart: Boolean, offsetX: Float, offsetY: Float, easeY: Float, orientation: TrackOrientation, formTrigDuration: Float) {
-            if (isFullScreen && fullScreenDialog?.parent != null) {
-                fullScreenDialog?.onTracked(isStart, if (scrollXEnabled) offsetX else 0f, offsetY, easeY, formTrigDuration)
+            fullScreenDialog?.let {
+                if (isFullScreen && it.parent != null) it.onTracked(isStart, if (scrollXEnabled) offsetX else 0f, offsetY, easeY, formTrigDuration)
             }
         }
 
         override fun onTouchActionEvent(event: MotionEvent, lastX: Float, lastY: Float, orientation: TrackOrientation?): Boolean {
-            return this@BaseVideoController.onTouchActionEvent(videoRoot, event, lastX, lastY, orientation)
+            return fullScreenDialog?.let {
+                if (isFullScreen && it.parent != null && !it.isMaxFull()) this@BaseVideoController.onTouchActionEvent(videoRoot, event, lastX, lastY, orientation) else false
+            } ?: false
         }
     }
 
@@ -490,7 +492,7 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
         this.onFullScreenLayoutInflateListener = onFullScreenLayoutInflateListener
     }
 
-    open fun onFullScreenChanged(isFull: Boolean) {}
+    open fun onFullScreenChanged(isFull: Boolean, payloads: Map<String, Any?>?) {}
 
     open fun onFullMaxScreenChanged(isFull: Boolean) {}
 
@@ -538,11 +540,11 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
         fullScreen?.let { onFullScreenClick(it, false) }
     }
 
-    open fun onFullScreenClick(v: View, formUser: Boolean) {
+    open fun onFullScreenClick(v: View, formUser: Boolean, payloads: Map<String, Any?>? = null) {
         log("on full screen", BehaviorLogsTable.onFullScreen())
         if (!isFullingOrDismissing) {
             isFullingOrDismissing = true
-            onFullScreen(!v.isSelected)
+            onFullScreen(!v.isSelected, payloads)
         }
     }
 
@@ -807,8 +809,8 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
     }
 
     private val fullScreenListener = object : FullScreenListener {
-        override fun onDisplayChanged(isShow: Boolean) {
-            this@BaseVideoController.onDisplayChanged(isShow)
+        override fun onDisplayChanged(isShow: Boolean, payloads: Map<String, Any?>?) {
+            this@BaseVideoController.onDisplayChanged(isShow, payloads)
         }
 
         override fun onFocusChange(dialog: BaseGestureFullScreenDialog, isMax: Boolean) {
@@ -825,9 +827,9 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
     }
 
     private val fullContentListener = object : FullContentListener {
-        override fun onDisplayChanged(isShow: Boolean) {
+        override fun onDisplayChanged(isShow: Boolean, payloads: Map<String, Any?>?) {
             onTrack(isPlayable, start = false, end = true, formTrigDuration = 1.0f)
-            this@BaseVideoController.onDisplayChanged(isShow)
+            this@BaseVideoController.onDisplayChanged(isShow, payloads)
         }
 
         override fun onContentLayoutInflated(content: View) {
@@ -853,7 +855,7 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
     }
 
     @SuppressLint("SourceLockedOrientationActivity")
-    protected fun onFullScreen(full: Boolean) {
+    private fun onFullScreen(full: Boolean, payloads: Map<String, Any?>?) {
         getVideoRootView()?.let { root ->
             if (!full) {
                 lockScreen?.visibility = GONE
@@ -870,6 +872,7 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
                         d.showFull(root, isTransactionNavigation, lockScreenRotation, fullScreenListener)
                     } else d.showInContent(root, fullScreenContentLayoutId, fullMaxScreenEnable, isTransactionNavigation, lockScreenRotation, fullContentListener)
                 }
+                fullScreenDialog?.payloads = payloads
                 lockScreenRotate(isLockScreenRotation)
             }
         }
@@ -911,7 +914,7 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
         muteView?.isSelected = if (muteIsUseGlobal) muteGlobalDefault else muteDefault
     }
 
-    protected fun onDisplayChanged(isShow: Boolean) {
+    protected fun onDisplayChanged(isShow: Boolean, payloads: Map<String, Any?>?) {
         log("on full screen $isShow", BehaviorLogsTable.onFullscreen(isShow))
         isFullScreen = isShow
         if (!isShow) {
@@ -919,7 +922,7 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
             lockScreen?.isSelected = false
         }
         isFullingOrDismissing = false
-        onFullScreenChanged(isShow)
+        onFullScreenChanged(isShow, payloads)
     }
 
     open fun onFullKeyEvent(code: Int, event: KeyEvent): Boolean {

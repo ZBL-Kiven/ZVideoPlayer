@@ -59,6 +59,7 @@ internal class BaseGestureFullScreenDialog private constructor(private var contr
     private var realWindowSize = Point()
     private var screenUtil: ScreenOrientationListener? = null
     private var isScreenRotateLocked: Boolean = false
+    var payloads: Map<String, Any?>? = null
 
     private var curScreenRotation: RotateOrientation? = null
         set(value) {
@@ -204,6 +205,10 @@ internal class BaseGestureFullScreenDialog private constructor(private var contr
         screenUtil = ScreenOrientationListener(WeakReference(context)) {
             if (isMaxFull) curScreenRotation = it
         }
+    }
+
+    fun isMaxFull(): Boolean {
+        return isMaxFull
     }
 
     fun isInterruptTouchEvent(): Boolean {
@@ -421,7 +426,7 @@ internal class BaseGestureFullScreenDialog private constructor(private var contr
     }
 
     private fun onDisplayChange(isShow: Boolean) {
-        onFullContentListener?.onDisplayChanged(isShow) ?: onFullScreenListener?.onDisplayChanged(isShow)
+        onFullContentListener?.onDisplayChanged(isShow, payloads) ?: onFullScreenListener?.onDisplayChanged(isShow, payloads)
     }
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {

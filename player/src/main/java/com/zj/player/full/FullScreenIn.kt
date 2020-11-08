@@ -12,7 +12,7 @@ internal interface FullContentListener : FullScreenListener {
 
 internal interface FullScreenListener {
 
-    fun onDisplayChanged(isShow: Boolean)
+    fun onDisplayChanged(isShow: Boolean, payloads: Map<String, Any?>?)
 
     fun onFocusChange(dialog: BaseGestureFullScreenDialog, isMax: Boolean)
 

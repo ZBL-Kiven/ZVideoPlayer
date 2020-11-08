@@ -76,6 +76,12 @@ abstract class ViewScroller(private val targetView: View) {
         resetTouch()
     }
 
+    fun clear(){
+        resetTouch()
+        mViewFling.stop()
+        mScrollState = SCROLL_STATE_IDLE
+    }
+
     private fun setScrollState(state: Int) {
         if (state == mScrollState) {
             return
