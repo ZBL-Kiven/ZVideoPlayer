@@ -59,7 +59,8 @@
         app:autoFullInterval="3000"
         app:autoFullTools="true"
         app:keepScreenOnWhenPlaying="true"
-        app:loadingIgnoreTs="1000" />
+        app:loadingIgnoreTs="1000"
+        app:scrollXEnabled="false" />
 
     <LinearLayout
         android:id="@+id/r_main_fg_feed_item_ll_claps"

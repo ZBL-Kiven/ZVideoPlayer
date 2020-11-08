@@ -1,8 +1,6 @@
 package com.zj.player.full
 
 import android.graphics.RectF
-import com.zj.player.BuildConfig
-import kotlin.math.abs
 
 internal class RectFCalculateUtil(bv: RectF, sv: RectF) {
 

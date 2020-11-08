@@ -214,10 +214,10 @@ public class ImageViewTouch extends ImageViewTouchBase {
         if (null == bitmapRect) {
             return false;
         }
-        boolean spaceInRight = bitmapRect.right - (elastic ? 30 : 0) > imageViewRect.right;
-        boolean spaceInLeft = bitmapRect.left + (elastic ? 30 : 0) < imageViewRect.left;
-        boolean spaceInTop = bitmapRect.top + (elastic ? 30 : 0) < imageViewRect.top;
-        boolean spaceInBottom = bitmapRect.bottom - (elastic ? 30 : 0) > imageViewRect.bottom;
+        boolean spaceInRight = (int) (bitmapRect.right - (elastic ? 30 : 0)) > imageViewRect.right;
+        boolean spaceInLeft = (int) (bitmapRect.left + (elastic ? 30 : 0)) < imageViewRect.left;
+        boolean spaceInTop = (int) (bitmapRect.top + (elastic ? 30 : 0)) < imageViewRect.top;
+        boolean spaceInBottom = (int) (bitmapRect.bottom - (elastic ? 30 : 0)) > imageViewRect.bottom;
         return (ltr && spaceInLeft) || (rtl && spaceInRight) || (ttb && spaceInTop) || (btt && spaceInBottom);
     }
 

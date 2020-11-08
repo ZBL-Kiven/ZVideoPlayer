@@ -60,7 +60,7 @@ internal abstract class GestureTouchListener(private val intercepted: () -> Bool
             }
             MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
                 try {
-                    val isInterrupted = onTouchActionEvent(event, lstX, lstY, null)
+                    val isInterrupted = onTouchActionEvent(event, 0f, 0f, null)
                     val isTap = !isRemoved && (abs((noPaddingClickPointStart?.x ?: _x) - max(event.rawX, paddingX)) < 20f && abs((noPaddingClickPointStart?.y ?: _y) - event.rawY) < 20f)
                     val isParseEnd = if (isInterrupted) onEventEnd(min(triggerY, event.rawY - _y) / triggerY, isInterrupted) else false
                     if (isTap && (!isInterrupted || isParseEnd)) {

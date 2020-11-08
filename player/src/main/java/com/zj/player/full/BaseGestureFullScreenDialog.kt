@@ -10,6 +10,7 @@ import android.graphics.Color
 import android.graphics.Point
 import android.graphics.PointF
 import android.graphics.RectF
+import android.util.Log
 import android.view.*
 import android.view.animation.DecelerateInterpolator
 import android.widget.FrameLayout
@@ -234,7 +235,7 @@ internal class BaseGestureFullScreenDialog private constructor(private var contr
         (getControllerView().parent as? ViewGroup)?.clipChildren = false
         setBackground(1f - formTrigDuration)
         followWithFinger(offsetX, offsetY)
-        scaleWithOffset(easeY)
+        scaleWithOffset(easeY * 2f)
         onTracked(isStart, false, formTrigDuration)
     }
 
@@ -290,7 +291,7 @@ internal class BaseGestureFullScreenDialog private constructor(private var contr
         if (getActivity()?.isFinishing == true) {
             dismissed();mDecorView?.removeView(this)
         } else {
-//            if (isDismissing) return
+            //            if (isDismissing) return
             isDismissing = true
             isAutoScaleFromTouchEnd(1f, false)
         }

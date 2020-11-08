@@ -86,7 +86,7 @@ abstract class ImageViewTouchBase extends AppCompatImageView implements IDisposa
 
     private int mThisWidth = -1;
     private int mThisHeight = -1;
-    private PointF mCenter = new PointF();
+    private final PointF mCenter = new PointF();
 
     protected DisplayType mScaleType = DisplayType.NONE;
     private boolean mScaleTypeChanged;
@@ -461,16 +461,12 @@ abstract class ImageViewTouchBase extends AppCompatImageView implements IDisposa
 
     @Override
     public void setImageMatrix(Matrix matrix) {
-
         Matrix current = getImageMatrix();
         boolean needUpdate = false;
-
         if (matrix == null && !current.isIdentity() || matrix != null && !current.equals(matrix)) {
             needUpdate = true;
         }
-
         super.setImageMatrix(matrix);
-
         if (needUpdate) onImageMatrixChanged();
     }
 
@@ -539,20 +535,14 @@ abstract class ImageViewTouchBase extends AppCompatImageView implements IDisposa
      * Setup the base matrix so that the image is centered and scaled properly.
      */
     protected void getProperBaseMatrix2(Drawable bitmap, Matrix matrix) {
-
         float viewWidth = mThisWidth;
         float viewHeight = mThisHeight;
-
         float w = bitmap.getIntrinsicWidth();
         float h = bitmap.getIntrinsicHeight();
-
         matrix.reset();
-
         float widthScale = viewWidth / w;
         float heightScale = viewHeight / h;
-
         float scale = Math.min(widthScale, heightScale);
-
         matrix.postScale(scale, scale);
         matrix.postTranslate((viewWidth - w * scale) / 2.0f, (viewHeight - h * scale) / 2.0f);
     }
@@ -573,7 +563,6 @@ abstract class ImageViewTouchBase extends AppCompatImageView implements IDisposa
 
     protected RectF getBitmapRect(Matrix supportMatrix) {
         final Drawable drawable = getDrawable();
-
         if (drawable == null) return null;
         Matrix m = getImageViewMatrix(supportMatrix);
         mBitmapRect.set(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
