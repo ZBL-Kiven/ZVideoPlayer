@@ -88,8 +88,6 @@
             android:layout_alignParentBottom="true"
             android:background="@drawable/z_player_video_bg_tools_bar"
             android:clickable="true"
-            android:clipChildren="false"
-            android:clipToPadding="false"
             android:focusable="true"
             android:orientation="horizontal"
             android:padding="10dp"

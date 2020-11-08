@@ -12,11 +12,14 @@ import kotlin.math.*
 internal abstract class GestureTouchListener(private val intercepted: () -> Boolean) : View.OnTouchListener {
 
     private var curOrientation: TrackOrientation? = null
+    private var realOrientation: TrackOrientation? = null
     private var lastOrientation: TrackOrientation? = null
-    private var lstX: Float = 0.0f
-    private var lstY: Float = 0.0f
     private var _x = 0f
     private var _y = 0f
+    private var lstX: Float = 0.0f
+    private var lstY: Float = 0.0f
+    private var startX = 0f
+    private var startY = 0f
     private var paddingX: Float = 0.0f
     private var paddingY: Float = 0.0f
     private var inTouching = false
@@ -25,8 +28,6 @@ internal abstract class GestureTouchListener(private val intercepted: () -> Bool
     private var interpolator = 58f
     private var triggerX = 230f
     private var triggerY = 400f
-    private var startX = 0f
-    private var startY = 0f
     private var noPaddingClickPointStart: PointF? = null
     private var isOnceTap = false
     private var handler: Handler? = Handler(Looper.getMainLooper()) {
@@ -55,10 +56,14 @@ internal abstract class GestureTouchListener(private val intercepted: () -> Bool
         when (event?.action) {
             MotionEvent.ACTION_DOWN -> {
                 noPaddingClickPointStart = PointF(event.rawX, event.rawY);init(v, event)
+                onTouchActionEvent(event, 0f, 0f, null)
             }
             MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
                 try {
-                    if (onEventEnd(min(triggerY, event.rawY - _y) / triggerY) && !isRemoved && (abs((noPaddingClickPointStart?.x ?: _x) - max(event.rawX, paddingX)) < 20f && abs((noPaddingClickPointStart?.y ?: _y) - event.rawY) < 20f)) {
+                    val isInterrupted = onTouchActionEvent(event, lstX, lstY, null)
+                    val isTap = !isRemoved && (abs((noPaddingClickPointStart?.x ?: _x) - max(event.rawX, paddingX)) < 20f && abs((noPaddingClickPointStart?.y ?: _y) - event.rawY) < 20f)
+                    val isParseEnd = if (isInterrupted) onEventEnd(min(triggerY, event.rawY - _y) / triggerY, isInterrupted) else false
+                    if (isTap && (!isInterrupted || isParseEnd)) {
                         if (isOnceTap) {
                             handler?.removeMessages(0)
                             isOnceTap = false
@@ -81,7 +86,9 @@ internal abstract class GestureTouchListener(private val intercepted: () -> Bool
                 val x = event.rawX
                 val y = max(event.rawY, _y)
                 try {
-                    if (parseCurOrientation(x, y)) {
+                    val orientation = parseCurOrientation(x, y)
+                    val interrupt = onTouchActionEvent(event, lstX, lstY, realOrientation)
+                    if (orientation || interrupt) {
                         init(v, event); return true
                     }
                     isRemoved = true
@@ -112,6 +119,7 @@ internal abstract class GestureTouchListener(private val intercepted: () -> Bool
             else if (absX > absY && stepX < 0) TrackOrientation.RIGHT_LEFT
             else if (absX < absY && stepY > 0) TrackOrientation.TOP_BOTTOM
             else TrackOrientation.BOTTOM_TOP
+            realOrientation = orientation
             if (lastOrientation == null && orientation != TrackOrientation.TOP_BOTTOM) return true
             lastOrientation = orientation
             if (orientation != curOrientation) {
@@ -125,7 +133,8 @@ internal abstract class GestureTouchListener(private val intercepted: () -> Bool
         val offsetX = max(x, _x) - min(x, _x)
         val isXEasing = triggerX > offsetX
         val isYEasing = triggerY > y - _y
-        val ry = min(0f, -if (isYEasing) y - startY else max(0f, elasticStep(max(y - startY, triggerY), triggerY)))
+        var ry = min(0f, -if (isYEasing) y - startY else max(0f, elasticStep(max(y - startY, triggerY), triggerY)))
+        if (ry == -0.0f) ry = 0f
         val rx: Float = if (x == _x) 0f else if (x > _x) {
             if (isXEasing) -(x - startX)
             else -max(0f, elasticStep(max(x - startX, triggerX), triggerX))
@@ -167,11 +176,26 @@ internal abstract class GestureTouchListener(private val intercepted: () -> Bool
         handler = null
     }
 
-    abstract fun onEventEnd(formTrigDuration: Float): Boolean
+    abstract fun onEventEnd(formTrigDuration: Float, parseAutoScale: Boolean): Boolean
 
     abstract fun onDoubleClick()
 
     abstract fun onClick()
 
+    /**
+     * Called only after the default gesture returns successfully triggered，
+     * @param formTrigDuration Out of bounds coefficient after exceeding the maximum return distance
+     * @param orientation see [TrackOrientation]
+     * @param easeY Current damping coefficient based on Y direction
+     * */
     abstract fun onTracked(isStart: Boolean, offsetX: Float, offsetY: Float, easeY: Float, orientation: TrackOrientation, formTrigDuration: Float)
+
+    /**
+     * @param event [MotionEvent]
+     * @param lastX X coordinate of recent valid record
+     * @param lastY Y coordinate of recent valid record
+     * @param orientation see [TrackOrientation] ,return null if it has never been recorded
+     * @return true to indicate that the event is consumed, and the default gesture will be intercepted.
+     * */
+    abstract fun onTouchActionEvent(event: MotionEvent, lastX: Float, lastY: Float, orientation: TrackOrientation?): Boolean
 }

@@ -13,10 +13,7 @@ import android.os.Handler
 import android.os.Looper
 import android.util.AttributeSet
 import android.util.TypedValue
-import android.view.KeyEvent
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.animation.AccelerateDecelerateInterpolator
 import android.widget.*
@@ -107,6 +104,7 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
     protected var onFullScreenLayoutInflateListener: ((v: View) -> Unit)? = null
     protected var isDefaultMaxScreen: Boolean = false
     protected var fullMaxScreenEnable: Boolean = true
+    protected var scrollXEnabled: Boolean = true
     protected var lockScreenRotation: Int = -1
     protected var isLockScreenRotation: Boolean = false
     protected var keepScreenOnWhenPlaying: Boolean = false
@@ -135,8 +133,8 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
 
     private var touchListener: GestureTouchListener? = object : GestureTouchListener({ isInterrupted() }) {
 
-        override fun onEventEnd(formTrigDuration: Float): Boolean {
-            return fullScreenDialog?.onEventEnd(formTrigDuration) ?: true
+        override fun onEventEnd(formTrigDuration: Float, parseAutoScale: Boolean): Boolean {
+            return fullScreenDialog?.onEventEnd(formTrigDuration, parseAutoScale) ?: true
         }
 
         override fun onClick() {
@@ -153,8 +151,12 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
 
         override fun onTracked(isStart: Boolean, offsetX: Float, offsetY: Float, easeY: Float, orientation: TrackOrientation, formTrigDuration: Float) {
             if (isFullScreen && fullScreenDialog?.parent != null) {
-                fullScreenDialog?.onTracked(isStart, offsetX, offsetY, easeY, formTrigDuration)
+                fullScreenDialog?.onTracked(isStart, if (scrollXEnabled) offsetX else 0f, offsetY, easeY, formTrigDuration)
             }
+        }
+
+        override fun onTouchActionEvent(event: MotionEvent, lastX: Float, lastY: Float, orientation: TrackOrientation?): Boolean {
+            return this@BaseVideoController.onTouchActionEvent(videoRoot, event, lastX, lastY, orientation)
         }
     }
 
@@ -194,6 +196,7 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
             fullMaxScreenEnable = ta.getBoolean(R.styleable.BaseVideoController_fullMaxScreenEnable, Constance.fullMaxScreenEnable)
             isDefaultMaxScreen = ta.getBoolean(R.styleable.BaseVideoController_isDefaultMaxScreen, Constance.isDefaultMaxScreen)
             lockScreenRotation = ta.getInt(R.styleable.BaseVideoController_lockScreenRotation, -1)
+            scrollXEnabled = ta.getBoolean(R.styleable.BaseVideoController_scrollXEnabled, true)
             muteIsUseGlobal = ta.getBoolean(R.styleable.BaseVideoController_useMuteGlobal, false)
             muteDefault = ta.getBoolean(R.styleable.BaseVideoController_muteDefault, false)
             keepScreenOnWhenPlaying = ta.getBoolean(R.styleable.BaseVideoController_keepScreenOnWhenPlaying, false)
@@ -492,6 +495,10 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
     open fun onFullMaxScreenChanged(isFull: Boolean) {}
 
     open fun onTrack(playAble: Boolean, start: Boolean, end: Boolean, formTrigDuration: Float) {}
+
+    open fun onTouchActionEvent(videoRoot: View?, event: MotionEvent, lastX: Float, lastY: Float, orientation: TrackOrientation?): Boolean {
+        return false
+    }
 
     open fun onPlayClick(v: View, formUser: Boolean) {
         if (!isPlayable) return

@@ -131,15 +131,12 @@ internal class BaseGestureFullScreenDialog private constructor(private var contr
     }
 
     private fun showAnim() {
-        fun start() {
-            mDecorView?.addView(this, LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT))
-            post {
-                init()
-                isAnimRun = true
-                scaleAnim?.start(true)
-            }
+        mDecorView?.addView(this, LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT))
+        post {
+            init()
+            isAnimRun = true
+            scaleAnim?.start(true)
         }
-        start()
     }
 
     private fun init() {
@@ -215,9 +212,9 @@ internal class BaseGestureFullScreenDialog private constructor(private var contr
         return isAnimRun || isDismissing
     }
 
-    fun onEventEnd(formTrigDuration: Float): Boolean {
+    fun onEventEnd(formTrigDuration: Float, parseAutoScale: Boolean): Boolean {
         (getControllerView().parent as? ViewGroup)?.clipChildren = true
-        return isAutoScaleFromTouchEnd(formTrigDuration, true)
+        return if (parseAutoScale) isAutoScaleFromTouchEnd(formTrigDuration, true) else false
     }
 
     fun onDoubleClick() {
@@ -293,7 +290,7 @@ internal class BaseGestureFullScreenDialog private constructor(private var contr
         if (getActivity()?.isFinishing == true) {
             dismissed();mDecorView?.removeView(this)
         } else {
-            if (isDismissing) return
+//            if (isDismissing) return
             isDismissing = true
             isAutoScaleFromTouchEnd(1f, false)
         }

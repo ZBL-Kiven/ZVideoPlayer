@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    tools:background="#000">
 
     <ImageView
         android:id="@+id/r_main_fg_list_iv_avatar"
@@ -43,10 +45,26 @@
         android:textSize="13sp"
         tools:text="some description for videos" />
 
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/player_gesture_full_screen_content"
+        android:background="#fff"
+        android:clipChildren="false"
+        android:clipToPadding="false"
+        android:paddingBottom="246dp"
+        app:layout_behavior="com.zj.videotest.widget.DetailScrollBehavior">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="12312 \n  12312 \n  12312 \n  12312 \n  12312 \n 12312 \n  12312 \n  12312 \n  12312 \n  12312 \n 12312 \n  12312 \n  12312 \n  12312 \n  12312 \n 12312 \n  12312 \n  12312 \n  12312 \n  12312 \n 12312 \n  12312 \n  12312 \n  12312 \n  12312 \n 12312 \n  12312 \n  12312 \n  12312 \n  12312 \n 12312 \n  12312 \n  12312 \n  12312 \n  12312 \n 12312 \n  12312 \n  12312 \n  12312 \n  12312 \n 12312 \n  12312 \n  12312 \n  12312 \n  12312 \n 12312 \n  12312 \n  12312 \n  12312 \n  12312 \n 12312 \n  12312 \n  12312 \n  12312 \n  12312 \n 12312 \n  12312 \n  12312 \n  12312 \n  12312 \n 12312 \n  12312 \n  12312 \n  12312 \n  12312 \n 12312 \n  12312 \n  12312 \n  12312 \n  12312 \n " />
+    </androidx.core.widget.NestedScrollView>
+
     <FrameLayout
         android:id="@id/player_gesture_full_screen_content"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="wrap_content" />
 
     <LinearLayout
         android:id="@+id/r_main_fg_feed_item_ll_claps"
