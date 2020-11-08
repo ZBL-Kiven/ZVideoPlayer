@@ -10,7 +10,6 @@ import android.graphics.Color
 import android.graphics.Point
 import android.graphics.PointF
 import android.graphics.RectF
-import android.util.Log
 import android.view.*
 import android.view.animation.DecelerateInterpolator
 import android.widget.FrameLayout
@@ -113,10 +112,8 @@ internal class BaseGestureFullScreenDialog private constructor(private var contr
                 if (controllerNeedAdd) this@BaseGestureFullScreenDialog.addView(controller);return
             }
             contentLayoutView?.let {
-                (it as? ViewGroup)?.clipChildren = false
                 it.findViewById<ViewGroup>(R.id.player_gesture_full_screen_content)?.let { v ->
                     if (controllerNeedAdd) v.addView(controller, vlp)
-                    v.clipChildren = false
                 } ?: if (controllerNeedAdd) (it as? ViewGroup)?.addView(controller, vlp) ?: throw IllegalArgumentException("the content layout view your set is not container a view group that id`s [R.id.playerFullScreenContent] ,and your content layout is not a view group!")
                 val contentNeedAdd = (it.parent as? ViewGroup)?.let { parent ->
                     if (parent != this) {
@@ -261,12 +258,14 @@ internal class BaseGestureFullScreenDialog private constructor(private var contr
 
     private fun isAutoScaleFromTouchEnd(curYOffset: Float, formUser: Boolean): Boolean {
         if (isMaxFull && formUser) return true
+        isDismissing = true
         val isScaleAuto = curYOffset <= MAX_DEEP_RATIO
         if (isScaleAuto) {
             getControllerView().scrollTo(0, 0)
             scaleWithOffset(0f)
             setBackground(1f)
             onTracked(false, isEnd = true, formTrigDuration = 0f)
+            isDismissing = false
         } else {
             isAnimRun = true
             changeSystemWindowVisibility(false)
@@ -291,8 +290,7 @@ internal class BaseGestureFullScreenDialog private constructor(private var contr
         if (getActivity()?.isFinishing == true) {
             dismissed();mDecorView?.removeView(this)
         } else {
-            //            if (isDismissing) return
-            isDismissing = true
+            if (isDismissing) return
             isAutoScaleFromTouchEnd(1f, false)
         }
     }
