@@ -3,6 +3,7 @@ package com.zj.player.full
 import android.graphics.PointF
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import androidx.annotation.FloatRange
@@ -56,7 +57,7 @@ internal abstract class GestureTouchListener(private val intercepted: () -> Bool
         when (event?.action) {
             MotionEvent.ACTION_DOWN -> {
                 noPaddingClickPointStart = PointF(event.rawX, event.rawY);init(v, event)
-                onTouchActionEvent(event, 0f, 0f, null)
+                onTouchActionEvent(event, lstX, lstY, null)
             }
             MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
                 try {
@@ -102,7 +103,7 @@ internal abstract class GestureTouchListener(private val intercepted: () -> Bool
     }
 
     private fun reset() {
-        lstY = 0f;lstX = 0f;_x = 0f;_y = 0f;startX = 0f;startY = 0f;curOrientation = null;lastOrientation = null;inTouching = false;isRemoved = false
+        lstY = 0f;lstX = 0f;_x = 0f;_y = 0f;startX = 0f;startY = 0f;curOrientation = null;lastOrientation = null;realOrientation = null;inTouching = false;isRemoved = false
     }
 
     private fun init(v: View?, event: MotionEvent) {

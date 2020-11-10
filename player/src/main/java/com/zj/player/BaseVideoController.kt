@@ -925,6 +925,9 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
         onFullScreenChanged(isShow, payloads)
     }
 
+    /**
+     * If the event is consumed, return true, otherwise false
+     * */
     open fun onFullKeyEvent(code: Int, event: KeyEvent): Boolean {
         return false
     }

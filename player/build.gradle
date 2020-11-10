@@ -21,6 +21,9 @@ android {
         abortOnError false
 
     }
+    kotlinOptions {
+        jvmTarget = '1.8'
+    }
 
 }
 

@@ -2,9 +2,11 @@ package com.zj.videotest.controllers.scroller
 
 import android.content.Context
 import android.util.AttributeSet
+import android.view.KeyEvent
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
+import androidx.annotation.CallSuper
 import com.zj.player.controller.BaseListVideoController
 import com.zj.player.full.TrackOrientation
 import com.zj.views.ut.DPUtils
@@ -14,28 +16,39 @@ abstract class ScrollerController @JvmOverloads constructor(c: Context, attr: At
     private var scrolled = 0f
     private var parseCancel = false
     private var viewScroller: ViewScroller? = null
+    private var inAnimation = false
+    private val leastHeight = DPUtils.dp2px(246f)
 
     override fun onFullScreenChanged(isFull: Boolean, payloads: Map<String, Any?>?) {
         super.onFullScreenChanged(isFull, payloads)
-        //        if (isFull && payloads?.get("isExpand") != null) {
-        //            videoRoot?.let {
-        //                it.post {
-        //                    val h = (it.height - DPUtils.dp2px(246f)).toFloat()
-        //                    scrolled = h
-        //                    lastHeight = it.height
-        //                    val anim = ValueAnimator.ofFloat(0.0f, 1.0f)
-        //                    anim.addUpdateListener { a ->
-        //                        onMoving(it, (-scrolled).toInt(), TrackOrientation.BOTTOM_TOP)
-        //                    }
-        //                    anim.duration = 1000
-        //                    anim.start()
-        //                }
-        //            }
-        //        } else {
-        viewScroller?.clear()
-        scrolled = 0f
-        lastHeight = 0
-        //        }
+        if (isFull && payloads?.get("isExpand") != null) {
+            videoRoot?.let {
+                //                inAnimation = true
+                //                it.postDelayed({
+                //                    val h = it.height.toFloat()
+                //                    scrolled = h
+                //                    lastHeight = it.height
+                //                    val anim = ValueAnimator.ofFloat(0.0f, 1.0f)
+                //                    anim.addUpdateListener { a ->
+                //                        onMoving(it, (h * a.animatedFraction).toInt(), TrackOrientation.BOTTOM_TOP)
+                //                    }
+                //                    anim.addListener(onEnd = {
+                //                        inAnimation = false
+                //                    })
+                //                    anim.duration = 500
+                //                    anim.start()
+                //                }, 300)
+            }
+        } else {
+            viewScroller?.clear()
+            scrolled = 0f
+            lastHeight = 0
+        }
+    }
+
+    @CallSuper
+    override fun onFullKeyEvent(code: Int, event: KeyEvent): Boolean {
+        return if (inAnimation) true else super.onFullKeyEvent(code, event)
     }
 
     override fun onFullScreenClick(v: View, formUser: Boolean, payloads: Map<String, Any?>?) {
@@ -46,6 +59,8 @@ abstract class ScrollerController @JvmOverloads constructor(c: Context, attr: At
     }
 
     override fun onTouchActionEvent(videoRoot: View?, event: MotionEvent, lastX: Float, lastY: Float, orientation: TrackOrientation?): Boolean {
+        if (inAnimation) return true
+        if (lastY <= 0) return false
         if (viewScroller == null) instanceScroller(videoRoot)
         when (event.action) {
             MotionEvent.ACTION_DOWN -> {
@@ -71,29 +86,43 @@ abstract class ScrollerController @JvmOverloads constructor(c: Context, attr: At
         videoRoot?.let {
             return if (scrolled == 0.0f && orientation == TrackOrientation.TOP_BOTTOM) {
                 parseCancel = true
+                setLayoutParams(it, ViewGroup.LayoutParams.MATCH_PARENT)
+                viewScroller?.clear()
                 false
             } else if (parseCancel) {
                 if (scrolled == 0f && orientation != TrackOrientation.TOP_BOTTOM) parseCancel = it.layoutParams.height < lastHeight
+                viewScroller?.clear()
                 return false
             } else {
                 var lh = 0
                 try {
-                    val lp = it.layoutParams
-                    lh = (lp.height - dy).coerceAtLeast(DPUtils.dp2px(246f)).coerceAtMost(lastHeight)
-                    lp.height = lh
-                    it.layoutParams = lp
-                    (it.parent as ViewGroup).let { vp ->
-                        val lpp = vp.layoutParams
-                        lpp.height = lh
-                        vp.layoutParams = lpp
-                    }
+                    var lph = it.layoutParams.height
+                    if (lph == ViewGroup.LayoutParams.MATCH_PARENT) lph = lastHeight
+                    lh = (lph - dy).coerceAtLeast(leastHeight).coerceAtMost(lastHeight)
+                    setLayoutParams(it, lh)
                     true
                 } finally {
-                    if (lh == lastHeight) scrolled = 0f else scrolled += dy
+                    if (lh == leastHeight || lh == lastHeight) {
+                        if (lh == lastHeight) {
+                            scrolled = 0f
+                        }
+                        viewScroller?.clear()
+                    } else scrolled += dy
                 }
             }
         }
         return false
+    }
+
+    private fun setLayoutParams(videoRoot: View, h: Int) {
+        val height = if (h == ViewGroup.LayoutParams.MATCH_PARENT) h else if (h == lastHeight) ViewGroup.LayoutParams.MATCH_PARENT else h
+        val lp = videoRoot.layoutParams
+        lp.height = height
+        (videoRoot.parent as? ViewGroup)?.let { vp ->
+            val lpp = vp.layoutParams
+            lpp.height = height
+            vp.layoutParams = lpp
+        }
     }
 
     private fun instanceScroller(videoRoot: View?) {

@@ -10,6 +10,7 @@ import android.graphics.Color
 import android.graphics.Point
 import android.graphics.PointF
 import android.graphics.RectF
+import android.util.Log
 import android.view.*
 import android.view.animation.DecelerateInterpolator
 import android.widget.FrameLayout
@@ -87,7 +88,8 @@ internal class BaseGestureFullScreenDialog private constructor(private var contr
         if (childCount > 0) removeAllViews()
         backgroundView = View(context)
         backgroundView?.setBackgroundColor(Color.BLACK)
-        backgroundView?.layoutParams = ViewGroup.LayoutParams(-1, -1)
+        backgroundView?.alpha = 0f
+        backgroundView?.layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
         this.addView(backgroundView, 0)
         setContent(isMaxFull)
         initListeners()
@@ -125,24 +127,23 @@ internal class BaseGestureFullScreenDialog private constructor(private var contr
                 onFullContentListener?.onContentLayoutInflated(it)
             }
         } finally {
-            if (isResizeCalculate) init()
+            if (isResizeCalculate) init(0f)
         }
     }
 
     private fun showAnim() {
         mDecorView?.addView(this, LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT))
+        init()
         post {
-            init()
             isAnimRun = true
             scaleAnim?.start(true)
         }
     }
 
-    private fun init() {
+    private fun init(contentValue: Float = 1f) {
         initCalculate()
-        updateContent(0f)
+        updateContent(contentValue)
         screenRotationsChanged(true)
-        setBackground(1f)
     }
 
     private fun initCalculate() {
@@ -180,7 +181,11 @@ internal class BaseGestureFullScreenDialog private constructor(private var contr
             override fun onDurationChange(animation: ValueAnimator, duration: Float, isFull: Boolean) {
                 if (isFull) {
                     updateContent(1 - duration)
+                    setBackground(duration, true)
                 } else {
+                    clipChildren = false
+                    setBackground(1 - duration, isFromStart = true, isDownTo = true)
+                    (getControllerView().parent as? ViewGroup)?.clipChildren = false
                     if (originInScreen == null) originInScreen = Point(getControllerView().scrollX, getControllerView().scrollY)
                     originInScreen?.let {
                         val sx = (it.x * (1f - duration)).roundToInt()
@@ -200,7 +205,7 @@ internal class BaseGestureFullScreenDialog private constructor(private var contr
                 else onDisplayChange(true)
             }
         }, false).apply {
-            duration = 220
+            duration = 350
         }
         screenUtil = ScreenOrientationListener(WeakReference(context)) {
             if (isMaxFull) curScreenRotation = it
@@ -234,10 +239,11 @@ internal class BaseGestureFullScreenDialog private constructor(private var contr
     }
 
     fun onTracked(isStart: Boolean, offsetX: Float, offsetY: Float, easeY: Float, formTrigDuration: Float) {
+        if (isStart) initCalculate()
         (getControllerView().parent as? ViewGroup)?.clipChildren = false
         setBackground(1f - formTrigDuration)
         followWithFinger(offsetX, offsetY)
-        scaleWithOffset(easeY * 2f)
+        scaleWithOffset(easeY)
         onTracked(isStart, false, formTrigDuration)
     }
 
@@ -268,7 +274,7 @@ internal class BaseGestureFullScreenDialog private constructor(private var contr
         if (isScaleAuto) {
             getControllerView().scrollTo(0, 0)
             scaleWithOffset(0f)
-            setBackground(1f)
+            setBackground(1f, true)
             onTracked(false, isEnd = true, formTrigDuration = 0f)
             isDismissing = false
         } else {
@@ -285,7 +291,9 @@ internal class BaseGestureFullScreenDialog private constructor(private var contr
         val pt: Int = ref.top.roundToInt()
         val pr: Int = ref.right.roundToInt()
         val pb: Int = ref.bottom.roundToInt()
-        val flp = LayoutParams((_width - (pl + pr)).roundToInt(), (_height - (pt + pb)).roundToInt())
+        val w = (_width - (pl + pr)).roundToInt()
+        val h = (_height - (pt + pb)).roundToInt()
+        val flp = LayoutParams(w, h)
         flp.setMargins(pl, pt, pr, pb)
         view.layoutParams = flp
     }
@@ -327,10 +335,16 @@ internal class BaseGestureFullScreenDialog private constructor(private var contr
     /**
      * Reduce the transparency of background and other unimportant (non-playing components) views when sliding
      * */
-    private fun setBackground(@FloatRange(from = 0.0, to = 1.0) duration: Float) {
+    private fun setBackground(@FloatRange(from = 0.0, to = 1.0) duration: Float, isFromStart: Boolean = false, isDownTo: Boolean = false) {
         if (isMaxFull) return
         val d = interpolator.getInterpolation(duration)
-        backgroundView?.alpha = ((duration * 0.85f) + 0.15f)
+        if (isDownTo) {
+            var cur = backgroundView?.alpha ?: 0f
+            if (duration < cur) cur = duration
+            backgroundView?.alpha = cur
+        } else {
+            backgroundView?.alpha = if (isFromStart) duration else ((duration * 0.85f) + 0.15f)
+        }
         val actionViews = mutableMapOf<Int, View>()
         hiddenAllChildIfNotScreenContent(contentLayoutView, actionViews)
         actionViews.forEach { (_, u) ->
