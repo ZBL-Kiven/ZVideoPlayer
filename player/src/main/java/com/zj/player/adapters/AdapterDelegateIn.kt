@@ -1,4 +1,4 @@
-package com.zj.player.list
+package com.zj.player.adapters
 
 import androidx.recyclerview.widget.RecyclerView
 import java.lang.ref.SoftReference
@@ -10,7 +10,7 @@ import java.lang.ref.WeakReference
  * adapters delegate interface , override all of the necessary methods in your data adapter and call delegate by this .
  * used see [com.zj.player.controller.BaseListVideoController]
  * */
-interface AdapterDelegateIn<T, VH : RecyclerView.ViewHolder> {
+internal interface AdapterDelegateIn<T, VH : RecyclerView.ViewHolder> {
     /**
      * call in with the overridden form data adapter [RecyclerView.Adapter.onAttachedToRecyclerView]
      * */
@@ -29,5 +29,5 @@ interface AdapterDelegateIn<T, VH : RecyclerView.ViewHolder> {
     /**
      * call in with the overridden form data adapter [RecyclerView.Adapter.bindViewHolder]
      * */
-    fun bindData(holder: SoftReference<VH>?, p: Int, d: T?, playAble: Boolean, pl: MutableList<Any>?)
+    fun bindData(holder: SoftReference<VH>?, p: Int, d: T?, pl: MutableList<Any>?)
 }

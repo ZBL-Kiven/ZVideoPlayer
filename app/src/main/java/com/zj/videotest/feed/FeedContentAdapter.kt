@@ -19,7 +19,7 @@ import com.zj.player.ZController
 import com.zj.player.config.VideoConfig
 import com.zj.player.controller.BaseListVideoController
 import com.zj.player.img.ImgLoader
-import com.zj.player.list.ListVideoAdapterDelegate
+import com.zj.player.adapters.ListVideoAdapterDelegate
 import com.zj.videotest.R
 import com.zj.videotest.controllers.CCImageLoader
 import com.zj.videotest.feed.data.DataType
@@ -141,7 +141,7 @@ class FeedContentAdapter<T : FeedDataIn> : ListenerAnimAdapter<T>(R.layout.r_mai
             h.getView<View>(R.id.r_main_fg_feed_item_ll_claps)?.setOnClickListener {
                 adapterInterface?.clap(d, p)
             }
-            adapterDelegate?.bindData(SoftReference(holder), p, d, d?.getType() == DataType.VIDEO, pl)
+            adapterDelegate?.bindData(SoftReference(holder), p, d, pl)
         }
     }
 
@@ -165,17 +165,26 @@ class FeedContentAdapter<T : FeedDataIn> : ListenerAnimAdapter<T>(R.layout.r_mai
             return Pair(d?.getVideoPath() ?: "", d?.getSourceId())
         }
 
-        override fun onBindData(holder: SoftReference<BaseViewHolder>?, p: Int, d: T?, playAble: Boolean, vc: CCVideoController, pl: MutableList<Any>?) {
-            vc.setTag(TAG_POSITION, p) // important properties.
-            vc.setTag(TAG_OVERLAY_VIEW, d?.getSourceId() ?: "TAG_OVERLAY_VIEW$p")
-            vc.setOnCompletedListener(if (playAble) onVcCompletedListener else null)
-            vc.setPlayingStateListener(if (playAble) onPlayingStateChangedListener else null)
-            vc.setOnResetListener(if (playAble) onResetListener else null)
-            vc.setOnTrackListener(if (playAble) onTrackListener else null)
-            //            vc.actionListener = if (playAble) actionListener else null
-            vc.setOnFullScreenChangedListener(onFullScreenListener)
-            onBindAdapterData(d, vc, pl)
+        override fun isInflateMediaType(d: T?): Boolean {
+            return true
         }
+
+        override fun onBindData(holder: BaseViewHolder?, p: Int, d: T?, playAble: Boolean, vc: CCVideoController?, pl: MutableList<Any>?) {
+            vc?.let {
+                it.setTag(TAG_POSITION, p) // important properties.
+                it.setTag(TAG_OVERLAY_VIEW, d?.getSourceId() ?: "TAG_OVERLAY_VIEW$p")
+                it.setOnCompletedListener(if (playAble) onVcCompletedListener else null)
+                it.setPlayingStateListener(if (playAble) onPlayingStateChangedListener else null)
+                it.setOnResetListener(if (playAble) onResetListener else null)
+                it.setOnTrackListener(if (playAble) onTrackListener else null)
+                //            it.actionListener = if (playAble) actionListener else null
+                it.setOnFullScreenChangedListener(onFullScreenListener)
+                onBindAdapterData(d, it, pl)
+            }
+        }
+
+        override val isSourcePlayAble: (d: T?) -> Boolean
+            get() = { d -> d?.getType() == DataType.VIDEO }
     }
 
     private val onTrackListener: (playAble: Boolean, start: Boolean, end: Boolean, formTrigDuration: Float) -> Unit = { playAble, start, end, _ ->

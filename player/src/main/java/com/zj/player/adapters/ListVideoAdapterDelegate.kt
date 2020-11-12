@@ -1,4 +1,4 @@
-package com.zj.player.list
+package com.zj.player.adapters
 
 import android.graphics.Rect
 import android.os.Handler
@@ -9,8 +9,10 @@ import android.view.animation.AccelerateInterpolator
 import androidx.annotation.MainThread
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.zj.player.R
 import com.zj.player.ZController
 import com.zj.player.controller.BaseListVideoController
+import com.zj.player.list.VideoControllerIn
 import com.zj.player.logs.ZPlayerLogs
 import java.lang.NullPointerException
 import java.lang.ref.SoftReference
@@ -33,13 +35,17 @@ abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : Rec
     private var isPausedToAutoPlay = false
     private var isAutoScrollToVisible = true
     private var recyclerView: RecyclerView? = null
-    private val waitingForPlayClicked = 9871662
-    private val waitingForPlayScrolled = 632573
+    private val waitingForPlayClicked = R.id.delegate_waiting_for_play_clicked
+    private val waitingForPlayScrolled = R.id.delegate_waiting_for_play_scrolled
     protected abstract fun createZController(vc: V): ZController
     protected abstract fun getViewController(holder: VH?): V?
     protected abstract fun getItem(p: Int): T?
+    protected abstract fun isInflateMediaType(d: T?): Boolean
     protected abstract fun getPathAndLogsCallId(d: T?): Pair<String, Any?>?
-    protected abstract fun onBindData(holder: SoftReference<VH>?, p: Int, d: T?, playAble: Boolean, vc: V, pl: MutableList<Any>?)
+    protected abstract fun onBindData(holder: VH?, p: Int, d: T?, playAble: Boolean, vc: V?, pl: MutableList<Any>?)
+    protected open fun onBindTypeData(holder: SoftReference<VH>?, d: T?, p: Int, pl: MutableList<Any>?) {}
+    protected open fun onBindDelegate(holder: VH?, p: Int, d: T?, pl: MutableList<Any>?) {}
+    protected abstract val isSourcePlayAble: (d: T?) -> Boolean
 
     /**
      * overridden your data adapter and call;
@@ -75,51 +81,23 @@ abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : Rec
         holder?.clear()
     }
 
-    override fun bindData(holder: SoftReference<VH>?, p: Int, d: T?, playAble: Boolean, pl: MutableList<Any>?) {
-        WeakReference(getViewController(holder?.get())).get()?.let { vc ->
-            vc.onBindHolder(p)
-            vc.setControllerIn(this)
-            if (playAble != vc.isPlayable) vc.isPlayable = playAble
-            if (pl?.isNullOrEmpty() == false) {
-                val pls = pl.last().toString()
-                if (pls.isNotEmpty()) {
-                    if (pls.startsWith(DEFAULT_LOADER)) {
-                        var index: Int
-                        var fromUser: Boolean
-                        pls.split("#").let {
-                            index = it[1].toInt()
-                            fromUser = it[2] == "true"
-                        }
-                        vc.post {
-                            if (p == index) {
-                                if (playAble && vc.isPlayable) {
-                                    if (!vc.isBindingController) onBindVideoView(vc)
-                                    playOrResume(vc, p, d, fromUser)
-                                } else {
-                                    if (controller?.isPlaying() == true) {
-                                        controller?.stopNow(false, isRegulate = true)
-                                    }
-                                }
-                                curPlayingIndex = p
-                            } else {
-                                vc.resetWhenDisFocus()
-                            }
-                        }
-                        return@let
-                    }
+    override fun bindData(holder: SoftReference<VH>?, p: Int, d: T?, pl: MutableList<Any>?) {
+        holder?.get()?.let { h ->
+            if (isInflateMediaType(d)) {
+                val playAble = isSourcePlayAble(d)
+                if (!pl.isNullOrEmpty() && !pl[0].toString().startsWith(DEFAULT_LOADER)) {
+                    val vc = getViewController(h)
+                    onBindData(h, p, d, playAble, vc, pl)
+                } else {
+                    onBindDelegate(h, p, d, pl)
+                    bindDelegateData(h, p, d, playAble, pl)
                 }
-            }
-            onBindData(holder, p, getItem(p), playAble, vc, pl)
-            getPathAndLogsCallId(d)?.let {
-                vc.post {
-                    if (curPlayingIndex == p && controller?.getPath() == it.first && controller?.isPlaying() == true) {
-                        if (!vc.isBindingController) onBindVideoView(vc)
-                        controller?.playOrResume(it.first, it.second)
-                    } else vc.resetWhenDisFocus()
-                }
+            } else {
+                onBindTypeData(SoftReference(h), d, p, pl)
             }
         }
     }
+
 
     @MainThread
     fun isVisible(position: Int): Boolean {
@@ -197,6 +175,52 @@ abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : Rec
             this.arg1 = curPlayingIndex
             this.obj = fromUser
         }, delay)
+    }
+
+    private fun bindDelegateData(h: VH, p: Int, d: T?, playAble: Boolean, pl: MutableList<Any>?) {
+        WeakReference(getViewController(h)).get()?.let { vc ->
+            vc.onBindHolder(p)
+            vc.setControllerIn(this)
+            if (playAble != vc.isPlayable) vc.isPlayable = playAble
+            if (pl?.isNullOrEmpty() == false) {
+                val pls = pl.last().toString()
+                if (pls.isNotEmpty()) {
+                    if (pls.startsWith(DEFAULT_LOADER)) {
+                        var index: Int
+                        var fromUser: Boolean
+                        pls.split("#").let {
+                            index = it[1].toInt()
+                            fromUser = it[2] == "true"
+                        }
+                        vc.post {
+                            if (p == index) {
+                                if (playAble && vc.isPlayable) {
+                                    if (!vc.isBindingController) onBindVideoView(vc)
+                                    playOrResume(vc, p, d, fromUser)
+                                } else {
+                                    if (controller?.isPlaying() == true) {
+                                        controller?.stopNow(false, isRegulate = true)
+                                    }
+                                }
+                                curPlayingIndex = p
+                            } else {
+                                vc.resetWhenDisFocus()
+                            }
+                        }
+                        return@let
+                    }
+                }
+            }
+            onBindData(h, p, getItem(p), playAble, vc, pl)
+            getPathAndLogsCallId(d)?.let {
+                vc.post {
+                    if (curPlayingIndex == p && controller?.getPath() == it.first && controller?.isPlaying() == true) {
+                        if (!vc.isBindingController) onBindVideoView(vc)
+                        controller?.playOrResume(it.first, it.second)
+                    } else vc.resetWhenDisFocus()
+                }
+            }
+        }
     }
 
     private fun onScrollIdle() {
