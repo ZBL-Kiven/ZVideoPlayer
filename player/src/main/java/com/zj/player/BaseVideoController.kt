@@ -546,23 +546,23 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
         log("on full screen", BehaviorLogsTable.onFullScreen())
         if (!isFullingOrDismissing) {
             isFullingOrDismissing = true
-            onFullScreen(!v.isSelected, this.onFullScreenClick(v, Transaction(formUser, fullScreenTransactionTime, true, payloads)))
+            onFullScreen(!v.isSelected, this.onFullScreenClick(Transaction(formUser, fullScreenTransactionTime, true, payloads)))
         }
     }
 
-    fun fullScreen(v: View, formUser: Boolean, payloads: Map<String, Any?>? = null) {
-        this.fullScreen(v, formUser, fullScreenTransactionTime, true, payloads)
+    fun fullScreen(isFull: Boolean, formUser: Boolean, payloads: Map<String, Any?>? = null) {
+        this.fullScreen(isFull, formUser, fullScreenTransactionTime, true, payloads)
     }
 
-    fun fullScreen(v: View, formUser: Boolean, transactionTime: Int, isStartOnly: Boolean, payloads: Map<String, Any?>? = null) {
+    fun fullScreen(isFull: Boolean, formUser: Boolean, transactionTime: Int, isStartOnly: Boolean, payloads: Map<String, Any?>? = null) {
         log("on override method full screen", BehaviorLogsTable.onChildFullScreen())
         if (!isFullingOrDismissing) {
             isFullingOrDismissing = true
-            onFullScreen(!v.isSelected, this.onFullScreenClick(v, Transaction(formUser, transactionTime, isStartOnly, payloads)))
+            onFullScreen(isFull, this.onFullScreenClick(Transaction(formUser, transactionTime, isStartOnly, payloads)))
         }
     }
 
-    open fun onFullScreenClick(v: View, transaction: Transaction): Transaction {
+    open fun onFullScreenClick(transaction: Transaction): Transaction {
         return transaction
     }
 
