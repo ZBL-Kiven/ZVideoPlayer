@@ -46,45 +46,220 @@
         app:layout_constraintStart_toStartOf="@id/r_main_fg_list_iv_avatar"
         app:layout_constraintTop_toBottomOf="@id/r_main_fg_list_iv_avatar" />
 
-    <FrameLayout
-        android:id="@id/player_gesture_full_screen_content"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:layout_constraintBottom_toTopOf="@id/r_main_fg_feed_item_sv"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <com.zj.views.list.refresh.layout.RefreshLayout
-        android:id="@+id/r_main_fg_feed_item_sv"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:background="#f7f7f7"
         android:clipChildren="false"
-        android:paddingBottom="260dp"
+        android:orientation="vertical"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/player_gesture_full_screen_content">
+        app:layout_constraintTop_toTopOf="parent">
 
-        <com.zj.videotest.refresh.RefreshHeader
+        <FrameLayout
+            android:id="@id/player_gesture_full_screen_content"
             android:layout_width="match_parent"
-            android:layout_height="60dp" />
+            android:layout_height="match_parent" />
 
-        <androidx.core.widget.NestedScrollView
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            android:background="#fff">
+
+            <ImageView
+                android:id="@+id/detail_comment_iv_avatar"
+                android:layout_width="31dp"
+                android:layout_height="31dp"
+                android:layout_marginStart="18dp"
+                android:layout_marginTop="7dp"
+                android:background="@drawable/ic_launcher_background"
+                android:contentDescription="@null"
+                app:layout_constraintBottom_toTopOf="@id/detail_comment_rl_refresh"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <com.zj.views.DrawableTextView
+                android:id="@+id/detail_comment_dtv_follow"
+                android:layout_width="wrap_content"
+                android:layout_height="27dp"
+                android:layout_marginEnd="18dp"
+                app:dtv_animDuration="350"
+                app:dtv_background="#aca"
+                app:dtv_backgroundSelected="#cac"
+                app:dtv_drawableHeight="13dp"
+                app:dtv_drawablePadding="5dp"
+                app:dtv_drawableWidth="13dp"
+                app:dtv_gravity="LEFT"
+                app:dtv_paddingBottom="6dp"
+                app:dtv_paddingLeft="18dp"
+                app:dtv_paddingRight="18dp"
+                app:dtv_paddingTop="6dp"
+                app:dtv_replaceDrawable="@mipmap/ic_launcher_round"
+                app:dtv_selectedDrawable="@mipmap/ic_launcher"
+                app:dtv_text="Follow"
+                app:dtv_textColor="#FFF"
+                app:dtv_textColorSelect="#333"
+                app:dtv_textSelected="Following"
+                app:dtv_textSize="12sp"
+                app:layout_constraintBottom_toBottomOf="@id/detail_comment_iv_avatar"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="@id/detail_comment_iv_avatar" />
 
             <TextView
+                android:id="@+id/detail_comment_tv_user"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="8dp"
+                android:ellipsize="end"
+                android:gravity="center_vertical"
+                android:maxLines="1"
+                android:textColor="#7a7a7a"
+                android:textSize="12sp"
+                app:layout_constraintBottom_toBottomOf="@id/detail_comment_iv_avatar"
+                app:layout_constraintEnd_toStartOf="@id/detail_comment_dtv_follow"
+                app:layout_constraintHorizontal_bias="0"
+                app:layout_constraintStart_toEndOf="@id/detail_comment_iv_avatar"
+                app:layout_constraintTop_toTopOf="@id/detail_comment_iv_avatar"
+                tools:text="user name" />
+
+            <com.zj.views.list.refresh.layout.RefreshLayout
+                android:id="@+id/detail_comment_rl_refresh"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="12312 \n  12312 \n  12312 \n  12312 \n  12312 \n 12312 \n  12312 \n  12312 \n  12312 \n  12312 \n 12312 \n  12312 \n  12312 \n  12312 \n  12312 \n 12312 \n  12312 \n  12312 \n  12312 \n  12312 \n 12312 \n  12312 \n  12312 \n  12312 \n  12312 \n 12312 \n  12312 \n  12312 \n  12312 \n  12312 \n 12312 \n  12312 \n  12312 \n  12312 \n  12312 \n 12312 \n  12312 \n  12312 \n  12312 \n  12312 \n 12312 \n  12312 \n  12312 \n  12312 \n  12312 \n 12312 \n  12312 \n  12312 \n  12312 \n  12312 \n 12312 \n  12312 \n  12312 \n  12312 \n  12312 \n 12312 \n  12312 \n  12312 \n  12312 \n  12312 \n 12312 \n  12312 \n  12312 \n  12312 \n  12312 \n 12312 \n  12312 \n  12312 \n  12312 \n  12312 \n " />
-        </androidx.core.widget.NestedScrollView>
+                android:layout_height="0dp"
+                android:layout_marginTop="9dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/detail_comment_iv_avatar"
+                app:rlEnableScrollContentWhenLoaded="false"
+                app:rlFooterTriggerRate="1.2"
+                app:rlHeaderTriggerRate="1.2">
 
-        <com.zj.videotest.refresh.RefreshFooter
-            android:layout_width="match_parent"
-            android:layout_height="40dp" />
+                <com.zj.videotest.refresh.RefreshHeader
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    tools:layout_height="1px" />
 
-    </com.zj.views.list.refresh.layout.RefreshLayout>
+                <androidx.coordinatorlayout.widget.CoordinatorLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:clipToPadding="false"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/detail_comment_iv_avatar"
+                    tools:paddingBottom="0dp">
+
+                    <com.google.android.material.appbar.AppBarLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="#fff"
+                        android:orientation="vertical">
+
+                        <androidx.constraintlayout.widget.ConstraintLayout
+                            android:id="@+id/detail_comment_cs_parent"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            app:layout_scrollFlags="scroll|exitUntilCollapsed">
+
+                            <TextView
+                                android:id="@+id/detail_comment_tv_desc"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:layout_marginStart="18dp"
+                                android:layout_marginTop="9dp"
+                                android:layout_marginEnd="18dp"
+                                android:ellipsize="end"
+                                android:gravity="center_vertical"
+                                android:maxLines="4"
+                                android:textColor="#333"
+                                android:textSize="16sp"
+                                tools:text="this is example video desc"
+                                tools:textStyle="bold" />
+
+                            <View
+                                android:id="@+id/detail_comment_v_ins"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="9dp"
+                                android:visibility="gone"
+                                app:layout_constraintEnd_toEndOf="@id/detail_comment_tv_desc"
+                                app:layout_constraintHorizontal_bias="0"
+                                app:layout_constraintStart_toStartOf="@id/detail_comment_tv_desc"
+                                app:layout_constraintTop_toBottomOf="@id/detail_comment_tv_desc"
+                                tools:visibility="visible" />
+
+                            <View
+                                android:id="@+id/detail_comment_v_line"
+                                android:layout_width="match_parent"
+                                android:layout_height="10dp"
+                                android:layout_marginTop="10dp"
+                                android:background="#f7f7f7"
+                                app:layout_constraintTop_toBottomOf="@id/detail_comment_v_ins" />
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="13dp"
+                                android:gravity="center_vertical"
+                                android:text="coasmds"
+                                android:textColor="#333"
+                                android:textSize="16sp"
+                                app:layout_constraintBottom_toBottomOf="@id/detail_comment_dtv_comment_count"
+                                app:layout_constraintEnd_toStartOf="@id/detail_comment_dtv_comment_count"
+                                app:layout_constraintStart_toStartOf="parent"
+                                app:layout_constraintTop_toTopOf="@id/detail_comment_dtv_comment_count"
+                                tools:textStyle="bold" />
+
+                            <com.zj.views.DrawableTextView
+                                android:id="@+id/detail_comment_dtv_comment_count"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginEnd="3dp"
+                                app:dtv_drawableHeight="12dp"
+                                app:dtv_drawablePadding="4dp"
+                                app:dtv_drawableWidth="12dp"
+                                app:dtv_padding="15dp"
+                                app:dtv_replaceDrawable="@mipmap/ic_launcher_round"
+                                app:dtv_text="0"
+                                app:dtv_textColor="#b3b3b3"
+                                app:dtv_textSize="12sp"
+                                app:layout_constraintBottom_toBottomOf="parent"
+                                app:layout_constraintEnd_toEndOf="parent"
+                                app:layout_constraintTop_toBottomOf="@id/detail_comment_v_line" />
+
+                            <View
+                                android:layout_width="match_parent"
+                                android:layout_height="1dp"
+                                android:background="#f7f7f7"
+                                app:layout_constraintBottom_toBottomOf="parent"
+                                app:layout_constraintStart_toStartOf="parent" />
+
+                        </androidx.constraintlayout.widget.ConstraintLayout>
+
+                    </com.google.android.material.appbar.AppBarLayout>
+
+                    <androidx.core.widget.NestedScrollView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="12312 \n  12312 \n  12312 \n  12312 \n  12312 \n 12312 \n  12312 \n  12312 \n  12312 \n  12312 \n 12312 \n  12312 \n  12312 \n  12312 \n  12312 \n 12312 \n  12312 \n  12312 \n  12312 \n  12312 \n 12312 \n  12312 \n  12312 \n  12312 \n  12312 \n 12312 \n  12312 \n  12312 \n  12312 \n  12312 \n 12312 \n  12312 \n  12312 \n  12312 \n  12312 \n 12312 \n  12312 \n  12312 \n  12312 \n  12312 \n 12312 \n  12312 \n  12312 \n  12312 \n  12312 \n 12312 \n  12312 \n  12312 \n  12312 \n  12312 \n 12312 \n  12312 \n  12312 \n  12312 \n  12312 \n 12312 \n  12312 \n  12312 \n  12312 \n  12312 \n 12312 \n  12312 \n  12312 \n  12312 \n  12312 \n 12312 \n  12312 \n  12312 \n  12312 \n  12312 \n " />
+                    </androidx.core.widget.NestedScrollView>
+                </androidx.coordinatorlayout.widget.CoordinatorLayout>
+
+                <com.zj.videotest.refresh.RefreshFooter
+                    android:layout_width="match_parent"
+                    android:layout_height="40dp"
+                    tools:layout_height="1px" />
+
+            </com.zj.views.list.refresh.layout.RefreshLayout>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>
 
 

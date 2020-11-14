@@ -42,7 +42,7 @@ dependencies {
     implementation project(':player')
     implementation 'com.zj.repo:loading:1.1.7'
     implementation 'com.zj.repo:constrain-fragment:2.0.3'
-    implementation 'com.zj.repo:views:1.2.8'
+    implementation 'com.zj.repo:views:1.4.4'
     implementation 'com.zj.repo:api:1.0.0'
     implementation 'com.github.bumptech.glide:glide:4.10.0'
 }

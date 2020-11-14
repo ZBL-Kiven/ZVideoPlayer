@@ -69,6 +69,10 @@ internal object BehaviorLogsTable {
         return ViewBaseData(detail = "click or call fullscreen btn", name = "fullScreen")
     }
 
+    fun onChildFullScreen(): ViewBaseData {
+        return ViewBaseData(detail = "click or call fullscreen btn by overridden", name = "fullScreen")
+    }
+
 
     fun onSpeedClick(): ViewBaseData {
         return ViewBaseData(detail = "click speed button", name = "speedView")

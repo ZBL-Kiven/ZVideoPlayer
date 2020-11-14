@@ -110,6 +110,7 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
     protected var keepScreenOnWhenPlaying: Boolean = false
     protected var enablePlayAnimation: Boolean = true
     private var curSpeedIndex = 0
+    private var fullScreenTransactionTime = 250
     private var fullScreenDialog: BaseGestureFullScreenDialog? = null
     private var muteDefault: Boolean = false
     private var muteIsUseGlobal: Boolean = false
@@ -195,6 +196,7 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
             val fullScreenEnable = ta.getInt(R.styleable.BaseVideoController_fullScreenEnable, Constance.fullScreenEnAble)
             autoFullTools = ta.getBoolean(R.styleable.BaseVideoController_autoFullTools, false)
             autoFullInterval = ta.getInt(R.styleable.BaseVideoController_autoFullInterval, 3000)
+            fullScreenTransactionTime = ta.getInt(R.styleable.BaseVideoController_fullScreenTransactionTime, fullScreenTransactionTime)
             fullMaxScreenEnable = ta.getBoolean(R.styleable.BaseVideoController_fullMaxScreenEnable, Constance.fullMaxScreenEnable)
             isDefaultMaxScreen = ta.getBoolean(R.styleable.BaseVideoController_isDefaultMaxScreen, Constance.isDefaultMaxScreen)
             lockScreenRotation = ta.getInt(R.styleable.BaseVideoController_lockScreenRotation, -1)
@@ -540,12 +542,28 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
         fullScreen?.let { onFullScreenClick(it, false) }
     }
 
-    open fun onFullScreenClick(v: View, formUser: Boolean, payloads: Map<String, Any?>? = null) {
+    private fun onFullScreenClick(v: View, formUser: Boolean, payloads: Map<String, Any?>? = null) {
         log("on full screen", BehaviorLogsTable.onFullScreen())
         if (!isFullingOrDismissing) {
             isFullingOrDismissing = true
-            onFullScreen(!v.isSelected, payloads)
+            onFullScreen(!v.isSelected, this.onFullScreenClick(v, Transaction(formUser, fullScreenTransactionTime, true, payloads)))
         }
+    }
+
+    fun fullScreen(v: View, formUser: Boolean, payloads: Map<String, Any?>? = null) {
+        this.fullScreen(v, formUser, fullScreenTransactionTime, true, payloads)
+    }
+
+    fun fullScreen(v: View, formUser: Boolean, transactionTime: Int, isStartOnly: Boolean, payloads: Map<String, Any?>? = null) {
+        log("on override method full screen", BehaviorLogsTable.onChildFullScreen())
+        if (!isFullingOrDismissing) {
+            isFullingOrDismissing = true
+            onFullScreen(!v.isSelected, this.onFullScreenClick(v, Transaction(formUser, transactionTime, isStartOnly, payloads)))
+        }
+    }
+
+    open fun onFullScreenClick(v: View, transaction: Transaction): Transaction {
+        return transaction
     }
 
     open fun onSpeedClick(v: View) {
@@ -855,7 +873,7 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
     }
 
     @SuppressLint("SourceLockedOrientationActivity")
-    private fun onFullScreen(full: Boolean, payloads: Map<String, Any?>?) {
+    private fun onFullScreen(full: Boolean, transaction: Transaction) {
         getVideoRootView()?.let { root ->
             if (!full) {
                 lockScreen?.visibility = GONE
@@ -867,12 +885,16 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
                     }
                 }
                 if (fullScreenDialog == null) fullScreenDialog = BaseGestureFullScreenDialog.let { d ->
-                    if (isDefaultMaxScreen) {
-                        lockScreen?.visibility = View.VISIBLE
-                        d.showFull(root, isTransactionNavigation, lockScreenRotation, fullScreenListener)
-                    } else d.showInContent(root, fullScreenContentLayoutId, fullMaxScreenEnable, isTransactionNavigation, lockScreenRotation, fullContentListener)
+                    d.open(root).defaultOrientation(lockScreenRotation).transactionNavigation(isTransactionNavigation).transactionAnimDuration(transaction.transactionTime, transaction.isStartOnly, fullScreenTransactionTime).payLoads(transaction.payloads).let { config ->
+                        if (isDefaultMaxScreen) {
+                            lockScreen?.visibility = View.VISIBLE
+                            config.withFullMaxScreen(fullScreenListener)
+                        } else {
+                            config.withFullContentScreen(fullScreenContentLayoutId, fullMaxScreenEnable, fullContentListener)
+                        }
+                        config.start(context)
+                    }
                 }
-                fullScreenDialog?.payloads = payloads
                 lockScreenRotate(isLockScreenRotation)
             }
         }

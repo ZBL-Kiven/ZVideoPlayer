@@ -98,7 +98,6 @@ abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : Rec
         }
     }
 
-
     @MainThread
     fun isVisible(position: Int): Boolean {
         (recyclerView?.layoutManager as? LinearLayoutManager)?.let { lm ->
@@ -178,37 +177,35 @@ abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : Rec
     }
 
     private fun bindDelegateData(h: VH, p: Int, d: T?, playAble: Boolean, pl: MutableList<Any>?) {
-        WeakReference(getViewController(h)).get()?.let { vc ->
+        getViewController(h)?.let { vc ->
             vc.onBindHolder(p)
             vc.setControllerIn(this)
             if (playAble != vc.isPlayable) vc.isPlayable = playAble
             if (pl?.isNullOrEmpty() == false) {
                 val pls = pl.last().toString()
-                if (pls.isNotEmpty()) {
-                    if (pls.startsWith(DEFAULT_LOADER)) {
-                        var index: Int
-                        var fromUser: Boolean
-                        pls.split("#").let {
-                            index = it[1].toInt()
-                            fromUser = it[2] == "true"
-                        }
-                        vc.post {
-                            if (p == index) {
-                                if (playAble && vc.isPlayable) {
-                                    if (!vc.isBindingController) onBindVideoView(vc)
-                                    playOrResume(vc, p, d, fromUser)
-                                } else {
-                                    if (controller?.isPlaying() == true) {
-                                        controller?.stopNow(false, isRegulate = true)
-                                    }
-                                }
-                                curPlayingIndex = p
-                            } else {
-                                vc.resetWhenDisFocus()
-                            }
-                        }
-                        return@let
+                if (pls.isNotEmpty() && pls.startsWith(DEFAULT_LOADER)) {
+                    var index: Int
+                    var fromUser: Boolean
+                    pls.split("#").let {
+                        index = it[1].toInt()
+                        fromUser = it[2] == "true"
                     }
+                    vc.post {
+                        if (p == index) {
+                            if (playAble && vc.isPlayable) {
+                                if (!vc.isBindingController) onBindVideoView(vc)
+                                playOrResume(vc, p, d, fromUser)
+                            } else {
+                                if (controller?.isPlaying() == true) {
+                                    controller?.stopNow(false, isRegulate = true)
+                                }
+                            }
+                            curPlayingIndex = p
+                        } else {
+                            vc.resetWhenDisFocus()
+                        }
+                    }
+                    return@bindDelegateData
                 }
             }
             onBindData(h, p, getItem(p), playAble, vc, pl)

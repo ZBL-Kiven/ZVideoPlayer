@@ -9,6 +9,7 @@ import android.view.ViewGroup
 import androidx.annotation.CallSuper
 import com.zj.player.controller.BaseListVideoController
 import com.zj.player.full.TrackOrientation
+import com.zj.player.full.Transaction
 import com.zj.views.ut.DPUtils
 
 abstract class ScrollerController @JvmOverloads constructor(c: Context, attr: AttributeSet? = null, def: Int = 0) : BaseListVideoController(c, attr, def) {
@@ -51,11 +52,12 @@ abstract class ScrollerController @JvmOverloads constructor(c: Context, attr: At
         return if (inAnimation) true else super.onFullKeyEvent(code, event)
     }
 
-    override fun onFullScreenClick(v: View, formUser: Boolean, payloads: Map<String, Any?>?) {
-        var pl: MutableMap<String, Any?>? = payloads?.toMutableMap()
+
+    override fun onFullScreenClick(v: View, transaction: Transaction): Transaction {
+        var pl: MutableMap<String, Any?>? = transaction.payloads?.toMutableMap()
         if (pl == null) pl = mutableMapOf()
         pl["isExpand"] = 0
-        super.onFullScreenClick(v, formUser, pl)
+        return super.onFullScreenClick(v, transaction)
     }
 
     override fun onTouchActionEvent(videoRoot: View?, event: MotionEvent, lastX: Float, lastY: Float, orientation: TrackOrientation?): Boolean {
