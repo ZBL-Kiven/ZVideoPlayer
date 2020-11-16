@@ -1015,6 +1015,14 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
         if (Constance.CORE_LOG_ABLE) ZPlayerLogs.onLog(s, controller?.getPath() ?: "", "", modeName, *params)
     }
 
+    fun getCurSpeed(): Float {
+        return controller?.getCurSpeed() ?: 1.0f
+    }
+
+    fun getCurVolume(): Float {
+        return controller?.getCurVolume() ?: 0.0f
+    }
+
     fun isPause(accurate: Boolean = false): Boolean {
         return controller?.isPause(accurate) ?: false
     }
