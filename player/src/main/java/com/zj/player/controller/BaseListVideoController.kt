@@ -21,7 +21,6 @@ abstract class BaseListVideoController @JvmOverloads constructor(c: Context, att
     var isCompleted: Boolean = false
 
     private var completedListener: ((BaseListVideoController) -> Unit)? = null
-    private var playerInfoListener: ((speed: Float, volume: Float) -> Unit)? = null
     private var playingStateListener: ((BaseListVideoController) -> Unit)? = null
     private var fullScreenChangeListener: ((BaseListVideoController, Boolean, payloads: Map<String, Any?>?) -> Unit)? = null
     private var resetListener: ((BaseListVideoController) -> Unit)? = null
@@ -89,11 +88,6 @@ abstract class BaseListVideoController @JvmOverloads constructor(c: Context, att
         onTrackListener?.invoke(playAble, start, end, formTrigDuration)
     }
 
-    override fun updateCurPlayerInfo(volume: Float, speed: Float) {
-        super.updateCurPlayerInfo(volume, speed)
-        playerInfoListener?.invoke(speed, volume)
-    }
-
     /**
      * It should be noted that this method will be called in [resetWhenDisFocus],
      * [com.zj.player.adapters.ListVideoAdapterDelegate] is mainly the way to reset the Controller in the list
@@ -114,10 +108,6 @@ abstract class BaseListVideoController @JvmOverloads constructor(c: Context, att
 
     fun setOnFullScreenChangedListener(l: ((BaseListVideoController, Boolean, payloads: Map<String, Any?>?) -> Unit)? = null) {
         this.fullScreenChangeListener = l
-    }
-
-    fun setOnPlayerInfoListener(speed: Float, volume: Float) {
-        this.playerInfoListener?.invoke(speed, volume)
     }
 
     fun setOnTrackListener(l: ((playAble: Boolean, start: Boolean, end: Boolean, formTrigDuration: Float) -> Unit)? = null) {
