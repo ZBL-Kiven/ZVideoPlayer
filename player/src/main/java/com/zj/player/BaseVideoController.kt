@@ -299,7 +299,7 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
 
         lockScreen?.setOnClickListener {
             log("on lock screen btn click", BehaviorLogsTable.onLockScreenClick())
-            if (!lockScreenRotate(!it.isSelected)) Toast.makeText(context, R.string.z_player_str_screen_locked_tint, Toast.LENGTH_SHORT).show()
+            onLockScreenClick(it)
         }
 
         videoOverrideImageView?.setSingleTapListener {
@@ -400,8 +400,12 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
         showOrHidePlayBtn(true)
     }
 
+    @CallSuper
     override fun updateCurPlayerInfo(volume: Float, speed: Float) {
-        syncMute(volume <= 0)
+        val nextState = volume <= 0
+        if (muteIsUseGlobal) muteGlobalDefault = nextState
+        muteDefault = nextState
+        muteView?.isSelected = nextState
         curSpeedIndex = supportedSpeedList.indexOfLast { it in (speed - 0.4f)..(speed + 0.5f) }
         speedView?.text = context.getString(R.string.z_player_str_speed, supportedSpeedList[curSpeedIndex].roundToInt())
     }
@@ -567,6 +571,7 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
     }
 
     open fun onSpeedClick(v: View) {
+        resendAutoFullScreenAction()
         if (controller?.isReady() == true) {
             val curSpeed = supportedSpeedList[++curSpeedIndex % supportedSpeedList.size]
             controller?.setSpeed(curSpeed)
@@ -574,13 +579,18 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
     }
 
     open fun onMuteClick(v: View) {
+        resendAutoFullScreenAction()
         val nextState = !v.isSelected
         try {
             initVolume(nextState)
-            syncMute(nextState)
         } catch (e: Exception) {
             error("the mute click to $nextState failed , trying to check the system audio manager as device type: ${android.os.Build.MANUFACTURER}")
         }
+    }
+
+    open fun onLockScreenClick(v: View) {
+        resendAutoFullScreenAction()
+        if (!lockScreenRotate(!v.isSelected)) Toast.makeText(context, R.string.z_player_str_screen_locked_tint, Toast.LENGTH_SHORT).show()
     }
 
     @CallSuper
@@ -992,10 +1002,9 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
         }
     }
 
-    private fun syncMute(nextState: Boolean) {
-        if (muteIsUseGlobal) muteGlobalDefault = nextState
-        muteDefault = nextState
-        muteView?.isSelected = nextState
+    private fun resendAutoFullScreenAction() {
+        if (autoFullTools) mHandler.removeMessages(dismissFullTools)
+        if (autoFullTools && isFull) mHandler.sendEmptyMessageDelayed(dismissFullTools, autoFullInterval.toLong())
     }
 
     private fun log(s: String, bd: BehaviorData? = null) {

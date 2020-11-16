@@ -47,7 +47,8 @@
             android:orientation="horizontal"
             android:padding="10dp"
             android:translationZ="6dp"
-            android:visibility="gone">
+            android:visibility="gone"
+            tools:visibility="visible">
 
             <ImageView
                 android:id="@+id/z_player_video_preview_iv_lock_screen"
@@ -93,7 +94,8 @@
             android:orientation="horizontal"
             android:padding="10dp"
             android:translationZ="6dp"
-            android:visibility="gone">
+            android:visibility="gone"
+            tools:visibility="visible">
 
             <TextView
                 android:id="@+id/z_player_video_preview_tv_start"

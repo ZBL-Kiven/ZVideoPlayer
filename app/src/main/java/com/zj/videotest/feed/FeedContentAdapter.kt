@@ -248,6 +248,10 @@ class FeedContentAdapter<T : FeedDataIn> : ListenerAnimAdapter<T>(R.layout.r_mai
         vc.setScreenContentLayout(R.layout.r_main_video_details_content) { v ->
             v.findViewById<ImageView>(R.id.r_main_fg_list_iv_avatar)?.let {
                 loadAvatar(d?.getAvatarPath() ?: "", it)
+                it.setOnClickListener { v ->
+                    v.isSelected = !v.isSelected
+                    vc.onMuteClick(v)
+                }
             }
         }
     }

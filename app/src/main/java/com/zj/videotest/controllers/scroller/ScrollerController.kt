@@ -53,11 +53,11 @@ abstract class ScrollerController @JvmOverloads constructor(c: Context, attr: At
     }
 
 
-    override fun onFullScreenClick(v: View, transaction: Transaction): Transaction {
+    override fun onFullScreenClick(transaction: Transaction): Transaction {
         var pl: MutableMap<String, Any?>? = transaction.payloads?.toMutableMap()
         if (pl == null) pl = mutableMapOf()
         pl["isExpand"] = 0
-        return super.onFullScreenClick(v, transaction)
+        return super.onFullScreenClick(transaction)
     }
 
     override fun onTouchActionEvent(videoRoot: View?, event: MotionEvent, lastX: Float, lastY: Float, orientation: TrackOrientation?): Boolean {
