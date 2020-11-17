@@ -573,9 +573,13 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
     open fun onSpeedClick(v: View) {
         resendAutoFullScreenAction()
         if (controller?.isReady() == true) {
-            val curSpeed = supportedSpeedList[++curSpeedIndex % supportedSpeedList.size]
-            controller?.setSpeed(curSpeed)
+            val next = supportedSpeedList[++curSpeedIndex % supportedSpeedList.size]
+            requestNewSpeed(next)
         }
+    }
+
+    open fun requestNewSpeed(nextSpeed: Float) {
+        controller?.setSpeed(nextSpeed)
     }
 
     open fun onMuteClick(v: View) {
