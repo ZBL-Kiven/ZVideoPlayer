@@ -37,7 +37,7 @@ object Constance {
      * Either the width or height is increased to obtain the desired aspect ratio.
      */
     const val RESIZE_MODE_ZOOM = 4
-    const val ANIMATE_DURATION = 300L
+    const val ANIMATE_DURATION = 200L
 
     /**
      * ------- set the global default controller visibility --------

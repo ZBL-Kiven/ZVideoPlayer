@@ -389,7 +389,7 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
         isInterruptPlayBtnAnim = false
         onLoadingEvent(LoadingMode.None)
         if (!isTickingSeekBarFromUser) {
-            showOrHidePlayBtn(false)
+            showOrHidePlayBtn(isShow = false, withState = false, byAnim = true)
             full(false)
             seekBarSmall?.visibility = View.VISIBLE
         }
@@ -718,7 +718,7 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
         return String.format("${if (minute < 10) "0%d" else "%d"}:${if (second < 10) "0%d" else "%d"}", minute, second)
     }
 
-    protected fun showOrHidePlayBtn(isShow: Boolean, withState: Boolean = false) {
+    protected fun showOrHidePlayBtn(isShow: Boolean, withState: Boolean = false, byAnim: Boolean = false) {
         vPlay?.let {
             var isNeedSetFreePlayBtn = true
             try {
@@ -730,7 +730,7 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
                 if (isShow && it.tag == 0) return
                 if (!isShow && it.tag == 1) return
                 isNeedSetFreePlayBtn = false
-                if (enablePlayAnimation) {
+                if (!byAnim || enablePlayAnimation) {
                     it.tag = if (isShow) 0 else 1
                     val start = if (isShow) 0.0f else 1.0f
                     val end = if (isShow) 1.0f else 0.0f
@@ -920,20 +920,19 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
             if (isStart) lastIsFull = this.isFull
             if (isStart && this.isFull) {
                 isStartTrack = true;full(false)
-                if (!isInterruptPlayBtnAnim) {
-                    showOrHidePlayBtn(isShow = false, withState = true)
-                }
+                showOrHidePlayBtn(isShow = false, withState = true)
             }
             if (isEnd && !this.isFull) {
                 isStartTrack = false
-                if (lastIsFull) {
-                    if (controller?.isLoadData() == true) full(true)
+                if (lastIsFull && controller?.isLoadData() == true) {
+                    full(true)
                     if (!isInterruptPlayBtnAnim) showOrHidePlayBtn(isShow = true, withState = true)
                 }
             }
         }
         onTrack(isPlayable, isStart, isEnd, formTrigDuration)
     }
+
 
     @CallSuper
     open fun reset(isNow: Boolean, isRegulate: Boolean, isShowPlayBtn: Boolean, isShowThumb: Boolean = true, isShowBackground: Boolean = true, isSinkBottomShader: Boolean = false) {
