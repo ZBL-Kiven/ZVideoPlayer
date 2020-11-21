@@ -116,11 +116,10 @@ open class ZPlayer(var config: VideoConfig = VideoConfig.create()) : Player.Even
                     controller?.onPrepare(currentPlayPath(), duration, false)
                     isReady = true
                     if (autoPlay) {
-                        player?.playWhenReady
                         setPlayerState(VideoState.PLAY)
                         autoPlay(false)
                     } else if (field == VideoState.SEEK_LOADING) {
-                        controller?.onPlay(currentPlayPath(), false)
+                        setPlayerState(VideoState.PLAY)
                     }
                 }
                 VideoState.PLAY -> {
