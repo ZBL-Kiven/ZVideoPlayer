@@ -20,6 +20,7 @@ import com.zj.player.config.VideoConfig
 import com.zj.player.logs.BehaviorData
 import com.zj.player.logs.BehaviorLogsTable
 import com.zj.player.logs.ZPlayerLogs
+import com.zj.player.ut.PlayStateChangeListener
 import java.lang.IllegalArgumentException
 import java.lang.NullPointerException
 
@@ -36,6 +37,7 @@ class ZController private constructor(private var player: ZPlayer?, viewControll
     private var curAccessKey: String = ""
     private var isPausedByLifecycle = false
     private var isIgnoreNullControllerGlobal = false
+    private var playingStateListener: PlayStateChangeListener? = null
     private var viewController: Controller? = null
         set(value) {
             if (field != null) {
@@ -265,6 +267,10 @@ class ZController private constructor(private var player: ZPlayer?, viewControll
         }
     }
 
+    fun setOnPlayingStateChangedListener(l: PlayStateChangeListener) {
+        this.playingStateListener = l
+    }
+
     /**
      * recycle a Controller in Completely, after which this instance will be invalid.
      * */
@@ -308,6 +314,7 @@ class ZController private constructor(private var player: ZPlayer?, viewControll
 
     override fun onError(e: Exception?) {
         withRenderAndControllerView(false)?.onError(e)
+        onPlayingStateChanged(false, "error")
         ZPlayerLogs.onError(e, true)
     }
 
@@ -321,11 +328,13 @@ class ZController private constructor(private var player: ZPlayer?, viewControll
 
     override fun onLoading(path: String?, isRegulate: Boolean) {
         log("on video loading ...", BehaviorLogsTable.controllerState("loading", getCallId(), getPath()))
+        onPlayingStateChanged(false, "loading")
         withRenderAndControllerView(true)?.onLoading(path, isRegulate)
     }
 
     override fun onPause(path: String?, isRegulate: Boolean) {
         log("on video loading ...", BehaviorLogsTable.controllerState("onPause", getCallId(), getPath()))
+        onPlayingStateChanged(false, "pause")
         withRenderAndControllerView(true)?.onPause(path, isRegulate)
     }
 
@@ -340,11 +349,13 @@ class ZController private constructor(private var player: ZPlayer?, viewControll
 
     override fun onSeekingLoading(path: String?, isRegulate: Boolean) {
         log("on video seek loading ...", BehaviorLogsTable.controllerState("onSeekLoading", getCallId(), getPath()))
+        onPlayingStateChanged(false, "buffering")
         withRenderAndControllerView(true)?.onSeekingLoading(path)
     }
 
     override fun onPrepare(path: String?, videoSize: Long, isRegulate: Boolean) {
         log("on video prepare ...", BehaviorLogsTable.controllerState("onPrepare", getCallId(), getPath()))
+        onPlayingStateChanged(false, "prepared")
         withRenderAndControllerView(true)?.onPrepare(path, videoSize, isRegulate)
     }
 
@@ -354,22 +365,26 @@ class ZController private constructor(private var player: ZPlayer?, viewControll
 
     override fun onPlay(path: String?, isRegulate: Boolean) {
         log("on video playing ...", BehaviorLogsTable.controllerState("onPlay", getCallId(), getPath()))
+        onPlayingStateChanged(true, "play")
         withRenderAndControllerView(true)?.onPlay(path, isRegulate)
     }
 
     override fun onStop(notifyStop: Boolean, path: String?, isRegulate: Boolean) {
         log("on video stop ...", BehaviorLogsTable.controllerState("onStop", getCallId(), getPath()))
+        onPlayingStateChanged(false, "stop")
         val c = withRenderAndControllerView(false)
         if (notifyStop) c?.onStop(path, isRegulate)
     }
 
     override fun onCompleted(path: String?, isRegulate: Boolean) {
         log("on video completed ...", BehaviorLogsTable.controllerState("onCompleted", getCallId(), getPath()))
+        onPlayingStateChanged(false, "completed")
         withRenderAndControllerView(false)?.onCompleted(path, isRegulate)
     }
 
     override fun completing(path: String?, isRegulate: Boolean) {
         log("on video completing ...", BehaviorLogsTable.controllerState("completing", getCallId(), getPath()))
+        onPlayingStateChanged(false, "completing")
         withRenderAndControllerView(true)?.completing(path, isRegulate)
     }
 
@@ -402,6 +417,10 @@ class ZController private constructor(private var player: ZPlayer?, viewControll
 
     fun getController(): Controller? {
         return viewController
+    }
+
+    private fun onPlayingStateChanged(isPlaying: Boolean, desc: String) {
+        playingStateListener?.onState(isPlaying, desc, this)
     }
 
     @OnLifecycleEvent(value = Lifecycle.Event.ON_RESUME)
