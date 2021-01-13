@@ -9,10 +9,6 @@ import android.widget.LinearLayout
 import android.widget.RelativeLayout
 import android.widget.RelativeLayout.CENTER_IN_PARENT
 import androidx.annotation.IntRange
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleObserver
-import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.OnLifecycleEvent
 import com.zj.player.ut.Constance.CORE_LOG_ABLE
 import com.zj.player.ut.Controller
 import com.zj.player.ut.PlayerEventController
@@ -30,7 +26,7 @@ import java.lang.NullPointerException
  * A controller that interacts with the user interface, player, and renderer.
  * */
 @Suppress("unused", "MemberVisibilityCanBePrivate")
-class ZController private constructor(private var player: ZPlayer?, viewController: Controller?) : PlayerEventController, LifecycleObserver {
+class ZController private constructor(private var player: ZPlayer?, viewController: Controller?) : PlayerEventController {
 
     private var seekProgressInterval: Long = 16
     private var render: ZRender? = null
@@ -50,7 +46,6 @@ class ZController private constructor(private var player: ZPlayer?, viewControll
 
     init {
         this.viewController = viewController
-        isBindLifecycle(true)
         curAccessKey = runWithPlayer { it.setViewController(this) } ?: ""
     }
 
@@ -287,7 +282,6 @@ class ZController private constructor(private var player: ZPlayer?, viewControll
         }
         viewController = null
         player = null
-        isBindLifecycle(false)
         seekProgressInterval = -1
         curAccessKey = releaseKey
     }
@@ -408,47 +402,12 @@ class ZController private constructor(private var player: ZPlayer?, viewControll
         }
     }
 
-    private fun isBindLifecycle(isBind: Boolean) {
-        (getController()?.context as? LifecycleOwner)?.let {
-            if (isBind) it.lifecycle.addObserver(this)
-            else it.lifecycle.removeObserver(this)
-        }
-    }
-
     fun getController(): Controller? {
         return viewController
     }
 
     private fun onPlayingStateChanged(isPlaying: Boolean, desc: String) {
         playingStateListener?.onState(isPlaying, desc, this)
-    }
-
-    @OnLifecycleEvent(value = Lifecycle.Event.ON_RESUME)
-    private fun onResumed() {
-        if (isPausedByLifecycle) {
-            isPausedByLifecycle = false
-            playOrResume()
-        }
-        getController()?.onLifecycleResume()
-    }
-
-    @OnLifecycleEvent(value = Lifecycle.Event.ON_STOP)
-    private fun onStopped() {
-        getController()?.onLifecycleStop()
-    }
-
-    @OnLifecycleEvent(value = Lifecycle.Event.ON_PAUSE)
-    private fun onPaused() {
-        if (isPlaying()) {
-            isPausedByLifecycle = true
-            pause()
-        }
-        getController()?.onLifecyclePause()
-    }
-
-    @OnLifecycleEvent(value = Lifecycle.Event.ON_DESTROY)
-    private fun onDestroyed() {
-        release()
     }
 
     private fun log(s: String, bd: BehaviorData? = null) {

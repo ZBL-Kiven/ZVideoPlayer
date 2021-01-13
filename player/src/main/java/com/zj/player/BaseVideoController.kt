@@ -461,18 +461,6 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
         onLoadingEvent(LoadingMode.Fail)
     }
 
-    override fun onLifecycleResume() {
-        fullScreenDialog?.onResume()
-    }
-
-    override fun onLifecycleStop() {
-        fullScreenDialog?.onStopped()
-    }
-
-    override fun onLifecyclePause() {
-        //use off in extends
-    }
-
     internal fun clickPlayBtn() {
         onPlayClick(vPlay ?: return, false)
     }

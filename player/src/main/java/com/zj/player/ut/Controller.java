@@ -44,10 +44,4 @@ public interface Controller {
     void onError(@Nullable Exception e);
 
     void updateCurPlayerInfo(float volume, float speed);
-
-    void onLifecycleResume();
-
-    void onLifecycleStop();
-
-    void onLifecyclePause();
 }
