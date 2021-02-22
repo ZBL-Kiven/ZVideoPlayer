@@ -38,11 +38,12 @@ dependencies {
     implementation 'androidx.core:core-ktx:1.3.2'
     implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
 
-    implementation 'com.gyf.immersionbar:immersionbar:3.0.0-beta02'
+    implementation 'com.gyf.immersionbar:immersionbar:3.0.0'
     implementation project(':player')
     implementation 'com.zj.repo:loading:1.1.7'
     implementation 'com.zj.repo:constrain-fragment:2.0.3'
     implementation 'com.zj.repo:views:1.4.4'
     implementation 'com.zj.repo:api:1.0.0'
+    implementation 'com.zj.repo:web-kit:1.1.7'
     implementation 'com.github.bumptech.glide:glide:4.10.0'
 }

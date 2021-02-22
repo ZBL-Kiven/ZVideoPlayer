@@ -5,6 +5,7 @@ import android.animation.ObjectAnimator
 import android.annotation.SuppressLint
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -13,9 +14,10 @@ import android.widget.RelativeLayout
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
-import com.zj.player.BaseVideoController
+import com.zj.player.ZPlayer
+import com.zj.player.z.ZVideoView
 import com.zj.videotest.feed.data.FeedDataIn
-import com.zj.player.ZController
+import com.zj.player.z.ZController
 import com.zj.player.config.VideoConfig
 import com.zj.player.controller.BaseListVideoController
 import com.zj.player.img.ImgLoader
@@ -24,6 +26,8 @@ import com.zj.videotest.R
 import com.zj.videotest.controllers.CCImageLoader
 import com.zj.videotest.feed.data.DataType
 import com.zj.videotest.controllers.CCVideoController
+import com.zj.videotest.cusRender.CusWebPlayer
+import com.zj.videotest.cusRender.CusWebRender
 import com.zj.views.list.holders.BaseViewHolder
 import java.lang.IllegalArgumentException
 import java.lang.ref.SoftReference
@@ -38,7 +42,8 @@ class FeedContentAdapter<T : FeedDataIn> : ListenerAnimAdapter<T>(R.layout.r_mai
     private var adapterInterface: FeedAdapterInterface<T>? = null
     private var loadDistance: Int = 5
     private var curLoadingTentaclePosition: Int = 5
-    private var controller: ZController? = null
+    private var controller: ZController<*, *>? = null
+    private var ytbController: ZController<CusWebPlayer, CusWebRender>? = null
 
     private companion object {
         const val TAG_POSITION = R.id.special_feed_adapter_tag_id_position
@@ -147,10 +152,25 @@ class FeedContentAdapter<T : FeedDataIn> : ListenerAnimAdapter<T>(R.layout.r_mai
 
     private var adapterDelegate: ListVideoAdapterDelegate<T, CCVideoController, BaseViewHolder>? = object : ListVideoAdapterDelegate<T, CCVideoController, BaseViewHolder>(this@FeedContentAdapter) {
 
-        override fun createZController(vc: CCVideoController): ZController {
-            if (controller == null) controller = ZController.build(vc, VideoConfig.create().setCacheEnable(true).setDebugAble(true).setCacheFileDir("feed/videos").updateMaxCacheSize(200L * 1024 * 1024))
-            else controller?.updateViewController(vc)
-            return controller!!
+        //todo
+        override fun createZController(data: T?, vc: CCVideoController): ZController<*, *> {
+            val config = VideoConfig.create().setCacheEnable(true).setDebugAble(true).setCacheFileDir("feed/videos").updateMaxCacheSize(200L * 1024 * 1024)
+            return when (data?.getType()) {
+                DataType.YTB -> {
+                    Log.e("-----> ", "use ytb controller")
+                    if (ytbController == null) ytbController = ZPlayer.build(vc, CusWebPlayer(), CusWebRender::class.java) else ytbController?.updateViewController(vc)
+                    ytbController!!
+                }
+                else -> {
+                    Log.e("-----> ", "use video controller")
+                    if (controller == null) controller = ZPlayer.build(vc, config) else controller?.updateViewController(vc)
+                    controller!!
+                }
+            }
+        }
+
+        override fun checkControllerMatching(data: T?, controller: ZController<*, *>?): Boolean {
+            return controller != null && ((data?.getType() == DataType.VIDEO && controller.isDefaultPlayerType()) || ((data?.getType() == DataType.YTB && controller.checkPlayerType(CusWebPlayer::class.java))))
         }
 
         override fun getViewController(holder: BaseViewHolder?): CCVideoController? {
@@ -184,7 +204,7 @@ class FeedContentAdapter<T : FeedDataIn> : ListenerAnimAdapter<T>(R.layout.r_mai
         }
 
         override val isSourcePlayAble: (d: T?) -> Boolean
-            get() = { d -> d?.getType() == DataType.VIDEO }
+            get() = { d -> d?.getType() == DataType.VIDEO || d?.getType() == DataType.YTB }
     }
 
     private val onTrackListener: (playAble: Boolean, start: Boolean, end: Boolean, formTrigDuration: Float) -> Unit = { playAble, start, end, _ ->
@@ -225,12 +245,10 @@ class FeedContentAdapter<T : FeedDataIn> : ListenerAnimAdapter<T>(R.layout.r_mai
         }
     }
 
-    private val onFullScreenListener: (BaseVideoController, Boolean, pl: Map<String, Any?>?) -> Unit = { vc, _, _ ->
-        controller?.let {
-            (vc.getTag(TAG_POSITION) as? Int)?.let { p ->
-                getItem(p)?.getVideoPath()?.let { path -> cancelIfNotCurrent(path) }
-                resumeIfVisible(p)
-            }
+    private val onFullScreenListener: (ZVideoView, Boolean, pl: Map<String, Any?>?) -> Unit = { vc, _, _ ->
+        (vc.getTag(TAG_POSITION) as? Int)?.let { p ->
+            getItem(p)?.getVideoPath()?.let { path -> cancelIfNotCurrent(path) }
+            resumeIfVisible(p)
         }
     }
 
@@ -265,7 +283,7 @@ class FeedContentAdapter<T : FeedDataIn> : ListenerAnimAdapter<T>(R.layout.r_mai
     private fun loadThumbImage(videoWidth: Int, videoHeight: Int, imgPath: String, vc: BaseListVideoController, d: T?) {
         val tag = d?.getSourceId() ?: return
         val imgType = when (val type = d.getType()) {
-            DataType.VIDEO, DataType.IMG -> ImgLoader.ImgType.IMG
+            DataType.VIDEO, DataType.YTB, DataType.IMG -> ImgLoader.ImgType.IMG
             DataType.GIF -> ImgLoader.ImgType.GIF
             else -> throw IllegalArgumentException("the data type [$type] is not supported !")
         }

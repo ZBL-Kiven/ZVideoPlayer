@@ -32,8 +32,10 @@ internal abstract class GestureTouchListener(private val intercepted: () -> Bool
     private var noPaddingClickPointStart: PointF? = null
     private var isOnceTap = false
     private var handler: Handler? = Handler(Looper.getMainLooper()) {
-        isOnceTap = false
-        onClick()
+        if (it.what == 127924) {
+            isOnceTap = false
+            onClick()
+        }
         return@Handler false
     }
 
@@ -66,13 +68,13 @@ internal abstract class GestureTouchListener(private val intercepted: () -> Bool
                     val isParseEnd = if (isDisInterrupted) onEventEnd(min(triggerY, event.rawY - _y) / triggerY, !isTap && isDisInterrupted) else false
                     if (isTap && (isDisInterrupted || isParseEnd)) {
                         if (isOnceTap) {
-                            handler?.removeMessages(0)
+                            handler?.removeMessages(127924)
                             isOnceTap = false
                             onDoubleClick()
                         } else {
                             isOnceTap = true
-                            handler?.removeMessages(0)
-                            handler?.sendEmptyMessageDelayed(0, 200)
+                            handler?.removeMessages(127924)
+                            handler?.sendEmptyMessageDelayed(127924, 200)
                         }
                     }
                 } finally {

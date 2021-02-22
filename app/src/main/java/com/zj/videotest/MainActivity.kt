@@ -10,6 +10,7 @@ import com.zj.player.logs.ZPlayerLogs
 import com.zj.videotest.feed.RFeedFragment
 import com.zj.videotest.frg.OtherFragment
 import com.zj.views.DrawableTextView
+import com.zj.webkit.CCWebView
 
 class MainActivity : AppCompatActivity() {
 
@@ -24,6 +25,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        CCWebView.onAppAttached(this, "")
         setContentView(R.layout.r_main_act_content)
         ImmersionBar.with(this).transparentStatusBar().statusBarDarkFont(true).init()
         initView()

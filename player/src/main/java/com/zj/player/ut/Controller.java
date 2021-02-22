@@ -3,7 +3,7 @@ package com.zj.player.ut;
 
 import android.content.Context;
 
-import com.zj.player.ZController;
+import com.zj.player.z.ZController;
 import com.zj.player.base.InflateInfo;
 
 import org.jetbrains.annotations.Nullable;
@@ -13,7 +13,7 @@ import org.jetbrains.annotations.Nullable;
  */
 public interface Controller {
 
-    void onControllerBind(ZController controller);
+    void onControllerBind(ZController<?, ?> controller);
 
     Context getContext();
 

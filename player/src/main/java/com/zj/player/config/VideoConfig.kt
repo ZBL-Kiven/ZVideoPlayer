@@ -2,7 +2,7 @@ package com.zj.player.config
 
 import com.google.android.exoplayer2.C
 import com.zj.player.ut.ScalingMode
-import com.zj.player.ZPlayer
+import com.zj.player.z.ZVideoPlayer
 import com.zj.player.logs.ZPlayerLogs
 
 
@@ -16,8 +16,8 @@ class VideoConfig private constructor() {
 
     companion object {
 
-        private const val MAX_CACHE_SIZE = ZPlayer.DEFAULT_VIDEO_MAX_CACHED_SIZE
-        private const val CACHE_FILE_DIR = ZPlayer.DEFAULT_VIDEO_CACHED_PATH
+        private const val MAX_CACHE_SIZE = ZVideoPlayer.DEFAULT_VIDEO_MAX_CACHED_SIZE
+        private const val CACHE_FILE_DIR = ZVideoPlayer.DEFAULT_VIDEO_CACHED_PATH
         private const val CACHE_ENABLE = true
         private const val VIDEO_SCALE_MOD = C.VIDEO_SCALING_MODE_SCALE_TO_FIT
 
@@ -61,7 +61,7 @@ class VideoConfig private constructor() {
 
 
     /**
-     * The default local disk persistent cache size is [ZPlayer.DEFAULT_VIDEO_MAX_CACHED_SIZE]. If you need to reset this value, please use this method.
+     * The default local disk persistent cache size is [ZVideoPlayer.DEFAULT_VIDEO_MAX_CACHED_SIZE]. If you need to reset this value, please use this method.
      * */
     fun updateMaxCacheSize(maxCacheSize: Long): VideoConfig {
         this.maxCacheSize = maxCacheSize
@@ -69,7 +69,7 @@ class VideoConfig private constructor() {
     }
 
     /**
-     * Set the file address of the local disk persistent cache. The default is [ZPlayer.DEFAULT_VIDEO_CACHED_PATH]
+     * Set the file address of the local disk persistent cache. The default is [ZVideoPlayer.DEFAULT_VIDEO_CACHED_PATH]
      * If the address changes when the new version is upgraded, the user cannot read the previous cache, and the previous cache will not be cleared.
      * */
     fun setCacheFileDir(cacheFileDir: String): VideoConfig {

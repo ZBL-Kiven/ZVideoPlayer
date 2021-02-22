@@ -1,10 +1,46 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.zj.player.BaseVideoController xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/mVideoView"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#fff"
-    android:clipChildren="false"
+    android:orientation="vertical"
     android:paddingTop="24dp">
 
-</com.zj.player.BaseVideoController>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <EditText
+            android:id="@+id/mEditText"
+            android:layout_width="match_parent"
+            android:layout_height="120dp"
+            android:layout_margin="10dp"
+            android:layout_weight="1"
+            android:background="#f7f7f7"
+            android:hint="input your test url:"
+            android:padding="10dp"
+            android:textColor="#333"
+            android:textColorHint="#999"
+            android:textSize="14dp" />
+
+        <TextView
+            android:id="@+id/mPlay"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:background="#eee"
+            android:padding="6dp"
+            android:text="PLAY" />
+
+    </LinearLayout>
+
+    <com.zj.player.z.ZVideoView
+        android:id="@+id/mVideoView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#fff">
+
+    </com.zj.player.z.ZVideoView>
+
+</LinearLayout>

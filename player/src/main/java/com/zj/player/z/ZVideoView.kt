@@ -1,4 +1,4 @@
-package com.zj.player
+package com.zj.player.z
 
 import android.animation.Animator
 import android.animation.ValueAnimator
@@ -20,6 +20,7 @@ import android.widget.*
 import androidx.annotation.CallSuper
 import androidx.annotation.LayoutRes
 import androidx.core.content.ContextCompat
+import com.zj.player.R
 import com.zj.player.anim.ZFullValueAnimator
 import com.zj.player.base.InflateInfo
 import com.zj.player.base.LoadingMode
@@ -50,7 +51,7 @@ import kotlin.math.roundToInt
  * */
 
 @Suppress("unused", "MemberVisibilityCanBePrivate", "InflateParams", "ClickableViewAccessibility")
-open class BaseVideoController @JvmOverloads constructor(context: Context, attributeSet: AttributeSet? = null, def: Int = 0) : FrameLayout(context, attributeSet, def), Controller {
+open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: AttributeSet? = null, def: Int = 0) : FrameLayout(context, attributeSet, def), Controller {
 
     companion object {
         private const val dismissFullTools = 7817
@@ -91,7 +92,7 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
     protected var videoOverrideImageView: TouchScaleImageView? = null
     protected var videoOverrideImageShaderView: ImageView? = null
     protected var videoRoot: VideoRootView? = null
-    protected var controller: ZController? = null
+    protected var controller: ZController<*, *>? = null
     protected var autoPlay = false
     protected var isFull = false
     protected var isStartTrack = false
@@ -158,7 +159,7 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
 
         override fun onTouchActionEvent(event: MotionEvent, lastX: Float, lastY: Float, orientation: TrackOrientation?): Boolean {
             return fullScreenDialog?.let {
-                if (isFullScreen && it.parent != null && !it.isMaxFull()) this@BaseVideoController.onTouchActionEvent(videoRoot, event, lastX, lastY, orientation) else false
+                if (isFullScreen && it.parent != null && !it.isMaxFull()) this@ZVideoView.onTouchActionEvent(videoRoot, event, lastX, lastY, orientation) else false
             } ?: false
         }
     }
@@ -174,10 +175,10 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
     }
 
     /**
-     * config it in [R.styleable.BaseVideoController]
+     * config it in [R.styleable.ZVideoView]
      * */
     private fun initView(context: Context, attributeSet: AttributeSet?) {
-        val ta = context.obtainStyledAttributes(attributeSet, R.styleable.BaseVideoController)
+        val ta = context.obtainStyledAttributes(attributeSet, R.styleable.ZVideoView)
         fun <T : View> setDefaultControllerStyle(id: Int, mode: Int): T? {
             return when (mode) {
                 1, 2 -> {
@@ -189,23 +190,23 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
             }
         }
         try {
-            val defaultControllerVisibility = ta.getInt(R.styleable.BaseVideoController_defaultControllerVisibility, Constance.defaultControllerVisibility)
-            val muteIconEnable = ta.getInt(R.styleable.BaseVideoController_muteIconEnable, Constance.muteIconEnable)
-            val speedIconEnable = ta.getInt(R.styleable.BaseVideoController_speedIconEnable, Constance.speedIconEnable)
-            val secondarySeekBarEnable = ta.getInt(R.styleable.BaseVideoController_secondarySeekBarEnable, Constance.secondarySeekBarEnable)
-            val fullScreenEnable = ta.getInt(R.styleable.BaseVideoController_fullScreenEnable, Constance.fullScreenEnAble)
-            autoFullTools = ta.getBoolean(R.styleable.BaseVideoController_autoFullTools, false)
-            autoFullInterval = ta.getInt(R.styleable.BaseVideoController_autoFullInterval, 3000)
-            fullScreenTransactionTime = ta.getInt(R.styleable.BaseVideoController_fullScreenTransactionTime, fullScreenTransactionTime)
-            fullMaxScreenEnable = ta.getBoolean(R.styleable.BaseVideoController_fullMaxScreenEnable, Constance.fullMaxScreenEnable)
-            isDefaultMaxScreen = ta.getBoolean(R.styleable.BaseVideoController_isDefaultMaxScreen, Constance.isDefaultMaxScreen)
-            lockScreenRotation = ta.getInt(R.styleable.BaseVideoController_lockScreenRotation, -1)
-            scrollXEnabled = ta.getBoolean(R.styleable.BaseVideoController_scrollXEnabled, true)
-            muteIsUseGlobal = ta.getBoolean(R.styleable.BaseVideoController_useMuteGlobal, false)
-            muteDefault = ta.getBoolean(R.styleable.BaseVideoController_muteDefault, false)
-            keepScreenOnWhenPlaying = ta.getBoolean(R.styleable.BaseVideoController_keepScreenOnWhenPlaying, false)
-            isTransactionNavigation = ta.getBoolean(R.styleable.BaseVideoController_isTransactionNavigation, false)
-            enablePlayAnimation = ta.getBoolean(R.styleable.BaseVideoController_enablePlayAnimation, true)
+            val defaultControllerVisibility = ta.getInt(R.styleable.ZVideoView_defaultControllerVisibility, Constance.defaultControllerVisibility)
+            val muteIconEnable = ta.getInt(R.styleable.ZVideoView_muteIconEnable, Constance.muteIconEnable)
+            val speedIconEnable = ta.getInt(R.styleable.ZVideoView_speedIconEnable, Constance.speedIconEnable)
+            val secondarySeekBarEnable = ta.getInt(R.styleable.ZVideoView_secondarySeekBarEnable, Constance.secondarySeekBarEnable)
+            val fullScreenEnable = ta.getInt(R.styleable.ZVideoView_fullScreenEnable, Constance.fullScreenEnAble)
+            autoFullTools = ta.getBoolean(R.styleable.ZVideoView_autoFullTools, false)
+            autoFullInterval = ta.getInt(R.styleable.ZVideoView_autoFullInterval, 3000)
+            fullScreenTransactionTime = ta.getInt(R.styleable.ZVideoView_fullScreenTransactionTime, fullScreenTransactionTime)
+            fullMaxScreenEnable = ta.getBoolean(R.styleable.ZVideoView_fullMaxScreenEnable, Constance.fullMaxScreenEnable)
+            isDefaultMaxScreen = ta.getBoolean(R.styleable.ZVideoView_isDefaultMaxScreen, Constance.isDefaultMaxScreen)
+            lockScreenRotation = ta.getInt(R.styleable.ZVideoView_lockScreenRotation, -1)
+            scrollXEnabled = ta.getBoolean(R.styleable.ZVideoView_scrollXEnabled, true)
+            muteIsUseGlobal = ta.getBoolean(R.styleable.ZVideoView_useMuteGlobal, false)
+            muteDefault = ta.getBoolean(R.styleable.ZVideoView_muteDefault, false)
+            keepScreenOnWhenPlaying = ta.getBoolean(R.styleable.ZVideoView_keepScreenOnWhenPlaying, false)
+            isTransactionNavigation = ta.getBoolean(R.styleable.ZVideoView_isTransactionNavigation, false)
+            enablePlayAnimation = ta.getBoolean(R.styleable.ZVideoView_enablePlayAnimation, true)
             val view = LayoutInflater.from(context).inflate(R.layout.z_player_video_view, null, false)
             addView(view, LayoutParams(MATCH_PARENT, MATCH_PARENT))
             videoRoot = view?.findViewById(R.id.z_player_video_root)
@@ -229,22 +230,22 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
             touchListener?.setPadding(0.05f, 0.08f)
 
             loadingView?.let {
-                loadingIgnoreInterval = ta.getInt(R.styleable.BaseVideoController_loadingIgnoreTs, 0)
-                val loadingBackgroundColor = ta.getColor(R.styleable.BaseVideoController_loadingBackgroundColor, ContextCompat.getColor(context, R.color.z_player_color_trans_50))
-                val loadingRes = ta.getResourceId(R.styleable.BaseVideoController_loadingRes, R.drawable.z_player_loading_progressbar)
-                val failRes = ta.getResourceId(R.styleable.BaseVideoController_failRes, R.mipmap.z_player_video_loading_fail)
-                val loadingIconWidth = ta.getDimension(R.styleable.BaseVideoController_loadingIconWidth, 0f)
-                val loadingIconHeight = ta.getDimension(R.styleable.BaseVideoController_loadingIconHeight, 0f)
-                val failIconWidth = ta.getDimension(R.styleable.BaseVideoController_failIconWidth, 0f)
-                val failIconHeight = ta.getDimension(R.styleable.BaseVideoController_failIconHeight, 0f)
-                val hintTextColor = ta.getColor(R.styleable.BaseVideoController_hintTextColor, ContextCompat.getColor(context, R.color.z_player_color_loading))
-                val refreshTextColor = ta.getColor(R.styleable.BaseVideoController_refreshTextColor, ContextCompat.getColor(context, R.color.z_player_color_gray))
-                val loadingText = ta.getString(R.styleable.BaseVideoController_loadingText)
-                val failText = ta.getString(R.styleable.BaseVideoController_failText)
-                val refreshHintText = ta.getString(R.styleable.BaseVideoController_refreshHintText)
+                loadingIgnoreInterval = ta.getInt(R.styleable.ZVideoView_loadingIgnoreTs, 0)
+                val loadingBackgroundColor = ta.getColor(R.styleable.ZVideoView_loadingBackgroundColor, ContextCompat.getColor(context, R.color.z_player_color_trans_50))
+                val loadingRes = ta.getResourceId(R.styleable.ZVideoView_loadingRes, R.drawable.z_player_loading_progressbar)
+                val failRes = ta.getResourceId(R.styleable.ZVideoView_failRes, R.mipmap.z_player_video_loading_fail)
+                val loadingIconWidth = ta.getDimension(R.styleable.ZVideoView_loadingIconWidth, 0f)
+                val loadingIconHeight = ta.getDimension(R.styleable.ZVideoView_loadingIconHeight, 0f)
+                val failIconWidth = ta.getDimension(R.styleable.ZVideoView_failIconWidth, 0f)
+                val failIconHeight = ta.getDimension(R.styleable.ZVideoView_failIconHeight, 0f)
+                val hintTextColor = ta.getColor(R.styleable.ZVideoView_hintTextColor, ContextCompat.getColor(context, R.color.z_player_color_loading))
+                val refreshTextColor = ta.getColor(R.styleable.ZVideoView_refreshTextColor, ContextCompat.getColor(context, R.color.z_player_color_gray))
+                val loadingText = ta.getString(R.styleable.ZVideoView_loadingText)
+                val failText = ta.getString(R.styleable.ZVideoView_failText)
+                val refreshHintText = ta.getString(R.styleable.ZVideoView_refreshHintText)
                 val density = context.resources.displayMetrics.density
-                val hintTextSize = ta.getDimension(R.styleable.BaseVideoController_hintTextSize, density * 14f)
-                val refreshTextSize = ta.getDimension(R.styleable.BaseVideoController_refreshTextSize, density * 14f)
+                val hintTextSize = ta.getDimension(R.styleable.ZVideoView_hintTextSize, density * 14f)
+                val refreshTextSize = ta.getDimension(R.styleable.ZVideoView_refreshTextSize, density * 14f)
                 it.setBackground(loadingBackgroundColor)
                 it.setLoadingDrawable(loadingRes)
                 it.setNoDataDrawable(failRes)
@@ -351,7 +352,7 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
         return keepScreenOnWhenPlaying
     }
 
-    override fun onControllerBind(controller: ZController?) {
+    override fun onControllerBind(controller: ZController<*, *>?) {
         this.controller = controller
     }
 
@@ -612,7 +613,7 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
     }
 
     /**
-     * For information about [zPoint], see [BaseVideoController.addViewWithZPoint].
+     * For information about [zPoint], see [ZVideoView.addViewWithZPoint].
      * The difference is that calling this method provides a stable width and height under various conditions,
      * suitable for covering the full layout of the covered view, and can follow the full screen animation zoom
      * */
@@ -830,7 +831,7 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
 
     private val fullScreenListener = object : FullScreenListener {
         override fun onDisplayChanged(isShow: Boolean, payloads: Map<String, Any?>?) {
-            this@BaseVideoController.onDisplayChanged(isShow, payloads)
+            this@ZVideoView.onDisplayChanged(isShow, payloads)
         }
 
         override fun onFocusChange(dialog: BaseGestureFullScreenDialog, isMax: Boolean) {
@@ -849,7 +850,7 @@ open class BaseVideoController @JvmOverloads constructor(context: Context, attri
     private val fullContentListener = object : FullContentListener {
         override fun onDisplayChanged(isShow: Boolean, payloads: Map<String, Any?>?) {
             onTrack(isPlayable, start = false, end = true, formTrigDuration = 1.0f)
-            this@BaseVideoController.onDisplayChanged(isShow, payloads)
+            this@ZVideoView.onDisplayChanged(isShow, payloads)
         }
 
         override fun onContentLayoutInflated(content: View) {

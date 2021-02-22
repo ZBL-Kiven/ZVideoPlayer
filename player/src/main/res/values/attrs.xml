@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <declare-styleable name="BaseVideoController">
+    <declare-styleable name="ZVideoView">
         <attr name="loadingIgnoreTs" format="integer" />
         <attr name="loadingBackgroundColor" format="color|reference" />
         <attr name="loadingRes" format="reference" />

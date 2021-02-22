@@ -10,7 +10,7 @@ import androidx.annotation.MainThread
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.zj.player.R
-import com.zj.player.ZController
+import com.zj.player.z.ZController
 import com.zj.player.controller.BaseListVideoController
 import com.zj.player.list.VideoControllerIn
 import com.zj.player.logs.ZPlayerLogs
@@ -28,7 +28,7 @@ import kotlin.math.min
  **/
 abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : RecyclerView.ViewHolder>(private val adapter: RecyclerView.Adapter<VH>) : AdapterDelegateIn<T, VH>, VideoControllerIn {
 
-    private var controller: ZController? = null
+    private var controller: ZController<*, *>? = null
     private var curPlayingIndex: Int = -1
     private var isStopWhenItemDetached = true
     private var isAutoPlayWhenItemAttached = true
@@ -37,14 +37,19 @@ abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : Rec
     private var recyclerView: RecyclerView? = null
     private val waitingForPlayClicked = R.id.delegate_waiting_for_play_clicked
     private val waitingForPlayScrolled = R.id.delegate_waiting_for_play_scrolled
-    protected abstract fun createZController(vc: V): ZController
+    protected abstract fun createZController(data: T?, vc: V): ZController<*, *>
     protected abstract fun getViewController(holder: VH?): V?
+
     protected abstract fun getItem(p: Int): T?
     protected abstract fun isInflateMediaType(d: T?): Boolean
     protected abstract fun getPathAndLogsCallId(d: T?): Pair<String, Any?>?
     protected abstract fun onBindData(holder: VH?, p: Int, d: T?, playAble: Boolean, vc: V?, pl: MutableList<Any>?)
     protected open fun onBindTypeData(holder: SoftReference<VH>?, d: T?, p: Int, pl: MutableList<Any>?) {}
     protected open fun onBindDelegate(holder: VH?, p: Int, d: T?, pl: MutableList<Any>?) {}
+    protected open fun checkControllerMatching(data: T?, controller: ZController<*, *>?): Boolean {
+        return controller != null
+    }
+
     protected abstract val isSourcePlayAble: (d: T?) -> Boolean
 
     /**
@@ -153,9 +158,9 @@ abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : Rec
         handler = null
     }
 
-    private fun onBindVideoView(vc: V) {
-        if (controller == null) {
-            controller = createZController(vc)
+    private fun onBindVideoView(d: T?, vc: V) {
+        if (!checkControllerMatching(d, controller)) {
+            controller = createZController(d, vc)
         } else {
             controller?.updateViewController(vc)
         }
@@ -193,7 +198,7 @@ abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : Rec
                     vc.post {
                         if (p == index) {
                             if (playAble && vc.isPlayable) {
-                                if (!vc.isBindingController) onBindVideoView(vc)
+                                if (!vc.isBindingController) onBindVideoView(d, vc)
                                 playOrResume(vc, p, d, fromUser)
                             } else {
                                 if (controller?.isPlaying() == true) {
@@ -212,7 +217,8 @@ abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : Rec
             getPathAndLogsCallId(d)?.let {
                 vc.post {
                     if (curPlayingIndex == p && controller?.getPath() == it.first && controller?.isPlaying() == true) {
-                        if (!vc.isBindingController) onBindVideoView(vc)
+                        if (!vc.isBindingController) onBindVideoView(d, vc)
+                        if (!checkControllerMatching(d, controller)) controller = createZController(d, vc)
                         controller?.playOrResume(it.first, it.second)
                     } else vc.resetWhenDisFocus()
                 }
@@ -262,7 +268,7 @@ abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : Rec
             ZPlayerLogs.onError(NullPointerException("use a null view controller ,means show what?"))
             return
         }
-        controller = controller ?: createZController(vc)
+        controller = if (checkControllerMatching(data, controller)) controller else createZController(data, vc)
         controller?.let { ctr ->
             getPathAndLogsCallId(data ?: getItem(p))?.let { d ->
                 fun play() {

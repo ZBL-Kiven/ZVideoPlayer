@@ -4,12 +4,12 @@ import android.content.Context;
 
 import androidx.annotation.Nullable;
 
-import com.zj.player.ZRender;
+import com.zj.player.base.BaseRender;
 
 /**
  * @author ZJJ on 2020.6.16
  */
-public interface PlayerEventController {
+public interface PlayerEventController<R extends BaseRender> {
 
     void onLoading(String path, boolean isRegulate);
 
@@ -30,7 +30,7 @@ public interface PlayerEventController {
     void onSeekChanged(int playingPosition, int buffered, boolean fromUser, long videoSize);
 
     @Nullable
-    ZRender getPlayerView();
+    R getPlayerView();
 
     long getProgressInterval();
 

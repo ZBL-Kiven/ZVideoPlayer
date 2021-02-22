@@ -1,4 +1,4 @@
-package com.zj.player
+package com.zj.player.z
 
 import android.content.Context
 import android.content.res.Resources
@@ -9,10 +9,12 @@ import android.widget.LinearLayout
 import android.widget.RelativeLayout
 import android.widget.RelativeLayout.CENTER_IN_PARENT
 import androidx.annotation.IntRange
+import com.zj.player.base.BaseController
+import com.zj.player.base.BasePlayer
+import com.zj.player.base.BaseRender
 import com.zj.player.ut.Constance.CORE_LOG_ABLE
 import com.zj.player.ut.Controller
 import com.zj.player.ut.PlayerEventController
-import com.zj.player.config.VideoConfig
 import com.zj.player.logs.BehaviorData
 import com.zj.player.logs.BehaviorLogsTable
 import com.zj.player.logs.ZPlayerLogs
@@ -26,11 +28,11 @@ import java.lang.NullPointerException
  * A controller that interacts with the user interface, player, and renderer.
  * */
 @Suppress("unused", "MemberVisibilityCanBePrivate")
-class ZController private constructor(private var player: ZPlayer?, viewController: Controller?) : PlayerEventController {
+class ZController<P : BasePlayer<R>, R : BaseRender> internal constructor(private var player: P?, private var renderCls: Class<R>, viewController: Controller?) : BaseController, PlayerEventController<R> {
 
     private var seekProgressInterval: Long = 16
-    private var render: ZRender? = null
     private var curAccessKey: String = ""
+    private var render: R? = null
     private var isPausedByLifecycle = false
     private var isIgnoreNullControllerGlobal = false
     private var playingStateListener: PlayStateChangeListener? = null
@@ -46,37 +48,12 @@ class ZController private constructor(private var player: ZPlayer?, viewControll
 
     init {
         this.viewController = viewController
-        curAccessKey = runWithPlayer { it.setViewController(this) } ?: ""
+        curAccessKey = runWithPlayer { it.setController(this) } ?: ""
+        withRenderAndControllerView(false)
     }
 
-    /**
-     * build a video controller.
-     * require a viewController and a player ex [ZPlayer]
-     * the uniqueId is required and it also binding with a viewController, changed if recreate or viewController [updateViewController] updated.
-     * */
     companion object {
-
         private const val releaseKey = " - released - "
-
-        fun build(viewController: Controller): ZController {
-            return build(viewController, ZPlayer(VideoConfig.create()))
-        }
-
-        fun build(viewController: Controller, config: VideoConfig): ZController {
-            return build(viewController, ZPlayer(config))
-        }
-
-        fun <T : ZPlayer> build(viewController: Controller, player: T): ZController {
-            return ZController(player, viewController)
-        }
-
-        /**
-         * After setting this property, all ViewController instances configured with app:useMuteGlobal in xml take effect。
-         * @see BaseVideoController.muteIsUseGlobal  bind to [BaseVideoController.muteGlobalDefault]
-         * */
-        fun setGlobalMuteDefault(isMute: Boolean) {
-            BaseVideoController.setGlobalMuteDefault(isMute)
-        }
     }
 
     private fun withRenderAndControllerView(needed: Boolean): Controller? {
@@ -84,13 +61,12 @@ class ZController private constructor(private var player: ZPlayer?, viewControll
             val c = getController()
             if (c == null) {
                 (render?.parent as? ViewGroup)?.removeView(render)
-                render = null
                 stopNow(false, isRegulate = false)
                 return null
             }
             val info = c.controllerInfo ?: throw NullPointerException("the controller view is required")
             val ctr = info.container ?: throw NullPointerException("the view controller post a null container parent , which the renderer add to?")
-            if (render == null) render = ZRender(ctr.context ?: throw NullPointerException("context should not be null!"))
+            if (render == null) render = BaseRender.create(ctr.context ?: throw NullPointerException("context should not be null!"), renderCls)
             render?.let { r ->
                 val parent = (r.parent as? ViewGroup) ?: if (r.parent != null) throw IllegalArgumentException("the renderer added in and without a viewGroup?") else null
                 if (parent == ctr) {
@@ -240,6 +216,22 @@ class ZController private constructor(private var player: ZPlayer?, viewControll
         return player?.getSpeed() ?: 1f
     }
 
+    fun isDefaultPlayerType(): Boolean {
+        return checkPlayerType(ZVideoPlayer::class.java)
+    }
+
+    fun isDefaultRendererType(): Boolean {
+        return checkRendererType(ZRender::class.java)
+    }
+
+    fun checkPlayerType(cls: Class<*>): Boolean {
+        return player?.let { cls == it::class.java } ?: false
+    }
+
+    fun checkRendererType(cls: Class<*>): Boolean {
+        return render?.let { cls == it::class.java } ?: false
+    }
+
     /**
      * Use another View to bind to the Controller. The bound ViewController will take effect immediately and receive the method callback from the player.
      * */
@@ -287,7 +279,7 @@ class ZController private constructor(private var player: ZPlayer?, viewControll
     }
 
 
-    private fun <T> runWithPlayer(throwMust: Boolean = true, block: (ZPlayer) -> T): T? {
+    private fun <T> runWithPlayer(throwMust: Boolean = true, block: (P) -> T): T? {
         return try {
             player?.let {
                 block(it) ?: return@runWithPlayer null
@@ -312,7 +304,7 @@ class ZController private constructor(private var player: ZPlayer?, viewControll
         ZPlayerLogs.onError(e, true)
     }
 
-    override fun getPlayerView(): ZRender? {
+    override fun getPlayerView(): R? {
         return render
     }
 

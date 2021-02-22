@@ -1,4 +1,4 @@
-package com.zj.player
+package com.zj.player.z
 
 import android.content.Context
 import android.graphics.Matrix
@@ -11,6 +11,7 @@ import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.text.TextOutput
 import com.google.android.exoplayer2.util.Assertions
 import com.google.android.exoplayer2.video.VideoListener
+import com.zj.player.base.BaseRender
 import com.zj.player.logs.BehaviorLogsTable
 import com.zj.player.logs.ZPlayerLogs
 import com.zj.player.ut.Constance.RESIZE_MODE_FIT
@@ -30,7 +31,7 @@ import com.zj.player.view.AspectRatioFrameLayout
  * It is not necessary to implement the [TextOutput] interface when barrage or other special effects are not required.
  * */
 
-open class ZRender @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) : AspectRatioFrameLayout(context, attrs, defStyleAttr), VideoListener, View.OnLayoutChangeListener {
+open class ZRender @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) : BaseRender(context, attrs, defStyleAttr), VideoListener, View.OnLayoutChangeListener {
 
     private var videoSurfaceView: View? = null
     private var player: Player? = null
@@ -164,7 +165,7 @@ open class ZRender @JvmOverloads constructor(context: Context, attrs: AttributeS
     /**
      * don`t forgot call this after your video finished
      * */
-    fun release() {
+    override fun release() {
         resetSurface()
         player = null
         renderEvent = null

@@ -2,12 +2,12 @@ package com.zj.player.controller
 
 import android.content.Context
 import android.util.AttributeSet
-import com.zj.player.BaseVideoController
+import com.zj.player.z.ZVideoView
 import com.zj.player.img.ImgLoader
 import com.zj.player.img.cache.ImageHandler
 import java.lang.ref.WeakReference
 
-abstract class BackgroundVideoController @JvmOverloads constructor(c: Context, attr: AttributeSet? = null, def: Int = 0) : BaseVideoController(c, attr, def) {
+abstract class BackgroundVideoController @JvmOverloads constructor(c: Context, attr: AttributeSet? = null, def: Int = 0) : ZVideoView(c, attr, def) {
 
     init {
         ImgLoader.autoTrimMemory(c)
