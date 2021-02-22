@@ -41,6 +41,7 @@ import com.zj.player.view.VideoLoadingView
 import com.zj.player.view.VideoRootView
 import java.lang.ref.WeakReference
 import java.text.DecimalFormat
+import kotlin.math.abs
 import kotlin.math.roundToInt
 
 /**
@@ -118,7 +119,7 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
     private var muteDefault: Boolean = false
     private var muteIsUseGlobal: Boolean = false
     private var isTransactionNavigation: Boolean = false
-    open val supportedSpeedList = floatArrayOf(1f, 1.5f, 2f)
+    open val supportedSpeedList = floatArrayOf(1.0f, 1.5f, 2f)
     protected var isFullScreen: Boolean = false
         set(value) {
             if (field == value) return
@@ -413,7 +414,20 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
         if (muteIsUseGlobal) muteGlobalDefault = nextState
         muteDefault = nextState
         muteView?.isSelected = nextState
-        curSpeedIndex = supportedSpeedList.indexOfLast { it in (speed - 0.4f)..(speed + 0.5f) }
+        curSpeedIndex = 0
+        var lastMinValue = 100000f
+        supportedSpeedList.forEachIndexed { index, fl ->
+            val of = abs(speed - fl)
+            if (of == 0f) {
+                lastMinValue = 0f
+                curSpeedIndex = index
+                return@forEachIndexed
+            }
+            if (of < lastMinValue) {
+                lastMinValue = of
+                curSpeedIndex = index
+            }
+        }
         val curSpeed = supportedSpeedList[curSpeedIndex]
         val t = if (curSpeed == curSpeed.roundToInt().toFloat()) "${curSpeed.roundToInt()}" else DecimalFormat("#.0").format(curSpeed)
         speedView?.text = context.getString(R.string.z_player_str_speed, t)
@@ -441,18 +455,19 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
             showOrHidePlayBtn(true, withState = false)
             full(false)
         }
-        onSeekChanged(0, 0, false, 0)
+        onSeekChanged(0, 0, false, 0, 0)
     }
 
-    override fun onSeekChanged(seek: Int, buffered: Int, fromUser: Boolean, videoSize: Long) {
+    override fun onSeekChanged(seek: Int, buffered: Int, fromUser: Boolean, played: Long, videoSize: Long) {
+        if (isTickingSeekBarFromUser) return
         if (!fromUser) {
             seekBar?.progress = seek
             seekBar?.secondaryProgress = buffered
             seekBarSmall?.progress = seek
             onLoadingEvent(LoadingMode.None, true)
         }
-        val startProgress = videoSize / 100f * seek
-        tvStart?.text = getDuration(startProgress.toLong())
+        tvStart?.text = getDuration(played)
+        tvEnd?.text = getDuration(videoSize)
     }
 
     override fun onSeekingLoading(path: String?) {
@@ -465,7 +480,7 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
         seekBar?.isSelected = false
         isInterruptPlayBtnAnim = true
         seekBarSmall?.visibility = View.GONE
-        onSeekChanged(0, 0, false, 0)
+        onSeekChanged(0, 0, false, 0, 0)
         showOrHidePlayBtn(false)
         onLoadingEvent(LoadingMode.Fail)
     }
@@ -940,7 +955,7 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
         seekBar?.isEnabled = false
         isInterruptPlayBtnAnim = true
         seekBarSmall?.visibility = View.GONE
-        onSeekChanged(0, 0, false, 0)
+        onSeekChanged(0, 0, false, 0, 0)
         if (isRegulate) showOrHidePlayBtn(isShowPlayBtn, withState = false)
         full(false, isSetNow = isNow)
         muteView?.isSelected = if (muteIsUseGlobal) muteGlobalDefault else muteDefault

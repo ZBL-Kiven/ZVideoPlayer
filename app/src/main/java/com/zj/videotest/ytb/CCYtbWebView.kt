@@ -3,16 +3,13 @@ package com.zj.videotest.ytb
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Bitmap
-import android.view.View
-import android.webkit.WebResourceRequest
-import android.webkit.WebView
+import android.view.ViewGroup
 import com.zj.webkit.CCWebView
-import com.zj.youtube.proctol.YouTubePlayerListener
+import kotlin.math.min
 
 @SuppressLint("ViewConstructor")
 class CCYtbWebView(context: Context, private val ytbWebBridge: YtbWebBridge) : CCWebView<YtbWebBridge>(context) {
 
-    private val isBackgroundPlaybackEnabled = false
     override val javaScriptClient: YtbWebBridge; get() = ytbWebBridge
     override val webDebugEnable: Boolean; get() = true
 
@@ -21,8 +18,8 @@ class CCYtbWebView(context: Context, private val ytbWebBridge: YtbWebBridge) : C
         return result ?: Bitmap.createBitmap(1, 1, Bitmap.Config.RGB_565)
     }
 
-    override fun onWindowVisibilityChanged(visibility: Int) {
-        if (isBackgroundPlaybackEnabled && (visibility == View.GONE || visibility == View.INVISIBLE)) return
-        super.onWindowVisibilityChanged(visibility)
+    override fun onSizeChanged(w: Int, h: Int, ow: Int, oh: Int) {
+        val h1 = (parent as? ViewGroup)?.height ?: h
+        super.onSizeChanged(w, min(w, h1), ow, oh)
     }
 }

@@ -11,9 +11,7 @@
             position: fixed;
         }
 
-
     </style>
-
     <head>
         <meta
                 name="viewport"
@@ -107,7 +105,7 @@
                 timerId = setInterval(function() {
                     YouTubePlayerBridge.sendVideoCurrentTime( player.getCurrentTime() )
                     YouTubePlayerBridge.sendVideoLoadedFraction( player.getVideoLoadedFraction() )
-                }, 100 );
+                }, 500 );
             }
         }
 

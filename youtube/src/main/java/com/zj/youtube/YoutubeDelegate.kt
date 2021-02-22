@@ -3,6 +3,7 @@ package com.zj.youtube
 import android.os.Handler
 import android.os.Looper
 import android.os.Message
+import android.view.ViewGroup
 import android.webkit.WebView
 import androidx.annotation.CallSuper
 import com.zj.youtube.constance.PlayerConstants
@@ -20,7 +21,7 @@ abstract class YoutubeDelegate(debugAble: Boolean) : YouTubePlayerListener {
     var curPlayingDuration = 0L
     var totalDuration = 0L
     var curPlayingRate = 0f
-    var curVolume = 0
+    var curVolume = 1
     var isPageReady = false
     private var pendingIfNotReady: PendingLoadTask? = null
     protected var playerState: PlayerConstants.PlayerState = PlayerConstants.PlayerState.UNKNOWN
@@ -29,7 +30,7 @@ abstract class YoutubeDelegate(debugAble: Boolean) : YouTubePlayerListener {
         if (debugAble) Utils.openDebug()
     }
 
-    abstract fun onSeekChanged()
+    abstract fun onSeekChanged(fromUser: Boolean)
 
     abstract fun onSeekParsed(progress: Int, fromUser: Boolean)
 
@@ -59,11 +60,11 @@ abstract class YoutubeDelegate(debugAble: Boolean) : YouTubePlayerListener {
     }
 
     fun play(webView: WebView) {
-        mainThreadHandler.postDelayed({ webView.loadUrl("javascript:playVideo()") }, 3000)
+        mainThreadHandler.post { webView.loadUrl("javascript:playVideo()") }
     }
 
     fun pause(webView: WebView) {
-        mainThreadHandler.postDelayed({ webView.loadUrl("javascript:pauseVideo()") }, 10000)
+        mainThreadHandler.post { webView.loadUrl("javascript:pauseVideo()") }
     }
 
     fun stop(webView: WebView) {
@@ -74,6 +75,7 @@ abstract class YoutubeDelegate(debugAble: Boolean) : YouTubePlayerListener {
     }
 
     fun setVolume(webView: WebView, volumePercent: Int) {
+        curVolume = volumePercent
         if (volumePercent <= 0) mainThreadHandler.post { webView.loadUrl("javascript:mute()") } else {
             mainThreadHandler.post {
                 webView.loadUrl("javascript:unMute()")
@@ -94,6 +96,7 @@ abstract class YoutubeDelegate(debugAble: Boolean) : YouTubePlayerListener {
             webView.clearHistory()
             webView.clearFormData()
             webView.removeAllViews()
+            (webView.parent as? ViewGroup)?.removeView(webView)
             webView.destroy()
         }
         curPath = ""
@@ -110,10 +113,10 @@ abstract class YoutubeDelegate(debugAble: Boolean) : YouTubePlayerListener {
 
     fun seekNow(webView: WebView, progress: Int, fromUser: Boolean) {
         val seekProgress = (max(0f, min(100, progress) / 100f * max(totalDuration, 1) - 1) / 1000f).toLong()
-        mainThreadHandler.post { webView.loadUrl("javascript:seekTo($seekProgress,$fromUser)") }
-        if (fromUser) {
-            curPlayingDuration = seekProgress
-            onSeekChanged()
+        curPlayingDuration = seekProgress
+        mainThreadHandler.post {
+            webView.loadUrl("javascript:seekTo($seekProgress,$fromUser)")
+            onSeekChanged(fromUser)
         }
     }
 
@@ -156,20 +159,20 @@ abstract class YoutubeDelegate(debugAble: Boolean) : YouTubePlayerListener {
     @CallSuper
     override fun onCurrentSecond(second: Long) {
         curPlayingDuration = second * 1000L
-        onSeekChanged()
+        mainThreadHandler.post { onSeekChanged(false) }
     }
 
     @CallSuper
     override fun onVideoDuration(duration: Long) {
         Utils.log("on video duration parsed : $duration")
         totalDuration = duration * 1000L
-        onSeekChanged()
+        mainThreadHandler.post { onSeekChanged(false) }
     }
 
     @CallSuper
     override fun onVideoLoadedFraction(loadedFraction: Float) {
         curBuffering = loadedFraction
-        onSeekChanged()
+        mainThreadHandler.post { onSeekChanged(false) }
     }
 
     @CallSuper

@@ -27,7 +27,7 @@ public interface PlayerEventController<R extends BaseRender> {
 
     void onSeekingLoading(String path, boolean isRegulate);
 
-    void onSeekChanged(int playingPosition, int buffered, boolean fromUser, long videoSize);
+    void onSeekChanged(int seek, int buffered, boolean fromUser, long played, long videoSize);
 
     @Nullable
     R getPlayerView();

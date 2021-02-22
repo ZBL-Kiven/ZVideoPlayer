@@ -2,16 +2,10 @@ package com.zj.videotest.controllers
 
 import android.content.Context
 import android.util.AttributeSet
-import android.util.Log
-import android.view.*
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.gif.GifDrawable
-import com.zj.player.controller.BaseListVideoController
-import com.zj.player.full.TrackOrientation
 import com.zj.player.img.ImgLoader
 import com.zj.videotest.controllers.scroller.ScrollerController
-import com.zj.videotest.controllers.scroller.ViewScroller
-import com.zj.views.ut.DPUtils
 
 class CCVideoController @JvmOverloads constructor(c: Context, attr: AttributeSet? = null, def: Int = 0) : ScrollerController(c, attr, def) {
 
@@ -35,11 +29,6 @@ class CCVideoController @JvmOverloads constructor(c: Context, attr: AttributeSet
         (thumb.drawable as? GifDrawable)?.let {
             if (stop) it.stop() else it.start()
         }
-    }
-
-    override fun onSeekChanged(seek: Int, buffered: Int, fromUser: Boolean, videoSize: Long) {
-        super.onSeekChanged(seek, buffered, fromUser, videoSize)
-        if (fromUser) Log.e("=-=-=", "$seek")
     }
 
     override fun completing(path: String, isRegulate: Boolean) {

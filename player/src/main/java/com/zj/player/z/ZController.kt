@@ -316,9 +316,9 @@ class ZController<P : BasePlayer<R>, R : BaseRender> internal constructor(privat
         log("the video had rendered a first frame !")
     }
 
-    override fun onSeekChanged(seek: Int, buffered: Int, fromUser: Boolean, videoSize: Long) {
+    override fun onSeekChanged(seek: Int, buffered: Int, fromUser: Boolean, played: Long, videoSize: Long) {
         if (fromUser) log("on seek changed to $seek")
-        withRenderAndControllerView(true)?.onSeekChanged(seek, buffered, fromUser, videoSize)
+        withRenderAndControllerView(true)?.onSeekChanged(seek, buffered, fromUser, played, videoSize)
     }
 
     override fun onSeekingLoading(path: String?, isRegulate: Boolean) {

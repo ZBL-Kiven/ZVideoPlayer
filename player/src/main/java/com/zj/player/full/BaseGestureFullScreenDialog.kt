@@ -419,14 +419,6 @@ internal class BaseGestureFullScreenDialog constructor(context: Context, private
         }
     }
 
-    fun onResume() {
-        changeSystemWindowVisibility(true)
-    }
-
-    fun onStopped() {
-        changeSystemWindowVisibility(false)
-    }
-
     fun lockScreenRotation(isLock: Boolean): Boolean {
         isScreenRotateLocked = isLock
         return checkSelfScreenLockAvailable(isLock)
@@ -456,6 +448,7 @@ internal class BaseGestureFullScreenDialog constructor(context: Context, private
 
     override fun onWindowFocusChanged(hasFocus: Boolean) {
         super.onWindowFocusChanged(hasFocus)
+        if (hasFocus) changeSystemWindowVisibility(true)
         checkSelfScreenLockAvailable(isScreenRotateLocked)
         config.onFullContentListener?.onFocusChange(this, isMaxFull)
     }
