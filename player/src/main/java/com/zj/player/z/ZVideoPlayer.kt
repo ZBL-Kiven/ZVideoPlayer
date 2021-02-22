@@ -1,6 +1,5 @@
 package com.zj.player.z
 
-import android.app.Activity
 import android.content.Context
 import android.net.Uri
 import android.os.Handler
@@ -62,7 +61,6 @@ open class ZVideoPlayer(var config: VideoConfig = VideoConfig.create()) : BasePl
         private const val HANDLE_SEEK = 10101
         private const val HANDLE_PROGRESS = 10102
         private const val HANDLE_STATE = 10103
-        private const val clearFlag = 78916
         @Suppress("DEPRECATION") val stableFlag = WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD
         @Suppress("DEPRECATION") val flag = WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON or WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON
     }
@@ -74,6 +72,8 @@ open class ZVideoPlayer(var config: VideoConfig = VideoConfig.create()) : BasePl
     private var controller: PlayerEventController<ZRender>? = null
     private var autoPlay = false
     private var _curLookedProgress = 0
+    private var curVolume = 0
+    private var maxVolume = 0
 
     private var curAccessKey: String = ""
         get() {
@@ -89,7 +89,6 @@ open class ZVideoPlayer(var config: VideoConfig = VideoConfig.create()) : BasePl
             HANDLE_STATE -> synchronized(curState) {
                 curState = it.obj as VideoState
             }
-            clearFlag -> checkIsMakeScreenOn(it.arg1 == 1)
         }
         return@Handler false
     }
@@ -132,7 +131,6 @@ open class ZVideoPlayer(var config: VideoConfig = VideoConfig.create()) : BasePl
                         field = value
                         it.playWhenReady = true
                     }
-                    setScreenOnMode(true, 100)
                     startProgressListen()
                     controller?.onPlay(currentPlayPath(), false)
                 }
@@ -143,7 +141,6 @@ open class ZVideoPlayer(var config: VideoConfig = VideoConfig.create()) : BasePl
 
                 VideoState.COMPLETED -> {
                     setPlayerState(VideoState.STOP)
-                    setScreenOnMode(false)
                     controller?.onCompleted(currentPlayPath(), false)
                 }
 
@@ -151,7 +148,6 @@ open class ZVideoPlayer(var config: VideoConfig = VideoConfig.create()) : BasePl
                     if (isPause()) return
                     runWithPlayer { it.playWhenReady = false }
                     stopProgressListen()
-                    setScreenOnMode(false)
                     val hideNotify = (value.obj() as? Boolean) ?: false
                     if (!hideNotify) controller?.onPause(currentPlayPath(), false)
                 }
@@ -161,7 +157,6 @@ open class ZVideoPlayer(var config: VideoConfig = VideoConfig.create()) : BasePl
                     if (isStop()) return
                     if (isPlaying()) setPlayerState(VideoState.PAUSE)
                     resetAndStop(true, isRegulate = false, e = error)
-                    setScreenOnMode(false)
                 }
 
                 VideoState.DESTROY -> {
@@ -462,16 +457,18 @@ open class ZVideoPlayer(var config: VideoConfig = VideoConfig.create()) : BasePl
         return player?.playbackParameters?.speed ?: 1f
     }
 
-    override fun setVolume(volume: Float) {
+    override fun setVolume(volume: Int, maxVolume: Int) {
+        this.curVolume = volume
+        this.maxVolume = maxVolume
         runWithPlayer {
             log("video set volume to $volume", BehaviorLogsTable.newVolume(currentCallId(), volume))
-            it.volume = volume
+            it.volume = volume * 1.0f / maxVolume
             controller?.onPlayerInfo(volume, getSpeed())
         }
     }
 
-    override fun getVolume(): Float {
-        return player?.volume ?: 1f
+    override fun getVolume(): Int {
+        return max(((player?.volume ?: 0f) * maxVolume).toInt(), curVolume)
     }
 
     override fun autoPlay(autoPlay: Boolean) {
@@ -509,29 +506,5 @@ open class ZVideoPlayer(var config: VideoConfig = VideoConfig.create()) : BasePl
 
     private fun log(s: String, bd: BehaviorData? = null) {
         if (CORE_LOG_ABLE) ZPlayerLogs.onLog(s, currentPlayPath(), curAccessKey, "ZPlayer", bd)
-    }
-
-    private fun setScreenOnMode(isScreenOn: Boolean, delay: Long = 10000) {
-        handler?.removeMessages(clearFlag)
-        handler?.sendMessageDelayed(Message.obtain().apply {
-            this.what = clearFlag
-            this.arg1 = if (isScreenOn) 1 else 0
-        }, delay)
-    }
-
-    private fun checkIsMakeScreenOn(isScreen: Boolean) {
-        try {
-            (controller?.context as? Activity)?.window?.let {
-                if (controller?.keepScreenOnWhenPlaying() != false) {
-                    if (isScreen) {
-                        it.addFlags(flag or stableFlag)
-                    } else {
-                        it.clearFlags(flag)
-                    }
-                }
-            }
-        } catch (e: java.lang.Exception) {
-            e.printStackTrace()
-        }
     }
 }

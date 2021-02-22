@@ -43,5 +43,5 @@ public interface PlayerEventController<R extends BaseRender> {
 
     void onFirstFrameRender();
 
-    void onPlayerInfo(float volume, float speed);
+    void onPlayerInfo(int volume, float speed);
 }

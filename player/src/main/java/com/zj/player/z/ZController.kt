@@ -1,15 +1,16 @@
 package com.zj.player.z
 
+import android.app.Activity
 import android.content.Context
 import android.content.res.Resources
 import android.view.Gravity
 import android.view.ViewGroup
+import android.view.WindowManager
 import android.widget.FrameLayout
 import android.widget.LinearLayout
 import android.widget.RelativeLayout
 import android.widget.RelativeLayout.CENTER_IN_PARENT
 import androidx.annotation.IntRange
-import com.zj.player.base.BaseController
 import com.zj.player.base.BasePlayer
 import com.zj.player.base.BaseRender
 import com.zj.player.ut.Constance.CORE_LOG_ABLE
@@ -28,7 +29,7 @@ import java.lang.NullPointerException
  * A controller that interacts with the user interface, player, and renderer.
  * */
 @Suppress("unused", "MemberVisibilityCanBePrivate")
-class ZController<P : BasePlayer<R>, R : BaseRender> internal constructor(private var player: P?, private var renderCls: Class<R>, viewController: Controller?) : BaseController, PlayerEventController<R> {
+class ZController<P : BasePlayer<R>, R : BaseRender> internal constructor(private var player: P?, private var renderCls: Class<R>, viewController: Controller?) : PlayerEventController<R> {
 
     private var seekProgressInterval: Long = 16
     private var curAccessKey: String = ""
@@ -68,6 +69,7 @@ class ZController<P : BasePlayer<R>, R : BaseRender> internal constructor(privat
             val ctr = info.container ?: throw NullPointerException("the view controller post a null container parent , which the renderer add to?")
             if (render == null) render = BaseRender.create(ctr.context ?: throw NullPointerException("context should not be null!"), renderCls)
             render?.let { r ->
+                r.init(this)
                 val parent = (r.parent as? ViewGroup) ?: if (r.parent != null) throw IllegalArgumentException("the renderer added in and without a viewGroup?") else null
                 if (parent == ctr) {
                     return@withRenderAndControllerView c
@@ -168,9 +170,9 @@ class ZController<P : BasePlayer<R>, R : BaseRender> internal constructor(privat
         runWithPlayer { it.setSpeed(s) }
     }
 
-    fun setVolume(volume: Float) {
+    fun setVolume(volume: Int, maxVolume: Int) {
         log("user set volume to $volume")
-        runWithPlayer { it.setVolume(volume) }
+        runWithPlayer { it.setVolume(volume, maxVolume) }
     }
 
     fun isPause(accurate: Boolean = false): Boolean {
@@ -208,8 +210,8 @@ class ZController<P : BasePlayer<R>, R : BaseRender> internal constructor(privat
         return runWithPlayer { it.isDestroyed(accurate) } ?: true
     }
 
-    fun getCurVolume(): Float {
-        return player?.getVolume() ?: 0f
+    fun getCurVolume(): Int {
+        return player?.getVolume() ?: 0
     }
 
     fun getCurSpeed(): Float {
@@ -298,30 +300,16 @@ class ZController<P : BasePlayer<R>, R : BaseRender> internal constructor(privat
         return seekProgressInterval
     }
 
-    override fun onError(e: Exception?) {
-        withRenderAndControllerView(false)?.onError(e)
-        onPlayingStateChanged(false, "error")
-        ZPlayerLogs.onError(e, true)
-    }
-
     override fun getPlayerView(): R? {
         return render
     }
 
+    override fun getContext(): Context? {
+        return getController()?.context
+    }
+
     override fun keepScreenOnWhenPlaying(): Boolean {
         return getController()?.keepScreenOnWhenPlaying() ?: true
-    }
-
-    override fun onLoading(path: String?, isRegulate: Boolean) {
-        log("on video loading ...", BehaviorLogsTable.controllerState("loading", getCallId(), getPath()))
-        onPlayingStateChanged(false, "loading")
-        withRenderAndControllerView(true)?.onLoading(path, isRegulate)
-    }
-
-    override fun onPause(path: String?, isRegulate: Boolean) {
-        log("on video loading ...", BehaviorLogsTable.controllerState("onPause", getCallId(), getPath()))
-        onPlayingStateChanged(false, "pause")
-        withRenderAndControllerView(true)?.onPause(path, isRegulate)
     }
 
     override fun onFirstFrameRender() {
@@ -339,33 +327,38 @@ class ZController<P : BasePlayer<R>, R : BaseRender> internal constructor(privat
         withRenderAndControllerView(true)?.onSeekingLoading(path)
     }
 
+    override fun onLoading(path: String?, isRegulate: Boolean) {
+        log("on video loading ...", BehaviorLogsTable.controllerState("loading", getCallId(), getPath()))
+        onPlayingStateChanged(false, "loading")
+        withRenderAndControllerView(true)?.onLoading(path, isRegulate)
+    }
+
     override fun onPrepare(path: String?, videoSize: Long, isRegulate: Boolean) {
         log("on video prepare ...", BehaviorLogsTable.controllerState("onPrepare", getCallId(), getPath()))
         onPlayingStateChanged(false, "prepared")
         withRenderAndControllerView(true)?.onPrepare(path, videoSize, isRegulate)
     }
 
-    override fun getContext(): Context? {
-        return getController()?.context
-    }
-
     override fun onPlay(path: String?, isRegulate: Boolean) {
         log("on video playing ...", BehaviorLogsTable.controllerState("onPlay", getCallId(), getPath()))
         onPlayingStateChanged(true, "play")
+        checkIsMakeScreenOn(true)
         withRenderAndControllerView(true)?.onPlay(path, isRegulate)
+    }
+
+    override fun onPause(path: String?, isRegulate: Boolean) {
+        log("on video loading ...", BehaviorLogsTable.controllerState("onPause", getCallId(), getPath()))
+        onPlayingStateChanged(false, "pause")
+        checkIsMakeScreenOn(false)
+        withRenderAndControllerView(true)?.onPause(path, isRegulate)
     }
 
     override fun onStop(notifyStop: Boolean, path: String?, isRegulate: Boolean) {
         log("on video stop ...", BehaviorLogsTable.controllerState("onStop", getCallId(), getPath()))
         onPlayingStateChanged(false, "stop")
+        checkIsMakeScreenOn(false)
         val c = withRenderAndControllerView(false)
         if (notifyStop) c?.onStop(path, isRegulate)
-    }
-
-    override fun onCompleted(path: String?, isRegulate: Boolean) {
-        log("on video completed ...", BehaviorLogsTable.controllerState("onCompleted", getCallId(), getPath()))
-        onPlayingStateChanged(false, "completed")
-        withRenderAndControllerView(false)?.onCompleted(path, isRegulate)
     }
 
     override fun completing(path: String?, isRegulate: Boolean) {
@@ -374,7 +367,20 @@ class ZController<P : BasePlayer<R>, R : BaseRender> internal constructor(privat
         withRenderAndControllerView(true)?.completing(path, isRegulate)
     }
 
-    override fun onPlayerInfo(volume: Float, speed: Float) {
+    override fun onCompleted(path: String?, isRegulate: Boolean) {
+        log("on video completed ...", BehaviorLogsTable.controllerState("onCompleted", getCallId(), getPath()))
+        onPlayingStateChanged(false, "completed")
+        checkIsMakeScreenOn(false)
+        withRenderAndControllerView(false)?.onCompleted(path, isRegulate)
+    }
+
+    override fun onError(e: Exception?) {
+        withRenderAndControllerView(false)?.onError(e)
+        onPlayingStateChanged(false, "error")
+        ZPlayerLogs.onError(e, true)
+    }
+
+    override fun onPlayerInfo(volume: Int, speed: Float) {
         log("on video upload player info ...", BehaviorLogsTable.controllerState("onUploadPlayerInfo", getCallId(), getPath()))
         withRenderAndControllerView(false)?.updateCurPlayerInfo(volume, speed)
     }
@@ -408,5 +414,31 @@ class ZController<P : BasePlayer<R>, R : BaseRender> internal constructor(privat
 
     internal fun recordLogs(s: String, modeName: String, bd: BehaviorData? = null) {
         if (CORE_LOG_ABLE) ZPlayerLogs.onLog(s, getPath(), curAccessKey, modeName, bd)
+    }
+
+    /**
+     * Keep screen on
+     * */
+    @Suppress("DEPRECATION") val stableFlag = WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD
+    @Suppress("DEPRECATION") val flag = WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON or WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON
+
+    private fun checkIsMakeScreenOn(isScreen: Boolean) {
+        try {
+            (context as? Activity)?.let { act ->
+                act.runOnUiThread {
+                    act.window?.let {
+                        if (keepScreenOnWhenPlaying()) {
+                            if (isScreen) {
+                                it.addFlags(flag or stableFlag)
+                            } else {
+                                it.clearFlags(flag)
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (e: java.lang.Exception) {
+            e.printStackTrace()
+        }
     }
 }

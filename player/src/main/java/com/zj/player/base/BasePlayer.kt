@@ -100,12 +100,12 @@ interface BasePlayer<R : BaseRender> {
     /**
      * Set current volume
      * */
-    fun setVolume(volume: Float)
+    fun setVolume(volume: Int, maxVolume: Int)
 
     /**
      * Get current volume
      * */
-    fun getVolume(): Float
+    fun getVolume(): Int
 
     /**
      * Set whether to automatically play when needed

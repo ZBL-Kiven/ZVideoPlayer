@@ -31,7 +31,7 @@ internal object BehaviorLogsTable {
         return PlayerBaseData(detail = "video set speed", name = "setVolume", params = mapOf(Pair("speed", s), Pair("callId", callId ?: "")))
     }
 
-    fun newVolume(callId: Any?, volume: Float): PlayerBaseData {
+    fun newVolume(callId: Any?, volume: Int): PlayerBaseData {
         return PlayerBaseData(detail = "video set volume", name = "setVolume", params = mapOf(Pair("volume", volume), Pair("callId", callId ?: "")))
     }
 

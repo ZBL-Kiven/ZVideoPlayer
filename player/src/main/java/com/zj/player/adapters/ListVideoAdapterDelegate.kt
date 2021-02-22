@@ -148,6 +148,10 @@ abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : Rec
         controller?.stopNow(true, isRegulate = true)
     }
 
+    fun cancelIfNotCurrent(path: String) {
+        if (controller?.getPath() != path) cancelAll()
+    }
+
     fun release() {
         handler?.removeCallbacksAndMessages(null)
         controller?.stopNow()
@@ -263,7 +267,7 @@ abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : Rec
         }
     }
 
-    private fun playOrResume(vc: V?, p: Int, data: T?, formUser: Boolean = false) {
+    private fun playOrResume(vc: V?, p: Int, data: T?, fromUser: Boolean = false) {
         if (vc == null) {
             ZPlayerLogs.onError(NullPointerException("use a null view controller ,means show what?"))
             return
@@ -279,7 +283,7 @@ abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : Rec
                 if ((ctr.isLoadData() && p != curPlayingIndex) || (ctr.isLoadData() && ctr.getPath() != d.first)) {
                     ctr.stopNow(false)
                 }
-                if (formUser || p != curPlayingIndex || (!vc.isCompleted && !ctr.isLoadData()) || (ctr.isLoadData() && !ctr.isPlaying() && !ctr.isPause(true) && !vc.isCompleted)) {
+                if (fromUser || p != curPlayingIndex || (!vc.isCompleted && !ctr.isLoadData()) || (ctr.isLoadData() && !ctr.isPlaying() && !ctr.isPause(true) && !vc.isCompleted)) {
                     play()
                 }
             }

@@ -270,8 +270,8 @@ internal class BaseGestureFullScreenDialog constructor(context: Context, private
         curScaleOffset = 1 - curYOffset
     }
 
-    private fun isAutoScaleFromTouchEnd(curYOffset: Float, formUser: Boolean): Boolean {
-        if (isMaxFull && formUser) return true
+    private fun isAutoScaleFromTouchEnd(curYOffset: Float, fromUser: Boolean): Boolean {
+        if (isMaxFull && fromUser) return true
         isDismissing = true
         val isScaleAuto = curYOffset <= MAX_DEEP_RATIO
         if (isScaleAuto) {

@@ -43,5 +43,5 @@ public interface Controller {
 
     void onError(@Nullable Exception e);
 
-    void updateCurPlayerInfo(float volume, float speed);
+    void updateCurPlayerInfo(int volume, float speed);
 }

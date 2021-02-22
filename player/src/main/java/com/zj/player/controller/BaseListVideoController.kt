@@ -36,12 +36,12 @@ abstract class BaseListVideoController @JvmOverloads constructor(c: Context, att
         curPlayingIndex = index
     }
 
-    override fun onPlayClick(v: View, formUser: Boolean) {
-        load(v, false, formUser)
+    override fun onPlayClick(v: View, fromUser: Boolean) {
+        load(v, false, fromUser)
     }
 
     override fun reload(v: View) {
-        load(v, reload = true, formUser = false)
+        load(v, reload = true, fromUser = false)
     }
 
     override fun onLoading(path: String, isRegulate: Boolean) {
@@ -54,11 +54,11 @@ abstract class BaseListVideoController @JvmOverloads constructor(c: Context, att
         playingStateListener?.invoke(this)
     }
 
-    private fun load(v: View, reload: Boolean, formUser: Boolean) {
+    private fun load(v: View, reload: Boolean, fromUser: Boolean) {
         if (controller?.isPlaying() == true) if (reload) super.reload(v) else super.onPlayClick(v, false) else {
             controller?.let {
                 if (reload) super.reload(v) else super.onPlayClick(v, false)
-            } ?: videoControllerIn?.waitingForPlay(curPlayingIndex, 20L, formUser)
+            } ?: videoControllerIn?.waitingForPlay(curPlayingIndex, 20L, fromUser)
         }
     }
 

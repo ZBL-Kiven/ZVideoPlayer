@@ -9,6 +9,7 @@ import android.content.Context
 import android.content.pm.ActivityInfo
 import android.content.res.Resources
 import android.media.AudioManager
+import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.util.AttributeSet
@@ -39,6 +40,7 @@ import com.zj.player.ut.Controller
 import com.zj.player.view.VideoLoadingView
 import com.zj.player.view.VideoRootView
 import java.lang.ref.WeakReference
+import java.text.DecimalFormat
 import kotlin.math.roundToInt
 
 /**
@@ -116,7 +118,7 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
     private var muteDefault: Boolean = false
     private var muteIsUseGlobal: Boolean = false
     private var isTransactionNavigation: Boolean = false
-    open val supportedSpeedList = floatArrayOf(1f, 2f, 4f)
+    open val supportedSpeedList = floatArrayOf(1f, 1.5f, 2f)
     protected var isFullScreen: Boolean = false
         set(value) {
             if (field == value) return
@@ -226,7 +228,7 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
             seekBar = view?.findViewById(R.id.z_player_video_preview_sb)
             isLockScreenRotation = lockScreenRotation != -1
             isFull = bottomToolsBar?.visibility == View.VISIBLE
-            speedView?.text = context.getString(R.string.z_player_str_speed, 1)
+            speedView?.text = context.getString(R.string.z_player_str_speed, "1")
             touchListener?.setPadding(0.05f, 0.08f)
 
             loadingView?.let {
@@ -313,11 +315,15 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
     }
 
     private fun initVolume(isMute: Boolean) {
-        val volume = if (isMute) 0f else {
-            val audioManager = context.getSystemService(Service.AUDIO_SERVICE) as AudioManager
-            audioManager.getStreamVolume(AudioManager.STREAM_MUSIC) * 1.0f
+        val audioManager = context.getSystemService(Service.AUDIO_SERVICE) as AudioManager
+        val volume = if (isMute) 0 else {
+            audioManager.getStreamVolume(AudioManager.STREAM_MUSIC)
         }
-        controller?.setVolume(volume)
+        var max = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            max -= audioManager.getStreamMinVolume(AudioManager.STREAM_MUSIC)
+        }
+        controller?.setVolume(volume, max)
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -402,13 +408,15 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
     }
 
     @CallSuper
-    override fun updateCurPlayerInfo(volume: Float, speed: Float) {
+    override fun updateCurPlayerInfo(volume: Int, speed: Float) {
         val nextState = volume <= 0
         if (muteIsUseGlobal) muteGlobalDefault = nextState
         muteDefault = nextState
         muteView?.isSelected = nextState
         curSpeedIndex = supportedSpeedList.indexOfLast { it in (speed - 0.4f)..(speed + 0.5f) }
-        speedView?.text = context.getString(R.string.z_player_str_speed, supportedSpeedList[curSpeedIndex].roundToInt())
+        val curSpeed = supportedSpeedList[curSpeedIndex]
+        val t = if (curSpeed == curSpeed.roundToInt().toFloat()) "${curSpeed.roundToInt()}" else DecimalFormat("#.0").format(curSpeed)
+        speedView?.text = context.getString(R.string.z_player_str_speed, t)
     }
 
     override fun onStop(path: String, isRegulate: Boolean) {
@@ -497,7 +505,7 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
         return false
     }
 
-    open fun onPlayClick(v: View, formUser: Boolean) {
+    open fun onPlayClick(v: View, fromUser: Boolean) {
         if (!isPlayable) return
         v.isEnabled = false
         if (!v.isSelected) {
@@ -535,23 +543,23 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
         fullScreen?.let { onFullScreenClick(it, false) }
     }
 
-    private fun onFullScreenClick(v: View, formUser: Boolean, payloads: Map<String, Any?>? = null) {
+    private fun onFullScreenClick(v: View, fromUser: Boolean, payloads: Map<String, Any?>? = null) {
         log("on full screen", BehaviorLogsTable.onFullScreen())
         if (!isFullingOrDismissing) {
             isFullingOrDismissing = true
-            onFullScreen(!v.isSelected, this.onFullScreenClick(Transaction(formUser, fullScreenTransactionTime, true, payloads)))
+            onFullScreen(!v.isSelected, this.onFullScreenClick(Transaction(fromUser, fullScreenTransactionTime, true, payloads)))
         }
     }
 
-    fun fullScreen(isFull: Boolean, formUser: Boolean, payloads: Map<String, Any?>? = null) {
-        this.fullScreen(isFull, formUser, fullScreenTransactionTime, true, payloads)
+    fun fullScreen(isFull: Boolean, fromUser: Boolean, payloads: Map<String, Any?>? = null) {
+        this.fullScreen(isFull, fromUser, fullScreenTransactionTime, true, payloads)
     }
 
-    fun fullScreen(isFull: Boolean, formUser: Boolean, transactionTime: Int, isStartOnly: Boolean, payloads: Map<String, Any?>? = null) {
+    fun fullScreen(isFull: Boolean, fromUser: Boolean, transactionTime: Int, isStartOnly: Boolean, payloads: Map<String, Any?>? = null) {
         log("on override method full screen", BehaviorLogsTable.onChildFullScreen())
         if (!isFullingOrDismissing) {
             isFullingOrDismissing = true
-            onFullScreen(isFull, this.onFullScreenClick(Transaction(formUser, transactionTime, isStartOnly, payloads)))
+            onFullScreen(isFull, this.onFullScreenClick(Transaction(fromUser, transactionTime, isStartOnly, payloads)))
         }
     }
 
@@ -577,7 +585,7 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
         try {
             initVolume(nextState)
         } catch (e: Exception) {
-            error("the mute click to $nextState failed , trying to check the system audio manager as device type: ${android.os.Build.MANUFACTURER}")
+            error("the mute click to $nextState failed , trying to check the system audio manager as device type: ${Build.MANUFACTURER}")
         }
     }
 
@@ -1011,8 +1019,8 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
         return controller?.getCurSpeed() ?: 1.0f
     }
 
-    fun getCurVolume(): Float {
-        return controller?.getCurVolume() ?: 0.0f
+    fun getCurVolume(): Int {
+        return controller?.getCurVolume() ?: 0
     }
 
     fun isPause(accurate: Boolean = false): Boolean {

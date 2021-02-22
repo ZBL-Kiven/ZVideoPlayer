@@ -26,8 +26,8 @@ import com.zj.videotest.R
 import com.zj.videotest.controllers.CCImageLoader
 import com.zj.videotest.feed.data.DataType
 import com.zj.videotest.controllers.CCVideoController
-import com.zj.videotest.cusRender.CusWebPlayer
-import com.zj.videotest.cusRender.CusWebRender
+import com.zj.videotest.ytb.CusWebPlayer
+import com.zj.videotest.ytb.CusWebRender
 import com.zj.views.list.holders.BaseViewHolder
 import java.lang.IllegalArgumentException
 import java.lang.ref.SoftReference
@@ -324,10 +324,9 @@ class FeedContentAdapter<T : FeedDataIn> : ListenerAnimAdapter<T>(R.layout.r_mai
         adapterDelegate?.cancelAll()
     }
 
+    //todo
     private fun cancelIfNotCurrent(path: String) {
-        if (controller?.getPath() != path) {
-            cancelAllPLay()
-        }
+        adapterDelegate?.cancelIfNotCurrent(path)
     }
 
     fun destroy() {
