@@ -37,6 +37,7 @@ class ZController<P : BasePlayer<R>, R : BaseRender> internal constructor(privat
     private var isPausedByLifecycle = false
     private var isIgnoreNullControllerGlobal = false
     private var playingStateListener: PlayStateChangeListener? = null
+    private var internalPlayingStateListener: PlayStateChangeListener? = null
     private var viewController: Controller? = null
         set(value) {
             if (field != null) {
@@ -405,7 +406,12 @@ class ZController<P : BasePlayer<R>, R : BaseRender> internal constructor(privat
     }
 
     private fun onPlayingStateChanged(isPlaying: Boolean, desc: String) {
-        playingStateListener?.onState(isPlaying, desc, this)
+        try {
+            playingStateListener?.onState(isPlaying, desc, this)
+        } catch (e: Throwable) {
+            playingStateListener?.onStateInvokeError(e)
+        }
+        internalPlayingStateListener?.onState(isPlaying, desc, this)
     }
 
     private fun log(s: String, bd: BehaviorData? = null) {
@@ -414,6 +420,10 @@ class ZController<P : BasePlayer<R>, R : BaseRender> internal constructor(privat
 
     internal fun recordLogs(s: String, modeName: String, bd: BehaviorData? = null) {
         if (CORE_LOG_ABLE) ZPlayerLogs.onLog(s, getPath(), curAccessKey, modeName, bd)
+    }
+
+    internal fun bindInternalPlayStateListener(l: PlayStateChangeListener) {
+        this.internalPlayingStateListener = l
     }
 
     /**

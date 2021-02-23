@@ -22,6 +22,7 @@ import com.zj.player.config.VideoConfig
 import com.zj.player.controller.BaseListVideoController
 import com.zj.player.img.ImgLoader
 import com.zj.player.adapters.ListVideoAdapterDelegate
+import com.zj.player.base.BasePlayer
 import com.zj.videotest.R
 import com.zj.videotest.controllers.CCImageLoader
 import com.zj.videotest.feed.data.DataType
@@ -205,6 +206,14 @@ class FeedContentAdapter<T : FeedDataIn> : ListenerAnimAdapter<T>(R.layout.r_mai
 
         override val isSourcePlayAble: (d: T?) -> Boolean
             get() = { d -> d?.getType() == DataType.VIDEO || d?.getType() == DataType.YTB }
+
+        override fun onState(isPlaying: Boolean, desc: String?, controller: ZController<out BasePlayer<*>, *>?) {
+
+        }
+
+        override fun onStateInvokeError(e: Throwable?) {
+
+        }
     }
 
     private val onTrackListener: (playAble: Boolean, start: Boolean, end: Boolean, formTrigDuration: Float) -> Unit = { playAble, start, end, _ ->

@@ -14,6 +14,7 @@ import com.zj.player.z.ZController
 import com.zj.player.controller.BaseListVideoController
 import com.zj.player.list.VideoControllerIn
 import com.zj.player.logs.ZPlayerLogs
+import com.zj.player.ut.PlayStateChangeListener
 import java.lang.NullPointerException
 import java.lang.ref.SoftReference
 import java.lang.ref.WeakReference
@@ -26,7 +27,7 @@ import kotlin.math.min
  * of course ZPlayer running in the list adapter as so well.
  * create an instance of [BaseListVideoController] in your data Adapter ,and see [AdapterDelegateIn]
  **/
-abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : RecyclerView.ViewHolder>(private val adapter: RecyclerView.Adapter<VH>) : AdapterDelegateIn<T, VH>, VideoControllerIn {
+abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : RecyclerView.ViewHolder>(private val adapter: RecyclerView.Adapter<VH>) : AdapterDelegateIn<T, VH>, VideoControllerIn, PlayStateChangeListener {
 
     private var controller: ZController<*, *>? = null
     private var curPlayingIndex: Int = -1
@@ -39,7 +40,6 @@ abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : Rec
     private val waitingForPlayScrolled = R.id.delegate_waiting_for_play_scrolled
     protected abstract fun createZController(data: T?, vc: V): ZController<*, *>
     protected abstract fun getViewController(holder: VH?): V?
-
     protected abstract fun getItem(p: Int): T?
     protected abstract fun isInflateMediaType(d: T?): Boolean
     protected abstract fun getPathAndLogsCallId(d: T?): Pair<String, Any?>?
@@ -164,7 +164,7 @@ abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : Rec
 
     private fun onBindVideoView(d: T?, vc: V) {
         if (!checkControllerMatching(d, controller)) {
-            controller = createZController(d, vc)
+            controller = getZController(d, vc)
         } else {
             controller?.updateViewController(vc)
         }
@@ -183,6 +183,15 @@ abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : Rec
             this.arg1 = curPlayingIndex
             this.obj = fromUser
         }, delay)
+    }
+
+    private fun getZController(data: T?, vc: V): ZController<*, *>? {
+        val c = createZController(data, vc)
+        if (c != controller) {
+            controller = c
+        }
+        controller?.bindInternalPlayStateListener(this)
+        return controller
     }
 
     private fun bindDelegateData(h: VH, p: Int, d: T?, playAble: Boolean, pl: MutableList<Any>?) {
@@ -222,7 +231,7 @@ abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : Rec
                 vc.post {
                     if (curPlayingIndex == p && controller?.getPath() == it.first && controller?.isPlaying() == true) {
                         if (!vc.isBindingController) onBindVideoView(d, vc)
-                        if (!checkControllerMatching(d, controller)) controller = createZController(d, vc)
+                        if (!checkControllerMatching(d, controller)) controller = getZController(d, vc)
                         controller?.playOrResume(it.first, it.second)
                     } else vc.resetWhenDisFocus()
                 }
@@ -272,7 +281,7 @@ abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : Rec
             ZPlayerLogs.onError(NullPointerException("use a null view controller ,means show what?"))
             return
         }
-        controller = if (checkControllerMatching(data, controller)) controller else createZController(data, vc)
+        controller = if (checkControllerMatching(data, controller)) controller else getZController(data, vc)
         controller?.let { ctr ->
             getPathAndLogsCallId(data ?: getItem(p))?.let { d ->
                 fun play() {

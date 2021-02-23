@@ -11,7 +11,7 @@ class CusWebPlayer : BasePlayer<CusWebRender> {
     private val render: CusWebRender?; get() = controller?.playerView
 
     override fun isLoadData(): Boolean {
-        return curPath != null
+        return curPath != null && render != null
     }
 
     override fun isLoading(accurate: Boolean): Boolean {
@@ -27,15 +27,15 @@ class CusWebPlayer : BasePlayer<CusWebRender> {
     }
 
     override fun isPause(accurate: Boolean): Boolean {
-        return render?.ytbDelegate?.isPause(accurate) ?: false
+        return render?.ytbDelegate?.isPause(accurate) ?: !accurate
     }
 
     override fun isStop(accurate: Boolean): Boolean {
-        return render?.ytbDelegate?.isStop(accurate) ?: false
+        return render?.ytbDelegate?.isStop(accurate) ?: true
     }
 
     override fun isDestroyed(accurate: Boolean): Boolean {
-        return render?.ytbDelegate?.isDestroyed(accurate) ?: false
+        return render?.ytbDelegate?.isDestroyed(accurate) ?: true
     }
 
     override fun currentPlayPath(): String {
