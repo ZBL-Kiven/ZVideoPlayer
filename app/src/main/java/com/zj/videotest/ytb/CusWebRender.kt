@@ -6,6 +6,7 @@ import android.view.Gravity
 import android.view.MotionEvent
 import android.view.ViewGroup
 import android.webkit.WebSettings
+import android.webkit.WebView
 import com.zj.player.base.BaseRender
 import com.zj.player.ut.Constance
 import com.zj.player.ut.ResizeMode
@@ -26,6 +27,10 @@ class CusWebRender(ctx: Context) : BaseRender(ctx) {
             val buffering = (curBuffering * 100.0f).toInt()
             val seek = (curPlayingDuration * 1.0f / max(1, totalDuration) * 100.0f + 0.5f).toInt()
             notifyTo { this.onSeekChanged(seek, buffering, fromUser, curPlayingDuration, totalDuration) }
+        }
+
+        override fun getWebView(): WebView? {
+            return this@CusWebRender.getWebView()
         }
 
         override fun onSeekParsed(progress: Int, fromUser: Boolean) {
@@ -69,7 +74,7 @@ class CusWebRender(ctx: Context) : BaseRender(ctx) {
         }
     }
     private var youTubePlayerBridge = YtbWebBridge(ytbDelegate)
-    private var webView = CCYtbWebView(ctx, youTubePlayerBridge)
+    private var webView: CCYtbWebView? = CCYtbWebView(ctx, youTubePlayerBridge)
     private var ytbOptions: IFramePlayerOptions = IFramePlayerOptions.default
 
     init {
@@ -81,15 +86,19 @@ class CusWebRender(ctx: Context) : BaseRender(ctx) {
     }
 
     private fun initWebView() {
-        webView.settings?.let {
+        webView?.settings?.let {
             it.mediaPlaybackRequiresUserGesture = false
             it.cacheMode = WebSettings.LOAD_NO_CACHE
         }
-        ytbDelegate.initYoutubeScript(webView, ytbOptions)
+        ytbDelegate.initYoutubeScript(ytbOptions)
+    }
+
+    private fun getWebView(): CCYtbWebView? {
+        return webView
     }
 
     fun setVideoFrame(@ResizeMode resizeMode: Int = Constance.RESIZE_MODE_FIT) {
-        webView.let {
+        webView?.let {
             it.removeAllViews()
             this.resizeMode = resizeMode
             (it.parent as? ViewGroup)?.let { vp ->
@@ -103,7 +112,8 @@ class CusWebRender(ctx: Context) : BaseRender(ctx) {
     }
 
     override fun release() {
-        ytbDelegate.destroy(webView)
+        ytbDelegate.destroy()
+        webView = null
         super.release()
     }
 
@@ -122,7 +132,7 @@ class CusWebRender(ctx: Context) : BaseRender(ctx) {
                 path.substring(li, path.length)
             } else path
         }
-        ytbDelegate.loadVideoById(webView, videoId, 0f, PlayerConstants.PlaybackQuality.DEFAULT.value, object : PendingLoadTask(path) {
+        ytbDelegate.loadVideoById(videoId, 0f, PlayerConstants.PlaybackQuality.DEFAULT.value, object : PendingLoadTask(path) {
             override fun run() {
                 load(this.path)
             }
@@ -131,37 +141,38 @@ class CusWebRender(ctx: Context) : BaseRender(ctx) {
 
     fun play() {
         if (ytbDelegate.isReady(false)) {
-            ytbDelegate.play(webView)
+            ytbDelegate.play()
         } else if (ytbDelegate.isPageReady) load(ytbDelegate.curPath)
     }
 
     fun pause() {
-        ytbDelegate.pause(webView)
+        ytbDelegate.pause()
     }
 
     fun stop(withNotify: Boolean, isRegulate: Boolean) {
-        ytbDelegate.stop(webView)
+        pause()
+        ytbDelegate.stop()
         if (withNotify) notifyTo { onStop(withNotify, ytbDelegate.curPath, isRegulate) }
     }
 
     fun seekTo(progress: Int, fromUser: Boolean) {
         if (fromUser) {
-            ytbDelegate.pause(webView)
+            ytbDelegate.pause()
         }
         ytbDelegate.seekTo(progress, fromUser)
     }
 
     private fun onSeekParsed(progress: Int, fromUser: Boolean) {
-        ytbDelegate.seekNow(webView, progress, fromUser)
+        ytbDelegate.seekNow(progress, fromUser)
     }
 
     fun setSpeed(rate: Float) {
-        ytbDelegate.setPlaybackRate(webView, rate)
+        ytbDelegate.setPlaybackRate(rate)
         notifyTo { onPlayerInfo(ytbDelegate.curVolume, ytbDelegate.curPlayingRate) }
     }
 
     fun setVolume(volume: Int, maxVolume: Int) {
-        ytbDelegate.setVolume(webView, (volume * 1.0f / maxVolume * 100f).toInt())
+        ytbDelegate.setVolume((volume * 1.0f / maxVolume * 100f).toInt())
         notifyTo { onPlayerInfo(ytbDelegate.curVolume, ytbDelegate.curPlayingRate) }
     }
 }

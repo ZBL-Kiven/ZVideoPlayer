@@ -11,6 +11,7 @@
             position: fixed;
         }
 
+
     </style>
     <head>
         <meta
@@ -33,48 +34,59 @@
         var CUED = "CUED";
         
         var YouTubePlayerBridge = window.YouTubePlayerBridge;
-    	var player;
+        var player;
 
         var timerId;
 
-    	function onYouTubeIframeAPIReady() {
+        function onYouTubeIframeAPIReady() {
+
+            player = new YT.Player('youTubePlayerDOM', {
+
+                height: '100%',
+                width: '100%',
+
+                events: {
+                    onReady: function(event) { YouTubePlayerBridge.sendReady(event.target.getDuration()) },
+                    onStateChange: function(event) { sendPlayerStateChange(event.data) },
+                    onPlaybackQualityChange: function(event) { YouTubePlayerBridge.sendPlaybackQualityChange(event.data) },
+                    onPlaybackRateChange: function(event) { YouTubePlayerBridge.sendPlaybackRateChange(event.data) },
+                    onError: function(error) { YouTubePlayerBridge.sendError(error.data) },
+                    onApiChange: function(event) { YouTubePlayerBridge.sendApiChange() }
+                },
+
+                playerVars: <<injectedPlayerVars>>
+
+            });
 
             YouTubePlayerBridge.sendYouTubeIFrameAPIReady();
-            
-    		player = new YT.Player('youTubePlayerDOM', {
-    			
-                height: '100%',
-    			width: '100%',
-    			
-                events: {
-    				onReady: function(event) { YouTubePlayerBridge.sendReady(event.target.getDuration()) },
-    				onStateChange: function(event) { sendPlayerStateChange(event.data) },
-    				onPlaybackQualityChange: function(event) { YouTubePlayerBridge.sendPlaybackQualityChange(event.data) },
-    				onPlaybackRateChange: function(event) { YouTubePlayerBridge.sendPlaybackRateChange(event.data) },
-    				onError: function(error) { YouTubePlayerBridge.sendError(error.data) },
-    				onApiChange: function(event) { YouTubePlayerBridge.sendApiChange() }
-    			},
+        }
 
-    			playerVars: <<injectedPlayerVars>>
-                
-    		});
-    	}
+        var times;
 
-    	function sendPlayerStateChange(playerState) {
+        function hideInfo(){
+            var idom = player&&player.h&&player.h.contentWindow&&player.h.contentWindow.document;
+            if (!idom){return}
+            var div = idom.getElementsByClassName('ytp-chrome-top')[0];
+            if (div){
+                div.style.display='none';
+            }
+        }
+
+        function sendPlayerStateChange(playerState) {
             clearTimeout(timerId);
 
             switch (playerState) {
-            	case YT.PlayerState.UNSTARTED:
+                case YT.PlayerState.UNSTARTED:
                     sendStateChange(UNSTARTED);
                     return;
 
-            	case YT.PlayerState.ENDED:
+                case YT.PlayerState.ENDED:
                     sendStateChange(ENDED);
                     return;
 
                 case YT.PlayerState.PLAYING:
                     sendStateChange(PLAYING);
-                    
+
                     startSendCurrentTimeInterval();
                     sendVideoData(player);
                     return;
@@ -112,15 +124,15 @@
         // JAVA to WEB functions
 
         function seekTo(startSeconds,formDrag) {
-        	player.seekTo(startSeconds, formDrag);
+            player.seekTo(startSeconds, formDrag);
         }
 
         function pauseVideo() {
-        	player.pauseVideo();
+            player.pauseVideo();
         }
 
         function playVideo() {
-        	player.playVideo();
+            player.playVideo();
         }
 
         function loadVideoById(videoId, startSeconds, suggestionQuality) {
@@ -152,6 +164,7 @@
         function destroy(){
             player.destroy();
         }
+
 
     </script>
 </html>

@@ -11,6 +11,7 @@ import com.zj.youtube.options.IFramePlayerOptions
 import com.zj.youtube.proctol.YouTubePlayerListener
 import com.zj.youtube.utils.PendingLoadTask
 import com.zj.youtube.utils.Utils
+import java.lang.Exception
 import kotlin.math.max
 import kotlin.math.min
 
@@ -34,6 +35,8 @@ abstract class YoutubeDelegate(debugAble: Boolean) : YouTubePlayerListener {
 
     abstract fun onSeekParsed(progress: Int, fromUser: Boolean)
 
+    abstract fun getWebView(): WebView?
+
     private val mainThreadHandler: Handler = Handler(Looper.getMainLooper()) {
         when (it.what) {
             HANDLE_SEEK -> onSeekParsed(it.arg1, it.arg2 == 0)
@@ -41,16 +44,29 @@ abstract class YoutubeDelegate(debugAble: Boolean) : YouTubePlayerListener {
         return@Handler false
     }
 
-    fun initYoutubeScript(webView: WebView, playerOptions: IFramePlayerOptions) {
-        val htmlPage = Utils.readHTMLFromUTF8File(webView.context.resources.openRawResource(R.raw.youtube_player_bridge)).replace("<<injectedPlayerVars>>", playerOptions.toString())
-        mainThreadHandler.post { webView.loadDataWithBaseURL(playerOptions.getOrigin(), htmlPage, "text/html", "utf-8", null) }
+    private fun runWithWebView(func: (WebView) -> Unit) {
+        try {
+            mainThreadHandler.post {
+                getWebView()?.let {
+                    func(it)
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
 
-    fun loadVideoById(webView: WebView, id: String, startSeconds: Float, suggestionQuality: String, pendingIfNotReady: PendingLoadTask) {
+    fun initYoutubeScript(playerOptions: IFramePlayerOptions) {
+        val ctx = getWebView()?.context ?: return
+        val htmlPage = Utils.readHTMLFromUTF8File(ctx.resources.openRawResource(R.raw.youtube_player_bridge)).replace("<<injectedPlayerVars>>", playerOptions.toString())
+        runWithWebView { it.loadDataWithBaseURL(playerOptions.getOrigin(), htmlPage, "text/html", "utf-8", null) }
+    }
+
+    fun loadVideoById(id: String, startSeconds: Float, suggestionQuality: String, pendingIfNotReady: PendingLoadTask) {
         if (isPageReady) {
             this.curPath = id
             onStateChange(PlayerConstants.PlayerState.LOADING)
-            mainThreadHandler.post { webView.loadUrl("javascript:loadVideoById(\'$id\', $startSeconds, \'$suggestionQuality\')") }
+            runWithWebView { it.loadUrl("javascript:loadVideoById(\'$id\', $startSeconds, \'$suggestionQuality\')") }
         } else {
             if (this.pendingIfNotReady?.path != pendingIfNotReady.path) {
                 this.pendingIfNotReady?.let { mainThreadHandler.removeCallbacks(it) }
@@ -59,45 +75,44 @@ abstract class YoutubeDelegate(debugAble: Boolean) : YouTubePlayerListener {
         }
     }
 
-    fun play(webView: WebView) {
-        mainThreadHandler.post { webView.loadUrl("javascript:playVideo()") }
+    fun play() {
+        runWithWebView { it.loadUrl("javascript:playVideo()") }
     }
 
-    fun pause(webView: WebView) {
-        mainThreadHandler.post { webView.loadUrl("javascript:pauseVideo()") }
+    fun pause() {
+        runWithWebView { it.loadUrl("javascript:pauseVideo()") }
     }
 
-    fun stop(webView: WebView) {
+    fun stop() {
         pendingIfNotReady = null
-        pause(webView)
         playerState = PlayerConstants.PlayerState.STOP
         mainThreadHandler.removeCallbacksAndMessages(null)
     }
 
-    fun setVolume(webView: WebView, volumePercent: Int) {
+    fun setVolume(volumePercent: Int) {
         curVolume = volumePercent
-        if (volumePercent <= 0) mainThreadHandler.post { webView.loadUrl("javascript:mute()") } else {
-            mainThreadHandler.post {
-                webView.loadUrl("javascript:unMute()")
-                if (volumePercent in 0..100) webView.loadUrl("javascript:setVolume($volumePercent)")
+        runWithWebView {
+            if (volumePercent <= 0) it.loadUrl("javascript:mute()") else {
+                it.loadUrl("javascript:unMute()")
+                if (volumePercent in 0..100) it.loadUrl("javascript:setVolume($volumePercent)")
             }
         }
     }
 
-    fun setPlaybackRate(webView: WebView, rate: Float) {
-        mainThreadHandler.post { webView.loadUrl("javascript:setPlaybackRate($rate)") }
+    fun setPlaybackRate(rate: Float) {
+        runWithWebView { it.loadUrl("javascript:setPlaybackRate($rate)") }
     }
 
-    fun destroy(webView: WebView) {
+    fun destroy() {
         pendingIfNotReady = null
         mainThreadHandler.removeCallbacksAndMessages(null)
         playerState = PlayerConstants.PlayerState.UNKNOWN
-        mainThreadHandler.post {
-            webView.clearHistory()
-            webView.clearFormData()
-            webView.removeAllViews()
-            (webView.parent as? ViewGroup)?.removeView(webView)
-            webView.destroy()
+        runWithWebView {
+            it.clearHistory()
+            it.clearFormData()
+            it.removeAllViews()
+            (it.parent as? ViewGroup)?.removeView(it)
+            it.destroy()
         }
         curPath = ""
     }
@@ -111,11 +126,11 @@ abstract class YoutubeDelegate(debugAble: Boolean) : YouTubePlayerListener {
         }, 200)
     }
 
-    fun seekNow(webView: WebView, progress: Int, fromUser: Boolean) {
+    fun seekNow(progress: Int, fromUser: Boolean) {
         val seekProgress = (max(0f, min(100, progress) / 100f * max(totalDuration, 1) - 1) / 1000f).toLong()
         curPlayingDuration = seekProgress
-        mainThreadHandler.post {
-            webView.loadUrl("javascript:seekTo($seekProgress,$fromUser)")
+        runWithWebView {
+            it.loadUrl("javascript:seekTo($seekProgress,$fromUser)")
             onSeekChanged(fromUser)
         }
     }
@@ -125,7 +140,7 @@ abstract class YoutubeDelegate(debugAble: Boolean) : YouTubePlayerListener {
     }
 
     override fun onYouTubeIFrameAPIReady() {
-
+        runWithWebView { it.loadUrl("javascript:hideInfo()") }
     }
 
     @CallSuper
@@ -137,6 +152,7 @@ abstract class YoutubeDelegate(debugAble: Boolean) : YouTubePlayerListener {
 
     @CallSuper
     override fun onStateChange(state: PlayerConstants.PlayerState) {
+        runWithWebView { it.loadUrl("javascript:hideInfo()") }
         Utils.log("on player state changed from $playerState to $state")
         this.playerState = state
     }
