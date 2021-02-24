@@ -9,6 +9,7 @@ import android.graphics.Color
 import android.graphics.Point
 import android.graphics.PointF
 import android.graphics.RectF
+import android.graphics.drawable.ColorDrawable
 import android.os.Handler
 import android.os.Looper
 import android.view.*
@@ -323,23 +324,25 @@ internal class ZPlayerFullScreenView constructor(context: Context, private val c
     @SuppressLint("SourceLockedOrientationActivity")
     private fun changeSystemWindowVisibility(visible: Boolean, onPost: (() -> Unit)? = null) {
         getActivity()?.let {
+            it.window.setBackgroundDrawable(ColorDrawable(Color.BLACK))
             val ime = ImmersionBar.with(it)
             if (visible) {
-                ime.hideBar(BarHide.FLAG_HIDE_STATUS_BAR).transparentStatusBar()
+                ime.transparentStatusBar()
                 if (isMaxFull || config.translateNavigation) {
-                    ime.transparentNavigationBar().hideBar(BarHide.FLAG_HIDE_NAVIGATION_BAR)
+                    ime.transparentNavigationBar().hideBar(BarHide.FLAG_HIDE_BAR)
                 } else {
-                    ime.fullScreen(false).navigationBarEnable(true).navigationBarColorInt(Color.BLACK)
+                    ime.fullScreen(false).hideBar(BarHide.FLAG_HIDE_STATUS_BAR).navigationBarEnable(true).navigationBarColorInt(Color.BLACK)
                 }
             } else {
                 ime.hideBar(BarHide.FLAG_SHOW_BAR).autoDarkModeEnable(true).navigationBarEnable(false)
             }
             ime.init()
-        }
-        var h: Handler? = Handler(Looper.getMainLooper())
-        h?.post {
-            onPost?.invoke()
-            h = null
+            var h: Handler? = Handler(Looper.getMainLooper())
+            h?.post {
+                onPost?.invoke()
+                h = null
+            }
+            it.window.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         }
     }
 
