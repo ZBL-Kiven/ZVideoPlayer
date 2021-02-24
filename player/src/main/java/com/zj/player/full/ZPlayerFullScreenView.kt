@@ -121,7 +121,14 @@ internal class ZPlayerFullScreenView constructor(context: Context, private val c
                         if (controllerNeedAdd) v.addView(controller, vlp)
                     } ?: if (controllerNeedAdd) (it as? ViewGroup)?.addView(controller, vlp) ?: throw IllegalArgumentException("the content layout view your set is not container a view group that id`s [R.id.playerFullScreenContent] ,and your content layout is not a view group!")
                     config.onFullContentListener?.onContentLayoutInflated(it)
-                    controller.post { controller.layoutParams.let { l -> l.height = l.height.coerceAtMost(this.height) } }
+                    postDelayed({
+                        try {
+                            if (controller.height > this.height && this.height > 0) controller.layoutParams.let { l -> l.height = l.height.coerceAtMost(this.height) }
+                            controller.requestLayout()
+                        } catch (e: Exception) {
+                            e.printStackTrace()
+                        }
+                    }, 100)
                 }
             } finally {
                 if (isResizeCalculate) init(0f)

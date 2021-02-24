@@ -132,14 +132,14 @@ class FeedContentAdapter<T : FeedDataIn> : ListenerAnimAdapter<T>(R.layout.r_mai
     }
 
     override fun bindData(holder: BaseViewHolder?, p: Int, d: T?, pl: MutableList<Any>?) {
-        holder?.itemView?.let {
+        holder?.itemView?.findViewById<View>(R.id.r_main_fg_feed_item_vc)?.let {
             val lp = it.layoutParams
             if (d?.getType() == DataType.YTB) {
                 val width = if (lp.width <= 0) it.context.resources.displayMetrics.widthPixels else lp.width
-                lp.height = (width * 3f / 4f).toInt()
+                lp.height = (width * 9f / 16f).toInt()
             } else {
                 lp.width = (it.parent as? ViewGroup)?.width ?: -1
-                lp.height = DPUtils.dp2px(352f)
+                lp.height = DPUtils.dp2px(252f)
             }
             it.layoutParams = lp
         }
