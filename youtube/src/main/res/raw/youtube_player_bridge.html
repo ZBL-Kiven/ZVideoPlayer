@@ -6,7 +6,7 @@
             width: 100%;
             margin: 0;
             padding: 0;
-            background-color: #000000;
+            background-color:transparent;
             overflow: hidden;
             position: fixed;
         }
@@ -32,10 +32,8 @@
         var PAUSED = "PAUSED";
         var BUFFERING = "BUFFERING";
         var CUED = "CUED";
-        
         var YouTubePlayerBridge = window.YouTubePlayerBridge;
         var player;
-
         var timerId;
 
         function onYouTubeIframeAPIReady() {
@@ -48,7 +46,7 @@
                 events: {
                     onReady: function(event) { YouTubePlayerBridge.sendReady(event.target.getDuration()) },
                     onStateChange: function(event) { sendPlayerStateChange(event.data) },
-                    onPlaybackQualityChange: function(event) { YouTubePlayerBridge.sendPlaybackQualityChange(event.data) },
+                    onPlaybackQualityChange: function(event) { YouTubePlayerBridge.sendPlaybackQualityChange(event.data, event.target.getAvailableQualityLevels()) },
                     onPlaybackRateChange: function(event) { YouTubePlayerBridge.sendPlaybackRateChange(event.data) },
                     onError: function(error) { YouTubePlayerBridge.sendError(error.data) },
                     onApiChange: function(event) { YouTubePlayerBridge.sendApiChange() }
@@ -64,11 +62,31 @@
         var times;
 
         function hideInfo(){
-            var idom = player&&player.h&&player.h.contentWindow&&player.h.contentWindow.document;
-            if (!idom){return}
-            var div = idom.getElementsByClassName('ytp-chrome-top')[0];
+            var dom = player&&player.h&&player.h.contentWindow&&player.h.contentWindow.document;
+            if (!dom){return}
+            var div = dom.getElementsByClassName('ytp-chrome-top')[0];
             if (div){
                 div.style.display='none';
+            }
+            var b = dom.body;
+            if(b){
+                 b.setAttribute("style", "background-color:transparent;");
+            }
+            var div1 = dom.getElementsByClassName('ytp-gradient-top')[0];
+            if(div1){
+                 div1.style.display='none';
+            }
+            var ct = dom.getElementsByClassName('ytp-watermark')[0];
+            if(ct){
+                ct.style.display='none';
+            }
+            var pl = dom.getElementsByClassName('html5-video-player')[0];
+            if(pl){
+                pl.setAttribute("style", "background-color:transparent;");
+            }
+            var p1 = dom.getElementById('player');
+            if(p1){
+                p1.setAttribute("style", "background-color:transparent;");
             }
         }
 
@@ -86,7 +104,6 @@
 
                 case YT.PlayerState.PLAYING:
                     sendStateChange(PLAYING);
-
                     startSendCurrentTimeInterval();
                     sendVideoData(player);
                     return;
@@ -107,6 +124,7 @@
             function sendVideoData(player) {
                 var videoDuration = player.getDuration();
                 YouTubePlayerBridge.sendVideoDuration(videoDuration);
+                YouTubePlayerBridge.sendPlaybackQualityChange(player.getPlaybackQuality(), player.getAvailableQualityLevels())
             }
 
             function sendStateChange(newState) {
@@ -155,6 +173,11 @@
 
         function setPlaybackRate(rate) {
             player.setPlaybackRate(rate);
+        }
+
+        // seems it's ignored in i-frame
+        function setPlaybackQuality(quality) {
+            player.setPlaybackQuality(quality);
         }
 
         function setVolume(volumePercent) {

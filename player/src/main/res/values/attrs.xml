@@ -50,6 +50,11 @@
             <enum name="DISPLAY_GONE" value="1" />
             <enum name="GONE" value="0" />
         </attr>
+        <attr name="qualityEnable" format="enum">
+            <enum name="DISPLAY_VISIBLE" value="2" />
+            <enum name="DISPLAY_GONE" value="1" />
+            <enum name="GONE" value="0" />
+        </attr>
         <attr name="isDefaultMaxScreen" format="boolean" />
         <attr name="fullMaxScreenEnable" format="boolean" />
         <attr name="lockScreenRotation" format="enum">

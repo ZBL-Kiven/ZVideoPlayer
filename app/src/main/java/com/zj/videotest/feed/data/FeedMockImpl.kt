@@ -1,5 +1,8 @@
 package com.zj.videotest.feed.data
 
+import android.content.res.Resources
+import android.view.ViewGroup
+import com.zj.views.ut.DPUtils
 import java.util.*
 
 class FeedMockImpl(private val imgPath: String, private val dataType: DataType, private val videoPath: String = "") : FeedDataIn {
@@ -35,11 +38,11 @@ class FeedMockImpl(private val imgPath: String, private val dataType: DataType, 
     }
 
     override fun getViewWidth(): Int {
-        return 1080
+        return Resources.getSystem().displayMetrics.widthPixels
     }
 
     override fun getViewHeight(): Int {
-        return 768
+        return DPUtils.dp2px(252f)
     }
 
     override fun getType(): DataType {
@@ -50,8 +53,8 @@ class FeedMockImpl(private val imgPath: String, private val dataType: DataType, 
         fun createMock(): MutableList<FeedDataIn> {
             val lst = mutableListOf<FeedDataIn>()
             lst.add(FeedMockImpl("https://gcdn.channelthree.tv/20201111/8/7/1/9/4/871946e853194067b61ce0f8601fb261.jpg", DataType.VIDEO, "https://gcdn.channelthree.tv/20201111/f/e/2/f/3/fe2f3916532d48498ef6d7a4e0a1cdd5.mp4"))
-            lst.add(FeedMockImpl("https://ss3.bdstatic.com/70cFv8Sh_Q1YnxGkpoWK1HF6hhy/it/u=211557466,2662846817&fm=11&gp=0.jpg", DataType.YTB, "https://youtu.be/xO8SYK-LuKc"))
-            lst.add(FeedMockImpl("https://ss1.bdstatic.com/70cFvXSh_Q1YnxGkpoWK1HF6hhy/it/u=589550674,1069105869&fm=26&gp=0.jpg", DataType.YTB, "https://youtu.be/w3Wluvzoggg"))
+            lst.add(FeedMockImpl("https://i.ytimg.com/vi/bPZc7avrCT4/hqdefault.jpg?sqp=-oaymwEcCPYBEIoBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLAPrfs2Bhirrkj87653AbMChENCVA", DataType.YTB, "https://youtu.be/bPZc7avrCT4"))
+            lst.add(FeedMockImpl("https://i.ytimg.com/vi/cK1igzo7XKs/hqdefault.jpg?sqp=-oaymwEcCPYBEIoBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLBROMigCs-xYUqQwrNj9_HKSHvaNw", DataType.YTB, "https://youtu.be/cK1igzo7XKs"))
             lst.add(FeedMockImpl("https://img-blog.csdnimg.cn/20190301125102646.png", DataType.VIDEO, "http://clips.vorwaerts-gmbh.de/big_buck_bunny.mp4"))
             lst.add(FeedMockImpl("https://ss1.bdstatic.com/70cFvXSh_Q1YnxGkpoWK1HF6hhy/it/u=1091405991,859863778&fm=26&gp=0.jpg", DataType.IMG))
             lst.add(FeedMockImpl("https://gcdn.channelthree.tv/20200623/2/7/a/3/f/27a3f845395a48dbaf535a35e1841f65.jpg", DataType.VIDEO, "https://gcdn.channelthree.tv/20200623/f/f/a/0/1/ffa018ffa0dc4540977e401c79ba964a.mp4"))

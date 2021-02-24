@@ -16,6 +16,14 @@ class PlayerConstants {
         fun setFrom(s: String): PlayerState {
             this.from = s;return this
         }
+
+        fun inLoading(): Boolean {
+            return this == LOADING || this == BUFFERING
+        }
+
+        fun inMutual(): Boolean {
+            return this == PLAYING || this == PAUSED
+        }
     }
 
     enum class PlaybackQuality(val value: String) {

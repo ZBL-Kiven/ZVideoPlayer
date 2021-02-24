@@ -31,6 +31,7 @@ import com.zj.player.logs.BehaviorLogsTable
 import com.zj.player.logs.ZPlayerLogs
 import com.zj.player.ut.Constance
 import com.zj.player.ut.Constance.CORE_LOG_ABLE
+import com.zj.player.ut.PlayQualityLevel
 import com.zj.player.ut.PlayerEventController
 import com.zj.player.ut.RenderEvent
 import java.io.File
@@ -109,6 +110,7 @@ open class ZVideoPlayer(var config: VideoConfig = VideoConfig.create()) : BasePl
                 }
                 VideoState.LOADING -> {
                     isReady = false
+                    controller?.onPlayQualityChanged(PlayQualityLevel.AUTO, null)
                     controller?.onLoading(currentPlayPath(), false)
                     loading()
                 }
@@ -389,6 +391,7 @@ open class ZVideoPlayer(var config: VideoConfig = VideoConfig.create()) : BasePl
         return playPath?.second
     }
 
+    override fun requirePlayQuality(level: PlayQualityLevel) {}
 
     override fun setData(path: String, autoPlay: Boolean, callId: Any?) {
         log("set video data to $path")

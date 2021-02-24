@@ -6,6 +6,8 @@ import androidx.annotation.Nullable;
 
 import com.zj.player.base.BaseRender;
 
+import java.util.List;
+
 /**
  * @author ZJJ on 2020.6.16
  */
@@ -44,4 +46,7 @@ public interface PlayerEventController<R extends BaseRender> {
     void onFirstFrameRender();
 
     void onPlayerInfo(int volume, float speed);
+
+    void onPlayQualityChanged(PlayQualityLevel qualityLevel, @Nullable List<PlayQualityLevel> supportedQualities);
+
 }

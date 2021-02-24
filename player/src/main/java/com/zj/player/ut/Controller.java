@@ -8,6 +8,8 @@ import com.zj.player.base.InflateInfo;
 
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
+
 /**
  * @author ZJJ on 2020.6.16
  */
@@ -44,4 +46,7 @@ public interface Controller {
     void onError(@Nullable Exception e);
 
     void updateCurPlayerInfo(int volume, float speed);
+
+    void updateCurPlayingQuality(PlayQualityLevel level,@Nullable List<PlayQualityLevel> supportedQualities);
+
 }

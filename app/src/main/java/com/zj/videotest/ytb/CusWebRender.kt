@@ -5,10 +5,10 @@ import android.content.Context
 import android.view.Gravity
 import android.view.MotionEvent
 import android.view.ViewGroup
-import android.webkit.WebSettings
 import android.webkit.WebView
 import com.zj.player.base.BaseRender
 import com.zj.player.ut.Constance
+import com.zj.player.ut.PlayQualityLevel
 import com.zj.player.ut.ResizeMode
 import com.zj.youtube.YoutubeDelegate
 import com.zj.youtube.constance.PlayerConstants
@@ -53,10 +53,14 @@ class CusWebRender(ctx: Context) : BaseRender(ctx) {
             notifyTo { this.onError(Exception(error.name)) }
         }
 
-        override fun onStateChange(state: PlayerConstants.PlayerState) {
-            if (state != playerState) when (state) {
+        override fun onPlayQualityChanged(quality: PlayerConstants.PlaybackQuality, supports: List<PlayerConstants.PlaybackQuality>?) {
+            notifyTo { onPlayQualityChanged(changeListFunc.invoke(listOf(quality))?.get(0) ?: PlayQualityLevel.AUTO, changeListFunc.invoke(supports)) }
+        }
+
+        override fun onPlayStateChange(curState: PlayerConstants.PlayerState, oldState: PlayerConstants.PlayerState) {
+            when (curState) {
                 PlayerConstants.PlayerState.UNKNOWN -> {
-                    notifyTo { onError(Exception(state.from)) }
+                    notifyTo { onError(Exception(curState.from)) }
                 }
                 PlayerConstants.PlayerState.ENDED -> notifyTo { onCompleted(curPath, false) }
                 PlayerConstants.PlayerState.PLAYING -> notifyTo { onPlay(curPath, false) }
@@ -70,7 +74,6 @@ class CusWebRender(ctx: Context) : BaseRender(ctx) {
                 else -> {
                 }
             }
-            super.onStateChange(state)
         }
     }
     private var youTubePlayerBridge = YtbWebBridge(ytbDelegate)
@@ -78,19 +81,11 @@ class CusWebRender(ctx: Context) : BaseRender(ctx) {
     private var ytbOptions: IFramePlayerOptions = IFramePlayerOptions.default
 
     init {
-        initWebView()
+        ytbDelegate.initYoutubeScript(true, ytbOptions)
     }
 
     override fun onInterceptTouchEvent(ev: MotionEvent?): Boolean {
         return true
-    }
-
-    private fun initWebView() {
-        webView?.settings?.let {
-            it.mediaPlaybackRequiresUserGesture = false
-            it.cacheMode = WebSettings.LOAD_NO_CACHE
-        }
-        ytbDelegate.initYoutubeScript(ytbOptions)
     }
 
     private fun getWebView(): CCYtbWebView? {
@@ -150,7 +145,6 @@ class CusWebRender(ctx: Context) : BaseRender(ctx) {
     }
 
     fun stop(withNotify: Boolean, isRegulate: Boolean) {
-        pause()
         ytbDelegate.stop()
         if (withNotify) notifyTo { onStop(withNotify, ytbDelegate.curPath, isRegulate) }
     }
@@ -174,5 +168,32 @@ class CusWebRender(ctx: Context) : BaseRender(ctx) {
     fun setVolume(volume: Int, maxVolume: Int) {
         ytbDelegate.setVolume((volume * 1.0f / maxVolume * 100f).toInt())
         notifyTo { onPlayerInfo(ytbDelegate.curVolume, ytbDelegate.curPlayingRate) }
+    }
+
+    fun requirePlayQuality(level: PlayQualityLevel) {
+        val quality = when (level) {
+            PlayQualityLevel.AUTO -> PlayerConstants.PlaybackQuality.DEFAULT.value
+            PlayQualityLevel.SMALL -> PlayerConstants.PlaybackQuality.SMALL.value
+            PlayQualityLevel.MEDIUM -> PlayerConstants.PlaybackQuality.MEDIUM.value
+            PlayQualityLevel.M720 -> PlayerConstants.PlaybackQuality.HD720.value
+            PlayQualityLevel.H1080 -> PlayerConstants.PlaybackQuality.HD1080.value
+            PlayQualityLevel.LARGE -> PlayerConstants.PlaybackQuality.LARGE.value
+            PlayQualityLevel.BR -> PlayerConstants.PlaybackQuality.HIGH_RES.value
+        }
+        ytbDelegate.setPlaybackQuality(quality)
+    }
+
+    private val changeListFunc = { lst: List<PlayerConstants.PlaybackQuality>? ->
+        lst?.map {
+            when (it) {
+                PlayerConstants.PlaybackQuality.DEFAULT, PlayerConstants.PlaybackQuality.UNKNOWN -> PlayQualityLevel.AUTO
+                PlayerConstants.PlaybackQuality.SMALL -> PlayQualityLevel.SMALL
+                PlayerConstants.PlaybackQuality.MEDIUM -> PlayQualityLevel.MEDIUM
+                PlayerConstants.PlaybackQuality.HD720 -> PlayQualityLevel.M720
+                PlayerConstants.PlaybackQuality.HD1080 -> PlayQualityLevel.H1080
+                PlayerConstants.PlaybackQuality.LARGE -> PlayQualityLevel.LARGE
+                PlayerConstants.PlaybackQuality.HIGH_RES -> PlayQualityLevel.BR
+            }
+        }
     }
 }

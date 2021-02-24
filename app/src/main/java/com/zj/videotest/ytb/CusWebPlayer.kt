@@ -1,6 +1,7 @@
 package com.zj.videotest.ytb
 
 import com.zj.player.base.BasePlayer
+import com.zj.player.ut.PlayQualityLevel
 import com.zj.player.ut.PlayerEventController
 
 class CusWebPlayer : BasePlayer<CusWebRender> {
@@ -11,7 +12,7 @@ class CusWebPlayer : BasePlayer<CusWebRender> {
     private val render: CusWebRender?; get() = controller?.playerView
 
     override fun isLoadData(): Boolean {
-        return curPath != null && render != null
+        return (isLoading() || isPause(true)) && render != null
     }
 
     override fun isLoading(accurate: Boolean): Boolean {
@@ -128,5 +129,9 @@ class CusWebPlayer : BasePlayer<CusWebRender> {
         this.controller?.onStop(true, currentPlayPath(), true)
         this.controller = controller
         return curAccessKey
+    }
+
+    override fun requirePlayQuality(level: PlayQualityLevel) {
+        render?.requirePlayQuality(level)
     }
 }

@@ -6,5 +6,12 @@
     <string name="z_player_str_loading_video_error_tint">点击以再次尝试</string>
     <string name="z_player_str_screen_locked_tint">设备已设置方向锁定</string>
     <string name="z_player_str_speed" translatable="false">%sX</string>
+    <string name="z_player_str_quality_auto" translatable="false">AUTO</string>
+    <string name="z_player_str_quality_small" translatable="false">240P</string>
+    <string name="z_player_str_quality_medium" translatable="false">360P</string>
+    <string name="z_player_str_quality_large" translatable="false">480P</string>
+    <string name="z_player_str_quality_720" translatable="false">720P</string>
+    <string name="z_player_str_quality_1080" translatable="false">1080P</string>
+    <string name="z_player_str_quality_br" translatable="false">HIGHEST</string>
 
 </resources>

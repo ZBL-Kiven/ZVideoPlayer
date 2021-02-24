@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center"
+    android:layout_margin="24dp"
+    android:background="@drawable/z_player_video_quality_pop_bg"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:id="@+id/z_player_quality_view_tv_auto"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="5dp"
+        android:gravity="center"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/z_player_video_menu_item_bg"
+            android:paddingStart="20dp"
+            android:paddingEnd="20dp"
+            android:text="@string/z_player_str_quality_auto"
+            android:textColor="#fff"
+            android:textSize="14sp" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1px"
+            android:layout_marginTop="5dp"
+            android:background="#aaa" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/z_player_quality_view_tv_240"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="5dp"
+        android:gravity="center"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/z_player_video_menu_item_bg"
+            android:paddingStart="20dp"
+            android:paddingEnd="20dp"
+            android:text="@string/z_player_str_quality_small"
+            android:textColor="#fff"
+            android:textSize="14sp" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1px"
+            android:layout_marginTop="5dp"
+            android:background="#aaa" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/z_player_quality_view_tv_360"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="5dp"
+        android:gravity="center"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingStart="20dp"
+            android:paddingEnd="20dp"
+            android:text="@string/z_player_str_quality_medium"
+            android:textColor="#fff"
+            android:textSize="14sp" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1px"
+            android:layout_marginTop="5dp"
+            android:background="#aaa" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/z_player_quality_view_tv_480"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="5dp"
+        android:gravity="center"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/z_player_video_menu_item_bg"
+            android:paddingStart="20dp"
+            android:paddingEnd="20dp"
+            android:text="@string/z_player_str_quality_large"
+            android:textColor="#fff"
+            android:textSize="14sp" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1px"
+            android:layout_marginTop="5dp"
+            android:background="#aaa" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/z_player_quality_view_tv_720"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="5dp"
+        android:gravity="center"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/z_player_video_menu_item_bg"
+            android:paddingStart="20dp"
+            android:paddingEnd="20dp"
+            android:text="@string/z_player_str_quality_720"
+            android:textColor="#fff"
+            android:textSize="14sp" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1px"
+            android:layout_marginTop="5dp"
+            android:background="#aaa" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/z_player_quality_view_tv_1080"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="5dp"
+        android:gravity="center"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/z_player_video_menu_item_bg"
+            android:paddingStart="20dp"
+            android:paddingEnd="20dp"
+            android:text="@string/z_player_str_quality_1080"
+            android:textColor="#fff"
+            android:textSize="14sp" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1px"
+            android:layout_marginTop="5dp"
+            android:background="#aaa" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/z_player_quality_view_tv_br"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/z_player_video_menu_item_bg"
+        android:paddingStart="20dp"
+        android:paddingEnd="20dp"
+        android:text="@string/z_player_str_quality_br"
+        android:textColor="#fff"
+        android:textSize="14sp" />
+
+</LinearLayout>

@@ -1,9 +1,12 @@
 package com.zj.youtube
 
+import android.graphics.Color
 import android.os.Handler
 import android.os.Looper
 import android.os.Message
+import android.view.View
 import android.view.ViewGroup
+import android.webkit.WebSettings
 import android.webkit.WebView
 import androidx.annotation.CallSuper
 import com.zj.youtube.constance.PlayerConstants
@@ -15,6 +18,7 @@ import java.lang.Exception
 import kotlin.math.max
 import kotlin.math.min
 
+@Suppress("MemberVisibilityCanBePrivate")
 abstract class YoutubeDelegate(debugAble: Boolean) : YouTubePlayerListener {
 
     var curPath: String = ""
@@ -24,8 +28,16 @@ abstract class YoutubeDelegate(debugAble: Boolean) : YouTubePlayerListener {
     var curPlayingRate = 0f
     var curVolume = 1
     var isPageReady = false
+
+    companion object {
+        private const val HANDLE_SEEK = 0x165771
+    }
+
+
     private var pendingIfNotReady: PendingLoadTask? = null
-    protected var playerState: PlayerConstants.PlayerState = PlayerConstants.PlayerState.UNKNOWN
+    private var playerState: PlayerConstants.PlayerState = PlayerConstants.PlayerState.UNKNOWN
+    open fun onPlayStateChange(curState: PlayerConstants.PlayerState, oldState: PlayerConstants.PlayerState) {}
+    open fun onPlayQualityChanged(quality: PlayerConstants.PlaybackQuality, supports: List<PlayerConstants.PlaybackQuality>?) {}
 
     init {
         if (debugAble) Utils.openDebug()
@@ -56,20 +68,27 @@ abstract class YoutubeDelegate(debugAble: Boolean) : YouTubePlayerListener {
         }
     }
 
-    fun initYoutubeScript(playerOptions: IFramePlayerOptions) {
+    fun initYoutubeScript(transparentWebBackground: Boolean, playerOptions: IFramePlayerOptions) {
         val ctx = getWebView()?.context ?: return
         val htmlPage = Utils.readHTMLFromUTF8File(ctx.resources.openRawResource(R.raw.youtube_player_bridge)).replace("<<injectedPlayerVars>>", playerOptions.toString())
-        runWithWebView { it.loadDataWithBaseURL(playerOptions.getOrigin(), htmlPage, "text/html", "utf-8", null) }
+        runWithWebView {
+            it.settings?.mediaPlaybackRequiresUserGesture = false
+            it.settings?.cacheMode = WebSettings.LOAD_NO_CACHE
+            if (transparentWebBackground) it.setBackgroundColor(Color.TRANSPARENT)
+            it.loadDataWithBaseURL(playerOptions.getOrigin(), htmlPage, "text/html", "utf-8", null)
+        }
     }
 
     fun loadVideoById(id: String, startSeconds: Float, suggestionQuality: String, pendingIfNotReady: PendingLoadTask) {
         if (isPageReady) {
             this.curPath = id
-            onStateChange(PlayerConstants.PlayerState.LOADING)
-            runWithWebView { it.loadUrl("javascript:loadVideoById(\'$id\', $startSeconds, \'$suggestionQuality\')") }
+            runWithWebView {
+                it.loadUrl("javascript:loadVideoById(\'$curPath\', $startSeconds, \'$suggestionQuality\')")
+                onStateChange(PlayerConstants.PlayerState.LOADING)
+            }
         } else {
             if (this.pendingIfNotReady?.path != pendingIfNotReady.path) {
-                this.pendingIfNotReady?.let { mainThreadHandler.removeCallbacks(it) }
+                this.pendingIfNotReady?.let { r -> mainThreadHandler.removeCallbacks(r) }
                 this.pendingIfNotReady = pendingIfNotReady
             }
         }
@@ -85,8 +104,9 @@ abstract class YoutubeDelegate(debugAble: Boolean) : YouTubePlayerListener {
 
     fun stop() {
         pendingIfNotReady = null
-        playerState = PlayerConstants.PlayerState.STOP
+        getWebView()?.visibility = View.INVISIBLE
         mainThreadHandler.removeCallbacksAndMessages(null)
+        playerState = PlayerConstants.PlayerState.STOP
     }
 
     fun setVolume(volumePercent: Int) {
@@ -101,6 +121,10 @@ abstract class YoutubeDelegate(debugAble: Boolean) : YouTubePlayerListener {
 
     fun setPlaybackRate(rate: Float) {
         runWithWebView { it.loadUrl("javascript:setPlaybackRate($rate)") }
+    }
+
+    fun setPlaybackQuality(quality: String) {
+        runWithWebView { it.loadUrl("javascript:setPlaybackQuality(\'$quality\')") }
     }
 
     fun destroy() {
@@ -135,10 +159,6 @@ abstract class YoutubeDelegate(debugAble: Boolean) : YouTubePlayerListener {
         }
     }
 
-    companion object {
-        private const val HANDLE_SEEK = 0x165771
-    }
-
     override fun onYouTubeIFrameAPIReady() {
         runWithWebView { it.loadUrl("javascript:hideInfo()") }
     }
@@ -150,15 +170,25 @@ abstract class YoutubeDelegate(debugAble: Boolean) : YouTubePlayerListener {
         pendingIfNotReady?.let { mainThreadHandler.post(it) }
     }
 
-    @CallSuper
-    override fun onStateChange(state: PlayerConstants.PlayerState) {
-        runWithWebView { it.loadUrl("javascript:hideInfo()") }
-        Utils.log("on player state changed from $playerState to $state")
-        this.playerState = state
+    final override fun onStateChange(state: PlayerConstants.PlayerState) {
+        if (playerState.inLoading() && state.inLoading()) return
+        if (playerState == PlayerConstants.PlayerState.LOADING && state == PlayerConstants.PlayerState.PAUSED) return
+        if (state != PlayerConstants.PlayerState.UNKNOWN && state == playerState) return
+        try {
+            getWebView()?.let {
+                it.visibility = if (state.inMutual() && !(playerState.inLoading() && state == PlayerConstants.PlayerState.PAUSED)) View.VISIBLE else View.INVISIBLE
+                it.loadUrl("javascript:hideInfo()")
+                onPlayStateChange(state, playerState)
+            }
+        } finally {
+            Utils.log("on player state changed from $playerState to $state")
+            this.playerState = state
+        }
     }
 
-    override fun onPlaybackQualityChange(playbackQuality: PlayerConstants.PlaybackQuality) {
-        Utils.log("the cur play back quality is ${playbackQuality.name}")
+    final override fun onPlaybackQualityChange(playbackQuality: PlayerConstants.PlaybackQuality, playbackQualities: List<PlayerConstants.PlaybackQuality>?) {
+        Utils.log("the cur play back quality is ${playbackQuality.name} , supported : ${playbackQualities?.joinToString { it.value }}")
+        onPlayQualityChanged(playbackQuality, playbackQualities?.toMutableList())
     }
 
     override fun onPlaybackRateChange(playbackRate: PlayerConstants.PlaybackRate) {

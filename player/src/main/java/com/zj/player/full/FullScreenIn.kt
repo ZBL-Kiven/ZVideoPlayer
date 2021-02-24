@@ -7,14 +7,14 @@ internal interface FullContentListener : FullScreenListener {
 
     fun onContentLayoutInflated(content: View)
 
-    fun onFullMaxChanged(dialog: BaseGestureFullScreenDialog, isMax: Boolean)
+    fun onFullMaxChanged(dialog: ZPlayerFullScreenView, isMax: Boolean)
 }
 
 internal interface FullScreenListener {
 
     fun onDisplayChanged(isShow: Boolean, payloads: Map<String, Any?>?)
 
-    fun onFocusChange(dialog: BaseGestureFullScreenDialog, isMax: Boolean)
+    fun onFocusChange(dialog: ZPlayerFullScreenView, isMax: Boolean)
 
     fun onTrack(isStart: Boolean, isEnd: Boolean, formTrigDuration: Float)
 

@@ -1,5 +1,6 @@
 package com.zj.player.base
 
+import com.zj.player.ut.PlayQualityLevel
 import com.zj.player.ut.PlayerEventController
 
 
@@ -121,5 +122,10 @@ interface BasePlayer<R : BaseRender> {
      * The current controller bound to this
      * */
     fun setController(controller: PlayerEventController<R>): String
+
+    /**
+     * Request a certain playback quality
+     * */
+    fun requirePlayQuality(level: PlayQualityLevel)
 
 }

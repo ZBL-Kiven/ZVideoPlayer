@@ -60,8 +60,8 @@ internal class FullScreenConfig internal constructor(private var controllerView:
         return this
     }
 
-    fun start(context: Context): BaseGestureFullScreenDialog {
-        return BaseGestureFullScreenDialog(context, this)
+    fun start(context: Context): ZPlayerFullScreenView {
+        return ZPlayerFullScreenView(context, this)
     }
 
     fun clear() {

@@ -24,8 +24,9 @@ interface YouTubePlayerListener {
     /**
      * Called every time the quality of the playback changes. Check [PlayerConstants.PlaybackQuality] to see all the possible values.
      * @param playbackQuality a state from [PlayerConstants.PlaybackQuality]
+     *  @param playbackQualities all supported qualities
      */
-    fun onPlaybackQualityChange(playbackQuality: PlayerConstants.PlaybackQuality)
+    fun onPlaybackQualityChange(playbackQuality: PlayerConstants.PlaybackQuality, playbackQualities: List<PlayerConstants.PlaybackQuality>?)
 
     /**
      * Called every time the speed of the playback changes. Check [PlayerConstants.PlaybackRate] to see all the possible values.

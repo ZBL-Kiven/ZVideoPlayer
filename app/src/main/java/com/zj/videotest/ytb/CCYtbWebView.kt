@@ -20,6 +20,6 @@ class CCYtbWebView(context: Context, private val ytbWebBridge: YtbWebBridge) : C
 
     override fun onSizeChanged(w: Int, h: Int, ow: Int, oh: Int) {
         val h1 = (parent as? ViewGroup)?.height ?: h
-        super.onSizeChanged(w, min(w, h1), ow, oh)
+        super.onSizeChanged(w, min((w * 3f / 4f).toInt(), h1), ow, oh)
     }
 }

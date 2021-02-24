@@ -39,4 +39,26 @@
         <item name="android:clipChildren">false</item>
     </style>
 
+<!--    <style name="menuPopStyle">-->
+<!--        <item name="android:popupMenuStyle">@style/popMenuStyle</item>-->
+<!--        <item name="android:dropDownListViewStyle">@style/popMenuDivier</item>-->
+<!--        <item name="android:textAppearanceSmallPopupMenu">@style/popMeuText</item>-->
+<!--        <item name="android:textAppearanceLargePopupMenu">@style/popMeuText</item>-->
+<!--    </style>-->
+<!--    &lt;!&ndash;popMenu的Style&ndash;&gt;-->
+<!--    <style name="popMenuStyle" parent="@android:style/Widget.PopupMenu">-->
+<!--        <item name="android:popupBackground"></item>&lt;!&ndash; popMenu的背景色&ndash;&gt;-->
+<!--    </style>-->
+<!--    &lt;!&ndash;popmenu的字体颜色&ndash;&gt;-->
+<!--    <style name="popMeuText">-->
+<!--        <item name="android:textColor">@color/white</item>-->
+<!--        <item name="android:textSize">20sp</item>-->
+<!--        <item name="android:gravity">center</item>-->
+<!--    </style>-->
+<!--    &lt;!&ndash;popMenu分割线的颜色&ndash;&gt;-->
+<!--    <style name="popMenuDivier">-->
+<!--        <item name="android:divider">@color/blueSky</item>-->
+<!--        <item name="android:dividerHeight">2sp</item>-->
+<!--    </style>-->
+
 </resources>

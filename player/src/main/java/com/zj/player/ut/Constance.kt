@@ -47,6 +47,7 @@ object Constance {
      * */
     internal var defaultControllerVisibility = 1
     internal var muteIconEnable = 2
+    internal var qualityEnable = 2
     internal var speedIconEnable = 2
     internal var fullScreenEnAble = 2
     internal var secondarySeekBarEnable = 1

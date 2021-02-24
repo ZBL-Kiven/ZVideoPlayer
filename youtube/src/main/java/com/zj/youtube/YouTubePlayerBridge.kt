@@ -2,11 +2,14 @@ package com.zj.youtube
 
 import android.os.Handler
 import android.os.Looper
+import android.os.Message
 import androidx.annotation.RestrictTo
 import android.text.TextUtils
+import android.util.Log
 import android.webkit.JavascriptInterface
 import com.zj.youtube.constance.PlayerConstants
 import com.zj.youtube.proctol.YouTubePlayerListener
+import com.zj.youtube.utils.Utils
 
 
 /**
@@ -46,7 +49,12 @@ open class YouTubePlayerBridge(private val youTubePlayerOwner: YouTubePlayerList
         private const val ERROR_VIDEO_NOT_PLAYABLE_IN_EMBEDDED_PLAYER2 = "150"
     }
 
-    private val mainThreadHandler: Handler = Handler(Looper.getMainLooper())
+    private val mainThreadHandler: Handler = Handler(Looper.getMainLooper()) {
+        if (it.what == 51463) {
+            youTubePlayerOwner.onStateChange(it.obj as PlayerConstants.PlayerState)
+        }
+        return@Handler false
+    }
 
     @JavascriptInterface
     fun sendYouTubeIFrameAPIReady() = mainThreadHandler.post { youTubePlayerOwner.onYouTubeIFrameAPIReady() }
@@ -68,16 +76,24 @@ open class YouTubePlayerBridge(private val youTubePlayerOwner: YouTubePlayerList
     @JavascriptInterface
     fun sendStateChange(state: String) {
         val playerState = parsePlayerState(state)
-        mainThreadHandler.post {
-            youTubePlayerOwner.onStateChange(playerState)
-        }
+        mainThreadHandler.removeMessages(51463)
+        mainThreadHandler.sendMessageDelayed(Message.obtain().apply {
+            what = 51463
+            obj = playerState
+        }, 80)
     }
 
     @JavascriptInterface
-    fun sendPlaybackQualityChange(quality: String) {
+    fun onIFrameContent(s: String) {
+        Utils.log(s)
+    }
+
+    @JavascriptInterface
+    fun sendPlaybackQualityChange(quality: String, qualityList: Array<String>?) {
+        val lst = if (qualityList != null) hashSetOf(*qualityList) else null
         val playbackQuality = parsePlaybackQuality(quality)
         mainThreadHandler.post {
-            youTubePlayerOwner.onPlaybackQualityChange(playbackQuality)
+            youTubePlayerOwner.onPlaybackQualityChange(playbackQuality, lst?.map { parsePlaybackQuality(it) })
         }
     }
 
@@ -92,7 +108,6 @@ open class YouTubePlayerBridge(private val youTubePlayerOwner: YouTubePlayerList
     @JavascriptInterface
     fun sendError(error: String) {
         val playerError = parsePlayerError(error)
-
         mainThreadHandler.post {
             youTubePlayerOwner.onError(playerError)
         }

@@ -19,6 +19,7 @@ import com.zj.player.ut.PlayerEventController
 import com.zj.player.logs.BehaviorData
 import com.zj.player.logs.BehaviorLogsTable
 import com.zj.player.logs.ZPlayerLogs
+import com.zj.player.ut.PlayQualityLevel
 import com.zj.player.ut.PlayStateChangeListener
 import java.lang.IllegalArgumentException
 import java.lang.NullPointerException
@@ -211,6 +212,11 @@ class ZController<P : BasePlayer<R>, R : BaseRender> internal constructor(privat
         return runWithPlayer { it.isDestroyed(accurate) } ?: true
     }
 
+    fun requirePlayQuality(level: PlayQualityLevel) {
+        log("user required play quality to level $level")
+        runWithPlayer { it.requirePlayQuality(level) }
+    }
+
     fun getCurVolume(): Int {
         return player?.getVolume() ?: 0
     }
@@ -382,8 +388,13 @@ class ZController<P : BasePlayer<R>, R : BaseRender> internal constructor(privat
     }
 
     override fun onPlayerInfo(volume: Int, speed: Float) {
-        log("on video upload player info ...", BehaviorLogsTable.controllerState("onUploadPlayerInfo", getCallId(), getPath()))
+        log("on video update player info ...", BehaviorLogsTable.controllerState("onUploadPlayerInfo", getCallId(), getPath()))
         withRenderAndControllerView(false)?.updateCurPlayerInfo(volume, speed)
+    }
+
+    override fun onPlayQualityChanged(qualityLevel: PlayQualityLevel?, supportedQualities: MutableList<PlayQualityLevel>?) {
+        log("on video update player info ...", BehaviorLogsTable.controllerState("onPlayQualityChanged", getCallId(), getPath()))
+        withRenderAndControllerView(false)?.updateCurPlayingQuality(qualityLevel, supportedQualities)
     }
 
     private fun getSuitParentLayoutParams(v: ViewGroup): ViewGroup.LayoutParams {
