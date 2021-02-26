@@ -42,9 +42,8 @@ import com.zj.player.view.QualityMenuView
 import com.zj.player.view.VideoLoadingView
 import com.zj.player.view.VideoRootView
 import java.lang.ref.WeakReference
-import java.text.DecimalFormat
 import kotlin.math.abs
-import kotlin.math.roundToInt
+import kotlin.math.max
 
 /**
  * @author ZJJ on 2020.6.16
@@ -123,7 +122,7 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
     private var muteDefault: Boolean = false
     private var muteIsUseGlobal: Boolean = false
     private var isTransactionNavigation: Boolean = false
-    open val supportedSpeedList = floatArrayOf(1.0f, 1.5f, 2f)
+    open val supportedSpeedList = arrayListOf(1.0f, 1.5f, 2f)
     private var menuView: QualityMenuView? = null
     protected var isFullScreen = false
         set(value) {
@@ -422,22 +421,22 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
         if (muteIsUseGlobal) muteGlobalDefault = nextState
         muteDefault = nextState
         muteView?.isSelected = nextState
-        curSpeedIndex = 0
         var lastMinValue = 100000f
-        supportedSpeedList.forEachIndexed { index, fl ->
-            val of = abs(speed - fl)
+        val realSpeed = speed.coerceAtLeast(supportedSpeedList.first())
+        var curSpeedIndex = 0
+        supportedSpeedList.forEachIndexed { i, fl ->
+            val of = abs(realSpeed - fl)
             if (of == 0f) {
                 lastMinValue = 0f
-                curSpeedIndex = index
+                curSpeedIndex = i
                 return@forEachIndexed
-            }
-            if (of < lastMinValue) {
+            } else if (of < lastMinValue) {
                 lastMinValue = of
-                curSpeedIndex = index
+                curSpeedIndex = i
             }
         }
         val curSpeed = supportedSpeedList[curSpeedIndex]
-        val t = if (curSpeed == curSpeed.roundToInt().toFloat()) "${curSpeed.roundToInt()}" else DecimalFormat("#.0").format(curSpeed)
+        val t = "${max(1.0f, curSpeed)}"
         speedView?.text = context.getString(R.string.z_player_str_speed, t)
     }
 

@@ -107,6 +107,7 @@ abstract class YoutubeDelegate(debugAble: Boolean) : YouTubePlayerListener {
         getWebView()?.visibility = View.INVISIBLE
         mainThreadHandler.removeCallbacksAndMessages(null)
         playerState = PlayerConstants.PlayerState.STOP
+        runWithWebView { it.loadUrl("javascript:stop()") }
     }
 
     fun setVolume(volumePercent: Int) {

@@ -25,6 +25,10 @@ object ZPlayer {
         return build(viewController, ZVideoPlayer(config), ZRender::class.java)
     }
 
+    fun <P : ZVideoPlayer> build(viewController: Controller, player: P): ZController<ZVideoPlayer, ZRender> {
+        return build(viewController, player, ZRender::class.java)
+    }
+
     fun <P : BasePlayer<R>, R : BaseRender> build(viewController: Controller, player: P, render: Class<R>): ZController<P, R> {
         return ZController(player, render, viewController)
     }

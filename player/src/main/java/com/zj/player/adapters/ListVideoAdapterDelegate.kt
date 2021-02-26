@@ -243,25 +243,29 @@ abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : Rec
         (recyclerView?.layoutManager as? LinearLayoutManager)?.let { lm ->
             var fv = lm.findFirstCompletelyVisibleItemPosition()
             var lv = lm.findLastCompletelyVisibleItemPosition()
-            val scrollAuto = (fv < 0 && lv < 0) || ((fv < 0 || lv < 0) && controller?.isLoadData() == false)
-            if (fv < 0) fv = lm.findFirstVisibleItemPosition()
-            if (lv < 0) lv = lm.findLastVisibleItemPosition()
+            var offsetPositions: Int? = null
+            var scrollAuto = false
+            if (fv < 0 && lv < 0) {
+                fv = lm.findFirstVisibleItemPosition()
+                lv = lm.findLastVisibleItemPosition()
+                scrollAuto = true
+            }
             val cp = Rect()
             recyclerView?.getLocalVisibleRect(cp)
-            var offsetPositions: Int? = null
-            val tr = if (fv == lv) fv else {
+            val tr = if (fv == lv) fv else if (fv >= 0 && lv >= 0) {
                 @Suppress("UNCHECKED_CAST") val vft = (recyclerView?.findViewHolderForAdapterPosition(fv) as? VH)?.itemView?.top ?: 0
                 @Suppress("UNCHECKED_CAST") val vlt = (recyclerView?.findViewHolderForAdapterPosition(lv) as? VH)?.itemView
                 val fvo = vft - cp.top
                 val lvo = vlt?.let { min(vlt.bottom - cp.bottom, vlt.top - cp.top) } ?: 0
                 val trv = min(abs(fvo), abs(lvo))
                 val isFo = abs(fvo) == trv
-                offsetPositions = if (isFo) fvo else lvo
+                offsetPositions = if (isFo) fvo - 20 else lvo + 20
                 if (isFo) fv else lv
-            }
+            } else if (fv <= 0) lv else fv
             @Suppress("UNCHECKED_CAST") (getViewController(recyclerView?.findViewHolderForAdapterPosition(tr) as? VH)?.let {
                 if (!it.isBindingController) it.clickPlayBtn()
             })
+            if (!scrollAuto) return@let
             val offset = offsetPositions ?: {
                 val itemOffset = @Suppress("UNCHECKED_CAST") (recyclerView?.findViewHolderForAdapterPosition(tr) as? VH)?.itemView?.top ?: 0
                 itemOffset - cp.top
