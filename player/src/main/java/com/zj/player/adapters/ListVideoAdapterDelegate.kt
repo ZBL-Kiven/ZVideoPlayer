@@ -251,7 +251,11 @@ abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : Rec
                 scrollAuto = true
             }
             val cp = Rect()
-            recyclerView?.getLocalVisibleRect(cp)
+            recyclerView?.let {
+                it.getLocalVisibleRect(cp)
+                cp.top += it.paddingTop
+                cp.bottom -= it.paddingBottom
+            }
             val tr = if (fv == lv) fv else if (fv >= 0 && lv >= 0) {
                 @Suppress("UNCHECKED_CAST") val vft = (recyclerView?.findViewHolderForAdapterPosition(fv) as? VH)?.itemView?.top ?: 0
                 @Suppress("UNCHECKED_CAST") val vlt = (recyclerView?.findViewHolderForAdapterPosition(lv) as? VH)?.itemView

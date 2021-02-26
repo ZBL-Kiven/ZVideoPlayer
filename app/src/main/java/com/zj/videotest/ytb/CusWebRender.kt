@@ -166,7 +166,7 @@ class CusWebRender(ctx: Context) : BaseRender(ctx) {
     }
 
     fun setVolume(volume: Int, maxVolume: Int) {
-        ytbDelegate.setVolume((volume * 1.0f / maxVolume * 100f).toInt())
+        ytbDelegate.setVolume((volume * 1.0f / maxVolume * 100f).toInt(), true)
         notifyTo { onPlayerInfo(ytbDelegate.curVolume, ytbDelegate.curPlayingRate) }
     }
 

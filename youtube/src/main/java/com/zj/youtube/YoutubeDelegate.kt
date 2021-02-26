@@ -110,12 +110,13 @@ abstract class YoutubeDelegate(debugAble: Boolean) : YouTubePlayerListener {
         runWithWebView { it.loadUrl("javascript:stop()") }
     }
 
-    fun setVolume(volumePercent: Int) {
+    fun setVolume(volumePercent: Int, isFollowToDevice: Boolean) {
         curVolume = volumePercent
         runWithWebView {
             if (volumePercent <= 0) it.loadUrl("javascript:mute()") else {
                 it.loadUrl("javascript:unMute()")
-                if (volumePercent in 0..100) it.loadUrl("javascript:setVolume($volumePercent)")
+                if (!isFollowToDevice && volumePercent in 0..100) it.loadUrl("javascript:setVolume($volumePercent)")
+                else it.loadUrl("javascript:setVolume(100)")
             }
         }
     }

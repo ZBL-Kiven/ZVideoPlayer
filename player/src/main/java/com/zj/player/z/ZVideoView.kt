@@ -993,6 +993,8 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
     protected fun onDisplayChanged(isShow: Boolean, payloads: Map<String, Any?>?) {
         log("on full screen $isShow", BehaviorLogsTable.onFullscreen(isShow))
         isFullScreen = isShow
+        lockScreen?.visibility = GONE
+        qualityView?.visibility = GONE
         if (!isShow) {
             isFullMaxScreen = false
             fullScreenView = null
