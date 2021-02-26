@@ -122,8 +122,8 @@
             function sendVideoData(player) {
                 var videoDuration = player.getDuration();
                 YouTubePlayerBridge.sendVideoDuration(videoDuration);
-                var curVolume = player.getVolume()
-                if(player.isMuted()) curVolume = 0
+                var curVolume = player.getVolume();
+                if(player.isMuted()) {curVolume = 0;}
                 YouTubePlayerBridge.sendPlayerInfo(curVolume, player.getPlaybackRate());
                 YouTubePlayerBridge.sendPlaybackQualityChange(player.getPlaybackQuality(), player.getAvailableQualityLevels());
             }
