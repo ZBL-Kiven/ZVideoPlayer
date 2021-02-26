@@ -74,6 +74,22 @@ open class YouTubePlayerBridge(private val youTubePlayerOwner: YouTubePlayerList
     }
 
     @JavascriptInterface
+    fun sendPlayerInfo(volume: String, speed: String) {
+        val curSpeed: Float
+        val curVolome: Int
+        try {
+            curSpeed = speed.toFloat()
+            curVolome = volume.toInt()
+        } catch (e: NumberFormatException) {
+            e.printStackTrace()
+            return
+        }
+        mainThreadHandler.post {
+            youTubePlayerOwner.onCurrentPlayerInfo(curVolome, curSpeed)
+        }
+    }
+
+    @JavascriptInterface
     fun sendStateChange(state: String) {
         val playerState = parsePlayerState(state)
         mainThreadHandler.removeMessages(51463)

@@ -12,7 +12,7 @@ class CusWebPlayer : BasePlayer<CusWebRender> {
     private val render: CusWebRender?; get() = controller?.playerView
 
     override fun isLoadData(): Boolean {
-        return (isLoading() || isPause(true)) && render != null
+        return (render?.ytbDelegate?.isPageReady == true && (isLoading() || isPause(true))) && render != null
     }
 
     override fun isLoading(accurate: Boolean): Boolean {

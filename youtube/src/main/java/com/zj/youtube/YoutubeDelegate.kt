@@ -211,6 +211,13 @@ abstract class YoutubeDelegate(debugAble: Boolean) : YouTubePlayerListener {
     }
 
     @CallSuper
+    override fun onCurrentPlayerInfo(curVolume: Int, curSpeed: Float) {
+        Utils.log("on video info parsed : volume = $curVolume  speed =  $curSpeed")
+        this.curPlayingRate = curSpeed
+        this.curVolume = curVolume
+    }
+
+    @CallSuper
     override fun onVideoDuration(duration: Long) {
         Utils.log("on video duration parsed : $duration")
         totalDuration = duration * 1000L
@@ -233,7 +240,7 @@ abstract class YoutubeDelegate(debugAble: Boolean) : YouTubePlayerListener {
     }
 
     fun isLoading(accurate: Boolean): Boolean {
-        return if (accurate) (playerState.level == PlayerConstants.PlayerState.LOADING.level || playerState.level == PlayerConstants.PlayerState.BUFFERING.level) else playerState.level >= PlayerConstants.PlayerState.BUFFERING.level
+        return if (!isPageReady) true else if (accurate) (playerState.level == PlayerConstants.PlayerState.LOADING.level || playerState.level == PlayerConstants.PlayerState.BUFFERING.level) else playerState.level >= PlayerConstants.PlayerState.BUFFERING.level
     }
 
     fun isReady(accurate: Boolean): Boolean {

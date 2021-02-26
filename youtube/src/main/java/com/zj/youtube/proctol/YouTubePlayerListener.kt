@@ -47,6 +47,13 @@ interface YouTubePlayerListener {
     fun onCurrentSecond(second: Long)
 
     /**
+     * Called if the volume / speeds got
+     * @param curVolume current player volume,range in 0..100
+     * @param curSpeed current player speed
+     */
+    fun onCurrentPlayerInfo(curVolume: Int, curSpeed: Float)
+
+    /**
      * Called when the total duration of the video is loaded. <br></br><br></br>
      * Note that getDuration() will return 0 until the video's metadata is loaded, which normally happens just after the video starts playing.
      * @param duration total duration of the video

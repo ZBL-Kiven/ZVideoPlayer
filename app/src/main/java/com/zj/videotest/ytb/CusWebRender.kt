@@ -37,6 +37,11 @@ class CusWebRender(ctx: Context) : BaseRender(ctx) {
             this@CusWebRender.onSeekParsed(progress, fromUser)
         }
 
+        override fun onCurrentPlayerInfo(curVolume: Int, curSpeed: Float) {
+            super.onCurrentPlayerInfo(curVolume, curSpeed)
+            notifyTo { this.onPlayerInfo(curVolume, curPlayingRate) }
+        }
+
         override fun onReady(totalDuration: Long) {
             super.onReady(totalDuration)
             notifyTo { this.onPrepare(curPath, totalDuration, false) }
@@ -118,6 +123,7 @@ class CusWebRender(ctx: Context) : BaseRender(ctx) {
     }
 
     fun load(path: String) {
+        if (!ytbDelegate.isPageReady) notifyTo { onLoading(path, true) }
         val videoId = if (path.contains(PlayerConstants.youtubeIdHost)) path.replace(PlayerConstants.youtubeIdHost, "")
         else if (path.contains(PlayerConstants.youtubeHost)) path.replace(PlayerConstants.youtubeHost, "")
         else {

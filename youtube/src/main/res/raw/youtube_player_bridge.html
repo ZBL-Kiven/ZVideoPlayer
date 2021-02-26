@@ -10,7 +10,6 @@
             overflow: hidden;
             position: fixed;
         }
-
     </style>
     <head>
         <meta
@@ -123,17 +122,20 @@
             function sendVideoData(player) {
                 var videoDuration = player.getDuration();
                 YouTubePlayerBridge.sendVideoDuration(videoDuration);
-                YouTubePlayerBridge.sendPlaybackQualityChange(player.getPlaybackQuality(), player.getAvailableQualityLevels())
+                var curVolume = player.getVolume()
+                if(player.isMuted()) curVolume = 0
+                YouTubePlayerBridge.sendPlayerInfo(curVolume, player.getPlaybackRate());
+                YouTubePlayerBridge.sendPlaybackQualityChange(player.getPlaybackQuality(), player.getAvailableQualityLevels());
             }
 
             function sendStateChange(newState) {
-                YouTubePlayerBridge.sendStateChange(newState)
+                YouTubePlayerBridge.sendStateChange(newState);
             }
 
             function startSendCurrentTimeInterval() {
                 timerId = setInterval(function() {
-                    YouTubePlayerBridge.sendVideoCurrentTime( player.getCurrentTime() )
-                    YouTubePlayerBridge.sendVideoLoadedFraction( player.getVideoLoadedFraction() )
+                    YouTubePlayerBridge.sendVideoCurrentTime(player.getCurrentTime());
+                    YouTubePlayerBridge.sendVideoLoadedFraction(player.getVideoLoadedFraction());
                 }, 500 );
             }
         }
