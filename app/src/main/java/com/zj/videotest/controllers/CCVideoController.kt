@@ -6,6 +6,7 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.gif.GifDrawable
 import com.zj.player.img.ImgLoader
 import com.zj.videotest.controllers.scroller.ScrollerController
+import com.zj.videotest.delegate.VideoControllerPlayers
 
 class CCVideoController @JvmOverloads constructor(c: Context, attr: AttributeSet? = null, def: Int = 0) : ScrollerController(c, attr, def) {
 
@@ -35,5 +36,16 @@ class CCVideoController @JvmOverloads constructor(c: Context, attr: AttributeSet
         isInterruptPlayBtnAnim = true
         showOrHidePlayBtn(false, withState = false)
         full(false)
+    }
+
+    override fun onFullScreenChanged(isFull: Boolean, payloads: Map<String, Any?>?) {
+        super.onFullScreenChanged(isFull, payloads)
+        if (isFull) {
+            if (isPlayable && !isBindingController) vPlay?.let { onPlayClick(it, true) }
+            else if (isBindingController) {
+                if (controller?.isPlaying() == true || controller?.isStop(true) == true) return
+                vPlay?.let { onPlayClick(it, true) }
+            }
+        }
     }
 }

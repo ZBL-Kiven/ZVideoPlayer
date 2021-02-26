@@ -11,15 +11,16 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal">
 
-        <EditText
-            android:id="@+id/mEditText"
+        <TextView
+            android:id="@+id/text"
             android:layout_width="match_parent"
-            android:layout_height="120dp"
+            android:layout_height="50dp"
             android:layout_margin="10dp"
             android:layout_weight="1"
             android:background="#f7f7f7"
-            android:hint="input your test url:"
+            android:gravity="center"
             android:padding="10dp"
+            android:text="https://youtu.be/zxU0Bvfpa70"
             android:textColor="#333"
             android:textColorHint="#999"
             android:textSize="14dp" />
@@ -31,16 +32,18 @@
             android:layout_gravity="center"
             android:background="#eee"
             android:padding="6dp"
-            android:text="PLAY" />
+            android:text="CHECK" />
 
     </LinearLayout>
 
-    <com.zj.player.z.ZVideoView
-        android:id="@+id/mVideoView"
+    <TextView
+        android:id="@+id/mResult"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="#fff">
+        android:layout_gravity="center"
+        android:background="#eee"
+        android:gravity="center"
+        android:padding="6dp" />
 
-    </com.zj.player.z.ZVideoView>
 
 </LinearLayout>

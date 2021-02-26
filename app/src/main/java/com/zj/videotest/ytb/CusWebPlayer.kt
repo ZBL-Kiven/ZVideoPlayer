@@ -12,7 +12,7 @@ class CusWebPlayer : BasePlayer<CusWebRender> {
     private val render: CusWebRender?; get() = controller?.playerView
 
     override fun isLoadData(): Boolean {
-        return (render?.ytbDelegate?.isPageReady == true && (isLoading() || isPause(true))) && render != null
+        return curPath != null && (render?.ytbDelegate?.isPageReady == true && (isLoading() || isPause(true))) && render != null
     }
 
     override fun isLoading(accurate: Boolean): Boolean {
@@ -64,10 +64,12 @@ class CusWebPlayer : BasePlayer<CusWebRender> {
 
     override fun stop() {
         render?.stop(true, isRegulate = false)
+        curPath = null
     }
 
     override fun stopNow(withNotify: Boolean, isRegulate: Boolean) {
         render?.stop(withNotify, isRegulate)
+        curPath = null
     }
 
     override fun seekTo(progress: Int, fromUser: Boolean) {

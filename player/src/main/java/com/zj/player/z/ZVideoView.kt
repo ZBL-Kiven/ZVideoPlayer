@@ -674,7 +674,7 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
                     val match = MATCH_PARENT
                     var ivW: Int? = null
                     var ivH: Int? = null
-                    try {
+                    if (it.drawable != null) try {
                         val bounds = it.getRealBounds()
                         ivW = bounds[0]
                         ivH = bounds[1]

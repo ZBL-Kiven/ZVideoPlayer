@@ -166,6 +166,7 @@ open class ZRender @JvmOverloads constructor(context: Context, attrs: AttributeS
      * don`t forgot call this after your video finished
      * */
     override fun release() {
+        super.release()
         resetSurface()
         player = null
         renderEvent = null

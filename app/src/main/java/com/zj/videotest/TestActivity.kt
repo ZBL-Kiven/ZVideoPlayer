@@ -1,24 +1,24 @@
-package com.zj.videotest.test
+package com.zj.videotest
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import com.zj.player.ZPlayer
-import com.zj.player.z.ZController
-import com.zj.videotest.R
+import com.zj.videotest.ytb.YtbContentChecker
+import com.zj.webkit.CCWebView
 import kotlinx.android.synthetic.main.test_act_content.*
-
 
 class TestActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        CCWebView.onAppAttached(this, "")
         setContentView(R.layout.test_act_content)
-        val c = ZPlayer.build(mVideoView)
+
+        val str = text.text.toString()
 
         mPlay.setOnClickListener {
-            val path = mEditText.text.toString()
-            if (path.isNotEmpty()) {
-                c.playOrResume(path)
+            mResult.text = "checking..."
+            YtbContentChecker.checkYtbLinkAvailable(this, str, 30000) { isOK, path ->
+                mResult.text = "$isOK    :  $path"
             }
         }
     }

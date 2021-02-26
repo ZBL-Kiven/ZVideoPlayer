@@ -19,6 +19,7 @@ import com.zj.player.ut.PlayerEventController
 import com.zj.player.logs.BehaviorData
 import com.zj.player.logs.BehaviorLogsTable
 import com.zj.player.logs.ZPlayerLogs
+import com.zj.player.logs.ZPlayerLogs.debug
 import com.zj.player.ut.PlayQualityLevel
 import com.zj.player.ut.PlayStateChangeListener
 import java.lang.IllegalArgumentException
@@ -89,8 +90,9 @@ open class ZController<P : BasePlayer<R>, R : BaseRender> internal constructor(p
             log("the render view added in $ctr")
             return c
         } catch (e: Exception) {
-            stopNow(false, isRegulate = true)
+            debug("bind to renderer failed ,because : ${e.message}")
             ZPlayerLogs.onError(e)
+            release()
         }
         return null
     }
@@ -139,7 +141,7 @@ open class ZController<P : BasePlayer<R>, R : BaseRender> internal constructor(p
      * On/Off No matter what the current state of the player is, when the first frame of the video is loaded, it will start to play automatically.
      * */
     fun autoPlayWhenReady(autoPlay: Boolean) {
-        log("user set auto play when ready")
+        log("user set auto play when ready ${getPath()}")
         runWithPlayer { it.autoPlay(autoPlay) }
     }
 
@@ -147,23 +149,23 @@ open class ZController<P : BasePlayer<R>, R : BaseRender> internal constructor(p
      * Call this method to start automatic playback after the player processes playable frames.
      * */
     fun playOrResume(path: String = getPath(), callId: Any? = null) {
-        log("user call play or resume")
+        log("user call play or resume ${getPath()}")
         if (path != getPath()) setData(path, false, callId)
         runWithPlayer { it.play() }
     }
 
     fun pause() {
-        log("user call pause")
+        log("user call pause ${getPath()}")
         runWithPlayer { it.pause() }
     }
 
     fun stop() {
-        log("user call stop")
+        log("user call stop ${getPath()}")
         runWithPlayer { it.stop() }
     }
 
     fun stopNow(withNotify: Boolean = false, isRegulate: Boolean = false) {
-        log("user call stop --now")
+        log("user call stop --now ${getPath()}")
         runWithPlayer { it.stopNow(withNotify, isRegulate) }
     }
 
@@ -329,39 +331,39 @@ open class ZController<P : BasePlayer<R>, R : BaseRender> internal constructor(p
     }
 
     override fun onSeekingLoading(path: String?, isRegulate: Boolean) {
-        log("on video seek loading ...", BehaviorLogsTable.controllerState("onSeekLoading", getCallId(), getPath()))
+        log("on video seek loading ... $path", BehaviorLogsTable.controllerState("onSeekLoading", getCallId(), getPath()))
         onPlayingStateChanged(false, "buffering")
         withRenderAndControllerView(true)?.onSeekingLoading(path)
     }
 
     override fun onLoading(path: String?, isRegulate: Boolean) {
-        log("on video loading ...", BehaviorLogsTable.controllerState("loading", getCallId(), getPath()))
+        log("on video loading ... $path", BehaviorLogsTable.controllerState("loading", getCallId(), getPath()))
         onPlayingStateChanged(false, "loading")
         withRenderAndControllerView(true)?.onLoading(path, isRegulate)
     }
 
     override fun onPrepare(path: String?, videoSize: Long, isRegulate: Boolean) {
-        log("on video prepare ...", BehaviorLogsTable.controllerState("onPrepare", getCallId(), getPath()))
+        log("on video prepare ... $path", BehaviorLogsTable.controllerState("onPrepare", getCallId(), getPath()))
         onPlayingStateChanged(false, "prepared")
         withRenderAndControllerView(true)?.onPrepare(path, videoSize, isRegulate)
     }
 
     override fun onPlay(path: String?, isRegulate: Boolean) {
-        log("on video playing ...", BehaviorLogsTable.controllerState("onPlay", getCallId(), getPath()))
+        log("on video playing ... $path", BehaviorLogsTable.controllerState("onPlay", getCallId(), getPath()))
         onPlayingStateChanged(true, "play")
         checkIsMakeScreenOn(true)
         withRenderAndControllerView(true)?.onPlay(path, isRegulate)
     }
 
     override fun onPause(path: String?, isRegulate: Boolean) {
-        log("on video loading ...", BehaviorLogsTable.controllerState("onPause", getCallId(), getPath()))
+        log("on video pause $path", BehaviorLogsTable.controllerState("onPause", getCallId(), getPath()))
         onPlayingStateChanged(false, "pause")
         checkIsMakeScreenOn(false)
         withRenderAndControllerView(true)?.onPause(path, isRegulate)
     }
 
     override fun onStop(notifyStop: Boolean, path: String?, isRegulate: Boolean) {
-        log("on video stop ...", BehaviorLogsTable.controllerState("onStop", getCallId(), getPath()))
+        log("on video stop ... $path", BehaviorLogsTable.controllerState("onStop", getCallId(), getPath()))
         onPlayingStateChanged(false, "stop")
         checkIsMakeScreenOn(false)
         val c = withRenderAndControllerView(false)
@@ -369,13 +371,13 @@ open class ZController<P : BasePlayer<R>, R : BaseRender> internal constructor(p
     }
 
     override fun completing(path: String?, isRegulate: Boolean) {
-        log("on video completing ...", BehaviorLogsTable.controllerState("completing", getCallId(), getPath()))
+        log("on video completing ... $path", BehaviorLogsTable.controllerState("completing", getCallId(), getPath()))
         onPlayingStateChanged(false, "completing")
         withRenderAndControllerView(true)?.completing(path, isRegulate)
     }
 
     override fun onCompleted(path: String?, isRegulate: Boolean) {
-        log("on video completed ...", BehaviorLogsTable.controllerState("onCompleted", getCallId(), getPath()))
+        log("on video completed ... $path", BehaviorLogsTable.controllerState("onCompleted", getCallId(), getPath()))
         onPlayingStateChanged(false, "completed")
         checkIsMakeScreenOn(false)
         withRenderAndControllerView(false)?.onCompleted(path, isRegulate)
@@ -393,7 +395,7 @@ open class ZController<P : BasePlayer<R>, R : BaseRender> internal constructor(p
     }
 
     override fun onPlayQualityChanged(qualityLevel: PlayQualityLevel?, supportedQualities: MutableList<PlayQualityLevel>?) {
-        log("on video update player info ...", BehaviorLogsTable.controllerState("onPlayQualityChanged", getCallId(), getPath()))
+        log("on video update quality", BehaviorLogsTable.controllerState("onPlayQualityChanged", getCallId(), getPath()))
         withRenderAndControllerView(false)?.updateCurPlayingQuality(qualityLevel, supportedQualities)
     }
 

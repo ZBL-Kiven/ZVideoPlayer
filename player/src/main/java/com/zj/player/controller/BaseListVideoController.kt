@@ -119,10 +119,10 @@ abstract class BaseListVideoController @JvmOverloads constructor(c: Context, att
     }
 
     fun onBehaviorDetached(p: String, callId: Any?) {
-        recordLogs("the data $p detached form window", this::class.java.simpleName, Pair("path", p), Pair("callId", callId ?: ""), Pair("name", "videoDetached"))
+        if (p.isNotEmpty()) recordLogs("the data $p detached form window", this::class.java.simpleName, Pair("path", p), Pair("callId", callId ?: ""), Pair("name", "videoDetached"))
     }
 
     fun onBehaviorAttached(p: String, callId: Any?) {
-        recordLogs("the data $p attached form window", this::class.java.simpleName, Pair("path", p), Pair("callId", callId ?: ""), Pair("name", "videoAttached"))
+        if (p.isNotEmpty()) recordLogs("the data $p attached form window", this::class.java.simpleName, Pair("path", p), Pair("callId", callId ?: ""), Pair("name", "videoAttached"))
     }
 }

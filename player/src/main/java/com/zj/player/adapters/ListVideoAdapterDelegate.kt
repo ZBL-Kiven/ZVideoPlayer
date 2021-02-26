@@ -5,6 +5,8 @@ import android.os.Handler
 import android.os.Looper
 import android.os.Message
 import android.view.View
+import android.view.ViewGroup
+import android.view.ViewGroup.FOCUS_BLOCK_DESCENDANTS
 import android.view.animation.AccelerateInterpolator
 import androidx.annotation.MainThread
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -60,6 +62,8 @@ abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : Rec
         if (this.recyclerView == null || this.recyclerView != recyclerView) {
             recyclerView.setHasFixedSize(true)
             recyclerView.clearOnScrollListeners()
+            (recyclerView.parent as? ViewGroup)?.descendantFocusability = FOCUS_BLOCK_DESCENDANTS
+            recyclerView.overScrollMode = View.OVER_SCROLL_NEVER
             recyclerView.addOnScrollListener(recyclerScrollerListener)
             this.recyclerView = recyclerView
         }
@@ -119,47 +123,6 @@ abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : Rec
             if (!attachForce || it.itemView.isAttachedToWindow) return it.itemView.findViewById(id)
         }
         return null
-    }
-
-    fun setIsStopWhenItemDetached(`is`: Boolean) {
-        this.isStopWhenItemDetached = `is`
-    }
-
-    fun setIsAutoPlayWhenItemAttached(`is`: Boolean) {
-        this.isAutoPlayWhenItemAttached = `is`
-    }
-
-    fun setIsAutoScrollToCenter(`is`: Boolean) {
-        this.isAutoScrollToVisible = `is`
-    }
-
-    fun resume() {
-        isPausedToAutoPlay = false
-        controller?.playOrResume()
-    }
-
-    fun pause() {
-        isPausedToAutoPlay = true
-        controller?.pause()
-    }
-
-    fun cancelAll() {
-        handler?.removeCallbacksAndMessages(null)
-        controller?.stopNow(true, isRegulate = true)
-    }
-
-    fun cancelIfNotCurrent(path: String) {
-        if (controller?.getPath() != path) cancelAll()
-    }
-
-    fun release() {
-        handler?.removeCallbacksAndMessages(null)
-        controller?.stopNow()
-        controller?.release()
-        controller = null
-        recyclerView?.clearOnScrollListeners()
-        recyclerView = null
-        handler = null
     }
 
     private fun onBindVideoView(d: T?, vc: V) {
@@ -241,15 +204,18 @@ abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : Rec
 
     private fun onScrollIdle() {
         (recyclerView?.layoutManager as? LinearLayoutManager)?.let { lm ->
-            var fv = lm.findFirstCompletelyVisibleItemPosition()
-            var lv = lm.findLastCompletelyVisibleItemPosition()
+            val fvc = lm.findFirstCompletelyVisibleItemPosition()
+            val lv = lm.findLastCompletelyVisibleItemPosition()
             var offsetPositions: Int? = null
             var scrollAuto = false
-            if (fv < 0 && lv < 0) {
-                fv = lm.findFirstVisibleItemPosition()
-                lv = lm.findLastVisibleItemPosition()
+            var fvi = fvc
+            if (fvc < 0 && lv < 0) {
+                fvi = lm.findFirstVisibleItemPosition()
+                val lvi = lm.findLastVisibleItemPosition()
+                if (lvi - fvi > 1) fvi++
                 scrollAuto = true
             }
+            val fv = if (fvc < 0) fvi else fvc
             val cp = Rect()
             recyclerView?.let {
                 it.getLocalVisibleRect(cp)
@@ -303,15 +269,34 @@ abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : Rec
         } ?: ZPlayerLogs.onError(NullPointerException("where is the thread call crashed, make the ZController to be null?"))
     }
 
-    private var handler: Handler? = Handler(Looper.getMainLooper()) {
-        when (it.what) {
-            waitingForPlayClicked -> {
-                controller?.stopNow()
-                adapter.notifyItemRangeChanged(0, adapter.itemCount, String.format(LOAD_STR_DEFAULT_LOADER, it.arg1, it.obj.toString()))
-            }
-            waitingForPlayScrolled -> onScrollIdle()
-        }
-        return@Handler false
+    fun setIsStopWhenItemDetached(`is`: Boolean) {
+        this.isStopWhenItemDetached = `is`
+    }
+
+    fun setIsAutoPlayWhenItemAttached(`is`: Boolean) {
+        this.isAutoPlayWhenItemAttached = `is`
+    }
+
+    fun setIsAutoScrollToCenter(`is`: Boolean) {
+        this.isAutoScrollToVisible = `is`
+    }
+
+    fun resume() {
+        isPausedToAutoPlay = false
+    }
+
+    fun pause() {
+        isPausedToAutoPlay = true
+        controller?.pause()
+    }
+
+    fun release(destroyPlayer: Boolean) {
+        handler?.removeCallbacksAndMessages(null)
+        if (destroyPlayer) controller?.release() else controller?.stopNow()
+        controller = null
+        recyclerView?.clearOnScrollListeners()
+        recyclerView = null
+        handler = null
     }
 
     fun idle(position: Int = -1) {
@@ -321,6 +306,17 @@ abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : Rec
         } else {
             if (position in 0 until adapter.itemCount) recyclerView?.smoothScrollToPosition(position)
         }
+    }
+
+    private var handler: Handler? = Handler(Looper.getMainLooper()) {
+        when (it.what) {
+            waitingForPlayClicked -> {
+                controller?.stopNow()
+                adapter.notifyItemRangeChanged(0, adapter.itemCount, String.format(LOAD_STR_DEFAULT_LOADER, it.arg1, it.obj.toString()))
+            }
+            waitingForPlayScrolled -> onScrollIdle()
+        }
+        return@Handler false
     }
 
     private val recyclerScrollerListener = object : RecyclerView.OnScrollListener() {

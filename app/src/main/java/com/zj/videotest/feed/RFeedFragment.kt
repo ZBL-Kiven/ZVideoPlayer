@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.zj.cf.fragments.BaseLinkageFragment
 import com.zj.videotest.R
+import com.zj.videotest.delegate.VideoControllerPlayers
 import com.zj.videotest.feed.apis.config.Constance
 import com.zj.videotest.feed.apis.init.AppInitApi
 import com.zj.videotest.feed.data.FeedDataIn
@@ -41,7 +42,7 @@ class RFeedFragment : BaseLinkageFragment() {
 
     private fun initData(isLoadMore: Boolean) {
         AppInitApi.getFeedMock { b, d, es ->
-            if (!isLoadMore) adapter?.cancelAllPLay()
+            if (!isLoadMore) VideoControllerPlayers.stopVideo()
             if (b) setAdapterData(d?.toMutableList(), isLoadMore)
             else if (es != null) Toast.makeText(activity, es.message(), Toast.LENGTH_SHORT).show()
             if (isLoadMore) {

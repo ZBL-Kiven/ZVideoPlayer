@@ -3,6 +3,7 @@ package com.zj.videotest
 import android.graphics.Color
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import com.gyf.immersionbar.ImmersionBar
 import com.zj.cf.managers.BaseFragmentManager
 import com.zj.player.logs.VideoEventListener
@@ -32,11 +33,11 @@ class MainActivity : AppCompatActivity() {
         initFrg()
         ZPlayerLogs.setVideoEventListener(object : VideoEventListener() {
             override fun onError(e: Exception) {
-                //                Log.e("------ ", " ================ error !!     ${e.message}")
+                Log.e("------ ", " ================ error !!     ${e.message}")
             }
 
             override fun onLog(s: String, curPath: String, accessKey: String, modeName: String, params: Map<String, Any>?) {
-                //                Log.e("------ ", s)
+                Log.e("------ ", s)
             }
         })
     }

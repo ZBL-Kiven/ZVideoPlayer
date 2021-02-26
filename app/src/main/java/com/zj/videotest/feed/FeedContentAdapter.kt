@@ -5,7 +5,6 @@ import android.animation.ObjectAnimator
 import android.annotation.SuppressLint
 import android.os.Handler
 import android.os.Looper
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -14,11 +13,8 @@ import android.widget.RelativeLayout
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
-import com.zj.player.ZPlayer
-import com.zj.player.z.ZVideoView
 import com.zj.videotest.feed.data.FeedDataIn
 import com.zj.player.z.ZController
-import com.zj.player.config.VideoConfig
 import com.zj.player.controller.BaseListVideoController
 import com.zj.player.img.ImgLoader
 import com.zj.player.adapters.ListVideoAdapterDelegate
@@ -27,8 +23,7 @@ import com.zj.videotest.R
 import com.zj.videotest.controllers.CCImageLoader
 import com.zj.videotest.feed.data.DataType
 import com.zj.videotest.controllers.CCVideoController
-import com.zj.videotest.ytb.CusWebPlayer
-import com.zj.videotest.ytb.CusWebRender
+import com.zj.videotest.delegate.VideoControllerPlayers
 import com.zj.views.list.holders.BaseViewHolder
 import com.zj.views.ut.DPUtils
 import java.lang.IllegalArgumentException
@@ -44,8 +39,6 @@ class FeedContentAdapter<T : FeedDataIn> : ListenerAnimAdapter<T>(R.layout.r_mai
     private var adapterInterface: FeedAdapterInterface<T>? = null
     private var loadDistance: Int = 5
     private var curLoadingTentaclePosition: Int = 5
-    private var controller: ZController<*, *>? = null
-    private var ytbController: ZController<CusWebPlayer, CusWebRender>? = null
 
     private companion object {
         const val TAG_POSITION = R.id.special_feed_adapter_tag_id_position
@@ -136,10 +129,10 @@ class FeedContentAdapter<T : FeedDataIn> : ListenerAnimAdapter<T>(R.layout.r_mai
             val lp = it.layoutParams
             if (d?.getType() == DataType.YTB) {
                 val width = if (lp.width <= 0) it.context.resources.displayMetrics.widthPixels else lp.width
-                lp.height = (width * 9f / 16f).toInt()
+                lp.height = (width * 5f / 16f).toInt()
             } else {
                 lp.width = (it.parent as? ViewGroup)?.width ?: -1
-                lp.height = DPUtils.dp2px(252f)
+                lp.height = DPUtils.dp2px(152f)
             }
             it.layoutParams = lp
         }
@@ -165,25 +158,12 @@ class FeedContentAdapter<T : FeedDataIn> : ListenerAnimAdapter<T>(R.layout.r_mai
 
     private var adapterDelegate: ListVideoAdapterDelegate<T, CCVideoController, BaseViewHolder>? = object : ListVideoAdapterDelegate<T, CCVideoController, BaseViewHolder>(this@FeedContentAdapter) {
 
-        //todo
         override fun createZController(data: T?, vc: CCVideoController): ZController<*, *> {
-            val config = VideoConfig.create().setCacheEnable(true).setDebugAble(true).setCacheFileDir("feed/videos").updateMaxCacheSize(200L * 1024 * 1024)
-            return when (data?.getType()) {
-                DataType.YTB -> {
-                    Log.e("-----> ", "use ytb controller")
-                    if (ytbController == null) ytbController = ZPlayer.build(vc, CusWebPlayer(), CusWebRender::class.java) else ytbController?.updateViewController(vc)
-                    ytbController!!
-                }
-                else -> {
-                    Log.e("-----> ", "use video controller")
-                    if (controller == null) controller = ZPlayer.build(vc, config) else controller?.updateViewController(vc)
-                    controller!!
-                }
-            }
+            return VideoControllerPlayers.getOrCreatePlayerWithVc(vc) { data?.getType() ?: DataType.VIDEO }
         }
 
         override fun checkControllerMatching(data: T?, controller: ZController<*, *>?): Boolean {
-            return controller != null && ((data?.getType() == DataType.VIDEO && controller.isDefaultPlayerType()) || ((data?.getType() == DataType.YTB && controller.checkPlayerType(CusWebPlayer::class.java))))
+            return VideoControllerPlayers.checkControllerMatching(data?.getType(), controller)
         }
 
         override fun getViewController(holder: BaseViewHolder?): CCVideoController? {
@@ -210,8 +190,6 @@ class FeedContentAdapter<T : FeedDataIn> : ListenerAnimAdapter<T>(R.layout.r_mai
                 it.setPlayingStateListener(if (playAble) onPlayingStateChangedListener else null)
                 it.setOnResetListener(if (playAble) onResetListener else null)
                 it.setOnTrackListener(if (playAble) onTrackListener else null)
-                //            it.actionListener = if (playAble) actionListener else null
-                it.setOnFullScreenChangedListener(onFullScreenListener)
                 onBindAdapterData(d, it, pl)
             }
         }
@@ -265,14 +243,6 @@ class FeedContentAdapter<T : FeedDataIn> : ListenerAnimAdapter<T>(R.layout.r_mai
             }
         }
     }
-
-    private val onFullScreenListener: (ZVideoView, Boolean, pl: Map<String, Any?>?) -> Unit = { vc, _, _ ->
-        (vc.getTag(TAG_POSITION) as? Int)?.let { p ->
-            getItem(p)?.getVideoPath()?.let { path -> cancelIfNotCurrent(path) }
-            resumeIfVisible(p)
-        }
-    }
-
 
     private val onResetListener: (BaseListVideoController) -> Unit = {
         it.getTag(TAG_OVERLAY_VIEW)?.let { tag -> it.removeView(tag, WeakReference(finishOverrideView)) }
@@ -337,32 +307,18 @@ class FeedContentAdapter<T : FeedDataIn> : ListenerAnimAdapter<T>(R.layout.r_mai
         adapterDelegate?.pause()
     }
 
-    fun cancelAllPLay() {
-        adapterDelegate?.cancelAll()
-    }
-
-    //todo
-    private fun cancelIfNotCurrent(path: String) {
-        adapterDelegate?.cancelIfNotCurrent(path)
-    }
-
     fun destroy() {
         isAutoPlayAble = false
-        adapterDelegate?.release()
+        adapterDelegate?.release(true)
         adapterDelegate = null
     }
 
     override fun onDataChange(data: MutableList<T>?) {
-        release()
+        context?.let { Glide.get(it).clearMemory() }
     }
 
     override fun onDataFullChange() {
         resumeIfVisible()
-    }
-
-    private fun release() {
-        context?.let { Glide.get(it).clearMemory() }
-        Runtime.getRuntime().gc()
     }
 
     private fun resumeIfVisible(position: Int = -1) {

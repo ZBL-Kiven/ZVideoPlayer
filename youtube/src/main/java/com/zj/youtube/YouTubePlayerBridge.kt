@@ -5,7 +5,6 @@ import android.os.Looper
 import android.os.Message
 import androidx.annotation.RestrictTo
 import android.text.TextUtils
-import android.util.Log
 import android.webkit.JavascriptInterface
 import com.zj.youtube.constance.PlayerConstants
 import com.zj.youtube.proctol.YouTubePlayerListener
@@ -181,7 +180,7 @@ open class YouTubePlayerBridge(private val youTubePlayerOwner: YouTubePlayerList
     }
 
     @JavascriptInterface
-    fun sendVideoUrl(videoUrl: String) {
+    fun sendVideoId(videoUrl: String) {
         mainThreadHandler.post {
             youTubePlayerOwner.onVideoUrl(videoUrl)
         }

@@ -33,7 +33,6 @@ abstract class YoutubeDelegate(debugAble: Boolean) : YouTubePlayerListener {
         private const val HANDLE_SEEK = 0x165771
     }
 
-
     private var pendingIfNotReady: PendingLoadTask? = null
     private var playerState: PlayerConstants.PlayerState = PlayerConstants.PlayerState.UNKNOWN
     open fun onPlayStateChange(curState: PlayerConstants.PlayerState, oldState: PlayerConstants.PlayerState) {}
@@ -80,6 +79,7 @@ abstract class YoutubeDelegate(debugAble: Boolean) : YouTubePlayerListener {
     }
 
     fun loadVideoById(id: String, startSeconds: Float, suggestionQuality: String, pendingIfNotReady: PendingLoadTask) {
+        playerState = PlayerConstants.PlayerState.UNKNOWN
         if (isPageReady) {
             this.curPath = id
             runWithWebView {
@@ -107,7 +107,8 @@ abstract class YoutubeDelegate(debugAble: Boolean) : YouTubePlayerListener {
         getWebView()?.visibility = View.INVISIBLE
         mainThreadHandler.removeCallbacksAndMessages(null)
         playerState = PlayerConstants.PlayerState.STOP
-        runWithWebView { it.loadUrl("javascript:stop()") }
+        curPath = ""
+        runWithWebView { it.loadUrl("javascript:pauseVideo()") }
     }
 
     fun setVolume(volumePercent: Int, isFollowToDevice: Boolean) {
@@ -173,9 +174,9 @@ abstract class YoutubeDelegate(debugAble: Boolean) : YouTubePlayerListener {
     }
 
     final override fun onStateChange(state: PlayerConstants.PlayerState) {
+        if (state == PlayerConstants.PlayerState.PAUSED && playerState == PlayerConstants.PlayerState.STOP) return
         if (playerState.inLoading() && state.inLoading()) return
         if (playerState == PlayerConstants.PlayerState.LOADING && state == PlayerConstants.PlayerState.PAUSED) return
-        if (state != PlayerConstants.PlayerState.UNKNOWN && state == playerState) return
         try {
             getWebView()?.let {
                 it.visibility = if (state.inMutual() && !(playerState.inLoading() && state == PlayerConstants.PlayerState.PAUSED)) View.VISIBLE else View.INVISIBLE
