@@ -23,6 +23,7 @@ import com.zj.player.R
 import com.zj.player.anim.ZFullValueAnimator
 import java.lang.IllegalArgumentException
 import java.lang.ref.WeakReference
+import kotlin.math.max
 import kotlin.math.roundToInt
 
 @SuppressLint("ViewConstructor")
@@ -80,6 +81,11 @@ internal class ZPlayerFullScreenView constructor(context: Context, private val c
         requestFocus()
         (getControllerView().context.applicationContext.getSystemService(Context.WINDOW_SERVICE) as? WindowManager)?.defaultDisplay?.getRealSize(realWindowSize)
         if (!config.isDefaultMaxScreen && config.contentLayout > 0) contentLayoutView = View.inflate(getControllerView().context, config.contentLayout, null)
+        val actionViews = mutableMapOf<Int, View>()
+        hiddenAllChildIfNotScreenContent(contentLayoutView, actionViews)
+        actionViews.forEach { (_, u) ->
+            u.alpha = 0.0f
+        }
         if (childCount > 0) removeAllViews()
         backgroundView = View(context)
         backgroundView?.setBackgroundColor(Color.BLACK)
@@ -205,9 +211,9 @@ internal class ZPlayerFullScreenView constructor(context: Context, private val c
                     updateContent(1 - duration)
                     setBackground(duration, true)
                 } else {
-                    clipChildren = false
+                    //                    clipChildren = false
                     setBackground(1 - duration, isFromStart = true, isDownTo = true)
-                    (getControllerView().parent as? ViewGroup)?.clipChildren = false
+                    //                    (getControllerView().parent as? ViewGroup)?.clipChildren = false
                     if (originInScreen == null) originInScreen = Point(getControllerView().scrollX, getControllerView().scrollY)
                     originInScreen?.let {
                         val sx = (it.x * (1f - duration)).roundToInt()
@@ -368,12 +374,12 @@ internal class ZPlayerFullScreenView constructor(context: Context, private val c
             if (duration < cur) cur = duration
             backgroundView?.alpha = cur
         } else {
-            backgroundView?.alpha = if (isFromStart) duration else ((duration * 0.85f) + 0.15f)
+            backgroundView?.alpha = if (isFromStart) duration else ((duration * 0.75f) + 0.25f)
         }
         val actionViews = mutableMapOf<Int, View>()
         hiddenAllChildIfNotScreenContent(contentLayoutView, actionViews)
         actionViews.forEach { (_, u) ->
-            u.alpha = d
+            if (d <= 0 || u.alpha >= d || !isDownTo) u.alpha = max(0f, d)
         }
     }
 
