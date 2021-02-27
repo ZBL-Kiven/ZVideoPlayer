@@ -16,7 +16,7 @@ import com.zj.player.z.ZController
 import com.zj.player.controller.BaseListVideoController
 import com.zj.player.list.VideoControllerIn
 import com.zj.player.logs.ZPlayerLogs
-import com.zj.player.ut.InternalPlayStateChangeListener
+import com.zj.player.ut.PlayStateChangeListener
 import java.lang.NullPointerException
 import java.lang.ref.SoftReference
 import java.lang.ref.WeakReference
@@ -28,8 +28,9 @@ import kotlin.math.min
  *
  * of course ZPlayer running in the list adapter as so well.
  * create an instance of [BaseListVideoController] in your data Adapter ,and see [AdapterDelegateIn]
+ * You must pay attention to [ListVideoAdapterDelegate] should be bound to an Adapter, not independent or static
  **/
-abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : RecyclerView.ViewHolder>(private val delegateName: String, private val adapter: RecyclerView.Adapter<VH>) : AdapterDelegateIn<T, VH>, VideoControllerIn, InternalPlayStateChangeListener {
+abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : RecyclerView.ViewHolder>(private val adapter: RecyclerView.Adapter<VH>) : AdapterDelegateIn<T, VH>, VideoControllerIn, PlayStateChangeListener {
 
     private var controller: ZController<*, *>? = null
     private var curPlayingIndex: Int = -1
@@ -48,7 +49,6 @@ abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : Rec
     protected abstract fun onBindData(holder: VH?, p: Int, d: T?, playAble: Boolean, vc: V?, pl: MutableList<Any>?)
     protected open fun onBindTypeData(holder: SoftReference<VH>?, d: T?, p: Int, pl: MutableList<Any>?) {}
     protected open fun onBindDelegate(holder: VH?, p: Int, d: T?, pl: MutableList<Any>?) {}
-    protected open fun onPlayStateChanged(delegateName: String?, isPlaying: Boolean, desc: String?, controller: ZController<*, *>?) {}
     protected open fun checkControllerMatching(data: T?, controller: ZController<*, *>?): Boolean {
         return controller != null
     }
@@ -149,16 +149,12 @@ abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : Rec
         }, delay)
     }
 
-    final override fun onState(delegateName: String?, isPlaying: Boolean, desc: String?, controller: ZController<*, *>?) {
-        this.onPlayStateChanged(delegateName, isPlaying, desc, controller)
-    }
-
     private fun getZController(data: T?, vc: V): ZController<*, *>? {
         val c = createZController(data, vc)
         if (c != controller) {
             controller = c
         }
-        controller?.bindInternalPlayStateListener(delegateName, this)
+        controller?.bindInternalPlayStateListener(this@ListVideoAdapterDelegate.adapter.hashCode(), this)
         return controller
     }
 

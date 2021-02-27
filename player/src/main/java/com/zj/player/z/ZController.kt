@@ -14,12 +14,14 @@ import androidx.annotation.IntRange
 import com.zj.player.base.BasePlayer
 import com.zj.player.base.BaseRender
 import com.zj.player.ut.Constance.CORE_LOG_ABLE
+import com.zj.player.ut.Controller
+import com.zj.player.ut.PlayerEventController
 import com.zj.player.logs.BehaviorData
 import com.zj.player.logs.BehaviorLogsTable
 import com.zj.player.logs.ZPlayerLogs
 import com.zj.player.logs.ZPlayerLogs.debug
-import com.zj.player.ut.*
-import com.zj.player.ut.InternalPlayStateChangeListener
+import com.zj.player.ut.PlayQualityLevel
+import com.zj.player.ut.PlayStateChangeListener
 import java.lang.IllegalArgumentException
 import java.lang.NullPointerException
 import java.util.concurrent.ConcurrentHashMap
@@ -57,7 +59,7 @@ open class ZController<P : BasePlayer<R>, R : BaseRender> internal constructor(p
 
     companion object {
         private const val releaseKey = " - released - "
-        private var internalPlayingStateListeners = ConcurrentHashMap<String, InternalPlayStateChangeListener?>()
+        private var internalPlayingStateListeners = ConcurrentHashMap<Int, PlayStateChangeListener?>()
     }
 
     private fun withRenderAndControllerView(needed: Boolean): Controller? {
@@ -426,7 +428,7 @@ open class ZController<P : BasePlayer<R>, R : BaseRender> internal constructor(p
         } catch (e: Throwable) {
             playingStateListener?.onStateInvokeError(e)
         }
-        internalPlayingStateListeners.forEach { (name, v) -> v?.onState(name, isPlaying, desc, this) }
+        internalPlayingStateListeners.forEach { (_, v) -> v?.onState(isPlaying, desc, this) }
     }
 
     private fun log(s: String, bd: BehaviorData? = null) {
@@ -437,8 +439,8 @@ open class ZController<P : BasePlayer<R>, R : BaseRender> internal constructor(p
         if (CORE_LOG_ABLE) ZPlayerLogs.onLog(s, getPath(), curAccessKey, modeName, bd)
     }
 
-    internal fun bindInternalPlayStateListener(delegateName: String, l: InternalPlayStateChangeListener?) {
-        internalPlayingStateListeners[delegateName] = l
+    internal fun bindInternalPlayStateListener(hash: Int, l: PlayStateChangeListener?) {
+        internalPlayingStateListeners[hash] = l
     }
 
     /**
