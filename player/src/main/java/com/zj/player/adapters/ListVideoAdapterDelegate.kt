@@ -48,7 +48,7 @@ abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : Rec
     protected abstract fun onBindData(holder: VH?, p: Int, d: T?, playAble: Boolean, vc: V?, pl: MutableList<Any>?)
     protected open fun onBindTypeData(holder: SoftReference<VH>?, d: T?, p: Int, pl: MutableList<Any>?) {}
     protected open fun onBindDelegate(holder: VH?, p: Int, d: T?, pl: MutableList<Any>?) {}
-    protected open fun onPlayStateChanged(delegateName: String, isPlaying: Boolean, desc: String?, controller: ZController<*, *>?) {}
+    protected open fun onPlayStateChanged(runningName: String, isPlaying: Boolean, desc: String?, controller: ZController<*, *>?) {}
     protected open fun checkControllerMatching(data: T?, controller: ZController<*, *>?): Boolean {
         return controller != null && controller.runningName != delegateName
     }
@@ -149,8 +149,8 @@ abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : Rec
         }, delay)
     }
 
-    final override fun onState(delegateName: String, isPlaying: Boolean, desc: String?, controller: ZController<*, *>?) {
-        this.onPlayStateChanged(delegateName, isPlaying, desc, controller)
+    final override fun onState(runningName: String, isPlaying: Boolean, desc: String?, controller: ZController<*, *>?) {
+        this.onPlayStateChanged(runningName, isPlaying, desc, controller)
     }
 
     private fun getZController(data: T?, vc: V): ZController<*, *>? {

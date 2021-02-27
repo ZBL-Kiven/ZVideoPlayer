@@ -184,7 +184,7 @@ class FeedContentAdapter<T : FeedDataIn> : ListenerAnimAdapter<T>(R.layout.r_mai
         override val isSourcePlayAble: (d: T?) -> Boolean
             get() = { d -> d?.getType() == DataType.VIDEO || d?.getType() == DataType.YTB }
 
-        override fun onPlayStateChanged(delegateName: String, isPlaying: Boolean, desc: String?, controller: ZController<*, *>?) {
+        override fun onPlayStateChanged(runningName: String, isPlaying: Boolean, desc: String?, controller: ZController<*, *>?) {
             this@FeedContentAdapter.onState(isPlaying, controller)
         }
     }

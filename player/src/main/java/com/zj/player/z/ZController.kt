@@ -427,7 +427,7 @@ open class ZController<P : BasePlayer<R>, R : BaseRender> internal constructor(i
         } catch (e: Throwable) {
             playingStateListener?.onStateInvokeError(e)
         }
-        internalPlayingStateListeners.forEach { (name, v) -> v?.onState(name, isPlaying, desc, this) }
+        internalPlayingStateListeners.forEach { (_, v) -> v?.onState(runningName, isPlaying, desc, this) }
     }
 
     private fun log(s: String, bd: BehaviorData? = null) {
