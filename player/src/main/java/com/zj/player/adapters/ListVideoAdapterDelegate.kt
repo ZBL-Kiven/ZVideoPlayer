@@ -282,8 +282,9 @@ abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : Rec
         this.isAutoScrollToVisible = `is`
     }
 
-    fun resume() {
+    fun resume(position: Int = -1) {
         isPausedToAutoPlay = false
+        idle(position)
     }
 
     fun pause() {
@@ -301,6 +302,7 @@ abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : Rec
     }
 
     fun idle(position: Int = -1) {
+        if (isPausedToAutoPlay) return
         if (position == -1) {
             handler?.removeMessages(waitingForPlayScrolled)
             handler?.sendEmptyMessageDelayed(waitingForPlayScrolled, 150)

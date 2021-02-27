@@ -104,7 +104,6 @@ class FeedContentAdapter<T : FeedDataIn> : ListenerAnimAdapter<T>(R.layout.r_mai
             it.setOnCompletedListener(null)
             it.setOnResetListener(null)
             it.setOnTrackListener(null)
-            it.setOnFullScreenChangedListener(null)
         }
         super.onViewRecycled(holder)
     }
@@ -176,7 +175,6 @@ class FeedContentAdapter<T : FeedDataIn> : ListenerAnimAdapter<T>(R.layout.r_mai
                 it.setTag(TAG_POSITION, p) // important properties.
                 it.setTag(TAG_OVERLAY_VIEW, d?.getSourceId() ?: "TAG_OVERLAY_VIEW$p")
                 it.setOnCompletedListener(if (playAble) onVcCompletedListener else null)
-                it.setPlayingStateListener(if (playAble) onPlayingStateChangedListener else null)
                 it.setOnResetListener(if (playAble) onResetListener else null)
                 it.setOnTrackListener(if (playAble) onTrackListener else null)
                 onBindAdapterData(d, it, pl)
@@ -187,7 +185,7 @@ class FeedContentAdapter<T : FeedDataIn> : ListenerAnimAdapter<T>(R.layout.r_mai
             get() = { d -> d?.getType() == DataType.VIDEO || d?.getType() == DataType.YTB }
 
         override fun onState(isPlaying: Boolean, desc: String?, controller: ZController<out BasePlayer<*>, *>?) {
-
+            this@FeedContentAdapter.onState(isPlaying, controller)
         }
 
         override fun onStateInvokeError(e: Throwable?) {
@@ -207,14 +205,6 @@ class FeedContentAdapter<T : FeedDataIn> : ListenerAnimAdapter<T>(R.layout.r_mai
                     it.animate().alpha(1.0f).setDuration(200).start()
                 }
             }
-        }
-    }
-
-    private val onPlayingStateChangedListener: (BaseListVideoController) -> Unit = {
-        if (!isAutoPlayAble) adapterDelegate?.pause()
-        val tag = finishOverrideView?.getTag(TAG_OVERLAY_VIEW)
-        if (it.containsOverlayView(tag, WeakReference(finishOverrideView))) {
-            it.removeView(tag, WeakReference(finishOverrideView))
         }
     }
 
@@ -245,7 +235,7 @@ class FeedContentAdapter<T : FeedDataIn> : ListenerAnimAdapter<T>(R.layout.r_mai
         loadThumbImage(videoWidth, videoHeight, imgPath, vc, d)
         vc.setScreenContentLayout(R.layout.r_main_video_details_content) { v ->
             v.findViewById<ImageView>(R.id.r_main_fg_list_iv_avatar)?.let {
-                //                loadAvatar(d?.getAvatarPath() ?: "", it)
+                loadAvatar(d?.getAvatarPath() ?: "", it)
             }
         }
     }
@@ -284,36 +274,40 @@ class FeedContentAdapter<T : FeedDataIn> : ListenerAnimAdapter<T>(R.layout.r_mai
         return adapterDelegate
     }
 
-    private var isAutoPlayAble = true
-
     fun resume() {
-        isAutoPlayAble = true
         resumeIfVisible()
     }
 
     fun pause() {
-        isAutoPlayAble = false
         adapterDelegate?.pause()
     }
 
     fun destroy() {
-        isAutoPlayAble = false
         adapterDelegate?.release(true)
         adapterDelegate = null
     }
 
+    private fun onState(isPlaying: Boolean, controller: ZController<out BasePlayer<*>, *>?) {
+        if (isPlaying) {
+            val vc = (controller?.getController() as? CCVideoController) ?: return
+            val tag = finishOverrideView?.getTag(TAG_OVERLAY_VIEW)
+            if (vc.containsOverlayView(tag, WeakReference(finishOverrideView))) {
+                vc.removeView(tag, WeakReference(finishOverrideView))
+            }
+        }
+    }
+
     override fun onDataChange(data: MutableList<T>?) {
-//        context?.let { Glide.get(it).clearMemory() }
+        //        context?.let { Glide.get(it).clearMemory() }
     }
 
     override fun onDataFullChange() {
         resumeIfVisible()
     }
 
-    private fun resumeIfVisible(position: Int = -1) {
+    private fun resumeIfVisible() {
         if (!data.isNullOrEmpty()) {
             adapterDelegate?.resume()
-            if (isAutoPlayAble) adapterDelegate?.idle(position)
         }
     }
 }

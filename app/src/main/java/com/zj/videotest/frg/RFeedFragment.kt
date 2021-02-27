@@ -1,4 +1,4 @@
-package com.zj.videotest.feed
+package com.zj.videotest.frg
 
 import android.util.Log
 import android.view.LayoutInflater
@@ -10,6 +10,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.zj.cf.fragments.BaseLinkageFragment
 import com.zj.videotest.R
 import com.zj.videotest.delegate.VideoControllerPlayers
+import com.zj.videotest.feed.FeedAdapterInterface
+import com.zj.videotest.feed.FeedContentAdapter
 import com.zj.videotest.feed.apis.config.Constance
 import com.zj.videotest.feed.apis.init.AppInitApi
 import com.zj.videotest.feed.data.FeedDataIn

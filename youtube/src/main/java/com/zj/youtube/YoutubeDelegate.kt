@@ -120,6 +120,7 @@ abstract class YoutubeDelegate(debugAble: Boolean) : YouTubePlayerListener {
         runWithWebView {
             curPath = ""
             it.loadUrl("javascript:pauseVideo()")
+            (it.parent as? ViewGroup)?.removeView(it)
             playerState = PlayerConstants.PlayerState.STOP
         }
     }
@@ -215,8 +216,9 @@ abstract class YoutubeDelegate(debugAble: Boolean) : YouTubePlayerListener {
     @CallSuper
     override fun onError(error: PlayerConstants.PlayerError) {
         Utils.log("play error case: ${error.name}")
-        inLoading = false
-        playerState = PlayerConstants.PlayerState.UNKNOWN.setFrom(error.name)
+        this.inLoading = false
+        this.pendingIfNotReady = null
+        mainThreadHandler.post { playerState = PlayerConstants.PlayerState.UNKNOWN.setFrom(error.name) }
     }
 
     @CallSuper
@@ -252,6 +254,10 @@ abstract class YoutubeDelegate(debugAble: Boolean) : YouTubePlayerListener {
 
     @CallSuper
     override fun onApiChange() {
+    }
+
+    fun isLoadData(): Boolean {
+        return playerState.level > PlayerConstants.PlayerState.ENDED.level || playerState == PlayerConstants.PlayerState.PAUSED
     }
 
     fun isLoading(accurate: Boolean): Boolean {
