@@ -205,15 +205,15 @@ abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : Rec
     private fun onScrollIdle() {
         (recyclerView?.layoutManager as? LinearLayoutManager)?.let { lm ->
             val fvc = lm.findFirstCompletelyVisibleItemPosition()
-            val lv = lm.findLastCompletelyVisibleItemPosition()
+            val lvc = lm.findLastCompletelyVisibleItemPosition()
+            val lv = lm.findLastVisibleItemPosition()
             var offsetPositions: Int? = null
             var fvi = fvc
             if (fvc < 0) {
                 fvi = lm.findFirstVisibleItemPosition()
-                val lvi = lm.findLastVisibleItemPosition()
-                if (lvi - fvi > 1) fvi++
+                if (lv - fvi > 1) fvi++
             }
-            val scrollAuto = fvi != lv && (fvi < 0 && lv < 0)
+            val scrollAuto = fvi != lv && (fvc < 0 && lvc < 0)
             val cp = Rect()
             recyclerView?.let {
                 it.getLocalVisibleRect(cp)
