@@ -40,7 +40,7 @@ abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : Rec
     private var recyclerView: RecyclerView? = null
     private val waitingForPlayClicked = R.id.delegate_waiting_for_play_clicked
     private val waitingForPlayScrolled = R.id.delegate_waiting_for_play_scrolled
-    protected abstract fun createZController(data: T?, vc: V): ZController<*, *>
+    protected abstract fun createZController(delegateName: String, data: T?, vc: V): ZController<*, *>
     protected abstract fun getViewController(holder: VH?): V?
     protected abstract fun getItem(p: Int): T?
     protected abstract fun isInflateMediaType(d: T?): Boolean
@@ -48,9 +48,9 @@ abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : Rec
     protected abstract fun onBindData(holder: VH?, p: Int, d: T?, playAble: Boolean, vc: V?, pl: MutableList<Any>?)
     protected open fun onBindTypeData(holder: SoftReference<VH>?, d: T?, p: Int, pl: MutableList<Any>?) {}
     protected open fun onBindDelegate(holder: VH?, p: Int, d: T?, pl: MutableList<Any>?) {}
-    protected open fun onPlayStateChanged(delegateName: String?, isPlaying: Boolean, desc: String?, controller: ZController<*, *>?) {}
+    protected open fun onPlayStateChanged(delegateName: String, isPlaying: Boolean, desc: String?, controller: ZController<*, *>?) {}
     protected open fun checkControllerMatching(data: T?, controller: ZController<*, *>?): Boolean {
-        return controller != null
+        return controller != null && controller.runningName != delegateName
     }
 
     protected abstract val isSourcePlayAble: (d: T?) -> Boolean
@@ -130,7 +130,7 @@ abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : Rec
         if (!checkControllerMatching(d, controller)) {
             controller = getZController(d, vc)
         } else {
-            controller?.updateViewController(vc)
+            controller?.updateViewController(delegateName, vc)
         }
     }
 
@@ -149,12 +149,12 @@ abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : Rec
         }, delay)
     }
 
-    final override fun onState(delegateName: String?, isPlaying: Boolean, desc: String?, controller: ZController<*, *>?) {
+    final override fun onState(delegateName: String, isPlaying: Boolean, desc: String?, controller: ZController<*, *>?) {
         this.onPlayStateChanged(delegateName, isPlaying, desc, controller)
     }
 
     private fun getZController(data: T?, vc: V): ZController<*, *>? {
-        val c = createZController(data, vc)
+        val c = createZController(delegateName, data, vc)
         if (c != controller) {
             controller = c
         }

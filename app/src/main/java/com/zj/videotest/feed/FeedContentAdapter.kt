@@ -144,14 +144,14 @@ class FeedContentAdapter<T : FeedDataIn> : ListenerAnimAdapter<T>(R.layout.r_mai
         }
     }
 
-    private var adapterDelegate: ListVideoAdapterDelegate<T, CCVideoController, BaseViewHolder>? = object : ListVideoAdapterDelegate<T, CCVideoController, BaseViewHolder>(this@FeedContentAdapter) {
+    private var adapterDelegate: ListVideoAdapterDelegate<T, CCVideoController, BaseViewHolder>? = object : ListVideoAdapterDelegate<T, CCVideoController, BaseViewHolder>("COMMON", this@FeedContentAdapter) {
 
-        override fun createZController(data: T?, vc: CCVideoController): ZController<*, *> {
-            return VideoControllerPlayers.getOrCreatePlayerWithVc(vc) { data?.getType() ?: DataType.VIDEO }
+        override fun createZController(delegateName: String, data: T?, vc: CCVideoController): ZController<*, *> {
+            return VideoControllerPlayers.getOrCreatePlayerWithVc(delegateName, vc) { data?.getType() ?: DataType.VIDEO }
         }
 
         override fun checkControllerMatching(data: T?, controller: ZController<*, *>?): Boolean {
-            return VideoControllerPlayers.checkControllerMatching(data?.getType(), controller)
+            return super.checkControllerMatching(data, controller) && VideoControllerPlayers.checkControllerMatching(data?.getType(), controller)
         }
 
         override fun getViewController(holder: BaseViewHolder?): CCVideoController? {
@@ -184,12 +184,8 @@ class FeedContentAdapter<T : FeedDataIn> : ListenerAnimAdapter<T>(R.layout.r_mai
         override val isSourcePlayAble: (d: T?) -> Boolean
             get() = { d -> d?.getType() == DataType.VIDEO || d?.getType() == DataType.YTB }
 
-        override fun onState(isPlaying: Boolean, desc: String?, controller: ZController<out BasePlayer<*>, *>?) {
+        override fun onPlayStateChanged(delegateName: String, isPlaying: Boolean, desc: String?, controller: ZController<*, *>?) {
             this@FeedContentAdapter.onState(isPlaying, controller)
-        }
-
-        override fun onStateInvokeError(e: Throwable?) {
-
         }
     }
 

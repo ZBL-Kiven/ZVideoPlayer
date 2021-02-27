@@ -17,20 +17,20 @@ import com.zj.player.z.ZVideoView
 @Suppress("unused")
 object ZPlayer {
 
-    fun build(viewController: Controller): ZController<ZVideoPlayer, ZRender> {
-        return build(viewController, ZVideoPlayer(VideoConfig.create()), ZRender::class.java)
+    fun build(withRunningName: String, viewController: Controller): ZController<ZVideoPlayer, ZRender> {
+        return build(withRunningName, viewController, ZVideoPlayer(VideoConfig.create()), ZRender::class.java)
     }
 
-    fun build(viewController: Controller, config: VideoConfig): ZController<ZVideoPlayer, ZRender> {
-        return build(viewController, ZVideoPlayer(config), ZRender::class.java)
+    fun build(withRunningName: String, viewController: Controller, config: VideoConfig): ZController<ZVideoPlayer, ZRender> {
+        return build(withRunningName, viewController, ZVideoPlayer(config), ZRender::class.java)
     }
 
-    fun <P : ZVideoPlayer> build(viewController: Controller, player: P): ZController<ZVideoPlayer, ZRender> {
-        return build(viewController, player, ZRender::class.java)
+    fun <P : ZVideoPlayer> build(withRunningName: String, viewController: Controller, player: P): ZController<ZVideoPlayer, ZRender> {
+        return build(withRunningName, viewController, player, ZRender::class.java)
     }
 
-    fun <P : BasePlayer<R>, R : BaseRender> build(viewController: Controller, player: P, render: Class<R>): ZController<P, R> {
-        return ZController(player, render, viewController)
+    fun <P : BasePlayer<R>, R : BaseRender> build(withRunningName: String, viewController: Controller, player: P, render: Class<R>): ZController<P, R> {
+        return ZController(withRunningName, player, render, viewController)
     }
 
     /**

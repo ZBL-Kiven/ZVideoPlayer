@@ -74,7 +74,7 @@ abstract class BaseListVideoController @JvmOverloads constructor(c: Context, att
 
     @CallSuper
     open fun resetWhenDisFocus() {
-        controller?.updateViewController(null)
+        controller?.updateViewController("", null)
         controller = null
         resetListener?.invoke(this)
         this.reset()
