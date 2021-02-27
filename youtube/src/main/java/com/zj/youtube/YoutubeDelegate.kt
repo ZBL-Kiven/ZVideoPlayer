@@ -120,7 +120,6 @@ abstract class YoutubeDelegate(debugAble: Boolean) : YouTubePlayerListener {
         runWithWebView {
             curPath = ""
             it.loadUrl("javascript:pauseVideo()")
-            (it.parent as? ViewGroup)?.removeView(it)
             playerState = PlayerConstants.PlayerState.STOP
         }
     }
