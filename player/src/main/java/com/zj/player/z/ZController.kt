@@ -24,6 +24,7 @@ import com.zj.player.ut.PlayQualityLevel
 import com.zj.player.ut.PlayStateChangeListener
 import java.lang.IllegalArgumentException
 import java.lang.NullPointerException
+import java.util.concurrent.ConcurrentHashMap
 
 /**
  * @author ZJJ on 2020/6/22.
@@ -39,7 +40,7 @@ open class ZController<P : BasePlayer<R>, R : BaseRender> internal constructor(p
     private var isPausedByLifecycle = false
     private var isIgnoreNullControllerGlobal = false
     private var playingStateListener: PlayStateChangeListener? = null
-    private var internalPlayingStateListener: PlayStateChangeListener? = null
+
     private var viewController: Controller? = null
         set(value) {
             if (field != null) {
@@ -58,6 +59,7 @@ open class ZController<P : BasePlayer<R>, R : BaseRender> internal constructor(p
 
     companion object {
         private const val releaseKey = " - released - "
+        private var internalPlayingStateListeners = ConcurrentHashMap<Int, PlayStateChangeListener?>()
     }
 
     private fun withRenderAndControllerView(needed: Boolean): Controller? {
@@ -426,7 +428,7 @@ open class ZController<P : BasePlayer<R>, R : BaseRender> internal constructor(p
         } catch (e: Throwable) {
             playingStateListener?.onStateInvokeError(e)
         }
-        internalPlayingStateListener?.onState(isPlaying, desc, this)
+        internalPlayingStateListeners.forEach { (_, v) -> v?.onState(isPlaying, desc, this) }
     }
 
     private fun log(s: String, bd: BehaviorData? = null) {
@@ -437,8 +439,8 @@ open class ZController<P : BasePlayer<R>, R : BaseRender> internal constructor(p
         if (CORE_LOG_ABLE) ZPlayerLogs.onLog(s, getPath(), curAccessKey, modeName, bd)
     }
 
-    internal fun bindInternalPlayStateListener(l: PlayStateChangeListener) {
-        this.internalPlayingStateListener = l
+    internal fun bindInternalPlayStateListener(hash: Int, l: PlayStateChangeListener?) {
+        internalPlayingStateListeners[hash] = l
     }
 
     /**

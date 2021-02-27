@@ -153,7 +153,7 @@ abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : Rec
         if (c != controller) {
             controller = c
         }
-        controller?.bindInternalPlayStateListener(this)
+        controller?.bindInternalPlayStateListener(this@ListVideoAdapterDelegate.hashCode(), this)
         return controller
     }
 
