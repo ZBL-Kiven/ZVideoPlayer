@@ -10,6 +10,7 @@ import com.zj.player.logs.VideoEventListener
 import com.zj.player.logs.ZPlayerLogs
 import com.zj.videotest.feed.RFeedFragment
 import com.zj.videotest.frg.OtherFragment
+import com.zj.videotest.frg.SingleFragment
 import com.zj.views.DrawableTextView
 import com.zj.webkit.CCWebView
 
@@ -18,7 +19,7 @@ class MainActivity : AppCompatActivity() {
     private var fragmentManager: BaseFragmentManager? = null
     private var mRFeedFragment: RFeedFragment? = null
     private var mRewardFragmentR: OtherFragment? = null
-    private var mMeFragmentR: OtherFragment? = null
+    private var mMeFragmentR: SingleFragment? = null
 
     private var mFeedNavView: DrawableTextView? = null
     private var mRewardNavView: DrawableTextView? = null
@@ -51,7 +52,7 @@ class MainActivity : AppCompatActivity() {
     private fun initFrg() {
         mRFeedFragment = RFeedFragment()
         mRewardFragmentR = OtherFragment()
-        mMeFragmentR = OtherFragment()
+        mMeFragmentR = SingleFragment()
         fragmentManager = object : BaseFragmentManager(this, R.id.r_main_act_fragment_content, 0, listOfNotNull(mFeedNavView, mRewardNavView, mMeNavView), mRFeedFragment, mRewardFragmentR, mMeFragmentR) {
             override fun syncSelectState(selectId: String) {
                 super.syncSelectState(selectId)

@@ -28,6 +28,7 @@ abstract class YoutubeDelegate(debugAble: Boolean) : YouTubePlayerListener {
     var curPlayingRate = 0f
     var curVolume = 1
     var isPageReady = false
+    private var inLoading = false
 
     companion object {
         private const val HANDLE_SEEK = 0x165771
@@ -79,11 +80,14 @@ abstract class YoutubeDelegate(debugAble: Boolean) : YouTubePlayerListener {
     }
 
     fun loadVideoById(id: String, startSeconds: Float, suggestionQuality: String, pendingIfNotReady: PendingLoadTask) {
+        if (id == curPath && inLoading) return
         playerState = PlayerConstants.PlayerState.UNKNOWN
         if (isPageReady) {
-            this.curPath = id
+            inLoading = true
+            this.pendingIfNotReady = null
             runWithWebView {
-                it.loadUrl("javascript:loadVideoById(\'$curPath\', $startSeconds, \'$suggestionQuality\')")
+                this.curPath = id
+                it.loadUrl("javascript:loadVideoById(\'$id\', $startSeconds, \'$suggestionQuality\')")
                 onStateChange(PlayerConstants.PlayerState.LOADING)
             }
         } else {
@@ -94,21 +98,30 @@ abstract class YoutubeDelegate(debugAble: Boolean) : YouTubePlayerListener {
         }
     }
 
-    fun play() {
+    fun play(): Boolean {
+        if (curPath.isEmpty()) return false
+        pendingIfNotReady = null
+        inLoading = false
         runWithWebView { it.loadUrl("javascript:playVideo()") }
+        return true
     }
 
     fun pause() {
-        runWithWebView { it.loadUrl("javascript:pauseVideo()") }
+        runWithWebView {
+            it.loadUrl("javascript:pauseVideo()")
+            playerState = PlayerConstants.PlayerState.PAUSED
+        }
     }
 
     fun stop() {
         pendingIfNotReady = null
         getWebView()?.visibility = View.INVISIBLE
         mainThreadHandler.removeCallbacksAndMessages(null)
-        playerState = PlayerConstants.PlayerState.STOP
-        curPath = ""
-        runWithWebView { it.loadUrl("javascript:pauseVideo()") }
+        runWithWebView {
+            curPath = ""
+            it.loadUrl("javascript:pauseVideo()")
+            playerState = PlayerConstants.PlayerState.STOP
+        }
     }
 
     fun setVolume(volumePercent: Int, isFollowToDevice: Boolean) {
@@ -133,8 +146,8 @@ abstract class YoutubeDelegate(debugAble: Boolean) : YouTubePlayerListener {
     fun destroy() {
         pendingIfNotReady = null
         mainThreadHandler.removeCallbacksAndMessages(null)
-        playerState = PlayerConstants.PlayerState.UNKNOWN
         runWithWebView {
+            playerState = PlayerConstants.PlayerState.STOP
             it.clearHistory()
             it.clearFormData()
             it.removeAllViews()
@@ -202,6 +215,7 @@ abstract class YoutubeDelegate(debugAble: Boolean) : YouTubePlayerListener {
     @CallSuper
     override fun onError(error: PlayerConstants.PlayerError) {
         Utils.log("play error case: ${error.name}")
+        inLoading = false
         playerState = PlayerConstants.PlayerState.UNKNOWN.setFrom(error.name)
     }
 

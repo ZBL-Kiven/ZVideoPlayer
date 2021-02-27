@@ -139,8 +139,6 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
             }
         }
 
-    private val isPlaying: Boolean; get() = controller?.isPlaying() ?: false
-
     private var touchListener: GestureTouchListener? = object : GestureTouchListener({ isInterrupted() }) {
 
         override fun onEventEnd(formTrigDuration: Float, parseAutoScale: Boolean): Boolean {

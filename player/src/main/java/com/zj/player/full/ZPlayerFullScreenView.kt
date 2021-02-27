@@ -211,9 +211,9 @@ internal class ZPlayerFullScreenView constructor(context: Context, private val c
                     updateContent(1 - duration)
                     setBackground(duration, true)
                 } else {
-                    //                    clipChildren = false
+                    clipChildren = false
                     setBackground(1 - duration, isFromStart = true, isDownTo = true)
-                    //                    (getControllerView().parent as? ViewGroup)?.clipChildren = false
+                    (getControllerView().parent as? ViewGroup)?.clipChildren = false
                     if (originInScreen == null) originInScreen = Point(getControllerView().scrollX, getControllerView().scrollY)
                     originInScreen?.let {
                         val sx = (it.x * (1f - duration)).roundToInt()

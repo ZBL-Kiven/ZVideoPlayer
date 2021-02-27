@@ -272,19 +272,21 @@ open class ZController<P : BasePlayer<R>, R : BaseRender> internal constructor(p
     /**
      * recycle a Controller in Completely, after which this instance will be invalid.
      * */
-    fun release() {
+    fun release(isDestroy: Boolean = false) {
         isPausedByLifecycle = false
         (render?.parent as? ViewGroup)?.removeView(render)
-        render?.release()
-        render = null
         player?.stopNow(false, isRegulate = false)
-        player?.release()
         viewController?.let {
             it.onStop("", true)
             it.onDestroy("", true)
         }
+        if (isDestroy) {
+            player?.release()
+            render?.release()
+            player = null
+            render = null
+        }
         viewController = null
-        player = null
         seekProgressInterval = -1
         curAccessKey = releaseKey
     }

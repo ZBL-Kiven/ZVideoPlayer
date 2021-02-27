@@ -395,8 +395,9 @@ open class ZVideoPlayer(var config: VideoConfig = VideoConfig.create()) : BasePl
 
     override fun setData(path: String, autoPlay: Boolean, callId: Any?) {
         log("set video data to $path")
+        val isNewData = playPath?.first != path
         playPath = Pair(path, callId)
-        if (autoPlay) setPlayerState(VideoState.LOADING)
+        if (autoPlay || isNewData) setPlayerState(VideoState.LOADING)
     }
 
     override fun play() {

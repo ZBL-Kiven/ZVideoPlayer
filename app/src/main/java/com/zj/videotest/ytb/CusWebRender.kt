@@ -140,10 +140,13 @@ class CusWebRender(ctx: Context) : BaseRender(ctx) {
         })
     }
 
-    fun play() {
+    fun play(path: String? = null) {
+        val p = if (path.isNullOrEmpty()) if (ytbDelegate.curPath.isEmpty()) "" else ytbDelegate.curPath else path
         if (ytbDelegate.isReady(false)) {
-            ytbDelegate.play()
-        } else if (ytbDelegate.isPageReady) load(ytbDelegate.curPath)
+            if (!ytbDelegate.play()) {
+                load(p)
+            }
+        } else if (ytbDelegate.isPageReady) load(p)
     }
 
     fun pause() {

@@ -55,7 +55,7 @@ class CusWebPlayer : BasePlayer<CusWebRender> {
     }
 
     override fun play() {
-        render?.play()
+        render?.play(curPath?.first)
     }
 
     override fun pause() {

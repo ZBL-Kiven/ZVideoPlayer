@@ -207,33 +207,34 @@ abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : Rec
             val fvc = lm.findFirstCompletelyVisibleItemPosition()
             val lv = lm.findLastCompletelyVisibleItemPosition()
             var offsetPositions: Int? = null
-            var scrollAuto = false
             var fvi = fvc
-            if (fvc < 0 && lv < 0) {
+            if (fvc < 0) {
                 fvi = lm.findFirstVisibleItemPosition()
                 val lvi = lm.findLastVisibleItemPosition()
                 if (lvi - fvi > 1) fvi++
-                scrollAuto = true
             }
-            val fv = if (fvc < 0) fvi else fvc
+            val scrollAuto = fvi != lv && (fvi < 0 && lv < 0)
             val cp = Rect()
             recyclerView?.let {
                 it.getLocalVisibleRect(cp)
                 cp.top += it.paddingTop
                 cp.bottom -= it.paddingBottom
             }
-            val tr = if (fv == lv) fv else if (fv >= 0 && lv >= 0) {
-                @Suppress("UNCHECKED_CAST") val vft = (recyclerView?.findViewHolderForAdapterPosition(fv) as? VH)?.itemView?.top ?: 0
-                @Suppress("UNCHECKED_CAST") val vlt = (recyclerView?.findViewHolderForAdapterPosition(lv) as? VH)?.itemView
-                val fvo = vft - cp.top
-                val lvo = vlt?.let { min(vlt.bottom - cp.bottom, vlt.top - cp.top) } ?: 0
-                val trv = min(abs(fvo), abs(lvo))
-                val isFo = abs(fvo) == trv
-                offsetPositions = if (isFo) fvo - 20 else lvo + 20
-                if (isFo) fv else lv
-            } else if (fv <= 0) lv else fv
+            val fv = if (fvc < 0) fvi else fvc
+            val tr = if (fv > 0 && fv != lv) fv else {
+                if (fv == lv) fv else if (fv >= 0 && lv >= 0) {
+                    @Suppress("UNCHECKED_CAST") val vft = (recyclerView?.findViewHolderForAdapterPosition(fv) as? VH)?.itemView?.top ?: 0
+                    @Suppress("UNCHECKED_CAST") val vlt = (recyclerView?.findViewHolderForAdapterPosition(lv) as? VH)?.itemView
+                    val fvo = vft - cp.top
+                    val lvo = vlt?.let { min(vlt.bottom - cp.bottom, vlt.top - cp.top) } ?: 0
+                    val trv = min(abs(fvo), abs(lvo))
+                    val isFo = abs(fvo) == trv
+                    offsetPositions = if (isFo) fvo - 20 else lvo + 20
+                    if (isFo) fv else lv
+                } else if (fv <= 0) lv else fv
+            }
             @Suppress("UNCHECKED_CAST") (getViewController(recyclerView?.findViewHolderForAdapterPosition(tr) as? VH)?.let {
-                if (!it.isBindingController) it.clickPlayBtn()
+                if (!it.isBindingController || (it.isBindingController && controller?.isPause() == true)) it.clickPlayBtn()
             })
             if (!scrollAuto) return@let
             val offset = offsetPositions ?: {
@@ -292,7 +293,7 @@ abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : Rec
 
     fun release(destroyPlayer: Boolean) {
         handler?.removeCallbacksAndMessages(null)
-        if (destroyPlayer) controller?.release() else controller?.stopNow()
+        controller?.release(destroyPlayer)
         controller = null
         recyclerView?.clearOnScrollListeners()
         recyclerView = null

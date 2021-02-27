@@ -105,17 +105,6 @@ class FeedContentAdapter<T : FeedDataIn> : ListenerAnimAdapter<T>(R.layout.r_mai
             it.setOnResetListener(null)
             it.setOnTrackListener(null)
             it.setOnFullScreenChangedListener(null)
-            //            it.actionListener = null
-            try {
-                context?.let { ctx ->
-                    val thumb = it.getThumbView() ?: return
-                    Glide.with(ctx).clear(thumb)
-                    val bg = it.getBackgroundView() ?: return
-                    Glide.with(ctx).clear(bg)
-                }
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
         }
         super.onViewRecycled(holder)
     }
@@ -314,7 +303,7 @@ class FeedContentAdapter<T : FeedDataIn> : ListenerAnimAdapter<T>(R.layout.r_mai
     }
 
     override fun onDataChange(data: MutableList<T>?) {
-        context?.let { Glide.get(it).clearMemory() }
+//        context?.let { Glide.get(it).clearMemory() }
     }
 
     override fun onDataFullChange() {
