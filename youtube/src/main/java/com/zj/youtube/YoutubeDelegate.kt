@@ -4,6 +4,7 @@ import android.graphics.Color
 import android.os.Handler
 import android.os.Looper
 import android.os.Message
+import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.webkit.WebSettings
@@ -36,6 +37,11 @@ abstract class YoutubeDelegate(debugAble: Boolean) : YouTubePlayerListener {
 
     private var pendingIfNotReady: PendingLoadTask? = null
     private var playerState: PlayerConstants.PlayerState = PlayerConstants.PlayerState.UNKNOWN
+        set(value) {
+            Log.e("---------- ", "$value")
+            field = value
+        }
+
     open fun onPlayStateChange(curState: PlayerConstants.PlayerState, oldState: PlayerConstants.PlayerState) {}
     open fun onPlayQualityChanged(quality: PlayerConstants.PlaybackQuality, supports: List<PlayerConstants.PlaybackQuality>?) {}
 
@@ -79,16 +85,15 @@ abstract class YoutubeDelegate(debugAble: Boolean) : YouTubePlayerListener {
         }
     }
 
-    fun loadVideoById(id: String, startSeconds: Float, suggestionQuality: String, pendingIfNotReady: PendingLoadTask) {
+    fun loadVideoById(id: String, startSeconds: Float, suggestionQuality: String, pendingIfNotReady: PendingLoadTask, fromPending: Boolean) {
         if (id == curPath && inLoading) return
-        playerState = PlayerConstants.PlayerState.UNKNOWN
+        if (!fromPending) playerState = PlayerConstants.PlayerState.UNKNOWN
         if (isPageReady) {
             inLoading = true
             this.pendingIfNotReady = null
             runWithWebView {
                 this.curPath = id
                 it.loadUrl("javascript:loadVideoById(\'$id\', $startSeconds, \'$suggestionQuality\')")
-                onStateChange(PlayerConstants.PlayerState.LOADING)
             }
         } else {
             if (this.pendingIfNotReady?.path != pendingIfNotReady.path) {
@@ -101,13 +106,13 @@ abstract class YoutubeDelegate(debugAble: Boolean) : YouTubePlayerListener {
     fun play(): Boolean {
         if (curPath.isEmpty()) return false
         pendingIfNotReady = null
-        inLoading = false
         runWithWebView { it.loadUrl("javascript:playVideo()") }
         return true
     }
 
     fun pause() {
         runWithWebView {
+            pendingIfNotReady = null
             it.loadUrl("javascript:pauseVideo()")
             playerState = PlayerConstants.PlayerState.PAUSED
         }
@@ -187,7 +192,9 @@ abstract class YoutubeDelegate(debugAble: Boolean) : YouTubePlayerListener {
     }
 
     final override fun onStateChange(state: PlayerConstants.PlayerState) {
+        if (state != PlayerConstants.PlayerState.LOADING && state != PlayerConstants.PlayerState.BUFFERING) inLoading = false
         if (state == PlayerConstants.PlayerState.PAUSED && playerState == PlayerConstants.PlayerState.STOP) return
+        if (playerState == PlayerConstants.PlayerState.PAUSED && (state == PlayerConstants.PlayerState.LOADING)) return
         if (playerState.inLoading() && state.inLoading()) return
         if (playerState == PlayerConstants.PlayerState.LOADING && state == PlayerConstants.PlayerState.PAUSED) return
         try {

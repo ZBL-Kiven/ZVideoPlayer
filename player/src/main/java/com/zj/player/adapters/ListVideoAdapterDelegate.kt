@@ -150,6 +150,7 @@ abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : Rec
     }
 
     final override fun onState(runningName: String, isPlaying: Boolean, desc: String?, controller: ZController<*, *>?) {
+        if (runningName == this.delegateName && isPlaying && isPausedToAutoPlay) pause()
         this.onPlayStateChanged(runningName, isPlaying, desc, controller)
     }
 
@@ -239,7 +240,7 @@ abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : Rec
                 } else if (fv <= 0) lv else fv
             }
             @Suppress("UNCHECKED_CAST") (getViewController(recyclerView?.findViewHolderForAdapterPosition(tr) as? VH)?.let {
-                if (!it.isBindingController || (it.isBindingController && controller?.isPause() == true)) it.clickPlayBtn()
+                if (!it.isBindingController || (it.isBindingController && controller?.isPause() == true)) it.clickPlayBtn(true)
             })
             if (!scrollAuto) return@let
             val offset = offsetPositions ?: {

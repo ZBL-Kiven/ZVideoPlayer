@@ -122,7 +122,7 @@ class CusWebRender(ctx: Context) : BaseRender(ctx) {
         play()
     }
 
-    fun load(path: String) {
+    fun load(path: String, fromPending: Boolean = false) {
         if (!ytbDelegate.isPageReady) notifyTo { onLoading(path, true) }
         val videoId = if (path.contains(PlayerConstants.youtubeIdHost)) path.replace(PlayerConstants.youtubeIdHost, "")
         else if (path.contains(PlayerConstants.youtubeHost)) path.replace(PlayerConstants.youtubeHost, "")
@@ -135,9 +135,9 @@ class CusWebRender(ctx: Context) : BaseRender(ctx) {
         }
         ytbDelegate.loadVideoById(videoId, 0f, PlayerConstants.PlaybackQuality.DEFAULT.value, object : PendingLoadTask(path) {
             override fun run() {
-                load(this.path)
+                load(this.path, true)
             }
-        })
+        }, fromPending)
     }
 
     fun play(path: String? = null) {

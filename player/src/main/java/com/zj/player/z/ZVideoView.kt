@@ -508,7 +508,8 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
         onLoadingEvent(LoadingMode.Fail)
     }
 
-    internal fun clickPlayBtn() {
+    internal fun clickPlayBtn(accuratePlay: Boolean) {
+        if (vPlay?.isSelected != !accuratePlay) vPlay?.isSelected = !accuratePlay
         onPlayClick(vPlay ?: return, false)
     }
 

@@ -35,7 +35,7 @@ class YtbContentChecker(context: ComponentActivity, private val path: String, ti
 
     init {
         context.lifecycle.addObserver(this)
-        VideoControllerPlayers.getOrCreatePlayerWithVc(this) { DataType.YTB }
+        VideoControllerPlayers.getOrCreatePlayerWithVc("check",this) { DataType.YTB }
         handler?.sendEmptyMessageDelayed(711263, timeOut)
     }
 
@@ -108,7 +108,7 @@ class YtbContentChecker(context: ComponentActivity, private val path: String, ti
     @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
     fun destroy() {
         act?.get()?.lifecycle?.removeObserver(this)
-        controller?.updateViewController(null)
+        controller?.updateViewController("check",null)
         handler?.removeCallbacksAndMessages(null)
         handler = null
         onCheckResult = null

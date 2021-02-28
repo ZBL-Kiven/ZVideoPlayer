@@ -18,7 +18,7 @@ class TestActivity2 : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         CCWebView.onAppAttached(this, "")
         setContentView(R.layout.test_act_2_content)
-        controller = VideoControllerPlayers.getOrCreatePlayerWithVc(mVideoView) { DataType.VIDEO }
+        controller = VideoControllerPlayers.getOrCreatePlayerWithVc("test", mVideoView) { DataType.VIDEO }
         controller?.playOrResume("http://vjs.zencdn.net/v/oceans.mp4")
     }
 
