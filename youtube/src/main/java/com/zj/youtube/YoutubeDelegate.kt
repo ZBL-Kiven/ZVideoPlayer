@@ -86,6 +86,7 @@ abstract class YoutubeDelegate(debugAble: Boolean) : YouTubePlayerListener {
         if (isPageReady) {
             inLoading = true
             this.pendingIfNotReady = null
+            onStateChange(PlayerConstants.PlayerState.LOADING)
             runWithWebView {
                 this.curPath = id
                 it.loadUrl("javascript:loadVideoById(\'$id\', $startSeconds, \'$suggestionQuality\')")
@@ -108,20 +109,19 @@ abstract class YoutubeDelegate(debugAble: Boolean) : YouTubePlayerListener {
     fun pause() {
         runWithWebView {
             pendingIfNotReady = null
-            it.loadUrl("javascript:pauseVideo()")
+            if (isPlaying(false)) it.loadUrl("javascript:pauseVideo()")
             playerState = PlayerConstants.PlayerState.PAUSED
         }
     }
 
     fun stop() {
+        curPath = ""
         pendingIfNotReady = null
         getWebView()?.visibility = View.INVISIBLE
-        mainThreadHandler.removeCallbacksAndMessages(null)
-        runWithWebView {
-            curPath = ""
+        if (!isStop(false)) runWithWebView {
             it.loadUrl("javascript:pauseVideo()")
-            playerState = PlayerConstants.PlayerState.STOP
         }
+        playerState = PlayerConstants.PlayerState.STOP
     }
 
     fun setVolume(volumePercent: Int, isFollowToDevice: Boolean) {
@@ -217,9 +217,10 @@ abstract class YoutubeDelegate(debugAble: Boolean) : YouTubePlayerListener {
     @CallSuper
     override fun onError(error: PlayerConstants.PlayerError) {
         Utils.log("play error case: ${error.name}")
+        this.curPath = ""
         this.inLoading = false
         this.pendingIfNotReady = null
-        mainThreadHandler.post { playerState = PlayerConstants.PlayerState.UNKNOWN.setFrom(error.name) }
+        mainThreadHandler.post { playerState = PlayerConstants.PlayerState.ERROR.setFrom(error.name) }
     }
 
     @CallSuper
@@ -258,31 +259,46 @@ abstract class YoutubeDelegate(debugAble: Boolean) : YouTubePlayerListener {
     }
 
     fun isLoadData(): Boolean {
-        return playerState.level > PlayerConstants.PlayerState.ENDED.level || playerState == PlayerConstants.PlayerState.PAUSED
+        val state = playerState.level > PlayerConstants.PlayerState.ENDED.level || playerState == PlayerConstants.PlayerState.PAUSED
+        Utils.log("query cur state isLoadData = $state")
+        return state
+
     }
 
     fun isLoading(accurate: Boolean): Boolean {
-        return if (!isPageReady) true else if (accurate) (playerState.level == PlayerConstants.PlayerState.LOADING.level || playerState.level == PlayerConstants.PlayerState.BUFFERING.level) else playerState.level >= PlayerConstants.PlayerState.BUFFERING.level
+        val state = if (!isPageReady) true else if (accurate) (playerState.level == PlayerConstants.PlayerState.LOADING.level || playerState.level == PlayerConstants.PlayerState.BUFFERING.level) else playerState.level >= PlayerConstants.PlayerState.BUFFERING.level
+        Utils.log("query cur state isLoading = $state")
+        return state
     }
 
     fun isReady(accurate: Boolean): Boolean {
-        return if (accurate) playerState.level == PlayerConstants.PlayerState.PREPARED.level else playerState.level >= PlayerConstants.PlayerState.PREPARED.level || playerState == PlayerConstants.PlayerState.PAUSED
+        val state = if (accurate) playerState.level == PlayerConstants.PlayerState.PREPARED.level else playerState.level >= PlayerConstants.PlayerState.PREPARED.level || playerState == PlayerConstants.PlayerState.PAUSED
+        Utils.log("query cur state isReady = $state")
+        return state
     }
 
     fun isPlaying(accurate: Boolean): Boolean {
-        return if (accurate) playerState.level == PlayerConstants.PlayerState.PLAYING.level else playerState.level >= PlayerConstants.PlayerState.PLAYING.level
+        val state = if (accurate) playerState.level == PlayerConstants.PlayerState.PLAYING.level else playerState.level >= PlayerConstants.PlayerState.PLAYING.level
+        Utils.log("query cur state isPlaying = $state")
+        return state
     }
 
     fun isPause(accurate: Boolean): Boolean {
-        return if (accurate) playerState == PlayerConstants.PlayerState.PAUSED else playerState.level <= PlayerConstants.PlayerState.PAUSED.level
+        val state = if (accurate) playerState == PlayerConstants.PlayerState.PAUSED else playerState.level <= PlayerConstants.PlayerState.PAUSED.level
+        Utils.log("query cur state isPause = $state")
+        return state
     }
 
     fun isStop(accurate: Boolean): Boolean {
-        return if (accurate) playerState.level == PlayerConstants.PlayerState.STOP.level else playerState.level <= PlayerConstants.PlayerState.STOP.level
+        val state = if (accurate) playerState.level == PlayerConstants.PlayerState.STOP.level else playerState.level <= PlayerConstants.PlayerState.STOP.level
+        Utils.log("query cur state isStop = $state")
+        return state
     }
 
     fun isDestroyed(accurate: Boolean): Boolean {
-        return if (accurate) playerState.level == PlayerConstants.PlayerState.UNKNOWN.level else playerState.level <= PlayerConstants.PlayerState.UNKNOWN.level
+        val state = if (accurate) playerState.level == PlayerConstants.PlayerState.UNKNOWN.level else playerState.level <= PlayerConstants.PlayerState.UNKNOWN.level
+        Utils.log("query cur state isDestroyed = $state")
+        return state
     }
 
     fun reset() {

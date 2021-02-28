@@ -2,6 +2,7 @@ package com.zj.videotest
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import com.zj.videotest.delegate.VideoControllerPlayers
 import com.zj.videotest.ytb.YtbContentChecker
 import com.zj.webkit.CCWebView
 import kotlinx.android.synthetic.main.test_act_content.*
@@ -21,5 +22,10 @@ class TestActivity : AppCompatActivity() {
                 mResult.text = "$isOK    :  $path"
             }
         }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        VideoControllerPlayers.stopVideo()
     }
 }

@@ -30,7 +30,7 @@ import java.util.concurrent.ConcurrentHashMap
  * A controller that interacts with the user interface, player, and renderer.
  * */
 @Suppress("unused", "MemberVisibilityCanBePrivate")
-open class ZController<P : BasePlayer<R>, R : BaseRender> internal constructor(internal var runningName: String, private var player: P?, private var renderCls: Class<R>, viewController: Controller?) : PlayerEventController<R> {
+open class ZController<P : BasePlayer<R>, R : BaseRender> internal constructor(var runningName: String, private var player: P?, private var renderCls: Class<R>, viewController: Controller?) : PlayerEventController<R> {
 
     private var seekProgressInterval: Long = 16
     private var curAccessKey: String = ""
@@ -247,15 +247,13 @@ open class ZController<P : BasePlayer<R>, R : BaseRender> internal constructor(i
      * Use another View to bind to the Controller. The bound ViewController will take effect immediately and receive the method callback from the player.
      * */
     fun updateViewController(runningName: String, viewController: Controller?, syncCurState: Boolean = false) {
-        this.runningName = runningName
+        if (this.runningName != runningName) stopNow(true)
         this.viewController = viewController
+        this.runningName = runningName
         if (viewController != null) {
             if (this.viewController != viewController) {
                 log("user update the view controller names ${viewController::class.java.simpleName}")
-                if (syncCurState) syncPlayerState() else {
-                    player?.reset()
-                    render?.reset()
-                }
+                if (syncCurState) syncPlayerState()
                 withRenderAndControllerView(false)
             }
         } else {

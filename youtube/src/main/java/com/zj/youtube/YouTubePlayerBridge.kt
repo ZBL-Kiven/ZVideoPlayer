@@ -92,10 +92,10 @@ open class YouTubePlayerBridge(private val youTubePlayerOwner: YouTubePlayerList
     fun sendStateChange(state: String) {
         val playerState = parsePlayerState(state)
         mainThreadHandler.removeMessages(51463)
-        mainThreadHandler.sendMessageDelayed(Message.obtain().apply {
+        mainThreadHandler.sendMessage(Message.obtain().apply {
             what = 51463
             obj = playerState
-        }, 80)
+        })
     }
 
     @JavascriptInterface
