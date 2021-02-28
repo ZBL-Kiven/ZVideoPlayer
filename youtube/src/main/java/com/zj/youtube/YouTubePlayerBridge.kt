@@ -194,7 +194,7 @@ open class YouTubePlayerBridge(private val youTubePlayerOwner: YouTubePlayerList
             state.equals(STATE_PAUSED, ignoreCase = true) -> PlayerConstants.PlayerState.PAUSED
             state.equals(STATE_BUFFERING, ignoreCase = true) -> PlayerConstants.PlayerState.BUFFERING
             state.equals(STATE_CUED, ignoreCase = true) -> PlayerConstants.PlayerState.PREPARED
-            else -> PlayerConstants.PlayerState.UNKNOWN.setFrom("no state parsed !!")
+            else -> PlayerConstants.PlayerState.ERROR.setFrom("no state parsed !!")
         }
     }
 

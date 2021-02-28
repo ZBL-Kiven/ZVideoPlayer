@@ -162,6 +162,8 @@ open class ZRender @JvmOverloads constructor(context: Context, attrs: AttributeS
         videoSurfaceView = null
     }
 
+    override fun reset() {}
+
     /**
      * don`t forgot call this after your video finished
      * */

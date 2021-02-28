@@ -64,9 +64,7 @@ class CusWebRender(ctx: Context) : BaseRender(ctx) {
 
         override fun onPlayStateChange(curState: PlayerConstants.PlayerState, oldState: PlayerConstants.PlayerState) {
             when (curState) {
-                PlayerConstants.PlayerState.UNKNOWN -> {
-                    notifyTo { onError(Exception(curState.from)) }
-                }
+                PlayerConstants.PlayerState.ERROR -> notifyTo { onError(Exception(curState.from)) }
                 PlayerConstants.PlayerState.ENDED -> notifyTo { onCompleted(curPath, false) }
                 PlayerConstants.PlayerState.PLAYING -> notifyTo { onPlay(curPath, false) }
                 PlayerConstants.PlayerState.PAUSED -> notifyTo { onPause(curPath, false) }
@@ -109,6 +107,10 @@ class CusWebRender(ctx: Context) : BaseRender(ctx) {
             params.gravity = Gravity.CENTER
             addView(it, 0, params)
         }
+    }
+
+    override fun reset() {
+        ytbDelegate.reset()
     }
 
     override fun release() {
@@ -190,6 +192,10 @@ class CusWebRender(ctx: Context) : BaseRender(ctx) {
             PlayQualityLevel.BR -> PlayerConstants.PlaybackQuality.HIGH_RES.value
         }
         ytbDelegate.setPlaybackQuality(quality)
+    }
+
+    fun syncControllerState() {
+        ytbDelegate.syncControllerState()
     }
 
     private val changeListFunc = { lst: List<PlayerConstants.PlaybackQuality>? ->

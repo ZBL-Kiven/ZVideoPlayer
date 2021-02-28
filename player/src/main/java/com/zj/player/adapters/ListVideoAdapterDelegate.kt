@@ -232,10 +232,10 @@ abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : Rec
                     @Suppress("UNCHECKED_CAST") val vft = (recyclerView?.findViewHolderForAdapterPosition(fv) as? VH)?.itemView?.top ?: 0
                     @Suppress("UNCHECKED_CAST") val vlt = (recyclerView?.findViewHolderForAdapterPosition(lv) as? VH)?.itemView
                     val fvo = vft - cp.top
-                    val lvo = vlt?.let { min(vlt.bottom - cp.bottom, vlt.top - cp.top) } ?: 0
+                    val lvo = vlt?.let { min(it.bottom - cp.bottom, it.top - cp.top) } ?: 0
                     val trv = min(abs(fvo), abs(lvo))
                     val isFo = abs(fvo) == trv
-                    offsetPositions = if (isFo) fvo - 20 else lvo + 20
+                    offsetPositions = if (isFo) fvo - 50 else lvo + 50
                     if (isFo) fv else lv
                 } else if (fv <= 0) lv else fv
             }

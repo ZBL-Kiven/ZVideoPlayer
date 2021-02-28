@@ -103,27 +103,11 @@ class CusWebPlayer : BasePlayer<CusWebRender> {
     }
 
     override fun updateControllerState() {
-        //        curState.let {
-        //            if (it == VideoState.LOADING) controller?.onLoading(currentPlayPath(), true)
-        //            if (it == VideoState.SEEK_LOADING) controller?.onSeekingLoading(currentPlayPath(), true)
-        //            if (it == VideoState.PLAY || it == VideoState.PAUSE || it == VideoState.COMPLETING || it == VideoState.READY) {
-        //                controller?.onPrepare(currentPlayPath(), duration, true)
-        //            }
-        //            when (it) {
-        //                VideoState.PLAY -> controller?.onPlay(currentPlayPath(), true)
-        //                VideoState.COMPLETING -> controller?.completing(currentPlayPath(), true)
-        //                VideoState.COMPLETED -> controller?.onCompleted(currentPlayPath(), true)
-        //                VideoState.PAUSE -> controller?.onPause(currentPlayPath(), true)
-        //                VideoState.STOP, VideoState.DESTROY -> {
-        //                    val e = (it.obj() as? ExoPlaybackException)
-        //                    if (e != null) controller?.onError(e)
-        //                    else controller?.onStop(true, currentPlayPath(), true)
-        //                }
-        //                else -> {
-        //                }
-        //            }
-        //        }
-        //        controller?.onPlayerInfo(getVolume(), getSpeed())
+        render?.syncControllerState()
+    }
+
+    override fun reset() {
+        curPath = null
     }
 
     override fun setController(controller: PlayerEventController<CusWebRender>): String {

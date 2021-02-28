@@ -9,6 +9,7 @@ import com.zj.player.view.AspectRatioFrameLayout
 abstract class BaseRender @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) : AspectRatioFrameLayout(context, attrs, defStyleAttr) {
 
     private var controller: PlayerEventController<*>? = null
+    abstract fun reset()
 
     companion object {
         fun <T : BaseRender> create(ctx: Context, cls: Class<T>): T {

@@ -9,7 +9,7 @@ class PlayerConstants {
 
     enum class PlayerState(val level: Int) {
 
-        PLAYING(8), PREPARED(7), LOADING(6), BUFFERING(5), ENDED(3), PAUSED(2), STOP(1), UNKNOWN(0);
+        PLAYING(8), PREPARED(7), LOADING(6), BUFFERING(5), ENDED(3), PAUSED(2), STOP(1), UNKNOWN(0), ERROR(-1);
 
         var from: String = ""; private set
 

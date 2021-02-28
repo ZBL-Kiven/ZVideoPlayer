@@ -246,14 +246,17 @@ open class ZController<P : BasePlayer<R>, R : BaseRender> internal constructor(i
     /**
      * Use another View to bind to the Controller. The bound ViewController will take effect immediately and receive the method callback from the player.
      * */
-    fun updateViewController(runningName: String, viewController: Controller?) {
+    fun updateViewController(runningName: String, viewController: Controller?, syncCurState: Boolean = false) {
         this.runningName = runningName
         this.viewController = viewController
         if (viewController != null) {
             if (this.viewController != viewController) {
-                withRenderAndControllerView(false)
                 log("user update the view controller names ${viewController::class.java.simpleName}")
-                syncPlayerState()
+                if (syncCurState) syncPlayerState() else {
+                    player?.reset()
+                    render?.reset()
+                }
+                withRenderAndControllerView(false)
             }
         } else {
             withRenderAndControllerView(true)

@@ -4,7 +4,6 @@ import android.graphics.Color
 import android.os.Handler
 import android.os.Looper
 import android.os.Message
-import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.webkit.WebSettings
@@ -37,10 +36,6 @@ abstract class YoutubeDelegate(debugAble: Boolean) : YouTubePlayerListener {
 
     private var pendingIfNotReady: PendingLoadTask? = null
     private var playerState: PlayerConstants.PlayerState = PlayerConstants.PlayerState.UNKNOWN
-        set(value) {
-            Log.e("---------- ", "$value")
-            field = value
-        }
 
     open fun onPlayStateChange(curState: PlayerConstants.PlayerState, oldState: PlayerConstants.PlayerState) {}
     open fun onPlayQualityChanged(quality: PlayerConstants.PlaybackQuality, supports: List<PlayerConstants.PlaybackQuality>?) {}
@@ -288,5 +283,19 @@ abstract class YoutubeDelegate(debugAble: Boolean) : YouTubePlayerListener {
 
     fun isDestroyed(accurate: Boolean): Boolean {
         return if (accurate) playerState.level == PlayerConstants.PlayerState.UNKNOWN.level else playerState.level <= PlayerConstants.PlayerState.UNKNOWN.level
+    }
+
+    fun reset() {
+        playerState = PlayerConstants.PlayerState.UNKNOWN
+        curPath = ""
+    }
+
+    fun syncControllerState() {
+        playerState.let {
+            if (it == PlayerConstants.PlayerState.LOADING) onStateChange(PlayerConstants.PlayerState.LOADING.setFrom("sync"))
+            if (it == PlayerConstants.PlayerState.BUFFERING) onStateChange(PlayerConstants.PlayerState.BUFFERING.setFrom("sync"))
+            if (it == PlayerConstants.PlayerState.PLAYING || it == PlayerConstants.PlayerState.PAUSED.setFrom("sync")) onReady(totalDuration)
+            onPlayStateChange(PlayerConstants.PlayerState.PLAYING, playerState.setFrom("sync"))
+        }
     }
 }

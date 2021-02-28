@@ -79,6 +79,11 @@ interface BasePlayer<R : BaseRender> {
     fun stopNow(withNotify: Boolean, isRegulate: Boolean = false)
 
     /**
+     * reset player info
+     * */
+    fun reset()
+
+    /**
      * Retrieve the specified location
      * */
     fun seekTo(progress: Int, fromUser: Boolean)
