@@ -3,6 +3,7 @@ package com.zj.player.z
 import android.app.Activity
 import android.content.Context
 import android.content.res.Resources
+import android.graphics.Rect
 import android.view.Gravity
 import android.view.ViewGroup
 import android.view.WindowManager
@@ -65,8 +66,8 @@ open class ZController<P : BasePlayer<R>, R : BaseRender> internal constructor(v
             val c = getController()
             if (c == null) {
                 (render?.parent as? ViewGroup)?.removeView(render)
-                stopNow(false, isRegulate = false)
                 runningName = "unset"
+                stopNow(false, isRegulate = false)
                 return null
             }
             val info = c.controllerInfo ?: throw NullPointerException("the controller view is required")
@@ -354,6 +355,8 @@ open class ZController<P : BasePlayer<R>, R : BaseRender> internal constructor(v
     }
 
     override fun onPlay(path: String?, isRegulate: Boolean) {
+        val r = Rect();render?.getHitRect(r)
+        if (render?.parent == null || r.isEmpty) stopNow(false)
         log("on video playing ... $path", BehaviorLogsTable.controllerState("onPlay", getCallId(), getPath()))
         onPlayingStateChanged(true, "play")
         checkIsMakeScreenOn(true)

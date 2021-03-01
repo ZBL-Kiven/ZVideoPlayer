@@ -150,7 +150,10 @@ abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : Rec
     }
 
     final override fun onState(runningName: String, isPlaying: Boolean, desc: String?, controller: ZController<*, *>?) {
-        if (runningName == this.delegateName && isPlaying && isPausedToAutoPlay) pause()
+        if (runningName == this.delegateName && isPlaying && isPausedToAutoPlay) {
+            ZPlayerLogs.debug("paused by state changed  runningName = $runningName  ,cur delegate name = $delegateName  isPlaying = $isPlaying   isPausedToAutoPlay = $isPausedToAutoPlay")
+            pause()
+        }
         this.onPlayStateChanged(runningName, isPlaying, desc, controller)
     }
 
@@ -218,7 +221,15 @@ abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : Rec
                 if (lv - fvi > 1) fvi++
             }
             val cp = Rect()
+            var pt = 0
+            var pb = 0
             recyclerView?.getLocalVisibleRect(cp)
+            recyclerView?.let {
+                pt = it.paddingTop
+                pb = it.paddingBottom
+                cp.top += pt + it.translationY.toInt()
+                cp.bottom -= pb - it.translationY.toInt()
+            }
             var offset = 0
             val fv = if (fvc < 0) fvi else fvc
             val tr = when (fvi) {
@@ -242,16 +253,24 @@ abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : Rec
                     val offL = (ccf.bottom - ccf.top) / 2 + hlt - cp.centerY()
                     val cy = min(abs(offF), abs(offL))
                     val next = if (cy == abs(offF)) fv else lv
-                    offset = if (next == fv) if (hft == 0) 0 else hft else if (hlb == cp.bottom) 0 else hlb - cp.bottom
+                    offset = if (next == fv) if (hft >= 0) 0 else hft - pt else if (hlb <= cp.bottom) 0 else hlb - cp.bottom + pb
                     next
                 }
                 else -> fv
             }
             getViewController((recyclerView?.findViewHolderForAdapterPosition(tr) as? VH))?.let { vc ->
-                if (!vc.isBindingController || (vc.isBindingController && controller?.isPause() == true)) vc.clickPlayBtn(true)
+                if (!vc.isBindingController || (vc.isBindingController && controller?.isPause() == true)) {
+                    vc.clickPlayBtn(true)
+                    ZPlayerLogs.debug("can click ")
+                } else {
+                    ZPlayerLogs.debug("isBind =  ${vc.isBindingController}   isPaused = ${controller?.isPause() == true}")
+                }
             }
             if (isAutoScrollToVisible && offset != 0) {
+                ZPlayerLogs.debug("offset =  $offset ")
                 recyclerView?.smoothScrollBy(0, offset, AccelerateInterpolator(), 600)
+            } else {
+                ZPlayerLogs.debug(" enable =  $isAutoScrollToVisible   offset = $offset ")
             }
         }
     }
@@ -293,7 +312,7 @@ abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : Rec
 
     fun resume(position: Int = -1) {
         isPausedToAutoPlay = false
-        recyclerView?.postDelayed({
+        handler?.postDelayed({
             idle(position)
         }, 500)
     }

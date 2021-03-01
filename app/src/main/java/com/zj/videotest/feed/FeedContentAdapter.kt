@@ -270,8 +270,8 @@ class FeedContentAdapter<T : FeedDataIn> : ListenerAnimAdapter<T>(R.layout.r_mai
         return adapterDelegate
     }
 
-    fun resume() {
-        resumeIfVisible()
+    fun resume(): Boolean {
+        return resumeIfVisible()
     }
 
     fun pause() {
@@ -301,9 +301,9 @@ class FeedContentAdapter<T : FeedDataIn> : ListenerAnimAdapter<T>(R.layout.r_mai
         resumeIfVisible()
     }
 
-    private fun resumeIfVisible() {
-        if (!data.isNullOrEmpty()) {
-            adapterDelegate?.resume()
-        }
+    private fun resumeIfVisible(): Boolean {
+        return if (!data.isNullOrEmpty()) {
+            adapterDelegate?.resume();true
+        } else false
     }
 }

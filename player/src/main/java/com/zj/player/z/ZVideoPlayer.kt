@@ -277,10 +277,10 @@ open class ZVideoPlayer(var config: VideoConfig = VideoConfig.create()) : BasePl
             it.removeListener(this)
             it.release()
         }
-        if (e != null) controller?.onError(e)
-        else controller?.onStop(notifyStop, currentPlayPath(), isRegulate)
         handler?.removeCallbacksAndMessages(null)
         player = null
+        if (e != null) controller?.onError(e)
+        else controller?.onStop(notifyStop, currentPlayPath(), isRegulate)
         log("video finished , current progress at $_curLookedProgress%", BehaviorLogsTable.videoStopped(currentCallId(), _curLookedProgress / 100f))
     }
 
