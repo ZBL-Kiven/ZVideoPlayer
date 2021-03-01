@@ -1,5 +1,6 @@
 package com.zj.player.adapters
 
+import android.graphics.Rect
 import android.os.Handler
 import android.os.Looper
 import android.os.Message
@@ -19,6 +20,8 @@ import com.zj.player.ut.InternalPlayStateChangeListener
 import java.lang.NullPointerException
 import java.lang.ref.SoftReference
 import java.lang.ref.WeakReference
+import kotlin.math.abs
+import kotlin.math.min
 
 /**
  * @author ZJJ on 2020.6.16
@@ -47,7 +50,7 @@ abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : Rec
     protected open fun onBindDelegate(holder: VH?, p: Int, d: T?, pl: MutableList<Any>?) {}
     protected open fun onPlayStateChanged(runningName: String, isPlaying: Boolean, desc: String?, controller: ZController<*, *>?) {}
     protected open fun checkControllerMatching(data: T?, controller: ZController<*, *>?): Boolean {
-        return controller != null && controller.runningName != delegateName
+        return controller != null && !controller.isDestroyed() && controller.runningName != delegateName
     }
 
     protected abstract val isSourcePlayAble: (d: T?) -> Boolean
@@ -137,7 +140,7 @@ abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : Rec
 
     final override fun waitingForPlay(curPlayingIndex: Int, delay: Long, fromUser: Boolean) {
         if (curPlayingIndex !in 0 until adapter.itemCount) return
-        if (fromUser) recyclerView?.smoothScrollToPosition(curPlayingIndex)
+        if (fromUser) recyclerView?.scrollToPosition(curPlayingIndex)
         handler?.removeMessages(waitingForPlayClicked)
         handler?.sendMessageDelayed(Message.obtain().apply {
             this.what = waitingForPlayClicked
@@ -205,27 +208,50 @@ abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : Rec
         }
     }
 
+    @Suppress("UNCHECKED_CAST")
     private fun onScrollIdle() {
         (recyclerView?.layoutManager as? LinearLayoutManager)?.let { lm ->
             val fvc = lm.findFirstCompletelyVisibleItemPosition()
             val lv = lm.findLastVisibleItemPosition()
-            var fvi = fvc
+            var fvi = lm.findFirstVisibleItemPosition()
             if (fvc < 0) {
-                fvi = lm.findFirstVisibleItemPosition()
                 if (lv - fvi > 1) fvi++
             }
+            val cp = Rect()
+            recyclerView?.getLocalVisibleRect(cp)
+            var offset = 0
             val fv = if (fvc < 0) fvi else fvc
-            var offsetPositions = 0
-            @Suppress("UNCHECKED_CAST") (recyclerView?.findViewHolderForAdapterPosition(fv) as? VH)?.let {
-                (getViewController(it)?.let { vc ->
-                    if (!vc.isBindingController || (vc.isBindingController && controller?.isPause() == true)) vc.clickPlayBtn(true)
-                })
-                it.itemView.let { iv ->
-                    if (iv.top < 0) offsetPositions = iv.top
+            val tr = when (fvi) {
+                lv - 1 -> {
+                    val ccf = Rect()
+                    val ccl = Rect()
+                    var hft = 0
+                    var hlt = 0
+                    var hlb = 0
+                    (recyclerView?.findViewHolderForAdapterPosition(fv) as? VH)?.itemView?.let {
+                        it.getLocalVisibleRect(ccf)
+                        hft = it.top
+                    }
+                    (recyclerView?.findViewHolderForAdapterPosition(lv) as? VH)?.itemView?.let {
+                        it.getLocalVisibleRect(ccl)
+                        hlt = it.top
+                        hlb = it.bottom
+                    }
+
+                    val offF = (ccf.bottom - ccf.top) / 2 - cp.centerY()
+                    val offL = (ccf.bottom - ccf.top) / 2 + hlt - cp.centerY()
+                    val cy = min(abs(offF), abs(offL))
+                    val next = if (cy == abs(offF)) fv else lv
+                    offset = if (next == fv) if (hft == 0) 0 else hft else if (hlb == cp.bottom) 0 else hlb - cp.bottom
+                    next
                 }
+                else -> fv
             }
-            if (isAutoScrollToVisible && offsetPositions != 0) {
-                recyclerView?.smoothScrollBy(0, offsetPositions, AccelerateInterpolator(), 600)
+            getViewController((recyclerView?.findViewHolderForAdapterPosition(tr) as? VH))?.let { vc ->
+                if (!vc.isBindingController || (vc.isBindingController && controller?.isPause() == true)) vc.clickPlayBtn(true)
+            }
+            if (isAutoScrollToVisible && offset != 0) {
+                recyclerView?.smoothScrollBy(0, offset, AccelerateInterpolator(), 600)
             }
         }
     }

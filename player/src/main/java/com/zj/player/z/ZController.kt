@@ -66,6 +66,7 @@ open class ZController<P : BasePlayer<R>, R : BaseRender> internal constructor(v
             if (c == null) {
                 (render?.parent as? ViewGroup)?.removeView(render)
                 stopNow(false, isRegulate = false)
+                runningName = "unset"
                 return null
             }
             val info = c.controllerInfo ?: throw NullPointerException("the controller view is required")

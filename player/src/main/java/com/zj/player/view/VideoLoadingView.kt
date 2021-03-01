@@ -221,8 +221,8 @@ internal class VideoLoadingView @JvmOverloads constructor(context: Context, attr
 
     private fun getHintString(mode: DisplayMode): String {
         return when (mode) {
-            DisplayMode.LOADING -> if (loadingHint.isEmpty()) "LOADING" else loadingHint
-            DisplayMode.NO_DATA -> if (noDataHint.isEmpty()) "no data found" else noDataHint
+            DisplayMode.LOADING -> if (loadingHint.isEmpty()) "" else loadingHint
+            DisplayMode.NO_DATA -> if (noDataHint.isEmpty()) "" else noDataHint
             else -> ""
         }
     }

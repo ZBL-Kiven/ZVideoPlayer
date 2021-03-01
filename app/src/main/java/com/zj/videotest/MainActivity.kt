@@ -1,5 +1,6 @@
 package com.zj.videotest
 
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
@@ -23,6 +24,7 @@ class MainActivity : AppCompatActivity() {
     private var mFeedNavView: DrawableTextView? = null
     private var mRewardNavView: DrawableTextView? = null
     private var mMeNavView: DrawableTextView? = null
+    private var goldView: DrawableTextView? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -46,6 +48,10 @@ class MainActivity : AppCompatActivity() {
         mFeedNavView = findViewById(R.id.r_main_act_fragment_nav_btn_feed)
         mRewardNavView = findViewById(R.id.r_main_act_fragment_nav_btn_reward)
         mMeNavView = findViewById(R.id.r_main_act_fragment_nav_btn_me)
+        goldView = findViewById(R.id.r_main_act_gold_view)
+        goldView?.setOnClickListener {
+            startActivity(Intent(this, TestActivity2::class.java))
+        }
     }
 
     private fun initFrg() {

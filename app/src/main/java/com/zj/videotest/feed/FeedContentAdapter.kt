@@ -117,10 +117,10 @@ class FeedContentAdapter<T : FeedDataIn> : ListenerAnimAdapter<T>(R.layout.r_mai
             val lp = it.layoutParams
             if (d?.getType() == DataType.YTB) {
                 val width = if (lp.width <= 0) it.context.resources.displayMetrics.widthPixels else lp.width
-                lp.height = (width * 5f / 16f).toInt()
+                lp.height = (width * 14f / 16f).toInt()
             } else {
                 lp.width = (it.parent as? ViewGroup)?.width ?: -1
-                lp.height = DPUtils.dp2px(152f)
+                lp.height = DPUtils.dp2px(352f)
             }
             it.layoutParams = lp
         }
