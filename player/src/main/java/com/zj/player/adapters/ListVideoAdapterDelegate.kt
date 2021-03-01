@@ -29,6 +29,7 @@ import kotlin.math.min
  * of course ZPlayer running in the list adapter as so well.
  * create an instance of [BaseListVideoController] in your data Adapter ,and see [AdapterDelegateIn]
  **/
+@Suppress("MemberVisibilityCanBePrivate")
 abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : RecyclerView.ViewHolder>(private val delegateName: String, private val adapter: RecyclerView.Adapter<VH>) : AdapterDelegateIn<T, VH>, VideoControllerIn, InternalPlayStateChangeListener {
 
     private var controller: ZController<*, *>? = null
@@ -310,9 +311,13 @@ abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : Rec
         this.isAutoScrollToVisible = `is`
     }
 
-    fun resume(position: Int = -1) {
+    fun resume(autoPlay: Boolean = false) {
+        resume(-1, autoPlay)
+    }
+
+    fun resume(position: Int = -1, autoPlay: Boolean = false) {
         isPausedToAutoPlay = false
-        handler?.postDelayed({
+        if (autoPlay) handler?.postDelayed({
             idle(position)
         }, 500)
     }
