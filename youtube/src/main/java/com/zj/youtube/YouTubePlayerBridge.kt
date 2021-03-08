@@ -188,7 +188,7 @@ open class YouTubePlayerBridge(private val youTubePlayerOwner: YouTubePlayerList
 
     private fun parsePlayerState(state: String): PlayerConstants.PlayerState {
         return when {
-            state.equals(STATE_UNSTARTED, ignoreCase = true) -> PlayerConstants.PlayerState.LOADING
+            state.equals(STATE_UNSTARTED, ignoreCase = true) -> PlayerConstants.PlayerState.STOP
             state.equals(STATE_ENDED, ignoreCase = true) -> PlayerConstants.PlayerState.ENDED
             state.equals(STATE_PLAYING, ignoreCase = true) -> PlayerConstants.PlayerState.PLAYING
             state.equals(STATE_PAUSED, ignoreCase = true) -> PlayerConstants.PlayerState.PAUSED

@@ -51,7 +51,6 @@ class CusWebPlayer : BasePlayer<CusWebRender> {
         curPath = Pair(path, callId)
         render?.setVideoFrame()
         render?.load(curPath?.first ?: "")
-        if (autoPlay) play()
     }
 
     override fun play() {

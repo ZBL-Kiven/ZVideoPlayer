@@ -119,7 +119,7 @@ abstract class YoutubeDelegate(debugAble: Boolean) : YouTubePlayerListener {
         pendingIfNotReady = null
         getWebView()?.visibility = View.INVISIBLE
         if (!isStop(false)) runWithWebView {
-            it.loadUrl("javascript:pauseVideo()")
+            it.loadUrl("javascript:stop()")
         }
         playerState = PlayerConstants.PlayerState.STOP
     }

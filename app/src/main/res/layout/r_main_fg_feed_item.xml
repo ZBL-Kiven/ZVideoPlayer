@@ -60,6 +60,7 @@
         app:autoFullTools="true"
         app:keepScreenOnWhenPlaying="true"
         app:loadingIgnoreTs="1000"
+        app:playAutoFullScreen="true"
         app:scrollXEnabled="false" />
 
     <LinearLayout
