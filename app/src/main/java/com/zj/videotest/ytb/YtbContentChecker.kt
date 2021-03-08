@@ -3,13 +3,11 @@ package com.zj.videotest.ytb
 import android.content.Context
 import android.os.Handler
 import android.os.Looper
-import android.util.Log
 import android.view.ViewGroup
 import androidx.activity.ComponentActivity
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.OnLifecycleEvent
-import com.zj.player.ZPlayer
 import com.zj.player.base.InflateInfo
 import com.zj.player.ut.Controller
 import com.zj.player.ut.PlayQualityLevel
@@ -21,12 +19,12 @@ import java.lang.ref.WeakReference
 class YtbContentChecker(context: ComponentActivity, private val path: String, timeOut: Long, private var onCheckResult: ((isOK: Boolean, path: String) -> Unit)?) : Controller, LifecycleObserver {
 
     companion object {
-        var controller: ZController<*, *>? = null
         fun checkYtbLinkAvailable(context: ComponentActivity, path: String, timeOut: Long, onCheckResult: (isOK: Boolean, path: String) -> Unit): YtbContentChecker {
             return YtbContentChecker(context, path, timeOut, onCheckResult)
         }
     }
 
+    var controller: ZController<*, *>? = null
     private var act: WeakReference<ComponentActivity>? = WeakReference(context)
     private var handler: Handler? = Handler(Looper.getMainLooper()) {
         if (it.what == 711263) sendCheckResult(false)
@@ -35,7 +33,7 @@ class YtbContentChecker(context: ComponentActivity, private val path: String, ti
 
     init {
         context.lifecycle.addObserver(this)
-        VideoControllerPlayers.getOrCreatePlayerWithVc("check",this) { DataType.YTB }
+        VideoControllerPlayers.getOrCreatePlayerWithVc("check", this) { DataType.YTB }
         handler?.sendEmptyMessageDelayed(711263, timeOut)
     }
 
@@ -98,8 +96,8 @@ class YtbContentChecker(context: ComponentActivity, private val path: String, ti
     }
 
     override fun onControllerBind(p0: ZController<*, *>?) {
-        if (p0 == null) return
         controller = p0
+        if (p0 == null) return
         p0.playOrResume(path)
     }
 
@@ -108,7 +106,7 @@ class YtbContentChecker(context: ComponentActivity, private val path: String, ti
     @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
     fun destroy() {
         act?.get()?.lifecycle?.removeObserver(this)
-        controller?.updateViewController("check",null)
+        controller?.updateViewController("check", null)
         handler?.removeCallbacksAndMessages(null)
         handler = null
         onCheckResult = null

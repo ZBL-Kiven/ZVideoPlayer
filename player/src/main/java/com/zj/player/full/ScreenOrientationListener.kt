@@ -59,7 +59,7 @@ internal class ScreenOrientationListener(private var c: WeakReference<Context>?,
 
     fun release() {
         disable()
-        c = null
+        c?.clear();c = null
         lastOrientation = null
         gravityListener = null
     }

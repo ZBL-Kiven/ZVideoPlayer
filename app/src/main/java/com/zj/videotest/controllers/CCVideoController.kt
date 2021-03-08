@@ -12,14 +12,15 @@ class CCVideoController @JvmOverloads constructor(c: Context, attr: AttributeSet
     override fun onImgGot(path: String, type: ImgLoader.ImgType, tag: String, e: Exception?) {
         val thumb = getThumbView() ?: return
         val background = getBackgroundView() ?: return
+        val context = thumb.context
         when (type) {
             ImgLoader.ImgType.IMG -> {
-                Glide.with(thumb).asBitmap().skipMemoryCache(true).fitCenter().load(path).into(thumb)
-                Glide.with(background).asBitmap().load(path).centerCrop().thumbnail(0.35f).transform(RenderScriptBlur(background.context, 12)).into(background)
+                Glide.with(context).asBitmap().skipMemoryCache(true).fitCenter().load(path).into(thumb)
+                Glide.with(context).asBitmap().load(path).centerCrop().thumbnail(0.35f).transform(RenderScriptBlur(background.context, 12)).into(background)
             }
             ImgLoader.ImgType.GIF -> {
-                Glide.with(thumb).asGif().skipMemoryCache(true).fitCenter().load(path).into(thumb)
-                Glide.with(background).asBitmap().load(path).centerCrop().thumbnail(0.35f).transform(RenderScriptBlur(background.context, 12)).into(background)
+                Glide.with(context).asGif().skipMemoryCache(true).fitCenter().load(path).into(thumb)
+                Glide.with(context).asBitmap().load(path).centerCrop().thumbnail(0.35f).transform(RenderScriptBlur(background.context, 12)).into(background)
             }
         }
     }
@@ -39,12 +40,12 @@ class CCVideoController @JvmOverloads constructor(c: Context, attr: AttributeSet
 
     override fun onFullScreenChanged(isFull: Boolean, payloads: Map<String, Any?>?) {
         super.onFullScreenChanged(isFull, payloads)
-        if (isFull) {
-            if (isPlayable && !isBindingController) vPlay?.let { onPlayClick(it, true) }
-            else if (isBindingController) {
-                if (controller?.isPlaying() == true || controller?.isStop(true) == true) return
-                vPlay?.let { onPlayClick(it, true) }
-            }
-        }
+        //        if (isFull) {
+        //            if (isPlayable && !isBindingController) vPlay?.let { onPlayClick(it, true) }
+        //            else if (isPlayable && isBindingController) {
+        //                if (controller?.isPlaying() == true || controller?.isStop(true) == true) return
+        //                vPlay?.let { onPlayClick(it, true) }
+        //            }
+        //        }
     }
 }

@@ -33,7 +33,7 @@ internal class ZPlayerFullScreenView constructor(context: Context, private val c
         private const val MAX_DEEP_RATIO = 0.55f
 
         internal fun open(view: View): FullScreenConfig {
-            return FullScreenConfig(WeakReference(view))
+            return FullScreenConfig(view)
         }
     }
 

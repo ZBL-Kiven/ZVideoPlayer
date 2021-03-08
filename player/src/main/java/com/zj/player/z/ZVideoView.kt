@@ -121,6 +121,7 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
     private var fullScreenView: ZPlayerFullScreenView? = null
     private var muteDefault: Boolean = false
     private var muteIsUseGlobal: Boolean = false
+    protected var playAutoFullScreen = false
     private var isTransactionNavigation: Boolean = false
     open val supportedSpeedList = arrayListOf(1.0f, 1.5f, 2f)
     private var menuView: QualityMenuView? = null
@@ -170,12 +171,6 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
         }
     }
 
-    fun isInterrupted(): Boolean {
-        return if ((menuView?.visibility ?: View.GONE) != View.GONE) {
-            menuView?.visibility = View.GONE;true
-        } else fullScreenView?.isInterruptTouchEvent() ?: false
-    }
-
     init {
         initView(context, attributeSet)
         initListener()
@@ -195,6 +190,7 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
             val secondarySeekBarEnable = ta.getInt(R.styleable.ZVideoView_secondarySeekBarEnable, Constance.secondarySeekBarEnable)
             val fullScreenEnable = ta.getInt(R.styleable.ZVideoView_fullScreenEnable, Constance.fullScreenEnAble)
             autoFullTools = ta.getBoolean(R.styleable.ZVideoView_autoFullTools, false)
+            playAutoFullScreen = ta.getBoolean(R.styleable.ZVideoView_playAutoFullScreen, false)
             autoFullInterval = ta.getInt(R.styleable.ZVideoView_autoFullInterval, 3000)
             fullScreenTransactionTime = ta.getInt(R.styleable.ZVideoView_fullScreenTransactionTime, fullScreenTransactionTime)
             fullMaxScreenEnable = ta.getBoolean(R.styleable.ZVideoView_fullMaxScreenEnable, Constance.fullMaxScreenEnable)
@@ -380,6 +376,9 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
     }
 
     override fun onLoading(path: String, isRegulate: Boolean) {
+        if (!isFullScreen && playAutoFullScreen) {
+            fullScreen?.let { onFullScreenClick(it, false) }
+        }
         seekBar?.isEnabled = false
         showOrHidePlayBtn(false)
         onLoadingEvent(LoadingMode.Loading)
@@ -396,6 +395,9 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
     }
 
     override fun onPlay(path: String, isRegulate: Boolean) {
+        if (!isFullScreen && playAutoFullScreen) {
+            fullScreen?.let { onFullScreenClick(it, false) }
+        }
         setOverlayViews(isShowThumb = false, isShowBackground = true, isSinkBottomShader = true)
         seekBar?.isSelected = true
         seekBar?.isEnabled = true
@@ -578,6 +580,7 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
     }
 
     open fun onRootDoubleClick() {
+        if (playAutoFullScreen) return
         log("on root view double click", BehaviorLogsTable.onRootDoubleClick())
         fullScreen?.let { onFullScreenClick(it, false) }
     }
@@ -989,7 +992,7 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
         qualityView?.visibility = View.GONE
     }
 
-    protected fun onDisplayChanged(isShow: Boolean, payloads: Map<String, Any?>?) {
+    private fun onDisplayChanged(isShow: Boolean, payloads: Map<String, Any?>?) {
         log("on full screen $isShow", BehaviorLogsTable.onFullscreen(isShow))
         isFullScreen = isShow
         lockScreen?.visibility = GONE
@@ -1000,6 +1003,9 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
             lockScreen?.isSelected = false
         }
         isFullingOrDismissing = false
+        if (!isShow && playAutoFullScreen) {
+            controller?.stopNow(withNotify = true, isRegulate = true)
+        }
         onFullScreenChanged(isShow, payloads)
     }
 
@@ -1096,5 +1102,11 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
 
     fun isDestroyed(accurate: Boolean = false): Boolean {
         return controller?.isDestroyed(accurate) ?: true
+    }
+
+    private fun isInterrupted(): Boolean {
+        return if ((menuView?.visibility ?: View.GONE) != View.GONE) {
+            menuView?.visibility = View.GONE;true
+        } else fullScreenView?.isInterruptTouchEvent() ?: false
     }
 }

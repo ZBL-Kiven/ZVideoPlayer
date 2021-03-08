@@ -4,6 +4,7 @@ import android.graphics.Color
 import android.os.Handler
 import android.os.Looper
 import android.os.Message
+import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.webkit.WebSettings
@@ -81,7 +82,9 @@ abstract class YoutubeDelegate(debugAble: Boolean) : YouTubePlayerListener {
     }
 
     fun loadVideoById(id: String, startSeconds: Float, suggestionQuality: String, pendingIfNotReady: PendingLoadTask, fromPending: Boolean) {
+        Log.e("------ ", "-1")
         if (id == curPath && inLoading) return
+        Log.e("------ ", "00000")
         if (!fromPending) playerState = PlayerConstants.PlayerState.UNKNOWN
         if (isPageReady) {
             inLoading = true

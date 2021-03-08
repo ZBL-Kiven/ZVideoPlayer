@@ -10,6 +10,9 @@
             overflow: hidden;
             position: fixed;
         }
+
+
+
     </style>
     <head>
         <meta
@@ -65,6 +68,10 @@
             var div = dom.getElementsByClassName('ytp-chrome-top')[0];
             if (div){
                 div.style.display='none';
+            }
+            var popups = dom.getElementsByClassName('ytp-popup')[0];
+            if (popups){
+                popups.style.display='none';
             }
             var b = dom.body;
             if(b){

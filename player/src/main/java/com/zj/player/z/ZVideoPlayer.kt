@@ -430,11 +430,6 @@ open class ZVideoPlayer(var config: VideoConfig = VideoConfig.create()) : BasePl
         }
     }
 
-    override fun reset() {
-        playPath = null
-        curState = VideoState.STOP
-    }
-
     override fun seekTo(progress: Int, fromUser: Boolean) {
         if (curState != VideoState.PAUSE && fromUser) {
             setPlayerState(VideoState.PAUSE.setObj(true))

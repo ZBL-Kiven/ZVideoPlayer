@@ -64,12 +64,10 @@ class CusWebPlayer : BasePlayer<CusWebRender> {
 
     override fun stop() {
         render?.stop(true, isRegulate = false)
-        curPath = null
     }
 
     override fun stopNow(withNotify: Boolean, isRegulate: Boolean) {
         render?.stop(withNotify, isRegulate)
-        curPath = null
     }
 
     override fun seekTo(progress: Int, fromUser: Boolean) {
@@ -104,10 +102,6 @@ class CusWebPlayer : BasePlayer<CusWebRender> {
 
     override fun updateControllerState() {
         render?.syncControllerState()
-    }
-
-    override fun reset() {
-        curPath = null
     }
 
     override fun setController(controller: PlayerEventController<CusWebRender>): String {

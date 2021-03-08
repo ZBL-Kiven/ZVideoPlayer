@@ -294,7 +294,7 @@ class FeedContentAdapter<T : FeedDataIn> : ListenerAnimAdapter<T>(R.layout.r_mai
     }
 
     override fun onDataChange(data: MutableList<T>?) {
-        //        context?.let { Glide.get(it).clearMemory() }
+        context?.let { Glide.get(it).clearMemory() }
     }
 
     override fun onDataFullChange() {

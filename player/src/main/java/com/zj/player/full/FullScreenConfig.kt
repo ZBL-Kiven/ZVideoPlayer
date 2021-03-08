@@ -2,9 +2,8 @@ package com.zj.player.full
 
 import android.content.Context
 import android.view.View
-import java.lang.ref.WeakReference
 
-internal class FullScreenConfig internal constructor(private var controllerView: WeakReference<View?>?) {
+internal class FullScreenConfig internal constructor(private var controllerView: View?) {
 
     var contentLayout: Int = -1; private set
     var fullMaxScreenEnable: Boolean = false; private set
@@ -52,7 +51,7 @@ internal class FullScreenConfig internal constructor(private var controllerView:
     }
 
     fun getControllerView(): View? {
-        return controllerView?.get()
+        return controllerView
     }
 
     fun payLoads(payloads: Map<String, Any?>?): FullScreenConfig {
@@ -65,8 +64,7 @@ internal class FullScreenConfig internal constructor(private var controllerView:
     }
 
     fun clear() {
-        controllerView?.clear()
-        controllerView = null
+        this.controllerView = null
     }
 
     fun reSetDurationWithDefault() {
