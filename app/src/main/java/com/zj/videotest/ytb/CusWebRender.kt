@@ -148,7 +148,7 @@ class CusWebRender(ctx: Context) : BaseRender(ctx) {
             if (!ytbDelegate.play()) {
                 load(p)
             }
-        } else if (ytbDelegate.isPageReady) load(p)
+        } else load(p)
     }
 
     fun pause() {

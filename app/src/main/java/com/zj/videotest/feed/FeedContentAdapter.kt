@@ -113,17 +113,6 @@ class FeedContentAdapter<T : FeedDataIn> : ListenerAnimAdapter<T>(R.layout.r_mai
     }
 
     override fun bindData(holder: BaseViewHolder?, p: Int, d: T?, pl: MutableList<Any>?) {
-        holder?.itemView?.findViewById<View>(R.id.r_main_fg_feed_item_vc)?.let {
-            val lp = it.layoutParams
-            if (d?.getType() == DataType.YTB) {
-                val width = if (lp.width <= 0) it.context.resources.displayMetrics.widthPixels else lp.width
-                lp.height = (width * 14f / 16f).toInt()
-            } else {
-                lp.width = (it.parent as? ViewGroup)?.width ?: -1
-                lp.height = DPUtils.dp2px(352f)
-            }
-            it.layoutParams = lp
-        }
         if (curLoadingTentaclePosition != maxPosition && p >= maxPosition - loadDistance) {
             curLoadingTentaclePosition = maxPosition
             Handler(Looper.getMainLooper()).post { adapterInterface?.onLoadMore(maxPosition) }

@@ -101,16 +101,18 @@ abstract class YoutubeDelegate(debugAble: Boolean) : YouTubePlayerListener {
     }
 
     fun play(): Boolean {
-        if (curPath.isEmpty()) return false
+        if (!isPageReady) Utils.log("call play error ! please wait to page ready!")
+        if (curPath.isEmpty() || !isPageReady) return false
         pendingIfNotReady = null
         runWithWebView { it.loadUrl("javascript:playVideo()") }
         return true
     }
 
     fun pause() {
+        if (!isPageReady) Utils.log("call pause error ! please wait to page ready!")
         runWithWebView {
             pendingIfNotReady = null
-            if (isPlaying(false)) it.loadUrl("javascript:pauseVideo()")
+            if (isPageReady && isPlaying(false)) it.loadUrl("javascript:pauseVideo()")
             playerState = PlayerConstants.PlayerState.PAUSED
         }
     }
@@ -119,7 +121,8 @@ abstract class YoutubeDelegate(debugAble: Boolean) : YouTubePlayerListener {
         curPath = ""
         pendingIfNotReady = null
         getWebView()?.visibility = View.INVISIBLE
-        if (!isStop(false)) runWithWebView {
+        if (!isPageReady) Utils.log("call stop error ! please wait to page ready!")
+        if (isPageReady && !isStop(false)) runWithWebView {
             it.loadUrl("javascript:stop()")
         }
         playerState = PlayerConstants.PlayerState.STOP
@@ -137,11 +140,11 @@ abstract class YoutubeDelegate(debugAble: Boolean) : YouTubePlayerListener {
     }
 
     fun setPlaybackRate(rate: Float) {
-        runWithWebView { it.loadUrl("javascript:setPlaybackRate($rate)") }
+        if (isPageReady) runWithWebView { it.loadUrl("javascript:setPlaybackRate($rate)") }
     }
 
     fun setPlaybackQuality(quality: String) {
-        runWithWebView { it.loadUrl("javascript:setPlaybackQuality(\'$quality\')") }
+        if (isPageReady) runWithWebView { it.loadUrl("javascript:setPlaybackQuality(\'$quality\')") }
     }
 
     fun destroy() {
@@ -171,13 +174,13 @@ abstract class YoutubeDelegate(debugAble: Boolean) : YouTubePlayerListener {
         val seekProgress = (max(0f, min(100, progress) / 100f * max(totalDuration, 1) - 1) / 1000f).toLong()
         curPlayingDuration = seekProgress
         runWithWebView {
-            it.loadUrl("javascript:seekTo($seekProgress,$fromUser)")
+            if (isPageReady) it.loadUrl("javascript:seekTo($seekProgress,$fromUser)")
             onSeekChanged(fromUser)
         }
     }
 
     override fun onYouTubeIFrameAPIReady() {
-        runWithWebView { it.loadUrl("javascript:hideInfo()") }
+        if (isPageReady) runWithWebView { it.loadUrl("javascript:hideInfo()") }
     }
 
     @CallSuper

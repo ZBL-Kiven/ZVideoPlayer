@@ -548,11 +548,13 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
 
     open fun onPlayClick(v: View, fromUser: Boolean) {
         if (!isPlayable) return
-        v.isEnabled = false
-        if (!v.isSelected) {
-            controller?.playOrResume()
-        } else {
-            controller?.pause()
+        controller?.let {
+            v.isEnabled = false
+            if (!v.isSelected) {
+                it.playOrResume()
+            } else {
+                it.pause()
+            }
         }
     }
 
