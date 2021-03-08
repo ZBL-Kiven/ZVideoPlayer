@@ -20,12 +20,12 @@ open class YouTubePlayerBridge(private val youTubePlayerOwner: YouTubePlayerList
 
     companion object {
         // these constants correspond to the values in the Javascript player
-        private const val STATE_UNSTARTED = "UNSTARTED"
-        private const val STATE_ENDED = "ENDED"
-        private const val STATE_PLAYING = "PLAYING"
-        private const val STATE_PAUSED = "PAUSED"
-        private const val STATE_BUFFERING = "BUFFERING"
-        private const val STATE_CUED = "CUED"
+        internal const val STATE_UNSTARTED = "UNSTARTED"
+        internal const val STATE_ENDED = "ENDED"
+        internal const val STATE_PLAYING = "PLAYING"
+        internal const val STATE_PAUSED = "PAUSED"
+        internal const val STATE_BUFFERING = "BUFFERING"
+        internal const val STATE_CUED = "CUED"
 
         private const val QUALITY_SMALL = "small"
         private const val QUALITY_MEDIUM = "medium"
@@ -188,7 +188,7 @@ open class YouTubePlayerBridge(private val youTubePlayerOwner: YouTubePlayerList
 
     private fun parsePlayerState(state: String): PlayerConstants.PlayerState {
         return when {
-            state.equals(STATE_UNSTARTED, ignoreCase = true) -> PlayerConstants.PlayerState.STOP
+            state.equals(STATE_UNSTARTED, ignoreCase = true) -> PlayerConstants.PlayerState.STOP.setFrom(STATE_UNSTARTED)
             state.equals(STATE_ENDED, ignoreCase = true) -> PlayerConstants.PlayerState.ENDED
             state.equals(STATE_PLAYING, ignoreCase = true) -> PlayerConstants.PlayerState.PLAYING
             state.equals(STATE_PAUSED, ignoreCase = true) -> PlayerConstants.PlayerState.PAUSED

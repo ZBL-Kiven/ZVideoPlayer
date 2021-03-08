@@ -9,6 +9,7 @@ import android.view.ViewGroup
 import android.webkit.WebSettings
 import android.webkit.WebView
 import androidx.annotation.CallSuper
+import com.zj.youtube.YouTubePlayerBridge.Companion.STATE_UNSTARTED
 import com.zj.youtube.constance.PlayerConstants
 import com.zj.youtube.options.IFramePlayerOptions
 import com.zj.youtube.proctol.YouTubePlayerListener
@@ -37,7 +38,7 @@ abstract class YoutubeDelegate(debugAble: Boolean) : YouTubePlayerListener {
     private var pendingIfNotReady: PendingLoadTask? = null
     private var playerState: PlayerConstants.PlayerState = PlayerConstants.PlayerState.UNKNOWN
 
-    open fun onPlayStateChange(curState: PlayerConstants.PlayerState, oldState: PlayerConstants.PlayerState) {}
+    open fun onPlayStateChange(curState: PlayerConstants.PlayerState, oldState: PlayerConstants.PlayerState, fromSync: Boolean) {}
     open fun onPlayQualityChanged(quality: PlayerConstants.PlaybackQuality, supports: List<PlayerConstants.PlaybackQuality>?) {}
 
     init {
@@ -191,15 +192,17 @@ abstract class YoutubeDelegate(debugAble: Boolean) : YouTubePlayerListener {
         if (state == PlayerConstants.PlayerState.PAUSED && playerState == PlayerConstants.PlayerState.STOP) return
         if (playerState == PlayerConstants.PlayerState.PAUSED && (state == PlayerConstants.PlayerState.LOADING)) return
         if (playerState.inLoading() && state.inLoading()) return
+        if ((playerState == PlayerConstants.PlayerState.ERROR || playerState == PlayerConstants.PlayerState.STOP) && state.from == STATE_UNSTARTED) return
         if (playerState == PlayerConstants.PlayerState.LOADING && state == PlayerConstants.PlayerState.PAUSED) return
         try {
             getWebView()?.let {
                 it.visibility = if (state.inMutual() && !(playerState.inLoading() && state == PlayerConstants.PlayerState.PAUSED)) View.VISIBLE else View.INVISIBLE
                 it.loadUrl("javascript:hideInfo()")
-                onPlayStateChange(state, playerState)
+                onPlayStateChange(state, playerState, state.from == "sync")
             }
         } finally {
-            Utils.log("on player state changed from $playerState to $state")
+            Utils.log("on player state changed from $playerState to $state ,from = ${state.from}")
+            state.setFrom("")
             this.playerState = state
         }
     }
@@ -220,7 +223,7 @@ abstract class YoutubeDelegate(debugAble: Boolean) : YouTubePlayerListener {
         this.curPath = ""
         this.inLoading = false
         this.pendingIfNotReady = null
-        mainThreadHandler.post { playerState = PlayerConstants.PlayerState.ERROR.setFrom(error.name) }
+        onStateChange(PlayerConstants.PlayerState.ERROR.setFrom(error.name))
     }
 
     @CallSuper
@@ -311,7 +314,8 @@ abstract class YoutubeDelegate(debugAble: Boolean) : YouTubePlayerListener {
             if (it == PlayerConstants.PlayerState.LOADING) onStateChange(PlayerConstants.PlayerState.LOADING.setFrom("sync"))
             if (it == PlayerConstants.PlayerState.BUFFERING) onStateChange(PlayerConstants.PlayerState.BUFFERING.setFrom("sync"))
             if (it == PlayerConstants.PlayerState.PLAYING || it == PlayerConstants.PlayerState.PAUSED.setFrom("sync")) onReady(totalDuration)
-            onPlayStateChange(PlayerConstants.PlayerState.PLAYING, playerState.setFrom("sync"))
+            if (it == PlayerConstants.PlayerState.PLAYING) onStateChange(PlayerConstants.PlayerState.PLAYING.setFrom("sync"))
+            onCurrentPlayerInfo(curVolume, curPlayingRate)
         }
     }
 }

@@ -62,15 +62,15 @@ class CusWebRender(ctx: Context) : BaseRender(ctx) {
             notifyTo { onPlayQualityChanged(changeListFunc.invoke(listOf(quality))?.get(0) ?: PlayQualityLevel.AUTO, changeListFunc.invoke(supports)) }
         }
 
-        override fun onPlayStateChange(curState: PlayerConstants.PlayerState, oldState: PlayerConstants.PlayerState) {
+        override fun onPlayStateChange(curState: PlayerConstants.PlayerState, oldState: PlayerConstants.PlayerState, fromSync: Boolean) {
             when (curState) {
                 PlayerConstants.PlayerState.ERROR -> notifyTo { onError(Exception(curState.from)) }
-                PlayerConstants.PlayerState.ENDED -> notifyTo { onCompleted(curPath, false) }
-                PlayerConstants.PlayerState.PLAYING -> notifyTo { onPlay(curPath, false) }
-                PlayerConstants.PlayerState.PAUSED -> notifyTo { onPause(curPath, false) }
-                PlayerConstants.PlayerState.BUFFERING -> notifyTo { onSeekingLoading(curPath, false) }
-                PlayerConstants.PlayerState.STOP -> notifyTo { onStop(true, curPath, false) }
-                PlayerConstants.PlayerState.LOADING -> notifyTo { onLoading(curPath, false) }
+                PlayerConstants.PlayerState.ENDED -> notifyTo { onCompleted(curPath, fromSync) }
+                PlayerConstants.PlayerState.PLAYING -> notifyTo { onPlay(curPath, fromSync) }
+                PlayerConstants.PlayerState.PAUSED -> notifyTo { onPause(curPath, fromSync) }
+                PlayerConstants.PlayerState.BUFFERING -> notifyTo { onSeekingLoading(curPath, fromSync) }
+                PlayerConstants.PlayerState.STOP -> notifyTo { onStop(true, curPath, fromSync) }
+                PlayerConstants.PlayerState.LOADING -> notifyTo { onLoading(curPath, fromSync) }
                 PlayerConstants.PlayerState.PREPARED -> {
                     if (autoPlay) this@CusWebRender.play()
                 }
