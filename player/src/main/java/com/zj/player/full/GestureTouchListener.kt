@@ -3,7 +3,6 @@ package com.zj.player.full
 import android.graphics.PointF
 import android.os.Handler
 import android.os.Looper
-import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import androidx.annotation.FloatRange
@@ -29,6 +28,7 @@ internal abstract class GestureTouchListener(private val intercepted: () -> Bool
     private var interpolator = 58f
     private var triggerX = 230f
     private var triggerY = 400f
+    private var toleranceClick = 20f
     private var noPaddingClickPointStart: PointF? = null
     private var isOnceTap = false
     private var handler: Handler? = Handler(Looper.getMainLooper()) {
@@ -44,8 +44,8 @@ internal abstract class GestureTouchListener(private val intercepted: () -> Bool
         this.paddingY = paddingY
     }
 
-    fun setTorque(interpolator: Float, tx: Float, ty: Float) {
-        triggerX = tx;triggerY = ty;this.interpolator = interpolator
+    fun setTorque(interpolator: Float, tx: Float, ty: Float, toleranceClick: Float) {
+        triggerX = tx;triggerY = ty;this.interpolator = interpolator;this.toleranceClick = toleranceClick
     }
 
     override fun onTouch(v: View?, event: MotionEvent?): Boolean {
@@ -63,7 +63,7 @@ internal abstract class GestureTouchListener(private val intercepted: () -> Bool
             }
             MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
                 try {
-                    val isTap = !isRemoved && (abs((noPaddingClickPointStart?.x ?: _x) - max(event.rawX, paddingX)) < 20f && abs((noPaddingClickPointStart?.y ?: _y) - event.rawY) < 20f)
+                    val isTap = !isRemoved && (abs((noPaddingClickPointStart?.x ?: _x) - max(event.rawX, paddingX)) < toleranceClick && abs((noPaddingClickPointStart?.y ?: _y) - event.rawY) < toleranceClick)
                     val isDisInterrupted = if (!isTap) !onTouchActionEvent(event, lstX, lstY, null) else true
                     val isParseEnd = if (isDisInterrupted) onEventEnd(min(triggerY, event.rawY - _y) / triggerY, !isTap && isDisInterrupted) else false
                     if (isTap && (isDisInterrupted || isParseEnd)) {

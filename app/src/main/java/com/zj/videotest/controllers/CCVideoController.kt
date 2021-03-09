@@ -40,12 +40,12 @@ class CCVideoController @JvmOverloads constructor(c: Context, attr: AttributeSet
 
     override fun onFullScreenChanged(isFull: Boolean, payloads: Map<String, Any?>?) {
         super.onFullScreenChanged(isFull, payloads)
-        //        if (isFull) {
-        //            if (isPlayable && !isBindingController) vPlay?.let { onPlayClick(it, true) }
-        //            else if (isPlayable && isBindingController) {
-        //                if (controller?.isPlaying() == true || controller?.isStop(true) == true) return
-        //                vPlay?.let { onPlayClick(it, true) }
-        //            }
-        //        }
+        if (isFull) {
+            if (isPlayable && !isBindingController) vPlay?.let { onPlayClick(it, true) }
+            else if (isPlayable && isBindingController) {
+                if (controller?.isPlaying() == true || controller?.isStop(true) == true) return
+                vPlay?.let { onPlayClick(it, true) }
+            }
+        }
     }
 }

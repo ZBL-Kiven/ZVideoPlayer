@@ -223,8 +223,9 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
             isLockScreenRotation = lockScreenRotation != -1
             isFull = bottomToolsBar?.visibility == View.VISIBLE
             speedView?.text = context.getString(R.string.z_player_str_speed, "1")
-            touchListener?.setPadding(0.05f, 0.08f)
-
+            touchListener?.let {
+                setTouchTorques(context, it)
+            }
             loadingView?.let {
                 loadingIgnoreInterval = ta.getInt(R.styleable.ZVideoView_loadingIgnoreTs, 0)
                 val loadingBackgroundColor = ta.getColor(R.styleable.ZVideoView_loadingBackgroundColor, ContextCompat.getColor(context, R.color.z_player_color_trans_50))
@@ -260,6 +261,12 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
         } finally {
             ta.recycle()
         }
+    }
+
+    private fun setTouchTorques(context: Context, l: GestureTouchListener) {
+        l.setPadding(0.05f, 0.08f)
+        val density = context.resources.displayMetrics.density
+        l.setTorque(32f, density * 75f + 0.5f, density * 142f + 0.5f, density * 7f + 0.5f)
     }
 
     private fun <T : View> getViewByDefaultConfig(id: Int, mode: Int): T? {
