@@ -21,6 +21,7 @@ import com.gyf.immersionbar.BarHide
 import com.gyf.immersionbar.ImmersionBar
 import com.zj.player.R
 import com.zj.player.anim.ZFullValueAnimator
+import com.zj.player.logs.ZPlayerLogs
 import java.lang.IllegalArgumentException
 import java.lang.ref.WeakReference
 import kotlin.math.max
@@ -40,8 +41,8 @@ internal class ZPlayerFullScreenView constructor(context: Context, private val c
     private val mDecorView by lazy { (getActivity()?.findViewById<FrameLayout>(android.R.id.content) as? ViewGroup) }
     private var _width: Float = 0f
     private var _height: Float = 0f
-    private val originWidth: Int = getControllerView().measuredWidth
-    private val originHeight: Int = getControllerView().measuredHeight
+    private val originWidth: Int = config.getControllerView()?.measuredWidth ?: 0
+    private val originHeight: Int = config.getControllerView()?.measuredHeight ?: 0
     private var calculateUtils: RectFCalculateUtil? = null
     private var originInScreen: Point? = null
     private var curScaleOffset: Float = 1.0f
@@ -50,8 +51,8 @@ internal class ZPlayerFullScreenView constructor(context: Context, private val c
     private var isDismissing = false
     private val interpolator = DecelerateInterpolator(1.5f)
     private var isMaxFull = config.isDefaultMaxScreen
-    private val vp: ViewGroup? = getControllerView().parent as? ViewGroup
-    private val vlp: ViewGroup.LayoutParams? = getControllerView().layoutParams
+    private val vp: ViewGroup? = config.getControllerView()?.parent as? ViewGroup
+    private val vlp: ViewGroup.LayoutParams? = config.getControllerView()?.layoutParams
     private var originViewRectF: RectF? = null
     private var contentLayoutView: View? = null
     private var backgroundView: View? = null
@@ -61,46 +62,47 @@ internal class ZPlayerFullScreenView constructor(context: Context, private val c
 
     private var curScreenRotation: RotateOrientation? = null
         set(value) {
-            if (field == value && getControllerView().rotation == value?.degree) return
+            if (field == value && config.getControllerView()?.rotation == value?.degree) return
             field = value
             if (value == null) return
             if (value != RotateOrientation.P1) {
-                getControllerView().rotation = value.degree
+                config.getControllerView()?.rotation = value.degree
                 val r = (value == RotateOrientation.L0 || value == RotateOrientation.L1)
                 val w = _width.roundToInt()
                 val h = _height.roundToInt()
                 val vlp = LayoutParams(if (r) h else w, if (r) w else h)
                 vlp.gravity = Gravity.CENTER
-                getControllerView().layoutParams = vlp
+                config.getControllerView()?.layoutParams = vlp
             }
         }
 
     init {
-        isFocusable = true
-        isFocusableInTouchMode = true
-        requestFocus()
-        (getControllerView().context.applicationContext.getSystemService(Context.WINDOW_SERVICE) as? WindowManager)?.defaultDisplay?.getRealSize(realWindowSize)
-        if (!config.isDefaultMaxScreen && config.contentLayout > 0) contentLayoutView = View.inflate(getControllerView().context, config.contentLayout, null)
-        val actionViews = mutableMapOf<Int, View>()
-        hiddenAllChildIfNotScreenContent(contentLayoutView, actionViews)
-        actionViews.forEach { (_, u) ->
-            u.alpha = 0.0f
+        runWithControllerView {
+            isFocusable = true
+            isFocusableInTouchMode = true
+            requestFocus()
+            (it.context?.applicationContext?.getSystemService(Context.WINDOW_SERVICE) as? WindowManager)?.defaultDisplay?.getRealSize(realWindowSize)
+            if (!config.isDefaultMaxScreen && config.contentLayout > 0) contentLayoutView = View.inflate(it.context, config.contentLayout, null)
+            val actionViews = mutableMapOf<Int, View>()
+            hiddenAllChildIfNotScreenContent(contentLayoutView, actionViews)
+            actionViews.forEach { (_, u) ->
+                u.alpha = 0.0f
+            }
+            if (childCount > 0) removeAllViews()
+            backgroundView = View(context)
+            backgroundView?.setBackgroundColor(Color.BLACK)
+            backgroundView?.alpha = 0f
+            backgroundView?.layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
+            this.addView(backgroundView, 0)
+            setContent(it, isMaxFull)
         }
-        if (childCount > 0) removeAllViews()
-        backgroundView = View(context)
-        backgroundView?.setBackgroundColor(Color.BLACK)
-        backgroundView?.alpha = 0f
-        backgroundView?.layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
-        this.addView(backgroundView, 0)
-        setContent(isMaxFull)
     }
 
-    private fun setContent(isMaxFull: Boolean, isResizeCalculate: Boolean = false, isInit: Boolean = true) {
+    private fun setContent(controller: View, isMaxFull: Boolean, isResizeCalculate: Boolean = false, isInit: Boolean = true) {
         if (!this.isMaxFull && isMaxFull) curScreenRotation = null
         this.isMaxFull = isMaxFull
         changeSystemWindowVisibility(true) {
             try {
-                val controller = getControllerView()
                 val controllerNeedAdd = (controller.parent as? ViewGroup)?.let { parent ->
                     if (isMaxFull || contentLayoutView == null) {
                         if (parent != this) {
@@ -155,7 +157,7 @@ internal class ZPlayerFullScreenView constructor(context: Context, private val c
                 updateContent(0f)
                 setBackground(1f, true)
                 onDisplayChange(true)
-                if (config.isAnimDurationOnlyStart) config.reSetDurationWithDefault()
+                if (config.isAnimDurationOnlyStart) config.resetDurationWithDefault()
             } else {
                 isAnimRun = true
                 startScaleAnim(true)
@@ -180,9 +182,11 @@ internal class ZPlayerFullScreenView constructor(context: Context, private val c
 
     private fun dismissed() {
         onDisplayChange(false)
+        runWithControllerView {
+            if (it.parent != null) (it.parent as? ViewGroup)?.removeView(it)
+            vp?.addView(it, vlp)
+        }
         curScaleOffset = 0f
-        if (getControllerView().parent != null) (getControllerView().parent as? ViewGroup)?.removeView(getControllerView())
-        vp?.addView(getControllerView(), vlp)
         screenUtil?.release()
         screenUtil = null
         if (scaleAnim?.isRunning == true) scaleAnim?.cancel()
@@ -195,7 +199,7 @@ internal class ZPlayerFullScreenView constructor(context: Context, private val c
     }
 
     private fun startScaleAnim(isFull: Boolean) {
-        scaleAnim?.duration = config.transactionAnimDuration.toLong()
+        scaleAnim?.duration = (config.transactionAnimDuration.coerceAtLeast(0)).toLong()
         scaleAnim?.start(isFull)
     }
 
@@ -213,12 +217,14 @@ internal class ZPlayerFullScreenView constructor(context: Context, private val c
                 } else {
                     clipChildren = false
                     setBackground(1 - duration, isFromStart = true, isDownTo = true)
-                    (getControllerView().parent as? ViewGroup)?.clipChildren = false
-                    if (originInScreen == null) originInScreen = Point(getControllerView().scrollX, getControllerView().scrollY)
-                    originInScreen?.let {
-                        val sx = (it.x * (1f - duration)).roundToInt()
-                        val sy = (it.y * (1f - duration)).roundToInt()
-                        getControllerView().scrollTo(sx, sy)
+                    runWithControllerView { cv ->
+                        (cv.parent as? ViewGroup)?.clipChildren = false
+                        if (originInScreen == null) originInScreen = Point(cv.scrollX, cv.scrollY)
+                        originInScreen?.let {
+                            val sx = (it.x * (1f - duration)).roundToInt()
+                            val sy = (it.y * (1f - duration)).roundToInt()
+                            cv.scrollTo(sx, sy)
+                        }
                     }
                     val curOff = if (curScaleOffset <= 0f) 1f else curScaleOffset
                     val offset = (duration * curOff) + (1f - curOff)
@@ -247,44 +253,57 @@ internal class ZPlayerFullScreenView constructor(context: Context, private val c
     }
 
     fun onEventEnd(formTrigDuration: Float, parseAutoScale: Boolean): Boolean {
-        (getControllerView().parent as? ViewGroup)?.clipChildren = true
-        return if (parseAutoScale) isAutoScaleFromTouchEnd(formTrigDuration, true) else false
+        return runWithControllerView {
+            (it.parent as? ViewGroup)?.clipChildren = true
+            if (parseAutoScale) isAutoScaleFromTouchEnd(formTrigDuration, true) else false
+        } ?: false
     }
 
     fun onDoubleClick() {
         if (config.isDefaultMaxScreen || !config.fullMaxScreenEnable) return
-        contentLayoutView?.let {
-            setContent(!isMaxFull, true, isInit = false)
-            config.onFullContentListener?.onFullMaxChanged(this@ZPlayerFullScreenView, isMaxFull)
-            if (isMaxFull) curScreenRotation = when (config.defaultScreenOrientation) {
-                0 -> RotateOrientation.L0
-                1 -> RotateOrientation.P0
-                else -> null
+        runWithControllerView {
+            contentLayoutView?.let {
+                setContent(it, !isMaxFull, true, isInit = false)
+                config.onFullContentListener?.onFullMaxChanged(this@ZPlayerFullScreenView, isMaxFull)
+                if (isMaxFull) curScreenRotation = when (config.defaultScreenOrientation) {
+                    0 -> RotateOrientation.L0
+                    1 -> RotateOrientation.P0
+                    else -> null
+                }
             }
         }
     }
 
     fun onTracked(isStart: Boolean, offsetX: Float, offsetY: Float, easeY: Float, formTrigDuration: Float) {
         if (isStart) initCalculate()
-        (getControllerView().parent as? ViewGroup)?.clipChildren = false
-        setBackground(1f - formTrigDuration)
-        followWithFinger(offsetX, offsetY)
-        scaleWithOffset(easeY)
-        onTracked(isStart, false, formTrigDuration)
+        runWithControllerView {
+            (it.parent as? ViewGroup)?.clipChildren = false
+            setBackground(1f - formTrigDuration)
+            followWithFinger(offsetX, offsetY)
+            scaleWithOffset(easeY)
+            onTracked(isStart, false, formTrigDuration)
+        }
     }
 
-    internal fun getControllerView(): View {
-        return config.getControllerView() ?: throw java.lang.NullPointerException("case the controller view is null ,so what`s your displaying wishes")
+    private fun <T> runWithControllerView(i: (View) -> T): T? {
+        val cv = config.getControllerView()
+        if (cv == null) {
+            dismissed()
+            ZPlayerLogs.debug("case the controller view is null ,so what`s your displaying wishes")
+        } else {
+            return i(cv)
+        }
+        return null
     }
 
     private fun updateContent(offset: Float) {
         val rect = calculateUtils?.calculate(offset)
-        getFrameLayoutParams(getControllerView(), rect)
+        runWithControllerView { getFrameLayoutParams(it, rect) }
     }
 
     private fun followWithFinger(x: Float, y: Float) {
         if (isMaxFull) return
-        getControllerView().scrollTo(x.roundToInt(), y.roundToInt())
+        runWithControllerView { it.scrollTo(x.roundToInt(), y.roundToInt()) }
     }
 
     private fun scaleWithOffset(curYOffset: Float) {
@@ -298,7 +317,7 @@ internal class ZPlayerFullScreenView constructor(context: Context, private val c
         isDismissing = true
         val isScaleAuto = curYOffset <= MAX_DEEP_RATIO
         if (isScaleAuto) {
-            getControllerView().scrollTo(0, 0)
+            runWithControllerView { it.scrollTo(0, 0) }
             scaleWithOffset(0f)
             setBackground(1f, true)
             onTracked(false, isEnd = true, formTrigDuration = 0f)
@@ -441,7 +460,7 @@ internal class ZPlayerFullScreenView constructor(context: Context, private val c
 
     @SuppressLint("SourceLockedOrientationActivity")
     private fun screenRotationsChanged(isRotateEnable: Boolean) {
-        getControllerView().rotation = 0f
+        runWithControllerView { it.rotation = 0f }
         if (isRotateEnable) screenUtil?.enable() else {
             screenUtil?.disable();curScreenRotation = null
         }

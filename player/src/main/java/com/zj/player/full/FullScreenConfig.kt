@@ -18,9 +18,9 @@ internal class FullScreenConfig internal constructor(private var controllerView:
     private var defaultTransactionAnimDuration: Int = 250
 
     fun transactionAnimDuration(duration: Int, isStart: Boolean, default: Int): FullScreenConfig {
-        this.transactionAnimDuration = duration
+        this.transactionAnimDuration = duration.coerceAtLeast(0)
         this.isAnimDurationOnlyStart = isStart
-        this.defaultTransactionAnimDuration = default
+        this.defaultTransactionAnimDuration = default.coerceAtLeast(0)
         return this
     }
 
@@ -67,7 +67,7 @@ internal class FullScreenConfig internal constructor(private var controllerView:
         this.controllerView = null
     }
 
-    fun reSetDurationWithDefault() {
+    fun resetDurationWithDefault() {
         this.transactionAnimDuration = defaultTransactionAnimDuration
     }
 }

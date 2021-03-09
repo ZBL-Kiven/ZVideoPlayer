@@ -46,7 +46,11 @@ open class ZController<P : BasePlayer<R>, R : BaseRender> internal constructor(v
                 field?.onControllerBind(null)
             }
             field = value
-            field?.onControllerBind(this)
+            try {
+                field?.onControllerBind(this)
+            } catch (e: OutOfMemoryError) {
+                e.printStackTrace()
+            }
             isIgnoreNullControllerGlobal = value == null
         }
 
