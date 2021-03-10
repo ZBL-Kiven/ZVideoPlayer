@@ -261,8 +261,8 @@ internal class ZPlayerFullScreenView constructor(context: Context, private val c
 
     fun onDoubleClick() {
         if (config.isDefaultMaxScreen || !config.fullMaxScreenEnable) return
-        runWithControllerView {
-            contentLayoutView?.let {
+        contentLayoutView?.let { _ ->
+            runWithControllerView {
                 setContent(it, !isMaxFull, true, isInit = false)
                 config.onFullContentListener?.onFullMaxChanged(this@ZPlayerFullScreenView, isMaxFull)
                 if (isMaxFull) curScreenRotation = when (config.defaultScreenOrientation) {
