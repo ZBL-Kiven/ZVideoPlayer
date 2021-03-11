@@ -125,13 +125,13 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
     private var isTransactionNavigation: Boolean = false
     open val supportedSpeedList = arrayListOf(1.0f, 1.5f, 2f)
     private var menuView: QualityMenuView? = null
-    protected var isFullScreen = false
-        set(value) {
+    var isFullScreen = false
+        private set(value) {
             if (field == value) return
             field = value
             fullScreen?.isSelected = value
         }
-    protected var isFullMaxScreen = false
+    var isFullMaxScreen = false; private set
     var isPlayable = true
         set(value) {
             if (value != field) {

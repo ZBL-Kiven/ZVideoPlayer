@@ -1,6 +1,7 @@
 package com.zj.player.full
 
 import android.content.Context
+import android.util.Log
 import android.view.View
 
 internal class FullScreenConfig internal constructor(private var controllerView: View?) {
@@ -51,6 +52,7 @@ internal class FullScreenConfig internal constructor(private var controllerView:
     }
 
     fun getControllerView(): View? {
+        Log.e("------ ", "=====================  $controllerView")
         return controllerView
     }
 

@@ -189,7 +189,10 @@ internal class ZPlayerFullScreenView constructor(context: Context, private val c
         curScaleOffset = 0f
         screenUtil?.release()
         screenUtil = null
-        if (scaleAnim?.isRunning == true) scaleAnim?.cancel()
+        if (scaleAnim?.isRunning == true) {
+            scaleAnim?.end()
+        }
+        scaleAnim?.cancel()
         scaleAnim = null
         calculateUtils = null
         isDismissing = false
@@ -199,6 +202,7 @@ internal class ZPlayerFullScreenView constructor(context: Context, private val c
     }
 
     private fun startScaleAnim(isFull: Boolean) {
+        if (scaleAnim?.isRunning == true) scaleAnim?.end()
         scaleAnim?.duration = (config.transactionAnimDuration.coerceAtLeast(0)).toLong()
         scaleAnim?.start(isFull)
     }

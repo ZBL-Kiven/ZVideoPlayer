@@ -1,6 +1,8 @@
 package com.zj.videotest
 
 import android.os.Bundle
+import android.view.KeyEvent
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import com.zj.player.z.ZController
 import com.zj.videotest.delegate.VideoControllerPlayers
@@ -19,7 +21,6 @@ class TestActivity2 : AppCompatActivity() {
         CCWebView.onAppAttached(this, "")
         setContentView(R.layout.test_act_2_content)
         controller = VideoControllerPlayers.getOrCreatePlayerWithVc("test", mVideoView) { DataType.VIDEO }
-        controller?.playOrResume("http://vjs.zencdn.net/v/oceans.mp4")
     }
 
     override fun onResume() {
@@ -28,12 +29,30 @@ class TestActivity2 : AppCompatActivity() {
     }
 
     override fun onPause() {
-        super.onPause()
         controller?.pause()
+        super.onPause()
     }
 
     override fun onDestroy() {
         super.onDestroy()
         VideoControllerPlayers.stopVideo()
     }
+
+    fun clickFull(view: View) {
+        val isFull = mVideoView.isFullScreen
+        if (isFull) {
+            controller?.stopNow(true, isRegulate = false)
+        } else {
+            controller?.playOrResume("http://vjs.zencdn.net/v/oceans.mp4")
+        }
+        mVideoView.fullScreen(!isFull, fromUser = true, payloads = null)
+    }
+
+    override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            clickFull(tv1);return false
+        }
+        return super.onKeyDown(keyCode, event)
+    }
+
 }
