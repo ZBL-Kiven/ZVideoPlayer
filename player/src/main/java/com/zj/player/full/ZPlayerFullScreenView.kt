@@ -488,7 +488,7 @@ internal class ZPlayerFullScreenView constructor(context: Context, private val c
     override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
         if (config.onFullContentListener?.onKeyEvent(keyCode, event) == true) return true
         if (keyCode == KeyEvent.KEYCODE_BACK) {
-            dismiss();return true
+            if (isAnimRun) return true else dismiss();return true
         }
         return super.onKeyDown(keyCode, event)
     }
