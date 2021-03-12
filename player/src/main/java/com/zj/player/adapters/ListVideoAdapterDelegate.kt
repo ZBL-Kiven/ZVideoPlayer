@@ -33,6 +33,7 @@ import kotlin.math.min
 abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : RecyclerView.ViewHolder>(private val delegateName: String, private val adapter: RecyclerView.Adapter<VH>) : AdapterDelegateIn<T, VH>, VideoControllerIn, InternalPlayStateChangeListener {
 
     private var controller: ZController<*, *>? = null
+    private var curHasFullScreen: Boolean = false
     private var curPlayingIndex: Int = -1
     private var isStopWhenItemDetached = true
     private var isAutoPlayWhenItemAttached = true
@@ -148,6 +149,10 @@ abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : Rec
             this.arg1 = curPlayingIndex
             this.obj = fromUser
         }, delay)
+    }
+
+    override fun onFullScreenChanged(vc: BaseListVideoController, isFull: Boolean) {
+        this.curHasFullScreen = isFull
     }
 
     final override fun onState(runningName: String, isPlaying: Boolean, desc: String?, controller: ZController<*, *>?) {

@@ -1,5 +1,7 @@
 package com.zj.player.list
 
+import com.zj.player.controller.BaseListVideoController
+
 /**
  * @author ZJJ on 2020.6.16
  * this interface linked the list video view controller [com.zj.player.controller.BaseListVideoController] to adapter.
@@ -9,4 +11,5 @@ internal interface VideoControllerIn {
 
     fun waitingForPlay(curPlayingIndex: Int, delay: Long, fromUser: Boolean = false)
 
+    fun onFullScreenChanged(vc: BaseListVideoController, isFull: Boolean)
 }
