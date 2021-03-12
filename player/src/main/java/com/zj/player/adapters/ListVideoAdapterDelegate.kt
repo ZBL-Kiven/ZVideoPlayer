@@ -32,8 +32,8 @@ import kotlin.math.min
 @Suppress("MemberVisibilityCanBePrivate")
 abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : RecyclerView.ViewHolder>(private val delegateName: String, private val adapter: RecyclerView.Adapter<VH>) : AdapterDelegateIn<T, VH>, VideoControllerIn, InternalPlayStateChangeListener {
 
+    var curHasFullScreen: Boolean = false
     private var controller: ZController<*, *>? = null
-    private var curHasFullScreen: Boolean = false
     private var curPlayingIndex: Int = -1
     private var isStopWhenItemDetached = true
     private var isAutoPlayWhenItemAttached = true
