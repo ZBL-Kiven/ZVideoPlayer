@@ -180,7 +180,14 @@ internal class ZPlayerFullScreenView constructor(context: Context, private val c
         calculateUtils = RectFCalculateUtil(viewRectF, originViewRectF ?: return)
     }
 
-    private fun dismissed() {
+    private fun dismissed(fromAnimEnd: Boolean = false) {
+        scaleAnim?.let {
+            if (!fromAnimEnd && it.isRunning) {
+                val toEnd = !it.isFull
+                it.end()
+                if (toEnd) return
+            }
+        }
         onDisplayChange(false)
         runWithControllerView {
             if (it.parent != null) (it.parent as? ViewGroup)?.removeView(it)
@@ -189,9 +196,6 @@ internal class ZPlayerFullScreenView constructor(context: Context, private val c
         curScaleOffset = 0f
         screenUtil?.release()
         screenUtil = null
-        if (scaleAnim?.isRunning == true) {
-            scaleAnim?.end()
-        }
         scaleAnim?.cancel()
         scaleAnim = null
         calculateUtils = null
@@ -239,7 +243,7 @@ internal class ZPlayerFullScreenView constructor(context: Context, private val c
             override fun onAnimEnd(animation: Animator, isFull: Boolean) {
                 isAnimRun = false
                 originInScreen = null
-                if (!isFull) dismissed()
+                if (!isFull) dismissed(true)
                 else onDisplayChange(true)
             }
         }, false)

@@ -9,7 +9,7 @@ import android.view.animation.AccelerateDecelerateInterpolator
  */
 internal class ZFullValueAnimator(private var listener: FullAnimatorListener?, private val isUseOffset: Boolean = true) : ValueAnimator(), Animator.AnimatorListener, ValueAnimator.AnimatorUpdateListener {
 
-    private var isFull: Boolean = false
+    var isFull: Boolean = false
     private var curDuration: Float = 0.toFloat()
     private var isCancel: Boolean = false
 
