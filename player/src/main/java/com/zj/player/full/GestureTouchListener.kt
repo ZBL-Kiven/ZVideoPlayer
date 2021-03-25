@@ -3,6 +3,7 @@ package com.zj.player.full
 import android.graphics.PointF
 import android.os.Handler
 import android.os.Looper
+import android.os.Message
 import android.view.MotionEvent
 import android.view.View
 import androidx.annotation.FloatRange
@@ -34,7 +35,7 @@ internal abstract class GestureTouchListener(private val intercepted: () -> Bool
     private var handler: Handler? = Handler(Looper.getMainLooper()) {
         if (it.what == 127924) {
             isOnceTap = false
-            onClick()
+            onClick(it.arg1 * 1.0f, it.arg2 * 1.0f)
         }
         return@Handler false
     }
@@ -70,11 +71,15 @@ internal abstract class GestureTouchListener(private val intercepted: () -> Bool
                         if (isOnceTap) {
                             handler?.removeMessages(127924)
                             isOnceTap = false
-                            onDoubleClick()
+                            onDoubleClick(event.x, event.y)
                         } else {
                             isOnceTap = true
                             handler?.removeMessages(127924)
-                            handler?.sendEmptyMessageDelayed(127924, 200)
+                            handler?.sendMessageDelayed(Message.obtain().apply {
+                                this.what = 127924
+                                this.arg1 = event.x.roundToInt()
+                                this.arg2 = event.y.roundToInt()
+                            }, 200)
                         }
                     }
                 } finally {
@@ -181,9 +186,9 @@ internal abstract class GestureTouchListener(private val intercepted: () -> Bool
 
     abstract fun onEventEnd(formTrigDuration: Float, parseAutoScale: Boolean): Boolean
 
-    abstract fun onDoubleClick()
+    abstract fun onDoubleClick(x: Float, y: Float)
 
-    abstract fun onClick()
+    abstract fun onClick(x: Float, y: Float)
 
     /**
      * Called only after the default gesture returns successfully triggered，

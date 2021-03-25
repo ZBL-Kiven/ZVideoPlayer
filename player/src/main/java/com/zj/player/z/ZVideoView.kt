@@ -149,15 +149,15 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
             return fullScreenView?.onEventEnd(formTrigDuration, parseAutoScale) ?: true
         }
 
-        override fun onClick() {
-            if (isPlayable) onRootClick() else onRootDoubleClick()
+        override fun onClick(x: Float, y: Float) {
+            if (isPlayable) onRootClick(x, y) else onRootDoubleClick(x, y)
         }
 
-        override fun onDoubleClick() {
+        override fun onDoubleClick(x: Float, y: Float) {
             if (isPlayable) if (isFullScreen) {
                 onFullScreenViewDoubleClick()
             } else {
-                onRootDoubleClick()
+                onRootDoubleClick(x, y)
             }
         }
 
@@ -578,7 +578,7 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
         } else controller?.playOrResume(path)
     }
 
-    open fun onRootClick() {
+    open fun onRootClick(x: Float, y: Float) {
         if (!isPlayable) {
             ZPlayerLogs.debug("on video root click , cur status is disable play")
             return
@@ -591,7 +591,7 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
         onFullTools(!isFull)
     }
 
-    open fun onRootDoubleClick() {
+    open fun onRootDoubleClick(x: Float, y: Float) {
         if (playAutoFullScreen) return
         log("on root view double click", BehaviorLogsTable.onRootDoubleClick())
         fullScreen?.let { onFullScreenClick(it, false) }
