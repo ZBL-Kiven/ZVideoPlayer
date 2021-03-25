@@ -116,9 +116,9 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
     protected var isLockScreenRotation: Boolean = false
     protected var keepScreenOnWhenPlaying: Boolean = false
     protected var enablePlayAnimation: Boolean = true
-    protected var fullScreenView: ZPlayerFullScreenView? = null
     private var curSpeedIndex = 0
     private var fullScreenTransactionTime = 250
+    private var fullScreenView: ZPlayerFullScreenView? = null
     private var muteDefault: Boolean = false
     private var muteIsUseGlobal: Boolean = false
     protected var playAutoFullScreen = false
@@ -152,7 +152,7 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
 
         override fun onDoubleClick() {
             if (isPlayable) if (isFullScreen) {
-                fullScreenView?.onDoubleClick()
+                onFullScreenViewDoubleClick()
             } else {
                 onRootDoubleClick()
             }
@@ -315,7 +315,7 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
         }
 
         videoOverrideImageView?.setSingleTapListener {
-            fullScreenView?.onDoubleClick()
+            onFullScreenViewDoubleClick()
         }
 
         videoOverrideImageView?.setTouchEnabled(ImageViewTouchEnableIn {
@@ -592,6 +592,10 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
         if (playAutoFullScreen) return
         log("on root view double click", BehaviorLogsTable.onRootDoubleClick())
         fullScreen?.let { onFullScreenClick(it, false) }
+    }
+
+    open fun onFullScreenViewDoubleClick() {
+        fullScreenView?.onDoubleClick()
     }
 
     private fun onFullScreenClick(v: View, fromUser: Boolean, payloads: Map<String, Any?>? = null) {
