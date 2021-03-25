@@ -1033,10 +1033,10 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
 
     open fun onToolsBarChanged(isFullExpand: Boolean, isResetNow: Boolean) {}
 
-    private fun onFocusChanged(dialog: ZPlayerFullScreenView, isMax: Boolean) {
+    private fun onFocusChanged(v: ZPlayerFullScreenView, isMax: Boolean) {
         log("on full max screen $isMax", BehaviorLogsTable.onFullMaxScreen(isMax))
         this@ZVideoView.isFullMaxScreen = isMax
-        if (isMax) lockScreen?.isSelected = dialog.isLockedCurrent()
+        if (isMax) lockScreen?.isSelected = v.isLockedCurrent()
         onFullMaxScreenChanged(isMax)
     }
 

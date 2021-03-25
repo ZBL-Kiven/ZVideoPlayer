@@ -24,6 +24,7 @@ import com.gyf.immersionbar.ImmersionBar
 import com.zj.player.R
 import com.zj.player.anim.ZFullValueAnimator
 import com.zj.player.logs.ZPlayerLogs
+import com.zj.player.z.ZVideoView
 import java.lang.IllegalArgumentException
 import java.lang.ref.WeakReference
 import kotlin.math.max
@@ -273,12 +274,18 @@ internal class ZPlayerFullScreenView constructor(context: Context, private val c
         if (config.isDefaultMaxScreen || !config.fullMaxScreenEnable) return
         contentLayoutView?.let { _ ->
             runWithControllerView {
+                if (!isMaxFull) {
+                    isScreenRotateLocked = config.defaultScreenOrientation != ZVideoView.LOCK_SCREEN_UNSPECIFIED
+                    checkSelfScreenLockAvailable(isScreenRotateLocked)
+                }
                 setContent(it, !isMaxFull, true, isInit = false)
                 config.onFullContentListener?.onFullMaxChanged(this@ZPlayerFullScreenView, isMaxFull)
-                if (isMaxFull) curScreenRotation = when (config.defaultScreenOrientation) {
-                    0 -> RotateOrientation.L0
-                    1 -> RotateOrientation.P0
-                    else -> null
+                if (isMaxFull) {
+                    curScreenRotation = when (config.defaultScreenOrientation) {
+                        0 -> RotateOrientation.L0
+                        1 -> RotateOrientation.P0
+                        else -> null
+                    }
                 }
             }
         }
@@ -515,10 +522,11 @@ internal class ZPlayerFullScreenView constructor(context: Context, private val c
         if (newConfig == null) return
         try {
             val isPortrait = newConfig.screenWidthDp < newConfig.screenHeightDp
+            val isReduce = if (config.defaultScreenOrientation == ZVideoView.LOCK_SCREEN_LANDSCAPE) isPortrait else curScreenRotation?.isLandSpace() != false
             runWithControllerView {
                 val w = _width.roundToInt()
                 val h = _height.roundToInt()
-                val vlp = LayoutParams(if (isPortrait) h else w, if (isPortrait) w else h)
+                val vlp = LayoutParams(if (isReduce) h else w, if (isReduce) w else h)
                 vlp.gravity = Gravity.CENTER
                 it.layoutParams = vlp
             }
