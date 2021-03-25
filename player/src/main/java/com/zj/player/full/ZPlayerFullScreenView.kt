@@ -5,6 +5,8 @@ import android.animation.ValueAnimator
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
+import android.content.pm.ActivityInfo
+import android.content.res.Configuration
 import android.graphics.Color
 import android.graphics.Point
 import android.graphics.PointF
@@ -65,14 +67,15 @@ internal class ZPlayerFullScreenView constructor(context: Context, private val c
             if (field == value && config.getControllerView()?.rotation == value?.degree) return
             field = value
             if (value == null) return
-            if (value != RotateOrientation.P1) {
-                config.getControllerView()?.rotation = value.degree
-                val r = (value == RotateOrientation.L0 || value == RotateOrientation.L1)
-                val w = _width.roundToInt()
-                val h = _height.roundToInt()
-                val vlp = LayoutParams(if (r) h else w, if (r) w else h)
-                vlp.gravity = Gravity.CENTER
-                config.getControllerView()?.layoutParams = vlp
+            if (config.allowReversePortrait || value != RotateOrientation.P1) {
+                (context as? Activity)?.let { act ->
+                    act.requestedOrientation = when (value) {
+                        RotateOrientation.L0 -> ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE
+                        RotateOrientation.L1 -> ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+                        RotateOrientation.P0 -> ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+                        RotateOrientation.P1 -> ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT
+                    }
+                }
             }
         }
 
@@ -96,10 +99,13 @@ internal class ZPlayerFullScreenView constructor(context: Context, private val c
             this.addView(backgroundView, 0)
             setContent(it, isMaxFull)
         }
+        screenUtil = ScreenOrientationListener(WeakReference(context)) {
+            if (!isScreenRotateLocked && isMaxFull) curScreenRotation = it
+        }
     }
 
     private fun setContent(controller: View, isMaxFull: Boolean, isResizeCalculate: Boolean = false, isInit: Boolean = true) {
-        if (!this.isMaxFull && isMaxFull) curScreenRotation = null
+        if (this.isMaxFull && !isMaxFull && curScreenRotation?.isLandSpace() != false) curScreenRotation = RotateOrientation.P0
         this.isMaxFull = isMaxFull
         changeSystemWindowVisibility(true) {
             try {
@@ -139,7 +145,7 @@ internal class ZPlayerFullScreenView constructor(context: Context, private val c
                     }, 100)
                 }
             } finally {
-                if (isResizeCalculate) init(0f)
+                if (isResizeCalculate && !isInit) init(0f, false)
                 if (isInit) {
                     initListeners()
                     showAnim()
@@ -150,8 +156,7 @@ internal class ZPlayerFullScreenView constructor(context: Context, private val c
 
     private fun showAnim() {
         mDecorView?.addView(this, LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT))
-        init()
-        post {
+        init();post {
             if (config.transactionAnimDuration <= 0) {
                 initCalculate()
                 updateContent(0f)
@@ -165,9 +170,9 @@ internal class ZPlayerFullScreenView constructor(context: Context, private val c
         }
     }
 
-    private fun init(contentValue: Float = 1f) {
+    private fun init(contentValue: Float = 1f, updateContent: Boolean = true) {
         initCalculate()
-        updateContent(contentValue)
+        if (isMaxFull || updateContent) updateContent(contentValue)
         screenRotationsChanged(true)
     }
 
@@ -247,9 +252,6 @@ internal class ZPlayerFullScreenView constructor(context: Context, private val c
                 else onDisplayChange(true)
             }
         }, false)
-        screenUtil = ScreenOrientationListener(WeakReference(context)) {
-            if (isMaxFull) curScreenRotation = it
-        }
     }
 
     fun isMaxFull(): Boolean {
@@ -352,6 +354,7 @@ internal class ZPlayerFullScreenView constructor(context: Context, private val c
     }
 
     fun dismiss() {
+        if (curScreenRotation?.isLandSpace() != false) curScreenRotation = RotateOrientation.P0
         screenRotationsChanged(false)
         if (getActivity()?.isFinishing == true) {
             dismissed();mDecorView?.removeView(this)
@@ -468,7 +471,6 @@ internal class ZPlayerFullScreenView constructor(context: Context, private val c
 
     @SuppressLint("SourceLockedOrientationActivity")
     private fun screenRotationsChanged(isRotateEnable: Boolean) {
-        runWithControllerView { it.rotation = 0f }
         if (isRotateEnable) screenUtil?.enable() else {
             screenUtil?.disable();curScreenRotation = null
         }
@@ -506,6 +508,23 @@ internal class ZPlayerFullScreenView constructor(context: Context, private val c
         if (hasFocus) changeSystemWindowVisibility(true)
         checkSelfScreenLockAvailable(isScreenRotateLocked)
         config.onFullContentListener?.onFocusChange(this, isMaxFull)
+    }
+
+    override fun onConfigurationChanged(newConfig: Configuration?) {
+        super.onConfigurationChanged(newConfig)
+        if (newConfig == null) return
+        try {
+            val isPortrait = newConfig.screenWidthDp < newConfig.screenHeightDp
+            runWithControllerView {
+                val w = _width.roundToInt()
+                val h = _height.roundToInt()
+                val vlp = LayoutParams(if (isPortrait) h else w, if (isPortrait) w else h)
+                vlp.gravity = Gravity.CENTER
+                it.layoutParams = vlp
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
 
     private fun checkSelfScreenLockAvailable(newState: Boolean): Boolean {

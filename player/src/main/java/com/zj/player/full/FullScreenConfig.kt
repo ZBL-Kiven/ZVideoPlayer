@@ -1,7 +1,6 @@
 package com.zj.player.full
 
 import android.content.Context
-import android.util.Log
 import android.view.View
 
 internal class FullScreenConfig internal constructor(private var controllerView: View?) {
@@ -11,6 +10,7 @@ internal class FullScreenConfig internal constructor(private var controllerView:
     var isDefaultMaxScreen: Boolean = false; private set
     var translateNavigation: Boolean = false; private set
     var defaultScreenOrientation: Int = -1; private set
+    var allowReversePortrait: Boolean = false; private set
     var onFullScreenListener: FullScreenListener? = null
     var onFullContentListener: FullContentListener? = null
     var transactionAnimDuration: Int = 250; private set
@@ -46,13 +46,17 @@ internal class FullScreenConfig internal constructor(private var controllerView:
         return this
     }
 
+    fun allowReversePortrait(allow: Boolean): FullScreenConfig {
+        this.allowReversePortrait = allow
+        return this
+    }
+
     fun transactionNavigation(translateNavigation: Boolean): FullScreenConfig {
         this.translateNavigation = translateNavigation
         return this
     }
 
     fun getControllerView(): View? {
-        Log.e("------ ", "=====================  $controllerView")
         return controllerView
     }
 

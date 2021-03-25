@@ -22,5 +22,9 @@ internal interface FullScreenListener {
 }
 
 enum class RotateOrientation(val degree: Float) {
-    P0(0f), P1(180f), L0(270f), L1(90f)
+    P0(0f), P1(180f), L0(270f), L1(90f);
+
+    fun isLandSpace(): Boolean {
+        return this == L0 || this == L1
+    }
 }

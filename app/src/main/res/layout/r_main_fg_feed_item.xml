@@ -57,6 +57,7 @@
         android:layout_marginTop="5dp"
         android:background="#eee"
         app:autoFullInterval="3000"
+        app:lockScreenRotation="LANDSCAPE"
         app:autoFullTools="true"
         app:keepScreenOnWhenPlaying="true"
         app:loadingIgnoreTs="1000"

@@ -86,6 +86,8 @@
         </attr>
         <!-- Whether to directly start the big-full screen mode -->
         <attr name="isDefaultMaxScreen" format="boolean" />
+        <!-- Whether to ignore the reverse portrait in the auto-rotating screen -->
+        <attr name="isAllowReversePortrait" format="boolean" />
         <!-- Whether to allow full screen display -->
         <attr name="fullMaxScreenEnable" format="boolean" />
         <!-- Default lock direction -->

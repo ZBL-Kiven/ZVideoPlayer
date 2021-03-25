@@ -61,6 +61,9 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
         private const val dismissFullTools = 7817
         private const val loadingModeDelay = 7716
         private var muteGlobalDefault: Boolean = false
+        const val LOCK_SCREEN_UNSPECIFIED = -1
+        const val LOCK_SCREEN_LANDSCAPE = 0
+        const val LOCK_SCREEN_PORTRAIT = 1
 
         /**
          * After setting this property, all ViewController instances configured with app:useMuteGlobal in xml take effect。
@@ -112,8 +115,6 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
     protected var fullMaxScreenEnable: Boolean = true
     protected var scrollXEnabled: Boolean = true
     protected var qualityEnable = 0
-    protected var lockScreenRotation: Int = -1
-    protected var isLockScreenRotation: Boolean = false
     protected var keepScreenOnWhenPlaying: Boolean = false
     protected var enablePlayAnimation: Boolean = true
     private var curSpeedIndex = 0
@@ -123,7 +124,9 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
     private var muteIsUseGlobal: Boolean = false
     protected var playAutoFullScreen = false
     private var isTransactionNavigation: Boolean = false
+    private var isAllowReversePortrait: Boolean = false
     open val supportedSpeedList = arrayListOf(1.0f, 1.5f, 2f)
+    private var lockScreenRotation: Int = LOCK_SCREEN_UNSPECIFIED
     private var menuView: QualityMenuView? = null
     var isFullScreen = false
         private set(value) {
@@ -195,7 +198,8 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
             fullScreenTransactionTime = ta.getInt(R.styleable.ZVideoView_fullScreenTransactionTime, fullScreenTransactionTime)
             fullMaxScreenEnable = ta.getBoolean(R.styleable.ZVideoView_fullMaxScreenEnable, Constance.fullMaxScreenEnable)
             isDefaultMaxScreen = ta.getBoolean(R.styleable.ZVideoView_isDefaultMaxScreen, Constance.isDefaultMaxScreen)
-            lockScreenRotation = ta.getInt(R.styleable.ZVideoView_lockScreenRotation, -1)
+            isAllowReversePortrait = ta.getBoolean(R.styleable.ZVideoView_isAllowReversePortrait, Constance.isAllowReversePortrait)
+            lockScreenRotation = ta.getInt(R.styleable.ZVideoView_lockScreenRotation, LOCK_SCREEN_UNSPECIFIED)
             scrollXEnabled = ta.getBoolean(R.styleable.ZVideoView_scrollXEnabled, true)
             muteIsUseGlobal = ta.getBoolean(R.styleable.ZVideoView_useMuteGlobal, false)
             muteDefault = ta.getBoolean(R.styleable.ZVideoView_muteDefault, false)
@@ -220,7 +224,6 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
             loadingView = view?.findViewById(R.id.z_player_video_preview_vs_loading)
             seekBar = view?.findViewById(R.id.z_player_video_preview_sb)
             menuView = view?.findViewById(R.id.z_player_video_preview_v_menu)
-            isLockScreenRotation = lockScreenRotation != -1
             isFull = bottomToolsBar?.visibility == View.VISIBLE
             speedView?.text = context.getString(R.string.z_player_str_speed, "1")
             touchListener?.let {
@@ -757,7 +760,6 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
     @CallSuper
     open fun lockScreenRotate(isLock: Boolean): Boolean {
         return if (fullScreenView?.lockScreenRotation(isLock) == true) {
-            isLockScreenRotation = isLock
             lockScreen?.isSelected = isLock
             true
         } else false
@@ -953,7 +955,7 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
                     }
                 }
                 if (fullScreenView == null) fullScreenView = ZPlayerFullScreenView.let { d ->
-                    d.open(root).defaultOrientation(lockScreenRotation).transactionNavigation(isTransactionNavigation).transactionAnimDuration(transaction.transactionTime, transaction.isStartOnly, fullScreenTransactionTime).payLoads(transaction.payloads).let { config ->
+                    d.open(root).defaultOrientation(lockScreenRotation).allowReversePortrait(isAllowReversePortrait).transactionNavigation(isTransactionNavigation).transactionAnimDuration(transaction.transactionTime, transaction.isStartOnly, fullScreenTransactionTime).payLoads(transaction.payloads).let { config ->
                         if (isDefaultMaxScreen) {
                             lockScreen?.visibility = View.VISIBLE
                             qualityView?.visibility = View.VISIBLE
@@ -964,7 +966,7 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
                         config.start(context)
                     }
                 }
-                lockScreenRotate(isLockScreenRotation)
+                lockScreenRotate(lockScreenRotation != LOCK_SCREEN_UNSPECIFIED)
             }
         }
     }

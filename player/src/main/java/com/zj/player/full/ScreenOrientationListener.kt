@@ -25,7 +25,7 @@ internal class ScreenOrientationListener(private var c: WeakReference<Context>?,
             if (isLandLock) return
             isLandLock = true
             isPortLock = false
-        } else if (orientation < 10 || orientation > 350 || orientation in 171..189) {
+        } else if (orientation in 1..10 || orientation > 350 || orientation in 171..189) {
             if (isPortLock) return
             isPortLock = true
             isLandLock = false
@@ -40,7 +40,7 @@ internal class ScreenOrientationListener(private var c: WeakReference<Context>?,
             in 171..189 -> {
                 lastOrientation = RotateOrientation.P1
             }
-            in 350..360, in 0..10 -> {
+            in 350..360, in 1..10 -> {
                 lastOrientation = RotateOrientation.P0
             }
         }
