@@ -116,9 +116,9 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
     protected var isLockScreenRotation: Boolean = false
     protected var keepScreenOnWhenPlaying: Boolean = false
     protected var enablePlayAnimation: Boolean = true
+    protected var fullScreenView: ZPlayerFullScreenView? = null
     private var curSpeedIndex = 0
     private var fullScreenTransactionTime = 250
-    private var fullScreenView: ZPlayerFullScreenView? = null
     private var muteDefault: Boolean = false
     private var muteIsUseGlobal: Boolean = false
     protected var playAutoFullScreen = false
