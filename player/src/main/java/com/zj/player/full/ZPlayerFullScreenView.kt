@@ -98,7 +98,9 @@ internal class ZPlayerFullScreenView constructor(context: Context, private val c
             backgroundView?.alpha = 0f
             backgroundView?.layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
             this.addView(backgroundView, 0)
-            setContent(it, isMaxFull)
+            config.preToFullMaxChange {
+                setContent(it, isMaxFull)
+            }
         }
         screenUtil = ScreenOrientationListener(WeakReference(context)) {
             if (!isScreenRotateLocked && isMaxFull) curScreenRotation = it
@@ -194,21 +196,23 @@ internal class ZPlayerFullScreenView constructor(context: Context, private val c
                 if (toEnd) return
             }
         }
-        onDisplayChange(false)
-        runWithControllerView {
-            if (it.parent != null) (it.parent as? ViewGroup)?.removeView(it)
-            vp?.addView(it, vlp)
+        config.preToDismiss {
+            onDisplayChange(false)
+            runWithControllerView {
+                if (it.parent != null) (it.parent as? ViewGroup)?.removeView(it)
+                vp?.addView(it, vlp)
+            }
+            curScaleOffset = 0f
+            screenUtil?.release()
+            screenUtil = null
+            scaleAnim?.cancel()
+            scaleAnim = null
+            calculateUtils = null
+            isDismissing = false
+            backgroundView = null
+            config.clear()
+            mDecorView?.removeView(this)
         }
-        curScaleOffset = 0f
-        screenUtil?.release()
-        screenUtil = null
-        scaleAnim?.cancel()
-        scaleAnim = null
-        calculateUtils = null
-        isDismissing = false
-        backgroundView = null
-        config.clear()
-        mDecorView?.removeView(this)
     }
 
     private fun startScaleAnim(isFull: Boolean) {
@@ -272,19 +276,21 @@ internal class ZPlayerFullScreenView constructor(context: Context, private val c
 
     fun onDoubleClick() {
         if (config.isDefaultMaxScreen || !config.fullMaxScreenEnable) return
-        contentLayoutView?.let { _ ->
-            runWithControllerView {
-                if (!isMaxFull) {
-                    isScreenRotateLocked = config.defaultScreenOrientation != ZVideoView.LOCK_SCREEN_UNSPECIFIED
-                    checkSelfScreenLockAvailable(isScreenRotateLocked)
-                }
-                setContent(it, !isMaxFull, true, isInit = false)
-                config.onFullContentListener?.onFullMaxChanged(this@ZPlayerFullScreenView, isMaxFull)
-                if (isMaxFull) {
-                    curScreenRotation = when (config.defaultScreenOrientation) {
-                        0 -> RotateOrientation.L0
-                        1 -> RotateOrientation.P0
-                        else -> null
+        config.preToFullMaxChange {
+            contentLayoutView?.let { _ ->
+                runWithControllerView {
+                    if (!isMaxFull) {
+                        isScreenRotateLocked = config.defaultScreenOrientation != ZVideoView.LOCK_SCREEN_UNSPECIFIED
+                        checkSelfScreenLockAvailable(isScreenRotateLocked)
+                    }
+                    setContent(it, !isMaxFull, true, isInit = false)
+                    config.onFullContentListener?.onFullMaxChanged(this@ZPlayerFullScreenView, isMaxFull)
+                    if (isMaxFull) {
+                        curScreenRotation = when (config.defaultScreenOrientation) {
+                            0 -> RotateOrientation.L0
+                            1 -> RotateOrientation.P0
+                            else -> null
+                        }
                     }
                 }
             }
@@ -340,9 +346,11 @@ internal class ZPlayerFullScreenView constructor(context: Context, private val c
             onTracked(false, isEnd = true, formTrigDuration = 0f)
             isDismissing = false
         } else {
-            isAnimRun = true
-            changeSystemWindowVisibility(false)
-            startScaleAnim(false)
+            config.preToDismiss {
+                isAnimRun = true
+                changeSystemWindowVisibility(false)
+                startScaleAnim(false)
+            }
         }
         return isScaleAuto
     }

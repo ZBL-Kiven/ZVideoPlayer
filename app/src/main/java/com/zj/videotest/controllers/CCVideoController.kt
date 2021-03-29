@@ -32,6 +32,14 @@ class CCVideoController @JvmOverloads constructor(c: Context, attr: AttributeSet
         }
     }
 
+    override fun onPreToDismissFullScreen(agree: () -> Unit) {
+        postDelayed({ agree.invoke() }, 3000)
+    }
+
+    override fun onPreToFullMaxScreen(agree: () -> Unit) {
+        postDelayed({ agree.invoke() }, 3000)
+    }
+
     override fun completing(path: String, isRegulate: Boolean) {
         isInterruptPlayBtnAnim = true
         showOrHidePlayBtn(false, withState = false)

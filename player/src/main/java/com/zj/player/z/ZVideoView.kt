@@ -765,6 +765,24 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
         } else false
     }
 
+    /**
+     * If the event is consumed, return true, otherwise false
+     * */
+    open fun onFullKeyEvent(code: Int, event: KeyEvent): Boolean {
+        return false
+    }
+
+    open fun onToolsBarChanged(isFullExpand: Boolean, isResetNow: Boolean) {}
+
+    open fun onPreToDismissFullScreen(agree: () -> Unit) {
+        agree.invoke()
+    }
+
+    open fun onPreToFullMaxScreen(agree: () -> Unit) {
+        agree.invoke()
+    }
+
+
     protected fun getDuration(mediaDuration: Long): String {
         val duration = mediaDuration / 1000
         val minute = duration / 60
@@ -955,7 +973,7 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
                     }
                 }
                 if (fullScreenView == null) fullScreenView = ZPlayerFullScreenView.let { d ->
-                    d.open(root).defaultOrientation(lockScreenRotation).allowReversePortrait(isAllowReversePortrait).transactionNavigation(isTransactionNavigation).transactionAnimDuration(transaction.transactionTime, transaction.isStartOnly, fullScreenTransactionTime).payLoads(transaction.payloads).let { config ->
+                    d.open(root).defaultOrientation(lockScreenRotation).allowReversePortrait(isAllowReversePortrait).transactionNavigation(isTransactionNavigation).transactionAnimDuration(transaction.transactionTime, transaction.isStartOnly, fullScreenTransactionTime).setPreDismissInterceptor { onPreToDismissFullScreen(it) }.setPreFullMaxChangeInterceptor { onPreToFullMaxScreen(it) }.payLoads(transaction.payloads).let { config ->
                         if (isDefaultMaxScreen) {
                             lockScreen?.visibility = View.VISIBLE
                             qualityView?.visibility = View.VISIBLE
@@ -1023,15 +1041,6 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
         }
         onFullScreenChanged(isShow, payloads)
     }
-
-    /**
-     * If the event is consumed, return true, otherwise false
-     * */
-    open fun onFullKeyEvent(code: Int, event: KeyEvent): Boolean {
-        return false
-    }
-
-    open fun onToolsBarChanged(isFullExpand: Boolean, isResetNow: Boolean) {}
 
     private fun onFocusChanged(v: ZPlayerFullScreenView, isMax: Boolean) {
         log("on full max screen $isMax", BehaviorLogsTable.onFullMaxScreen(isMax))

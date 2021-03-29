@@ -17,6 +17,16 @@ internal class FullScreenConfig internal constructor(private var controllerView:
     var isAnimDurationOnlyStart: Boolean = true; private set
     var payloads: Map<String, Any?>? = null; private set
     private var defaultTransactionAnimDuration: Int = 250
+    private var preToDismissAgree: ((lambda: () -> Unit) -> Unit)? = null
+    private var preToFullMaxChangeAgree: ((lambda: () -> Unit) -> Unit)? = null
+
+    fun preToDismiss(agree: () -> Unit) {
+        preToDismissAgree?.invoke(agree) ?: agree.invoke()
+    }
+
+    fun preToFullMaxChange(agree: () -> Unit) {
+        preToFullMaxChangeAgree?.invoke(agree) ?: agree.invoke()
+    }
 
     fun transactionAnimDuration(duration: Int, isStart: Boolean, default: Int): FullScreenConfig {
         this.transactionAnimDuration = duration.coerceAtLeast(0)
@@ -58,6 +68,16 @@ internal class FullScreenConfig internal constructor(private var controllerView:
 
     fun getControllerView(): View? {
         return controllerView
+    }
+
+    fun setPreDismissInterceptor(l: ((lambda: () -> Unit) -> Unit)?): FullScreenConfig {
+        this.preToDismissAgree = l
+        return this
+    }
+
+    fun setPreFullMaxChangeInterceptor(l: ((lambda: () -> Unit) -> Unit)?): FullScreenConfig {
+        this.preToFullMaxChangeAgree = l
+        return this
     }
 
     fun payLoads(payloads: Map<String, Any?>?): FullScreenConfig {
