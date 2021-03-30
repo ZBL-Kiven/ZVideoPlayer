@@ -50,6 +50,7 @@ object Constance {
     internal var qualityEnable = 2
     internal var speedIconEnable = 2
     internal var fullScreenEnAble = 2
+    internal var lockRotationEnable = 2
     internal var secondarySeekBarEnable = 1
     internal var isDefaultMaxScreen = false
     internal var isAllowReversePortrait = false

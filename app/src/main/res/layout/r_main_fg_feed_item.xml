@@ -58,6 +58,7 @@
         android:background="#eee"
         app:autoFullInterval="3000"
         app:autoFullTools="true"
+        app:lockScreenRotation="LANDSCAPE"
         app:keepScreenOnWhenPlaying="true"
         app:loadingIgnoreTs="1000"
         app:scrollXEnabled="false" />
