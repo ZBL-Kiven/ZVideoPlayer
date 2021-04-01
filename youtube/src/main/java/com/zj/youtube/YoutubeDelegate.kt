@@ -16,8 +16,6 @@ import com.zj.youtube.proctol.YouTubePlayerListener
 import com.zj.youtube.utils.PendingLoadTask
 import com.zj.youtube.utils.Utils
 import java.lang.Exception
-import kotlin.math.max
-import kotlin.math.min
 
 @Suppress("MemberVisibilityCanBePrivate")
 abstract class YoutubeDelegate(debugAble: Boolean) : YouTubePlayerListener {
@@ -47,13 +45,13 @@ abstract class YoutubeDelegate(debugAble: Boolean) : YouTubePlayerListener {
 
     abstract fun onSeekChanged(fromUser: Boolean)
 
-    abstract fun onSeekParsed(progress: Int, fromUser: Boolean)
+    abstract fun onSeekParsed(progress: Long, fromUser: Boolean)
 
     abstract fun getWebView(): WebView?
 
     private val mainThreadHandler: Handler = Handler(Looper.getMainLooper()) {
         when (it.what) {
-            HANDLE_SEEK -> onSeekParsed(it.arg1, it.arg2 == 0)
+            HANDLE_SEEK -> onSeekParsed(it.obj as Long, it.arg2 == 0)
         }
         return@Handler false
     }
@@ -161,20 +159,19 @@ abstract class YoutubeDelegate(debugAble: Boolean) : YouTubePlayerListener {
         curPath = ""
     }
 
-    fun seekTo(progress: Int, fromUser: Boolean) {
+    fun seekTo(progress: Long, fromUser: Boolean) {
         mainThreadHandler.removeMessages(HANDLE_SEEK)
         mainThreadHandler.sendMessageDelayed(Message.obtain().apply {
             what = HANDLE_SEEK
-            arg1 = progress
+            obj = progress
             arg2 = if (fromUser) 0 else 1
         }, 200)
     }
 
-    fun seekNow(progress: Int, fromUser: Boolean) {
-        val seekProgress = (max(0f, min(100, progress) / 100f * max(totalDuration, 1) - 1) / 1000f).toLong()
-        curPlayingDuration = seekProgress
+    fun seekNow(progress: Long, fromUser: Boolean) {
+        curPlayingDuration = progress
         runWithWebView {
-            if (isPageReady) it.loadUrl("javascript:seekTo($seekProgress,$fromUser)")
+            if (isPageReady) it.loadUrl("javascript:seekTo($progress,$fromUser)")
             onSeekChanged(fromUser)
         }
     }

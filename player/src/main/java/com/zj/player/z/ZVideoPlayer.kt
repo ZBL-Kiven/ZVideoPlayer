@@ -85,7 +85,7 @@ open class ZVideoPlayer(var config: VideoConfig = VideoConfig.create()) : BasePl
 
     private var handler: Handler? = Handler(Looper.getMainLooper()) {
         when (it.what) {
-            HANDLE_SEEK -> seekNow(it.arg1, duration, it.arg2 == 0)
+            HANDLE_SEEK -> seekNow(it.obj as Long, duration, it.arg2 == 0)
             HANDLE_PROGRESS -> updateProgress()
             HANDLE_STATE -> synchronized(curState) {
                 curState = it.obj as VideoState
@@ -247,15 +247,14 @@ open class ZVideoPlayer(var config: VideoConfig = VideoConfig.create()) : BasePl
         }
     }
 
-    private fun seekNow(progress: Int, duration: Long, fromUser: Boolean) {
-        val seekProgress = (max(0f, min(100, progress) / 100f * max(duration, 1) - 1)).toLong()
+    private fun seekNow(progress: Long, duration: Long, fromUser: Boolean) {
         runWithPlayer { p ->
-            p.seekTo(seekProgress)
+            val seekProgress = (max(0f, min(100, progress) / 100f * max(duration, 1) - 1)).toInt()
+            p.seekTo(progress)
             if (fromUser) {
-                val bf = ((player?.bufferedPosition ?: 0L) * 1.0f / max(1, duration) * 100 + 0.5f).toInt()
-                controller?.onSeekChanged(progress, bf, true, seekProgress, duration)
+                controller?.onSeekChanged(seekProgress, player?.bufferedPosition ?: 0L, true, progress, duration)
             }
-            log("video seek to $seekProgress", BehaviorLogsTable.seekTo(currentCallId(), seekProgress))
+            log("video seek to $progress", BehaviorLogsTable.seekTo(currentCallId(), progress))
         }
     }
 
@@ -290,11 +289,9 @@ open class ZVideoPlayer(var config: VideoConfig = VideoConfig.create()) : BasePl
             val bufferedPosition = player?.bufferedPosition ?: 0L
             if (curDuration > 0) {
                 val interval = curDuration * 1.0f / max(1, duration)
-                val buffered = bufferedPosition * 1.0f / max(1, duration)
                 val curSeekProgress = (interval * 100 + 0.5f).toInt()
-                val curBufferProgress = (buffered * 100 + 0.5f).toInt()
                 _curLookedProgress = curSeekProgress
-                controller?.onSeekChanged(min(100, curSeekProgress), curBufferProgress, false, curDuration, duration)
+                controller?.onSeekChanged(curSeekProgress, bufferedPosition, false, curDuration, duration)
                 if (interval >= 0.99f) {
                     if (curState != VideoState.COMPLETING) setPlayerState(VideoState.COMPLETING)
                 }
@@ -430,14 +427,14 @@ open class ZVideoPlayer(var config: VideoConfig = VideoConfig.create()) : BasePl
         }
     }
 
-    override fun seekTo(progress: Int, fromUser: Boolean) {
+    override fun seekTo(progress: Long, fromUser: Boolean) {
         if (curState != VideoState.PAUSE && fromUser) {
             setPlayerState(VideoState.PAUSE.setObj(true))
         }
         handler?.removeMessages(HANDLE_SEEK)
         handler?.sendMessageDelayed(Message.obtain().apply {
             what = HANDLE_SEEK
-            arg1 = progress
+            obj = progress
             arg2 = if (fromUser) 0 else 1
         }, 200)
     }

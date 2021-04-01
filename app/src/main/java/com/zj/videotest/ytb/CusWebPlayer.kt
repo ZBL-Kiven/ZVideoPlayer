@@ -69,7 +69,7 @@ class CusWebPlayer : BasePlayer<CusWebRender> {
         render?.stop(withNotify, isRegulate)
     }
 
-    override fun seekTo(progress: Int, fromUser: Boolean) {
+    override fun seekTo(progress: Long, fromUser: Boolean) {
         render?.seekTo(progress, fromUser)
     }
 

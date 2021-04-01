@@ -85,7 +85,8 @@ class YtbContentChecker(context: ComponentActivity, private val path: String, ti
         } ?: InflateInfo(null, 0, ViewGroup.LayoutParams(1, 1))
     }
 
-    override fun onSeekChanged(p0: Int, p1: Int, p2: Boolean, p3: Long, p4: Long) {
+    override fun onSeekChanged(seek: Int, buffered: Long, fromUser: Boolean, played: Long, videoSize: Long) {
+
     }
 
     override fun onSeekingLoading(p0: String?) {

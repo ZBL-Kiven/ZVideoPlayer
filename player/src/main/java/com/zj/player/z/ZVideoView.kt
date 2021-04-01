@@ -44,6 +44,7 @@ import com.zj.player.view.VideoRootView
 import java.lang.ref.WeakReference
 import kotlin.math.abs
 import kotlin.math.max
+import kotlin.math.min
 
 /**
  * @author ZJJ on 2020.6.16
@@ -117,12 +118,15 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
     protected var qualityEnable = 0
     protected var keepScreenOnWhenPlaying: Boolean = false
     protected var enablePlayAnimation: Boolean = true
+    protected var playAutoFullScreen = false
+    protected var videoTotalTime: Long = 0L
+    protected var curPlayingTime: Long = 0L
+    protected var curBufferedTime: Long = 0L
     private var curSpeedIndex = 0
     private var fullScreenTransactionTime = 250
     private var fullScreenView: ZPlayerFullScreenView? = null
     private var muteDefault: Boolean = false
     private var muteIsUseGlobal: Boolean = false
-    protected var playAutoFullScreen = false
     private var isTransactionNavigation: Boolean = false
     private var isAllowReversePortrait: Boolean = false
     open val supportedSpeedList = arrayListOf(1.0f, 1.5f, 2f)
@@ -351,8 +355,9 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
         seekBarSmall?.setOnTouchListener(null)
         seekBar?.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(p0: SeekBar?, p1: Int, p2: Boolean) {
+                val seekProgress = (max(0f, min(100, p0?.progress ?: seekBar?.progress ?: 0) / 100f * max(videoTotalTime, 1) - 1)).toLong()
                 if (isTickingSeekBarFromUser && p2) {
-                    controller?.seekTo(p0?.progress ?: 0, true)
+                    controller?.seekTo(seekProgress, true)
                     if (autoFullTools) mHandler.removeMessages(dismissFullTools)
                 }
             }
@@ -403,6 +408,7 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
 
     override fun onPrepare(path: String, videoSize: Long, isRegulate: Boolean) {
         seekBar?.isEnabled = true
+        this.videoTotalTime = videoSize
         tvEnd?.text = getDuration(videoSize)
         if (muteIsUseGlobal) {
             if (muteView?.isSelected != muteGlobalDefault) muteView?.isSelected = muteGlobalDefault;initVolume(muteGlobalDefault)
@@ -500,11 +506,14 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
         onSeekChanged(0, 0, false, 0, 0)
     }
 
-    override fun onSeekChanged(seek: Int, buffered: Int, fromUser: Boolean, played: Long, videoSize: Long) {
+    override fun onSeekChanged(seek: Int, buffered: Long, fromUser: Boolean, played: Long, videoSize: Long) {
         if (isTickingSeekBarFromUser) return
         if (!fromUser) {
+            val bf = (buffered * 1.0f / max(1, videoTotalTime) * 100 + 0.5f).toInt()
+            if (!fromUser) curPlayingTime = played
+            curBufferedTime = buffered
             seekBar?.progress = seek
-            seekBar?.secondaryProgress = buffered
+            seekBar?.secondaryProgress = bf
             seekBarSmall?.progress = seek
             onLoadingEvent(LoadingMode.None, true)
         }
@@ -605,6 +614,7 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
     }
 
     open fun onFullScreenViewDoubleClick(x: Float, y: Float) {
+        log("on full screen view double click", BehaviorLogsTable.onRootDoubleClick())
         fullScreenView?.onDoubleClick()
     }
 
@@ -1025,6 +1035,9 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
         seekBar?.isEnabled = false
         isInterruptPlayBtnAnim = true
         seekBarSmall?.visibility = View.GONE
+        videoTotalTime = 0L
+        curPlayingTime = 0L
+        curBufferedTime = 0L
         onSeekChanged(0, 0, false, 0, 0)
         if (isRegulate) showOrHidePlayBtn(isShowPlayBtn, withState = false)
         full(false, isSetNow = isNow)

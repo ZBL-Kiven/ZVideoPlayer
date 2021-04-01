@@ -24,7 +24,7 @@ class CusWebRender(ctx: Context) : BaseRender(ctx) {
     internal var ytbDelegate = object : YoutubeDelegate(true) {
 
         override fun onSeekChanged(fromUser: Boolean) {
-            val buffering = (curBuffering * 100.0f).toInt()
+            val buffering = (curBuffering * totalDuration).toLong()
             val seek = (curPlayingDuration * 1.0f / max(1, totalDuration) * 100.0f + 0.5f).toInt()
             notifyTo { this.onSeekChanged(seek, buffering, fromUser, curPlayingDuration, totalDuration) }
         }
@@ -33,7 +33,7 @@ class CusWebRender(ctx: Context) : BaseRender(ctx) {
             return this@CusWebRender.getWebView()
         }
 
-        override fun onSeekParsed(progress: Int, fromUser: Boolean) {
+        override fun onSeekParsed(progress: Long, fromUser: Boolean) {
             this@CusWebRender.onSeekParsed(progress, fromUser)
         }
 
@@ -160,14 +160,14 @@ class CusWebRender(ctx: Context) : BaseRender(ctx) {
         if (withNotify) notifyTo { onStop(withNotify, ytbDelegate.curPath, isRegulate) }
     }
 
-    fun seekTo(progress: Int, fromUser: Boolean) {
+    fun seekTo(progress: Long, fromUser: Boolean) {
         if (fromUser) {
             ytbDelegate.pause()
         }
         ytbDelegate.seekTo(progress, fromUser)
     }
 
-    private fun onSeekParsed(progress: Int, fromUser: Boolean) {
+    private fun onSeekParsed(progress: Long, fromUser: Boolean) {
         ytbDelegate.seekNow(progress, fromUser)
     }
 

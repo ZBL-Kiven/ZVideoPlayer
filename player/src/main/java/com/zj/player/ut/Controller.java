@@ -39,7 +39,7 @@ public interface Controller {
 
     void onCompleted(String path, boolean isRegulate);
 
-    void onSeekChanged(int seek, int buffered, boolean fromUser, long played, long videoSize);
+    void onSeekChanged(int seek, long buffered, boolean fromUser, long played, long videoSize);
 
     void onSeekingLoading(String path);
 

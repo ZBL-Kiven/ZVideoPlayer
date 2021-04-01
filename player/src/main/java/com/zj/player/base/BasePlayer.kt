@@ -81,7 +81,7 @@ interface BasePlayer<R : BaseRender> {
     /**
      * Retrieve the specified location
      * */
-    fun seekTo(progress: Int, fromUser: Boolean)
+    fun seekTo(progress: Long, fromUser: Boolean)
 
     /**
      * Retrieve the specified location
