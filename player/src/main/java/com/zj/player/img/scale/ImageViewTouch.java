@@ -226,7 +226,7 @@ public class ImageViewTouch extends ImageViewTouchBase {
         @Override
         public boolean onSingleTapConfirmed(MotionEvent e) {
             if (null != mSingleTapListener) {
-                mSingleTapListener.onSingleTapConfirmed();
+                mSingleTapListener.onSingleTapConfirmed(e.getX(), e.getY());
             }
             return ImageViewTouch.this.onSingleTapConfirmed(e);
         }
@@ -324,6 +324,6 @@ public class ImageViewTouch extends ImageViewTouchBase {
 
     public interface OnImageViewTouchSingleTapListener {
 
-        void onSingleTapConfirmed();
+        void onSingleTapConfirmed(float x, float y);
     }
 }

@@ -62,10 +62,6 @@ internal class ZPlayerFullScreenView constructor(context: Context, private val c
     private var realWindowSize = Point()
     private var screenUtil: ScreenOrientationListener? = null
     private var isScreenRotateLocked: Boolean = false
-    private var mHandler = Handler(Looper.getMainLooper()) {
-
-        return@Handler false
-    }
 
     private var curScreenRotation: RotateOrientation? = null
         set(value) {
@@ -220,7 +216,6 @@ internal class ZPlayerFullScreenView constructor(context: Context, private val c
     }
 
     private fun startScaleAnim(isFull: Boolean) {
-        if (!isFull) mHandler.removeCallbacksAndMessages(null)
         if (scaleAnim?.isRunning == true) scaleAnim?.end()
         scaleAnim?.duration = (config.transactionAnimDuration.coerceAtLeast(0)).toLong()
         scaleAnim?.start(isFull)
@@ -533,22 +528,19 @@ internal class ZPlayerFullScreenView constructor(context: Context, private val c
     override fun onConfigurationChanged(newConfig: Configuration?) {
         super.onConfigurationChanged(newConfig)
         if (newConfig == null) return
-        mHandler.removeCallbacksAndMessages(null)
-        mHandler.postDelayed({
-            try {
-                val isPortrait = newConfig.screenWidthDp < newConfig.screenHeightDp
-                val isReduce = if (config.defaultScreenOrientation == ZVideoView.LOCK_SCREEN_LANDSCAPE) isPortrait else curScreenRotation?.isLandSpace() != false
-                runWithControllerView {
-                    val w = _width.roundToInt()
-                    val h = _height.roundToInt()
-                    val vlp = LayoutParams(if (isReduce) h else w, if (isReduce) w else h)
-                    vlp.gravity = Gravity.CENTER
-                    it.layoutParams = vlp
-                }
-            } catch (e: Exception) {
-                e.printStackTrace()
+        try {
+            val isPortrait = newConfig.screenWidthDp < newConfig.screenHeightDp
+            val isReduce = if (config.defaultScreenOrientation == ZVideoView.LOCK_SCREEN_LANDSCAPE) isPortrait else curScreenRotation?.isLandSpace() != false
+            runWithControllerView {
+                val w = _width.roundToInt()
+                val h = _height.roundToInt()
+                val vlp = LayoutParams(if (isReduce) h else w, if (isReduce) w else h)
+                vlp.gravity = Gravity.CENTER
+                it.layoutParams = vlp
             }
-        }, 100)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
 
     private fun checkSelfScreenLockAvailable(newState: Boolean): Boolean {

@@ -155,7 +155,7 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
 
         override fun onDoubleClick(x: Float, y: Float) {
             if (isPlayable) if (isFullScreen) {
-                onFullScreenViewDoubleClick()
+                onFullScreenViewDoubleClick(x, y)
             } else {
                 onRootDoubleClick(x, y)
             }
@@ -216,7 +216,7 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
             fullScreen = getViewByDefaultConfig(R.id.z_player_video_preview_iv_full_screen, fullScreenEnable)
             seekBarSmall = getViewByDefaultConfig(R.id.z_player_video_preview_sb_small, secondarySeekBarEnable)
             bottomToolsBar = getViewByDefaultConfig(R.id.z_player_video_preview_tools_bar, defaultControllerVisibility)
-            lockScreen = getViewByDefaultConfig(R.id.z_player_video_preview_iv_lock_screen,lockRotationEnable)
+            lockScreen = getViewByDefaultConfig(R.id.z_player_video_preview_iv_lock_screen, lockRotationEnable)
             tvStart = view?.findViewById(R.id.z_player_video_preview_tv_start)
             tvEnd = view?.findViewById(R.id.z_player_video_preview_tv_end)
             topToolsBar = view?.findViewById(R.id.z_player_video_preview_top_bar)
@@ -260,10 +260,16 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
                 it.setDrawableSize(loadingIconWidth, loadingIconHeight, failIconWidth, failIconHeight)
             }
         } catch (e: Exception) {
-            if (e is RuntimeException) throw e
-            else e.printStackTrace()
+            log("teh attributeSet for ${this::class.java.simpleName} has some problem , with error: ${e.message}")
+            if (e !is RuntimeException) e.printStackTrace()
         } finally {
             ta.recycle()
+        }
+        try {
+            (context as? Activity)?.window?.setFlags(WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED, WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED)
+        } catch (e: Exception) {
+            log("hardware open failed , Player rendering may be affected.\nFor example, the rendering engine used by Render is WebView or Surface-based MediaPlayer. \nYou can add <activity android:hardwareAccelerated=\"true\"> in the Manifest to try to fix it")
+            e.printStackTrace()
         }
     }
 
@@ -318,8 +324,8 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
             onLockScreenClick(it)
         }
 
-        videoOverrideImageView?.setSingleTapListener {
-            onFullScreenViewDoubleClick()
+        videoOverrideImageView?.setSingleTapListener { x, y ->
+            onFullScreenViewDoubleClick(x, y)
         }
 
         videoOverrideImageView?.setTouchEnabled(ImageViewTouchEnableIn {
@@ -549,7 +555,7 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
 
     open fun onFullScreenChanged(isFull: Boolean, payloads: Map<String, Any?>?) {}
 
-    open fun onFullMaxScreenChanged(isFull: Boolean) {}
+    open fun onFullMaxScreenChanged(isFull: Boolean, fromFocusChange: Boolean) {}
 
     open fun onTrack(playAble: Boolean, start: Boolean, end: Boolean, formTrigDuration: Float) {}
 
@@ -598,7 +604,7 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
         fullScreen?.let { onFullScreenClick(it, false) }
     }
 
-    open fun onFullScreenViewDoubleClick() {
+    open fun onFullScreenViewDoubleClick(x: Float, y: Float) {
         fullScreenView?.onDoubleClick()
     }
 
@@ -919,7 +925,7 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
         }
 
         override fun onFocusChange(dialog: ZPlayerFullScreenView, isMax: Boolean) {
-            onFocusChanged(dialog, isMax)
+            this@ZVideoView.onFocusChanged(dialog, isMax, false)
         }
 
         override fun onTrack(isStart: Boolean, isEnd: Boolean, formTrigDuration: Float) {
@@ -944,11 +950,11 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
         override fun onFullMaxChanged(dialog: ZPlayerFullScreenView, isMax: Boolean) {
             lockScreen?.visibility = if (isPlayable && isMax) View.VISIBLE else GONE
             qualityView?.visibility = if (isPlayable && isMax) View.VISIBLE else GONE
-            onFocusChanged(dialog, isMax)
+            this@ZVideoView.onFocusChanged(dialog, isMax, false)
         }
 
         override fun onFocusChange(dialog: ZPlayerFullScreenView, isMax: Boolean) {
-            onFocusChanged(dialog, isMax)
+            this@ZVideoView.onFocusChanged(dialog, isMax, true)
         }
 
         override fun onTrack(isStart: Boolean, isEnd: Boolean, formTrigDuration: Float) {
@@ -1043,11 +1049,11 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
         onFullScreenChanged(isShow, payloads)
     }
 
-    private fun onFocusChanged(v: ZPlayerFullScreenView, isMax: Boolean) {
+    private fun onFocusChanged(v: ZPlayerFullScreenView, isMax: Boolean, fromFocusChange: Boolean) {
         log("on full max screen $isMax", BehaviorLogsTable.onFullMaxScreen(isMax))
         this@ZVideoView.isFullMaxScreen = isMax
         if (isMax) lockScreen?.isSelected = v.isLockedCurrent()
-        onFullMaxScreenChanged(isMax)
+        onFullMaxScreenChanged(isMax, fromFocusChange)
     }
 
     protected fun setMuteIsGlobal(isGlobal: Boolean) {
