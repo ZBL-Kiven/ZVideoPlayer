@@ -508,8 +508,9 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
 
     override fun onSeekChanged(seek: Int, buffered: Long, fromUser: Boolean, played: Long, videoSize: Long) {
         if (isTickingSeekBarFromUser) return
+        this.videoTotalTime = videoSize
         if (!fromUser) {
-            val bf = (buffered * 1.0f / max(1, videoTotalTime) * 100 + 0.5f).toInt()
+            val bf = (buffered * 1.0f / max(1, videoSize) * 100 + 0.5f).toInt()
             if (!fromUser) curPlayingTime = played
             curBufferedTime = buffered
             seekBar?.progress = seek

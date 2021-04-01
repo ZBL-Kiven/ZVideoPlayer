@@ -169,9 +169,9 @@ abstract class YoutubeDelegate(debugAble: Boolean) : YouTubePlayerListener {
     }
 
     fun seekNow(progress: Long, fromUser: Boolean) {
-        curPlayingDuration = progress
+        curPlayingDuration = progress / 1000L
         runWithWebView {
-            if (isPageReady) it.loadUrl("javascript:seekTo($progress,$fromUser)")
+            if (isPageReady) it.loadUrl("javascript:seekTo($curPlayingDuration,$fromUser)")
             onSeekChanged(fromUser)
         }
     }
