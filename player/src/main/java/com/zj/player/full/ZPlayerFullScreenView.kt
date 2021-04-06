@@ -140,6 +140,10 @@ internal class ZPlayerFullScreenView constructor(context: Context, private val c
                     config.onFullContentListener?.onContentLayoutInflated(it)
                 }
             } finally {
+                if (isInit) {
+                    initListeners()
+                    showAnim()
+                }
                 postDelayed({
                     if (isResizeCalculate && !isInit) init(0f, false)
                     try {
@@ -149,10 +153,6 @@ internal class ZPlayerFullScreenView constructor(context: Context, private val c
                         }
                     } catch (e: Exception) {
                         e.printStackTrace()
-                    }
-                    if (isInit) {
-                        initListeners()
-                        showAnim()
                     }
                 }, 100)
             }

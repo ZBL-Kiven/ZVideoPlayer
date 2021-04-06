@@ -985,11 +985,6 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
                 qualityView?.visibility = GONE
                 fullScreenView?.dismiss()
             } else {
-                if (!isDefaultMaxScreen) (context as? Activity)?.let {
-                    if (it.requestedOrientation != ActivityInfo.SCREEN_ORIENTATION_PORTRAIT) {
-                        it.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
-                    }
-                }
                 if (fullScreenView == null) fullScreenView = ZPlayerFullScreenView.let { d ->
                     d.open(root).defaultOrientation(lockScreenRotation).allowReversePortrait(isAllowReversePortrait).transactionNavigation(isTransactionNavigation).transactionAnimDuration(transaction.transactionTime, transaction.isStartOnly, fullScreenTransactionTime).setPreDismissInterceptor { onPreToDismissFullScreen(it) }.setPreFullMaxChangeInterceptor { onPreToFullMaxScreen(it) }.payLoads(transaction.payloads).let { config ->
                         if (isDefaultMaxScreen) {
