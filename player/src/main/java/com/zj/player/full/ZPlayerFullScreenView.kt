@@ -138,21 +138,23 @@ internal class ZPlayerFullScreenView constructor(context: Context, private val c
                         if (controllerNeedAdd) v.addView(controller, vlp)
                     } ?: if (controllerNeedAdd) (it as? ViewGroup)?.addView(controller, vlp) ?: throw IllegalArgumentException("the content layout view your set is not container a view group that id`s [R.id.playerFullScreenContent] ,and your content layout is not a view group!")
                     config.onFullContentListener?.onContentLayoutInflated(it)
-                    postDelayed({
-                        try {
-                            if (controller.height > this.height && this.height > 0) controller.layoutParams.let { l -> l.height = l.height.coerceAtMost(this.height) }
-                            controller.requestLayout()
-                        } catch (e: Exception) {
-                            e.printStackTrace()
-                        }
-                    }, 100)
                 }
             } finally {
-                if (isResizeCalculate && !isInit) init(0f, false)
-                if (isInit) {
-                    initListeners()
-                    showAnim()
-                }
+                postDelayed({
+                    if (isResizeCalculate && !isInit) init(0f, false)
+                    try {
+                        if (controller.height > this.height && this.height > 0) {
+                            controller.layoutParams.let { l -> l.height = l.height.coerceAtMost(this.height) }
+                            controller.requestLayout()
+                        }
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
+                    if (isInit) {
+                        initListeners()
+                        showAnim()
+                    }
+                }, 100)
             }
         }
     }
@@ -320,8 +322,10 @@ internal class ZPlayerFullScreenView constructor(context: Context, private val c
     }
 
     private fun updateContent(offset: Float) {
-        val rect = calculateUtils?.calculate(offset)
-        runWithControllerView { getFrameLayoutParams(it, rect) }
+        runWithControllerView {
+            val rect = calculateUtils?.calculate(offset)
+            getFrameLayoutParams(it, rect)
+        }
     }
 
     private fun followWithFinger(x: Float, y: Float) {
