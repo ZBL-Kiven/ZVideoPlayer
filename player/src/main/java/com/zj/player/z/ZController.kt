@@ -139,7 +139,7 @@ open class ZController<P : BasePlayer<R>, R : BaseRender> internal constructor(v
      * Retrieve the video playback position
      * */
     fun seekTo(i: Long, fromUser: Boolean) {
-        log("user seek the video on $i%")
+        log("user seek the video to $i")
         runWithPlayer { it.seekTo(i, fromUser) }
     }
 
@@ -336,7 +336,7 @@ open class ZController<P : BasePlayer<R>, R : BaseRender> internal constructor(v
     }
 
     override fun onSeekChanged(seek: Int, buffered: Long, fromUser: Boolean, played: Long, videoSize: Long) {
-        if (fromUser) log("on seek changed to $seek")
+        if (fromUser) log("on seek changed to $seek , buffered = $buffered , fromUser = $fromUser  played = $played ,videoSize =  $videoSize")
         withRenderAndControllerView(true)?.onSeekChanged(seek, buffered, fromUser, played, videoSize)
     }
 

@@ -118,6 +118,7 @@ abstract class YoutubeDelegate(debugAble: Boolean) : YouTubePlayerListener {
     fun stop() {
         curPath = ""
         pendingIfNotReady = null
+        curPlayingDuration = 0
         getWebView()?.visibility = View.INVISIBLE
         if (!isPageReady) Utils.log("call stop error ! please wait to page ready!")
         if (isPageReady && !isStop(false)) runWithWebView {
@@ -223,6 +224,7 @@ abstract class YoutubeDelegate(debugAble: Boolean) : YouTubePlayerListener {
         this.curPath = ""
         this.inLoading = false
         this.pendingIfNotReady = null
+        this.curPlayingDuration = 0
         onStateChange(PlayerConstants.PlayerState.ERROR.setFrom(error.name))
     }
 
