@@ -8,7 +8,7 @@ import com.zj.player.controller.BaseListVideoController
 import com.zj.player.img.ImgLoader
 import com.zj.videotest.controllers.scroller.ScrollerController
 
-class CCVideoController @JvmOverloads constructor(c: Context, attr: AttributeSet? = null, def: Int = 0) : BaseListVideoController(c, attr, def) {
+class CCVideoController @JvmOverloads constructor(c: Context, attr: AttributeSet? = null, def: Int = 0) : ScrollerController(c, attr, def) {
 
     override fun onImgGot(path: String, type: ImgLoader.ImgType, tag: String, e: Exception?) {
         val thumb = getThumbView() ?: return

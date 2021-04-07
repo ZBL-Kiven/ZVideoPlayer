@@ -14,6 +14,7 @@ import android.graphics.RectF
 import android.graphics.drawable.ColorDrawable
 import android.os.Handler
 import android.os.Looper
+import android.os.Message
 import android.view.*
 import android.view.animation.DecelerateInterpolator
 import android.widget.FrameLayout
@@ -35,6 +36,7 @@ internal class ZPlayerFullScreenView constructor(context: Context, private val c
 
     companion object {
         private const val MAX_DEEP_RATIO = 0.55f
+        private const val HANDLE_RESIZE_CONTROLLER = 19283
 
         internal fun open(view: View): FullScreenConfig {
             return FullScreenConfig(view)
@@ -62,6 +64,24 @@ internal class ZPlayerFullScreenView constructor(context: Context, private val c
     private var realWindowSize = Point()
     private var screenUtil: ScreenOrientationListener? = null
     private var isScreenRotateLocked: Boolean = false
+    private var fullHandler = Handler(Looper.getMainLooper()) {
+        when (it.what) {
+            HANDLE_RESIZE_CONTROLLER -> {
+                if (it.arg1 == 0) init(0f, false)
+                try {
+                    runWithControllerView { controller ->
+                        if (controller.height > this.height && this.height > 0) {
+                            controller.layoutParams.let { l -> l.height = l.height.coerceAtMost(this.height) }
+                            controller.requestLayout()
+                        }
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }
+        }
+        return@Handler false
+    }
 
     private var curScreenRotation: RotateOrientation? = null
         set(value) {
@@ -110,52 +130,40 @@ internal class ZPlayerFullScreenView constructor(context: Context, private val c
     private fun setContent(controller: View, isMaxFull: Boolean, isResizeCalculate: Boolean = false, isInit: Boolean = true) {
         if (this.isMaxFull && !isMaxFull && curScreenRotation?.isLandSpace() != false) curScreenRotation = RotateOrientation.P0
         this.isMaxFull = isMaxFull
-        changeSystemWindowVisibility(true) {
-            try {
-                val controllerNeedAdd = (controller.parent as? ViewGroup)?.let { parent ->
-                    if (isMaxFull || contentLayoutView == null) {
-                        if (parent != this) {
-                            parent.removeView(controller); true
-                        } else false
-                    } else if (parent != contentLayoutView) {
+        fullHandler.removeMessages(HANDLE_RESIZE_CONTROLLER)
+        changeSystemWindowVisibility(true)
+        try {
+            val controllerNeedAdd = (controller.parent as? ViewGroup)?.let { parent ->
+                if (isMaxFull || contentLayoutView == null) {
+                    if (parent != this) {
                         parent.removeView(controller); true
                     } else false
-                } ?: if (controller.parent !is ViewGroup) throw IllegalArgumentException("controllers parent is not a viewGroup ,so what's that?") else true
-                if (isMaxFull || contentLayoutView == null) {
-                    if (contentLayoutView != null) (contentLayoutView?.parent as? ViewGroup)?.removeView(contentLayoutView)
-                    if (controllerNeedAdd) this@ZPlayerFullScreenView.addView(controller);return@changeSystemWindowVisibility
-                }
-                contentLayoutView?.let {
-                    val contentNeedAdd = (it.parent as? ViewGroup)?.let { parent ->
-                        if (parent != this) {
-                            parent.removeView(it);true
-                        } else false
-                    } ?: true
-                    val lp = it.layoutParams ?: LayoutParams(if (this.width > 0) this.width else ViewGroup.LayoutParams.MATCH_PARENT, if (this.height > 0) this.height else ViewGroup.LayoutParams.MATCH_PARENT)
-                    lp.height = if (it.height <= 0 && this.height > 0) this.height else if (it.height > this.height && this.height > 0) it.height.coerceAtMost(this.height) else lp.height
-                    if (contentNeedAdd) this@ZPlayerFullScreenView.addView(it, lp)
-                    it.findViewById<ViewGroup>(R.id.player_gesture_full_screen_content)?.let { v ->
-                        if (controllerNeedAdd) v.addView(controller, vlp)
-                    } ?: if (controllerNeedAdd) (it as? ViewGroup)?.addView(controller, vlp) ?: throw IllegalArgumentException("the content layout view your set is not container a view group that id`s [R.id.playerFullScreenContent] ,and your content layout is not a view group!")
-                    config.onFullContentListener?.onContentLayoutInflated(it)
-                }
-            } finally {
-                if (isInit) {
-                    initListeners()
-                    showAnim()
-                }
-                postDelayed({
-                    if (isResizeCalculate && !isInit) init(0f, false)
-                    try {
-                        if (controller.height > this.height && this.height > 0) {
-                            controller.layoutParams.let { l -> l.height = l.height.coerceAtMost(this.height) }
-                            controller.requestLayout()
-                        }
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                    }
-                }, 100)
+                } else if (parent != contentLayoutView) {
+                    parent.removeView(controller); true
+                } else false
+            } ?: if (controller.parent !is ViewGroup) throw IllegalArgumentException("controllers parent is not a viewGroup ,so what's that?") else true
+            if (isMaxFull || contentLayoutView == null) {
+                if (contentLayoutView != null) (contentLayoutView?.parent as? ViewGroup)?.removeView(contentLayoutView)
+                if (controllerNeedAdd) this@ZPlayerFullScreenView.addView(controller);return
             }
+            contentLayoutView?.let {
+                val contentNeedAdd = (it.parent as? ViewGroup)?.let { parent ->
+                    if (parent != this) {
+                        parent.removeView(it);true
+                    } else false
+                } ?: true
+                if (contentNeedAdd) this@ZPlayerFullScreenView.addView(it)
+                it.findViewById<ViewGroup>(R.id.player_gesture_full_screen_content)?.let { v ->
+                    if (controllerNeedAdd) v.addView(controller, vlp)
+                } ?: if (controllerNeedAdd) (it as? ViewGroup)?.addView(controller, vlp) ?: throw IllegalArgumentException("the content layout view your set is not container a view group that id`s [R.id.playerFullScreenContent] ,and your content layout is not a view group!")
+                config.onFullContentListener?.onContentLayoutInflated(it)
+            }
+        } finally {
+            if (isInit) {
+                initListeners()
+                showAnim()
+            }
+            fullHandler.sendMessage(Message.obtain().apply { what = HANDLE_RESIZE_CONTROLLER;arg1 = if (isResizeCalculate && !isInit) 0 else 1 })
         }
     }
 
@@ -198,6 +206,7 @@ internal class ZPlayerFullScreenView constructor(context: Context, private val c
                 if (toEnd) return
             }
         }
+        fullHandler.removeCallbacksAndMessages(null)
         config.preToDismiss {
             onDisplayChange(false)
             runWithControllerView {
@@ -384,7 +393,7 @@ internal class ZPlayerFullScreenView constructor(context: Context, private val c
     }
 
     @SuppressLint("SourceLockedOrientationActivity")
-    private fun changeSystemWindowVisibility(visible: Boolean, onPost: (() -> Unit)? = null) {
+    private fun changeSystemWindowVisibility(visible: Boolean) {
         getActivity()?.let {
             it.window.setBackgroundDrawable(ColorDrawable(Color.BLACK))
             val ime = ImmersionBar.with(it)
@@ -399,11 +408,6 @@ internal class ZPlayerFullScreenView constructor(context: Context, private val c
                 ime.hideBar(BarHide.FLAG_SHOW_BAR).autoDarkModeEnable(true).navigationBarEnable(false)
             }
             ime.init()
-            var h: Handler? = Handler(Looper.getMainLooper())
-            h?.post {
-                onPost?.invoke()
-                h = null
-            }
             it.window.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         }
     }
