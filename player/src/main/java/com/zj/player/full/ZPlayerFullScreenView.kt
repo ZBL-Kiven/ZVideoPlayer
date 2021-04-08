@@ -70,8 +70,9 @@ internal class ZPlayerFullScreenView constructor(context: Context, private val c
                 if (it.arg1 == 0) init(0f, false)
                 try {
                     runWithControllerView { controller ->
-                        if (controller.height > this.height && this.height > 0) {
-                            controller.layoutParams.let { l -> l.height = l.height.coerceAtMost(this.height) }
+                        val v = (controller.parent as? ViewGroup) ?: return@runWithControllerView
+                        if (v.height > 0 && controller.height > v.height) {
+                            controller.layoutParams.let { l -> l.height = l.height.coerceAtMost(v.height) }
                             controller.requestLayout()
                         }
                     }
@@ -163,7 +164,7 @@ internal class ZPlayerFullScreenView constructor(context: Context, private val c
                 initListeners()
                 showAnim()
             }
-            fullHandler.sendMessage(Message.obtain().apply { what = HANDLE_RESIZE_CONTROLLER;arg1 = if (isResizeCalculate && !isInit) 0 else 1 })
+            fullHandler.sendMessageDelayed(Message.obtain().apply { what = HANDLE_RESIZE_CONTROLLER;arg1 = if (isResizeCalculate && !isInit) 0 else 1 }, 100)
         }
     }
 
