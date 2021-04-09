@@ -25,7 +25,6 @@ import com.zj.videotest.feed.data.DataType
 import com.zj.videotest.controllers.CCVideoController
 import com.zj.videotest.delegate.VideoControllerPlayers
 import com.zj.views.list.holders.BaseViewHolder
-import com.zj.views.ut.DPUtils
 import java.lang.IllegalArgumentException
 import java.lang.ref.SoftReference
 import java.lang.ref.WeakReference
@@ -255,7 +254,7 @@ class FeedContentAdapter<T : FeedDataIn> : ListenerAnimAdapter<T>(R.layout.r_mai
         this.adapterInterface = adapterInterface
     }
 
-    private fun getDelegate(): ListVideoAdapterDelegate<T, CCVideoController, BaseViewHolder>? {
+    fun getDelegate(): ListVideoAdapterDelegate<T, CCVideoController, BaseViewHolder>? {
         return adapterDelegate
     }
 

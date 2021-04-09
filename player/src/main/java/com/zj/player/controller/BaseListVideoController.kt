@@ -55,10 +55,8 @@ abstract class BaseListVideoController @JvmOverloads constructor(c: Context, att
     }
 
     private fun load(v: View, reload: Boolean, fromUser: Boolean) {
-        if (controller?.isPlaying() == true) if (reload) super.reload(v) else super.onPlayClick(v, false) else {
-            controller?.let {
-                if (reload) super.reload(v) else super.onPlayClick(v, false)
-            } ?: videoControllerIn?.waitingForPlay(curPlayingIndex, 20L, fromUser)
+        videoControllerIn?.waitingForPlay(curPlayingIndex, 20L, fromUser) ?: controller?.let {
+            if (reload) super.reload(v) else super.onPlayClick(v, false)
         }
     }
 

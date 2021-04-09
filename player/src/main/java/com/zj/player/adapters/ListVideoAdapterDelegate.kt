@@ -82,6 +82,7 @@ abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : Rec
         holder?.get()?.let { h ->
             val position = h.adapterPosition
             getViewController(h)?.let {
+                if (it.isFullScreen) return@onViewDetachedFromWindow
                 getItem(position)?.let { p ->
                     val pac = getPathAndLogsCallId(p)
                     pac?.let { pv -> it.onBehaviorDetached(pv.first, pv.second) }

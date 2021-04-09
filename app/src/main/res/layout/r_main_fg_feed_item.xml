@@ -52,7 +52,7 @@
     <com.zj.videotest.controllers.CCVideoController
         android:id="@+id/r_main_fg_feed_item_vc"
         android:layout_width="match_parent"
-        android:layout_height="336dp"
+        android:layout_height="189dp"
         android:layout_below="@id/r_main_fg_feed_item_tv_desc"
         android:layout_marginTop="5dp"
         android:background="#eee"
