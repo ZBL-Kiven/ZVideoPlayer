@@ -32,7 +32,7 @@ import kotlin.math.min
 @Suppress("MemberVisibilityCanBePrivate")
 abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : RecyclerView.ViewHolder>(private val delegateName: String, private val adapter: RecyclerView.Adapter<VH>) : AdapterDelegateIn<T, VH>, VideoControllerIn, InternalPlayStateChangeListener {
 
-    var curHasFullScreen: Boolean = false
+    var curFullScreenController: BaseListVideoController? = null
     private var controller: ZController<*, *>? = null
     private var curPlayingIndex: Int = -1
     private var isStopWhenItemDetached = true
@@ -153,7 +153,7 @@ abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : Rec
     }
 
     override fun onFullScreenChanged(vc: BaseListVideoController, isFull: Boolean) {
-        this.curHasFullScreen = isFull
+        this.curFullScreenController = vc
     }
 
     final override fun onState(runningName: String, isPlaying: Boolean, desc: String?, controller: ZController<*, *>?) {
@@ -335,6 +335,7 @@ abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : Rec
 
     fun release(destroyPlayer: Boolean) {
         handler?.removeCallbacksAndMessages(null)
+        curFullScreenController = null
         controller?.release(destroyPlayer)
         controller = null
         recyclerView?.clearOnScrollListeners()
