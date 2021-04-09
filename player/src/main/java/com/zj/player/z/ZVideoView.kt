@@ -6,7 +6,6 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.Service
 import android.content.Context
-import android.content.pm.ActivityInfo
 import android.content.res.Resources
 import android.media.AudioManager
 import android.os.Build
@@ -799,7 +798,6 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
     open fun onPreToFullMaxScreen(agree: () -> Unit) {
         agree.invoke()
     }
-
 
     protected fun getDuration(mediaDuration: Long): String {
         val duration = mediaDuration / 1000
