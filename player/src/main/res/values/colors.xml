@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="z_player_color_primary">#36485E</color>
-    <color name="z_player_color_white">#FFFFFF</color>
-    <color name="z_player_color_gray">#A4A4A4</color>
-    <color name="z_player_color_loading">#c4c6c0</color>
-    <color name="z_player_color_gray_5">#F5F5F5</color>
-    <color name="z_player_color_trans_50">#a000</color>
-    <color name="z_player_color_controller_bar_bg">#cf181F2A</color>
-    <color name="z_player_color_controller_bar_bg_pressed">#7f1a2c1f</color>
+    <color name="z_player_color_primary">#FF36485E</color>
+    <color name="z_player_color_white">#FFFFFFFF</color>
+    <color name="z_player_color_gray">#FFA4A4A4</color>
+    <color name="z_player_color_loading">#FFC4C6C0</color>
+    <color name="z_player_color_gray_5">#FFF5F5F5</color>
+    <color name="z_player_color_trans_50">#AA000000</color>
+    <color name="z_player_color_controller_bar_bg">#CF181F2A</color>
+    <color name="z_player_color_controller_bar_bg_pressed">#7F1A2C1F</color>
 </resources>

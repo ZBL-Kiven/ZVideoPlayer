@@ -45,6 +45,6 @@ dependencies {
     implementation 'com.zj.repo:constrain-fragment:2.0.3'
     implementation 'com.zj.repo:views:1.4.4'
     implementation 'com.zj.repo:api:1.0.0'
-    implementation 'com.zj.repo:web-kit:1.1.9'
+    implementation 'com.zj.repo:web-kit:1.2.1'
     implementation 'com.github.bumptech.glide:glide:4.10.0'
 }

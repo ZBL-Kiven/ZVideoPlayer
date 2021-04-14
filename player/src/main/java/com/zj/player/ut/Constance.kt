@@ -1,6 +1,8 @@
 package com.zj.player.ut
 
+import com.zj.player.R
 import com.zj.player.logs.ZPlayerLogs
+import kotlinx.android.synthetic.main.z_player_video_view.view.*
 
 /**
  * @author ZJJ on 2020.6.16
@@ -45,16 +47,16 @@ object Constance {
      * Its priority is lower than XML Properties. When XML does not set custom properties,
      * it works normally and is attached to any BaseVideo Controller as default values.
      * */
-    internal var defaultControllerVisibility = 1
-    internal var muteIconEnable = 2
-    internal var qualityEnable = 2
-    internal var speedIconEnable = 2
-    internal var fullScreenEnAble = 2
-    internal var lockRotationEnable = 2
-    internal var secondarySeekBarEnable = 1
-    internal var isDefaultMaxScreen = false
-    internal var isAllowReversePortrait = false
-    internal var fullMaxScreenEnable = true
+    internal const val defaultControllerVisibility = 1
+    internal const val muteIconEnable = 2
+    internal const val qualityEnable = 1
+    internal const val speedIconEnable = 2
+    internal const val fullScreenEnAble = 2
+    internal const val lockRotationEnable = 1
+    internal const val secondarySeekBarEnable = 1
+    internal const val isDefaultMaxScreen = false
+    internal const val isAllowReversePortrait = false
+    internal const val fullMaxScreenEnable = true
 
     /**
      * Setting the following properties only supports the name reflect method, because I am lazy.

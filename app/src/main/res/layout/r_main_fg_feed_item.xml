@@ -58,10 +58,10 @@
         android:background="#eee"
         app:autoFullInterval="3000"
         app:autoFullTools="true"
-        app:playAutoFullScreen="true"
-        app:lockScreenRotation="LANDSCAPE"
+        app:muteIconEnable="DISPLAY_FOREVER"
         app:keepScreenOnWhenPlaying="true"
         app:loadingIgnoreTs="1000"
+        app:lockScreenRotation="LANDSCAPE"
         app:scrollXEnabled="false" />
 
     <LinearLayout

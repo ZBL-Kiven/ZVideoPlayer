@@ -49,9 +49,7 @@
             android:gravity="end"
             android:orientation="horizontal"
             android:padding="10dp"
-            android:translationZ="6dp"
-            android:visibility="gone"
-            tools:visibility="visible">
+            android:translationZ="6dp">
 
             <TextView
                 android:id="@+id/z_player_video_preview_tv_quality"

@@ -18,8 +18,10 @@ import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.animation.AccelerateDecelerateInterpolator
 import android.widget.*
 import androidx.annotation.CallSuper
+import androidx.annotation.IntRange
 import androidx.annotation.LayoutRes
 import androidx.core.content.ContextCompat
+import androidx.core.view.forEach
 import com.zj.player.R
 import com.zj.player.anim.ZFullValueAnimator
 import com.zj.player.base.InflateInfo
@@ -95,8 +97,8 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
     protected var muteView: View? = null
     protected var lockScreen: View? = null
     private var loadingView: VideoLoadingView? = null
-    protected var bottomToolsBar: View? = null
-    protected var topToolsBar: View? = null
+    protected var bottomToolsBar: LinearLayout? = null
+    protected var topToolsBar: LinearLayout? = null
     protected var videoOverrideImageView: TouchScaleImageView? = null
     protected var videoOverrideImageShaderView: ImageView? = null
     protected var videoRoot: VideoRootView? = null
@@ -114,7 +116,13 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
     protected var isDefaultMaxScreen: Boolean = false
     protected var fullMaxScreenEnable: Boolean = true
     protected var scrollXEnabled: Boolean = true
-    protected var qualityEnable = 0
+    protected var qualityEnable = Constance.qualityEnable; private set
+    protected var defaultControllerVisibility = Constance.defaultControllerVisibility; private set
+    protected var muteIconEnable = Constance.muteIconEnable; private set
+    protected var speedIconEnable = Constance.speedIconEnable; private set
+    protected var secondarySeekBarEnable = Constance.secondarySeekBarEnable; private set
+    protected var fullScreenEnable = Constance.fullScreenEnAble; private set
+    protected var lockRotationEnable = Constance.lockRotationEnable; private set
     protected var keepScreenOnWhenPlaying: Boolean = false
     protected var enablePlayAnimation: Boolean = true
     protected var playAutoFullScreen = false
@@ -191,11 +199,11 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
         try {
             val defaultControllerVisibility = ta.getInt(R.styleable.ZVideoView_defaultControllerVisibility, Constance.defaultControllerVisibility)
             val muteIconEnable = ta.getInt(R.styleable.ZVideoView_muteIconEnable, Constance.muteIconEnable)
-            qualityEnable = ta.getInt(R.styleable.ZVideoView_qualityEnable, Constance.qualityEnable)
             val speedIconEnable = ta.getInt(R.styleable.ZVideoView_speedIconEnable, Constance.speedIconEnable)
             val secondarySeekBarEnable = ta.getInt(R.styleable.ZVideoView_secondarySeekBarEnable, Constance.secondarySeekBarEnable)
             val fullScreenEnable = ta.getInt(R.styleable.ZVideoView_fullScreenEnable, Constance.fullScreenEnAble)
             val lockRotationEnable = ta.getInt(R.styleable.ZVideoView_lockRotationEnable, Constance.lockRotationEnable)
+            qualityEnable = ta.getInt(R.styleable.ZVideoView_qualityEnable, Constance.qualityEnable)
             autoFullTools = ta.getBoolean(R.styleable.ZVideoView_autoFullTools, false)
             playAutoFullScreen = ta.getBoolean(R.styleable.ZVideoView_playAutoFullScreen, false)
             autoFullInterval = ta.getInt(R.styleable.ZVideoView_autoFullInterval, 3000)
@@ -214,12 +222,6 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
             addView(view, LayoutParams(MATCH_PARENT, MATCH_PARENT))
             videoRoot = view?.findViewById(R.id.z_player_video_root)
             vPlay = view?.findViewById(R.id.z_player_video_preview_iv_play)
-            muteView = getViewByDefaultConfig(R.id.z_player_video_preview_iv_mute, muteIconEnable)
-            speedView = getViewByDefaultConfig(R.id.z_player_video_preview_tv_speed, speedIconEnable)
-            fullScreen = getViewByDefaultConfig(R.id.z_player_video_preview_iv_full_screen, fullScreenEnable)
-            seekBarSmall = getViewByDefaultConfig(R.id.z_player_video_preview_sb_small, secondarySeekBarEnable)
-            bottomToolsBar = getViewByDefaultConfig(R.id.z_player_video_preview_tools_bar, defaultControllerVisibility)
-            lockScreen = getViewByDefaultConfig(R.id.z_player_video_preview_iv_lock_screen, lockRotationEnable)
             tvStart = view?.findViewById(R.id.z_player_video_preview_tv_start)
             tvEnd = view?.findViewById(R.id.z_player_video_preview_tv_end)
             topToolsBar = view?.findViewById(R.id.z_player_video_preview_top_bar)
@@ -228,6 +230,12 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
             loadingView = view?.findViewById(R.id.z_player_video_preview_vs_loading)
             seekBar = view?.findViewById(R.id.z_player_video_preview_sb)
             menuView = view?.findViewById(R.id.z_player_video_preview_v_menu)
+            setMuteIconEnable(muteIconEnable)
+            setSpeedIconEnable(speedIconEnable)
+            setFullScreenEnable(fullScreenEnable)
+            setSecondarySeekBarEnable(secondarySeekBarEnable)
+            setLockRotationEnable(lockRotationEnable)
+            setBottomToolsEnable(defaultControllerVisibility)
             isFull = bottomToolsBar?.visibility == View.VISIBLE
             speedView?.text = context.getString(R.string.z_player_str_speed, "1")
             touchListener?.let {
@@ -282,12 +290,11 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
         l.setTorque(32f, density * 75f + 0.5f, density * 142f + 0.5f, density * 7f + 0.5f)
     }
 
-    private fun <T : View> getViewByDefaultConfig(id: Int, mode: Int): T? {
-        return if (mode == 1 || mode == 2) {
-            val v = videoRoot?.findViewById<T>(id)
-            v?.visibility = if (mode == 2) View.VISIBLE else View.GONE
-            v
-        } else null
+    private fun <T : View> getViewByDefaultConfig(id: Int, mode: Int, default: T? = null): T? {
+        val v: T? = default ?: videoRoot?.findViewById(id)
+        v?.visibility = if (mode < 2) View.GONE else View.VISIBLE
+        v?.setTag(R.id.tag_view_enabled, mode)
+        return if (mode == 0) null else v
     }
 
     private fun initListener() {
@@ -371,6 +378,7 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
                 if (autoFullTools && isFull) mHandler.sendEmptyMessageDelayed(dismissFullTools, autoFullInterval.toLong())
             }
         })
+        onViewInit()
     }
 
     override fun keepScreenOnWhenPlaying(): Boolean {
@@ -410,7 +418,8 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
         this.videoTotalTime = videoSize
         tvEnd?.text = getDuration(videoSize)
         if (muteIsUseGlobal) {
-            if (muteView?.isSelected != muteGlobalDefault) muteView?.isSelected = muteGlobalDefault;initVolume(muteGlobalDefault)
+            val isMute = muteGlobalDefault || muteDefault
+            if (muteView?.isSelected != isMute) muteView?.isSelected = isMute;initVolume(isMute)
         } else {
             if (muteView?.isSelected != muteDefault) muteView?.isSelected = muteDefault;initVolume(muteDefault)
         }
@@ -446,15 +455,17 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
         var lastMinValue = 100000f
         val realSpeed = speed.coerceAtLeast(supportedSpeedList.first())
         var curSpeedIndex = 0
-        supportedSpeedList.forEachIndexed { i, fl ->
-            val of = abs(realSpeed - fl)
-            if (of == 0f) {
-                lastMinValue = 0f
-                curSpeedIndex = i
-                return@forEachIndexed
-            } else if (of < lastMinValue) {
-                lastMinValue = of
-                curSpeedIndex = i
+        run loop@{
+            supportedSpeedList.forEachIndexed { i, fl ->
+                val of = abs(realSpeed - fl)
+                if (of == 0f) {
+                    lastMinValue = 0f
+                    curSpeedIndex = i
+                    return@loop
+                } else if (of < lastMinValue) {
+                    lastMinValue = of
+                    curSpeedIndex = i
+                }
             }
         }
         val curSpeed = supportedSpeedList[curSpeedIndex]
@@ -561,6 +572,8 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
         this.fullScreenContentLayoutId = layoutId
         this.onFullScreenLayoutInflateListener = onFullScreenLayoutInflateListener
     }
+
+    open fun onViewInit() {}
 
     open fun onFullScreenChanged(isFull: Boolean, payloads: Map<String, Any?>?) {}
 
@@ -852,8 +865,7 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
                 it.visibility = if (isFull) VISIBLE else GONE
             }
             topToolsBar?.let {
-                it.alpha = 1.0f
-                it.visibility = if (isFull) VISIBLE else GONE
+                hideTopViews(false, 1f, isFull)
             }
             seekBarSmall?.visibility = GONE
         } else {
@@ -905,10 +917,7 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
                 if (isFull && it.visibility != View.VISIBLE) it.visibility = View.VISIBLE
             }
             topToolsBar?.let {
-                if (isFull && it.alpha == 1.0f) it.alpha = 0f
-                val d = if (isFull) duration else -duration
-                it.alpha += d
-                if (isFull && it.visibility != View.VISIBLE) it.visibility = View.VISIBLE
+                hideTopViews(true, duration, isFull)
             }
         }
 
@@ -922,8 +931,7 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
                 if (!isFull && !isStartTrack && (controller?.isPlaying() == true || controller?.isPause(true) == true)) seekBarSmall?.visibility = View.VISIBLE
             }
             topToolsBar?.let {
-                it.alpha = if (isFull) 1f else 0f
-                if (!isFull) it.visibility = View.GONE
+                hideTopViews(false, if (isFull) 1f else 0f, isFull)
             }
         }
     }
@@ -1035,7 +1043,7 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
         onSeekChanged(0, 0, false, 0, 0)
         if (isRegulate) showOrHidePlayBtn(isShowPlayBtn, withState = false)
         full(false, isSetNow = isNow)
-        muteView?.isSelected = if (muteIsUseGlobal) muteGlobalDefault else muteDefault
+        muteView?.isSelected = if (muteIsUseGlobal) muteGlobalDefault || muteDefault else muteDefault
         qualityView?.visibility = View.GONE
     }
 
@@ -1093,6 +1101,21 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
         }
     }
 
+    private fun hideTopViews(inDuration: Boolean, duration: Float, isFull: Boolean) {
+        topToolsBar?.forEach {
+            if (((it.getTag(R.id.tag_view_enabled) as? Int?) ?: return@forEach) >= 3) return@forEach
+            if (inDuration) {
+                if (isFull && it.alpha == 1.0f) it.alpha = 0f
+                val d = if (isFull) duration else -duration
+                it.alpha += d
+                if (isFull && it.visibility != View.VISIBLE) it.visibility = View.VISIBLE
+            } else {
+                it.alpha = duration
+                it.visibility = if (isFull) VISIBLE else GONE
+            }
+        }
+    }
+
     private fun resendAutoFullScreenAction() {
         if (autoFullTools) mHandler.removeMessages(dismissFullTools)
         if (autoFullTools && isFull) mHandler.sendEmptyMessageDelayed(dismissFullTools, autoFullInterval.toLong())
@@ -1140,6 +1163,30 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
 
     fun isDestroyed(accurate: Boolean = false): Boolean {
         return controller?.isDestroyed(accurate) ?: true
+    }
+
+    open fun setMuteIconEnable(@IntRange(from = 0, to = 3) mode: Int) {
+        this.muteIconEnable = mode;muteView = getViewByDefaultConfig(R.id.z_player_video_preview_iv_mute, mode, muteView)
+    }
+
+    open fun setSpeedIconEnable(@IntRange(from = 0, to = 3) mode: Int) {
+        this.speedIconEnable = mode;speedView = getViewByDefaultConfig(R.id.z_player_video_preview_tv_speed, mode, speedView)
+    }
+
+    open fun setSecondarySeekBarEnable(@IntRange(from = 0, to = 3) mode: Int) {
+        this.secondarySeekBarEnable = mode;seekBarSmall = getViewByDefaultConfig(R.id.z_player_video_preview_sb_small, mode, seekBarSmall)
+    }
+
+    open fun setFullScreenEnable(@IntRange(from = 0, to = 3) mode: Int) {
+        this.fullScreenEnable = mode;fullScreen = getViewByDefaultConfig(R.id.z_player_video_preview_iv_full_screen, mode, fullScreen)
+    }
+
+    open fun setLockRotationEnable(@IntRange(from = 0, to = 3) mode: Int) {
+        this.lockRotationEnable = mode;lockScreen = getViewByDefaultConfig(R.id.z_player_video_preview_iv_lock_screen, mode, lockScreen)
+    }
+
+    open fun setBottomToolsEnable(@IntRange(from = 0, to = 3) mode: Int) {
+        this.defaultControllerVisibility = mode;bottomToolsBar = getViewByDefaultConfig(R.id.z_player_video_preview_tools_bar, mode, bottomToolsBar)
     }
 
     private fun isInterrupted(): Boolean {
