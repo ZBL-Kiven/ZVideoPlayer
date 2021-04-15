@@ -408,6 +408,7 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
     }
 
     override fun onLoading(path: String, isRegulate: Boolean) {
+        if (controller?.isPlaying(true) == true) return
         checkVisibleViews() //need'nt to check with ignore visibility
         if (!isFullScreen && playAutoFullScreen) {
             fullScreen?.let { onFullScreenClick(!it.isSelected, false) }
@@ -537,6 +538,7 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
     }
 
     override fun onSeekingLoading(path: String?) {
+        if (controller?.isPlaying(true) == true) return
         isInterruptPlayBtnAnim = true
         onLoadingEvent(LoadingMode.Loading)
         showOrHidePlayBtn(false)
