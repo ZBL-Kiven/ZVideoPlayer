@@ -4,7 +4,6 @@ import android.content.Context
 import android.util.AttributeSet
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.gif.GifDrawable
-import com.zj.player.controller.BaseListVideoController
 import com.zj.player.img.ImgLoader
 import com.zj.videotest.controllers.scroller.ScrollerController
 
@@ -54,10 +53,10 @@ class CCVideoController @JvmOverloads constructor(c: Context, attr: AttributeSet
         }
         super.onFullScreenChanged(isFull, payloads)
         if (isFull) {
-            if (isPlayable && !isBindingController) vPlay?.let { onPlayClick(it, true) }
+            if (isPlayable && !isBindingController) onPlayClick(true)
             else if (isPlayable && isBindingController) {
                 if (controller?.isPlaying() == true || controller?.isStop(true) == true) return
-                vPlay?.let { onPlayClick(it, true) }
+                onPlayClick(true)
             }
         }
     }

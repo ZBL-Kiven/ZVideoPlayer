@@ -59,7 +59,7 @@
         app:autoFullInterval="3000"
         app:autoFullTools="true"
         app:keepScreenOnWhenPlaying="true"
-        app:loadingIgnoreTs="1000"
+        app:loadingIgnoreTs="200"
         app:lockScreenRotation="LANDSCAPE"
         app:muteDefault="true"
         app:muteIconEnable="DISPLAY_FOREVER"

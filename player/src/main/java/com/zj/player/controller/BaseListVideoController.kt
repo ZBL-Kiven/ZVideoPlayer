@@ -2,7 +2,6 @@ package com.zj.player.controller
 
 import android.content.Context
 import android.util.AttributeSet
-import android.view.View
 import androidx.annotation.CallSuper
 import com.zj.player.list.VideoControllerIn
 
@@ -36,12 +35,12 @@ abstract class BaseListVideoController @JvmOverloads constructor(c: Context, att
         curPlayingIndex = index
     }
 
-    override fun onPlayClick(v: View, fromUser: Boolean) {
-        load(v, false, fromUser)
+    override fun onPlayClick(fromUser: Boolean) {
+        load(false, fromUser)
     }
 
-    override fun reload(v: View) {
-        load(v, reload = true, fromUser = false)
+    override fun reload() {
+        load(reload = true, fromUser = false)
     }
 
     override fun onLoading(path: String, isRegulate: Boolean) {
@@ -54,12 +53,12 @@ abstract class BaseListVideoController @JvmOverloads constructor(c: Context, att
         playingStateListener?.invoke(this)
     }
 
-    private fun load(v: View, reload: Boolean, fromUser: Boolean) {
+    private fun load(reload: Boolean, fromUser: Boolean) {
         if (controller?.isLoadData() == true) {
-            if (reload) super.reload(v) else super.onPlayClick(v, false)
+            if (reload) super.reload() else super.onPlayClick(false)
         } else {
             videoControllerIn?.waitingForPlay(curPlayingIndex, 20L, fromUser) ?: controller?.let {
-                if (reload) super.reload(v) else super.onPlayClick(v, false)
+                if (reload) super.reload() else super.onPlayClick(false)
             }
         }
     }

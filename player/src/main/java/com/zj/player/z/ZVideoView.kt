@@ -303,7 +303,7 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
     private fun initListener() {
         vPlay?.setOnClickListener {
             log("on play btn click", BehaviorLogsTable.onPlayClick())
-            onPlayClick(it, true)
+            onPlayClick(true)
         }
 
         videoRoot?.setTargetChangeListener { v, e ->
@@ -315,26 +315,26 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
         videoRoot?.setOnTouchListener(touchListener)
 
         loadingView?.setRefreshListener {
-            reload(it)
+            reload()
         }
 
         fullScreen?.setOnClickListener {
-            onFullScreenClick(it, true)
+            onFullScreenClick(!it.isSelected, true)
         }
 
         speedView?.setOnClickListener {
             log("on speed btn click", BehaviorLogsTable.onSpeedClick())
-            onSpeedClick(it)
+            onSpeedClick()
         }
 
         muteView?.setOnClickListener {
             log("on mute btn click", BehaviorLogsTable.onMuteClick())
-            onMuteClick(it)
+            onMuteClick(!it.isSelected)
         }
 
         lockScreen?.setOnClickListener {
             log("on lock screen btn click", BehaviorLogsTable.onLockScreenClick())
-            onLockScreenClick(it)
+            onLockScreenClick(!it.isSelected)
         }
 
         videoOverrideImageView?.setSingleTapListener { x, y ->
@@ -410,7 +410,7 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
     override fun onLoading(path: String, isRegulate: Boolean) {
         checkVisibleViews() //need'nt to check with ignore visibility
         if (!isFullScreen && playAutoFullScreen) {
-            fullScreen?.let { onFullScreenClick(it, false) }
+            fullScreen?.let { onFullScreenClick(!it.isSelected, false) }
         }
         seekBar?.isEnabled = false
         showOrHidePlayBtn(false)
@@ -431,7 +431,7 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
 
     override fun onPlay(path: String, isRegulate: Boolean) {
         if (!isFullScreen && playAutoFullScreen) {
-            fullScreen?.let { onFullScreenClick(it, false) }
+            fullScreen?.let { onFullScreenClick(!it.isSelected, false) }
         }
         setOverlayViews(isShowThumb = false, isShowBackground = true, isSinkBottomShader = true)
         seekBar?.isSelected = true
@@ -553,7 +553,7 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
 
     internal fun clickPlayBtn(accuratePlay: Boolean) {
         if (vPlay?.isSelected != !accuratePlay) vPlay?.isSelected = !accuratePlay
-        onPlayClick(vPlay ?: return, false)
+        onPlayClick(false)
     }
 
     open fun playIfReady() {
@@ -589,11 +589,11 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
         return false
     }
 
-    open fun onPlayClick(v: View, fromUser: Boolean) {
+    open fun onPlayClick(fromUser: Boolean) {
         if (!isPlayable) return
         controller?.let {
-            v.isEnabled = false
-            if (!v.isSelected) {
+            vPlay?.isEnabled = false
+            if (vPlay?.isSelected != true) {
                 it.playOrResume()
             } else {
                 it.pause()
@@ -601,7 +601,7 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
         }
     }
 
-    open fun reload(v: View) {
+    open fun reload() {
         val path = controller?.getPath()
         if (path.isNullOrEmpty()) {
             onLoadingEvent(LoadingMode.Loading, isSetInNow = false, ignoreInterval = true)
@@ -627,7 +627,7 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
     open fun onRootDoubleClick(x: Float, y: Float) {
         if (playAutoFullScreen) return
         log("on root view double click", BehaviorLogsTable.onRootDoubleClick())
-        fullScreen?.let { onFullScreenClick(it, false) }
+        fullScreen?.let { onFullScreenClick(!it.isSelected, false) }
     }
 
     open fun onFullScreenViewDoubleClick(x: Float, y: Float) {
@@ -635,11 +635,11 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
         fullScreenView?.onDoubleClick()
     }
 
-    private fun onFullScreenClick(v: View, fromUser: Boolean, payloads: Map<String, Any?>? = null) {
+    private fun onFullScreenClick(nextState: Boolean, fromUser: Boolean, payloads: Map<String, Any?>? = null) {
         log("on full screen", BehaviorLogsTable.onFullScreen())
         if (!isFullingOrDismissing) {
             isFullingOrDismissing = true
-            onFullScreen(!v.isSelected, this.onFullScreenClick(Transaction(fromUser, fullScreenTransactionTime, true, payloads)))
+            onFullScreen(nextState, this.onFullScreenClick(Transaction(fromUser, fullScreenTransactionTime, true, payloads)))
         }
     }
 
@@ -659,7 +659,7 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
         return transaction
     }
 
-    open fun onSpeedClick(v: View) {
+    open fun onSpeedClick() {
         resendAutoFullScreenAction()
         if (controller?.isReady() == true) {
             val next = supportedSpeedList[++curSpeedIndex % supportedSpeedList.size]
@@ -671,9 +671,8 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
         controller?.setSpeed(nextSpeed)
     }
 
-    open fun onMuteClick(v: View) {
+    open fun onMuteClick(nextState: Boolean) {
         resendAutoFullScreenAction()
-        val nextState = !v.isSelected
         try {
             initVolume(nextState)
         } catch (e: Exception) {
@@ -681,9 +680,9 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
         }
     }
 
-    open fun onLockScreenClick(v: View) {
+    open fun onLockScreenClick(nextState: Boolean) {
         resendAutoFullScreenAction()
-        if (!lockScreenRotate(!v.isSelected)) Toast.makeText(context, R.string.z_player_str_screen_locked_tint, Toast.LENGTH_SHORT).show()
+        if (!lockScreenRotate(nextState)) Toast.makeText(context, R.string.z_player_str_screen_locked_tint, Toast.LENGTH_SHORT).show()
     }
 
     @CallSuper
