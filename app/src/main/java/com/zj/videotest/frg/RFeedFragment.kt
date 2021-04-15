@@ -38,7 +38,6 @@ class RFeedFragment : BaseLinkageFragment() {
         adapter = FeedContentAdapter()
         rvContent?.layoutManager = LinearLayoutManager(this.activity)
         rvContent?.adapter = adapter
-        adapter?.getDelegate()?.setIsAutoPlayWhenItemAttached(false)
         initData(false)
         initListener()
     }

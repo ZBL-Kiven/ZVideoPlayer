@@ -55,6 +55,11 @@
             <enum name="DISPLAY_GONE" value="1" />
             <enum name="GONE" value="0" />
         </attr>
+        <!-- Whether to enable the play button, [DISPLAY_FOREVER] always display in parent, [DISPLAY_VISIBLE] is always enabled, [DISPLAY_GONE] is not displayed by default but will be initialized, [GONE] is not displayed and will not be initialized -->
+        <attr name="playIconEnable" format="enum">
+            <enum name="DISPLAY_VISIBLE" value="2" />
+            <enum name="DISPLAY_GONE" value="1" />
+        </attr>
         <!-- Whether to enable the double speed button, [DISPLAY_FOREVER] always display in parent, [DISPLAY_VISIBLE] is always enabled, [DISPLAY_GONE] is not displayed by default but will be initialized, [GONE] is not displayed and will not be initialized -->
         <attr name="speedIconEnable" format="enum">
             <enum name="DISPLAY_FOREVER" value="3" />
@@ -76,9 +81,8 @@
             <enum name="DISPLAY_GONE" value="1" />
             <enum name="GONE" value="0" />
         </attr>
-        <!-- Whether to enable the lock rotation button, [DISPLAY_FOREVER] always display in parent, [DISPLAY_VISIBLE] is always enabled, [DISPLAY_GONE] is not displayed by default but will be initialized, [GONE] is not displayed and not initialized -->
+        <!-- Whether to enable the lock rotation button, [DISPLAY_VISIBLE] is always enabled, [DISPLAY_GONE] is not displayed by default but will be initialized, [GONE] is not displayed and not initialized -->
         <attr name="lockRotationEnable" format="enum">
-            <enum name="DISPLAY_FOREVER" value="3" />
             <enum name="DISPLAY_VISIBLE" value="2" />
             <enum name="DISPLAY_GONE" value="1" />
             <enum name="GONE" value="0" />
@@ -90,9 +94,8 @@
             <enum name="DISPLAY_GONE" value="1" />
             <enum name="GONE" value="0" />
         </attr>
-        <!-- Whether to enable the quality selection button, [DISPLAY_FOREVER] always display in parent, [DISPLAY_VISIBLE] is always enabled, [DISPLAY_GONE] is not displayed by default but will be initialized, [GONE] is not displayed and will not be initialized -->
+        <!-- Whether to enable the quality selection button, [DISPLAY_VISIBLE] is always enabled, [DISPLAY_GONE] is not displayed by default but will be initialized, [GONE] is not displayed and will not be initialized -->
         <attr name="qualityEnable" format="enum">
-            <enum name="DISPLAY_FOREVER" value="3" />
             <enum name="DISPLAY_VISIBLE" value="2" />
             <enum name="DISPLAY_GONE" value="1" />
             <enum name="GONE" value="0" />

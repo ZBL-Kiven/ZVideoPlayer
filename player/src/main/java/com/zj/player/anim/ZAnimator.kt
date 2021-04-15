@@ -10,12 +10,14 @@ import android.view.animation.AccelerateDecelerateInterpolator
 internal class ZFullValueAnimator(private var listener: FullAnimatorListener?, private val isUseOffset: Boolean = true) : ValueAnimator(), Animator.AnimatorListener, ValueAnimator.AnimatorUpdateListener {
 
     var isFull: Boolean = false
+    private var obj: Any? = null
     private var curDuration: Float = 0.toFloat()
     private var isCancel: Boolean = false
 
-    fun start(isFull: Boolean) {
+    fun start(isFull: Boolean, obj: Any? = null) {
         if (isRunning) cancel()
         this.isFull = isFull
+        this.obj = obj
         removeAllListeners()
         addListener(this)
         addUpdateListener(this)
@@ -39,9 +41,9 @@ internal class ZFullValueAnimator(private var listener: FullAnimatorListener?, p
 
         open fun onStart() {}
 
-        abstract fun onDurationChange(animation: ValueAnimator, duration: Float, isFull: Boolean)
+        abstract fun onDurationChange(animation: ValueAnimator, duration: Float, isFull: Boolean, obj: Any? = null)
 
-        abstract fun onAnimEnd(animation: Animator, isFull: Boolean)
+        abstract fun onAnimEnd(animation: Animator, isFull: Boolean, obj: Any? = null)
     }
 
     override fun onAnimationStart(animation: Animator) {
@@ -51,12 +53,12 @@ internal class ZFullValueAnimator(private var listener: FullAnimatorListener?, p
 
     override fun onAnimationEnd(animation: Animator) {
         curDuration = 0f
-        listener?.onAnimEnd(animation, isFull)
+        listener?.onAnimEnd(animation, isFull, obj)
     }
 
     override fun onAnimationCancel(animation: Animator) {
         curDuration = 0f
-        listener?.onAnimEnd(animation, isFull)
+        listener?.onAnimEnd(animation, isFull, obj)
     }
 
     override fun onAnimationRepeat(animation: Animator) {
@@ -69,7 +71,7 @@ internal class ZFullValueAnimator(private var listener: FullAnimatorListener?, p
             animation?.let {
                 val duration = (it.animatedValue as? Float) ?: 0f
                 val offset = if (isUseOffset) duration - curDuration else duration
-                listener?.onDurationChange(it, offset, isFull)
+                listener?.onDurationChange(it, offset, isFull, obj)
                 curDuration = duration
             }
         }

@@ -39,7 +39,19 @@ class CCVideoController @JvmOverloads constructor(c: Context, attr: AttributeSet
         full(false)
     }
 
+    override fun onRootClick(x: Float, y: Float) {
+        if (isFullScreen) super.onRootClick(x, y)
+        else fullScreen(isFull = true, fromUser = true)
+    }
+
     override fun onFullScreenChanged(isFull: Boolean, payloads: Map<String, Any?>?) {
+        if (isFull) {
+            setPlayIconEnable(2)
+            setMuteIconEnable(if (super.isFull) 2 else 1)
+        } else {
+            setPlayIconEnable(1)
+            setMuteIconEnable(3)
+        }
         super.onFullScreenChanged(isFull, payloads)
         if (isFull) {
             if (isPlayable && !isBindingController) vPlay?.let { onPlayClick(it, true) }
@@ -48,5 +60,9 @@ class CCVideoController @JvmOverloads constructor(c: Context, attr: AttributeSet
                 vPlay?.let { onPlayClick(it, true) }
             }
         }
+    }
+
+    override fun resumeToolsWhenFullscreenChanged(): Boolean {
+        return false
     }
 }

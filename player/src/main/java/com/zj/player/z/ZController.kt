@@ -11,7 +11,6 @@ import android.widget.FrameLayout
 import android.widget.LinearLayout
 import android.widget.RelativeLayout
 import android.widget.RelativeLayout.CENTER_IN_PARENT
-import androidx.annotation.IntRange
 import com.zj.player.base.BasePlayer
 import com.zj.player.base.BaseRender
 import com.zj.player.ut.Constance.CORE_LOG_ABLE

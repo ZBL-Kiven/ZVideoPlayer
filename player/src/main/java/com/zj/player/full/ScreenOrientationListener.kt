@@ -16,7 +16,6 @@ internal class ScreenOrientationListener(private var c: WeakReference<Context>?,
     private var lastOrientation: RotateOrientation? = null
     private var isEventLock = false
 
-
     override fun onOrientationChanged(orientation: Int) {
         if (isEventLock) {
             return

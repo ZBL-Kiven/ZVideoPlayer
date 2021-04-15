@@ -37,6 +37,7 @@ internal class ZPlayerFullScreenView constructor(context: Context, private val c
     companion object {
         private const val MAX_DEEP_RATIO = 0.55f
         private const val HANDLE_RESIZE_CONTROLLER = 19283
+        private const val HANDLE_ORIENTATION_CHANGE = 19285
 
         internal fun open(view: View): FullScreenConfig {
             return FullScreenConfig(view)
@@ -80,13 +81,16 @@ internal class ZPlayerFullScreenView constructor(context: Context, private val c
                     e.printStackTrace()
                 }
             }
+            HANDLE_ORIENTATION_CHANGE -> {
+                (it.obj as? RotateOrientation)?.let { o -> curScreenRotation = o }
+            }
         }
         return@Handler false
     }
 
     private var curScreenRotation: RotateOrientation? = null
         set(value) {
-            if (field == value && config.getControllerView()?.rotation == value?.degree) return
+            if (field == value) return
             field = value
             if (value == null) return
             if (config.allowReversePortrait || value != RotateOrientation.P1) {
@@ -124,7 +128,10 @@ internal class ZPlayerFullScreenView constructor(context: Context, private val c
             }
         }
         screenUtil = ScreenOrientationListener(WeakReference(context)) {
-            if (!isScreenRotateLocked && isMaxFull) curScreenRotation = it
+            handler.removeMessages(HANDLE_ORIENTATION_CHANGE)
+            if (!isScreenRotateLocked && isMaxFull) {
+                fullHandler.sendMessageDelayed(Message.obtain().apply { what = HANDLE_ORIENTATION_CHANGE;obj = it }, 100)
+            }
         }
     }
 
@@ -240,7 +247,7 @@ internal class ZPlayerFullScreenView constructor(context: Context, private val c
                 initCalculate()
             }
 
-            override fun onDurationChange(animation: ValueAnimator, duration: Float, isFull: Boolean) {
+            override fun onDurationChange(animation: ValueAnimator, duration: Float, isFull: Boolean, obj: Any?) {
                 if (isFull) {
                     updateContent(1 - duration)
                     setBackground(duration, true)
@@ -262,7 +269,7 @@ internal class ZPlayerFullScreenView constructor(context: Context, private val c
                 }
             }
 
-            override fun onAnimEnd(animation: Animator, isFull: Boolean) {
+            override fun onAnimEnd(animation: Animator, isFull: Boolean, obj: Any?) {
                 isAnimRun = false
                 originInScreen = null
                 if (!isFull) dismissed(true)
@@ -529,6 +536,7 @@ internal class ZPlayerFullScreenView constructor(context: Context, private val c
 
     override fun onWindowFocusChanged(hasFocus: Boolean) {
         super.onWindowFocusChanged(hasFocus)
+        isScreenRotateLocked = screenUtil?.checkAccelerometerSystem() != false || !hasFocus
         if (hasFocus) changeSystemWindowVisibility(true)
         checkSelfScreenLockAvailable(isScreenRotateLocked)
         config.onFullContentListener?.onFocusChange(this, isMaxFull)

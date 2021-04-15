@@ -48,6 +48,7 @@ object Constance {
      * it works normally and is attached to any BaseVideo Controller as default values.
      * */
     internal const val defaultControllerVisibility = 1
+    internal const val playIconEnable = 2
     internal const val muteIconEnable = 2
     internal const val qualityEnable = 1
     internal const val speedIconEnable = 2
