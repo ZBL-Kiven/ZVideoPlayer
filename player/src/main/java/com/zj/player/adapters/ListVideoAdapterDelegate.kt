@@ -42,6 +42,7 @@ abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : Rec
     private var recyclerView: RecyclerView? = null
     private val waitingForPlayClicked = R.id.delegate_waiting_for_play_clicked
     private val waitingForPlayScrolled = R.id.delegate_waiting_for_play_scrolled
+    private val waitingForPlayIdle = R.id.delegate_waiting_for_play_idle
     protected abstract fun createZController(delegateName: String, data: T?, vc: V): ZController<*, *>
     protected abstract fun getViewController(holder: VH?): V?
     protected abstract fun getItem(p: Int): T?
@@ -223,46 +224,56 @@ abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : Rec
         (recyclerView?.layoutManager as? LinearLayoutManager)?.let { lm ->
             val fvc = lm.findFirstCompletelyVisibleItemPosition()
             val lv = lm.findLastVisibleItemPosition()
+            val lvi = lm.findLastCompletelyVisibleItemPosition()
             var fvi = lm.findFirstVisibleItemPosition()
             if (fvc < 0) {
                 if (lv - fvi > 1) fvi++
             }
-            val cp = Rect()
-            var pt = 0
-            var pb = 0
-            recyclerView?.getLocalVisibleRect(cp)
-            recyclerView?.let {
-                pt = it.paddingTop
-                pb = it.paddingBottom
-                cp.top += pt + it.translationY.toInt()
-                cp.bottom -= pb - it.translationY.toInt()
-            }
-            var offset = 0
             val fv = if (fvc < 0) fvi else fvc
-            val tr = when (fvi) {
-                lv - 1 -> {
-                    val ccf = Rect()
-                    val ccl = Rect()
-                    var hft = 0
-                    var hlt = 0
-                    var hlb = 0
-                    (recyclerView?.findViewHolderForAdapterPosition(fv) as? VH)?.itemView?.let {
-                        it.getLocalVisibleRect(ccf)
-                        hft = it.top
+            var offset = 0
+            val tr = run indexFound@{
+                if (lv - fv > 0) {
+                    (fv..lvi).forEach {
+                        getViewController((recyclerView?.findViewHolderForAdapterPosition(it) as? VH))?.let { vc ->
+                            if (vc.isFullScreen || vc.isBindingController) return@indexFound it
+                        }
                     }
-                    (recyclerView?.findViewHolderForAdapterPosition(lv) as? VH)?.itemView?.let {
-                        it.getLocalVisibleRect(ccl)
-                        hlt = it.top
-                        hlb = it.bottom
-                    }
-                    val offF = (ccf.bottom - ccf.top) / 2 - cp.centerY()
-                    val offL = (ccf.bottom - ccf.top) / 2 + hlt - cp.centerY()
-                    val cy = min(abs(offF), abs(offL))
-                    val next = if (cy == abs(offF)) fv else lv
-                    offset = if (next == fv) if (hft >= 0) 0 else hft - pt else if (hlb <= cp.bottom) 0 else hlb - cp.bottom + pb
-                    next
                 }
-                else -> fv
+                val cp = Rect()
+                var pt = 0
+                var pb = 0
+                recyclerView?.getLocalVisibleRect(cp)
+                recyclerView?.let {
+                    pt = it.paddingTop
+                    pb = it.paddingBottom
+                    cp.top += pt + it.translationY.toInt()
+                    cp.bottom -= pb - it.translationY.toInt()
+                }
+                when (fvi) {
+                    lv - 1 -> {
+                        val ccf = Rect()
+                        val ccl = Rect()
+                        var hft = 0
+                        var hlt = 0
+                        var hlb = 0
+                        (recyclerView?.findViewHolderForAdapterPosition(fv) as? VH)?.itemView?.let {
+                            it.getLocalVisibleRect(ccf)
+                            hft = it.top
+                        }
+                        (recyclerView?.findViewHolderForAdapterPosition(lv) as? VH)?.itemView?.let {
+                            it.getLocalVisibleRect(ccl)
+                            hlt = it.top
+                            hlb = it.bottom
+                        }
+                        val offF = (ccf.bottom - ccf.top) / 2 - cp.centerY()
+                        val offL = (ccf.bottom - ccf.top) / 2 + hlt - cp.centerY()
+                        val cy = min(abs(offF), abs(offL))
+                        val next = if (cy == abs(offF)) fv else lv
+                        offset = if (next == fv) if (hft >= 0) 0 else hft - pt else if (hlb <= cp.bottom) 0 else hlb - cp.bottom + pb
+                        next
+                    }
+                    else -> fv
+                }
             }
             getViewController((recyclerView?.findViewHolderForAdapterPosition(tr) as? VH))?.let { vc ->
                 if (!vc.isBindingController || (vc.isBindingController && controller?.isPause() == true)) {
@@ -274,7 +285,7 @@ abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : Rec
             }
             if (isAutoScrollToVisible && offset != 0) {
                 ZPlayerLogs.debug("offset =  $offset ")
-                recyclerView?.smoothScrollBy(0, offset, AccelerateInterpolator(), 600)
+                recyclerView?.smoothScrollBy(0, offset, AccelerateInterpolator(), 500)
             } else {
                 ZPlayerLogs.debug(" enable =  $isAutoScrollToVisible   offset = $offset ")
             }
@@ -322,8 +333,10 @@ abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : Rec
 
     fun resume(position: Int = -1, autoPlay: Boolean = false) {
         isPausedToAutoPlay = false
-        if (autoPlay) handler?.postDelayed({
-            idle(position)
+        handler?.removeMessages(waitingForPlayIdle)
+        if (autoPlay) handler?.sendMessageDelayed(Message.obtain().apply {
+            what = waitingForPlayIdle
+            arg1 = position
         }, 500)
     }
 
@@ -359,6 +372,7 @@ abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : Rec
                 adapter.notifyItemRangeChanged(0, adapter.itemCount, String.format(LOAD_STR_DEFAULT_LOADER, it.arg1, it.obj.toString()))
             }
             waitingForPlayScrolled -> onScrollIdle()
+            waitingForPlayIdle -> idle(it.arg1)
         }
         return@Handler false
     }

@@ -291,7 +291,7 @@ class FeedContentAdapter<T : FeedDataIn> : ListenerAnimAdapter<T>(R.layout.r_mai
 
     private fun resumeIfVisible(): Boolean {
         return if (!data.isNullOrEmpty()) {
-            adapterDelegate?.resume();true
+            adapterDelegate?.resume(true);true
         } else false
     }
 }

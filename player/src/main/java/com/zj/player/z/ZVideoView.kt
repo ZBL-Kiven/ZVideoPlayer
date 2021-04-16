@@ -347,15 +347,15 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
     }
 
     private fun initVolume(isMute: Boolean) {
-        val audioManager = context.getSystemService(Service.AUDIO_SERVICE) as AudioManager
+        val audioManager = context.getSystemService(Service.AUDIO_SERVICE) as? AudioManager
         val volume = if (isMute) 0 else {
-            audioManager.getStreamVolume(AudioManager.STREAM_MUSIC)
-        }
-        var max = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
+            audioManager?.getStreamVolume(AudioManager.STREAM_MUSIC)
+        } ?: 0
+        var max = (audioManager?.getStreamMaxVolume(AudioManager.STREAM_MUSIC) ?: 0)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            max -= audioManager.getStreamMinVolume(AudioManager.STREAM_MUSIC)
+            max -= (audioManager?.getStreamMinVolume(AudioManager.STREAM_MUSIC) ?: 0)
         }
-        controller?.setVolume(volume, max)
+        controller?.setVolume(min(volume, max).coerceAtLeast(0), max.coerceAtLeast(0))
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -1084,7 +1084,7 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
     }
 
     private fun onFocusChanged(v: ZPlayerFullScreenView, isMax: Boolean, fromFocusChange: Boolean) {
-        log("on full max screen $isMax", BehaviorLogsTable.onFullMaxScreen(isMax))
+        log("on focus changed  fullMaxScreen = $isMax", BehaviorLogsTable.onFullMaxScreen(isMax))
         this@ZVideoView.isFullMaxScreen = isMax
         if (isMax) lockScreen?.isSelected = v.isLockedCurrent()
         onFullMaxScreenChanged(isMax, fromFocusChange)

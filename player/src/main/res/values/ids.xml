@@ -5,5 +5,6 @@
     <item name="tag_view_point_z" type="id" />
     <item name="tag_view_enabled" type="id" />
     <item name="delegate_waiting_for_play_scrolled" type="id" />
+    <item name="delegate_waiting_for_play_idle" type="id" />
     <item name="delegate_waiting_for_play_clicked" type="id" />
 </resources>
