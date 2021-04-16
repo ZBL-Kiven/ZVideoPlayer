@@ -346,7 +346,7 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
         })
     }
 
-    private fun initVolume(isMute: Boolean) {
+    protected fun setVolume(isMute: Boolean) {
         val audioManager = context.getSystemService(Service.AUDIO_SERVICE) as? AudioManager
         val volume = if (isMute) 0 else {
             audioManager?.getStreamVolume(AudioManager.STREAM_MUSIC)
@@ -424,9 +424,9 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
         tvEnd?.text = getDuration(videoSize)
         if (muteIsUseGlobal) {
             val isMute = muteGlobalDefault || muteDefault
-            if (muteView?.isSelected != isMute) muteView?.isSelected = isMute;initVolume(isMute)
+            if (muteView?.isSelected != isMute) muteView?.isSelected = isMute;setVolume(isMute)
         } else {
-            if (muteView?.isSelected != muteDefault) muteView?.isSelected = muteDefault;initVolume(muteDefault)
+            if (muteView?.isSelected != muteDefault) muteView?.isSelected = muteDefault;setVolume(muteDefault)
         }
     }
 
@@ -676,7 +676,7 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
     open fun onMuteClick(nextState: Boolean) {
         resendAutoFullScreenAction()
         try {
-            initVolume(nextState)
+            setVolume(nextState)
         } catch (e: Exception) {
             error("the mute click to $nextState failed , trying to check the system audio manager as device type: ${Build.MANUFACTURER}")
         }
