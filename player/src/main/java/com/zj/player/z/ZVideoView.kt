@@ -1031,13 +1031,11 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
                 }
             }
             if (isEnd) {
-                if (controller?.isLoadData() == true) {
-                    if (lastIsFull && resumeFullState) {
-                        full(true, isSetNow = false, ignoreStableVisibility = false)
-                        if (!isInterruptPlayBtnAnim) showOrHidePlayBtn(isShow = true, withState = true)
-                    } else {
-                        hideTopViews(false, 1.0f, isFull = false, ignoreStableVisibility = false)
-                    }
+                if (lastIsFull && resumeFullState) {
+                    full(true, isSetNow = false, ignoreStableVisibility = false)
+                    if (!isInterruptPlayBtnAnim) showOrHidePlayBtn(isShow = true, withState = true)
+                } else {
+                    hideTopViews(false, 1.0f, isFull = false, ignoreStableVisibility = false)
                 }
                 lastIsFull = false
             }
@@ -1070,7 +1068,6 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
         lockScreen?.visibility = GONE
         qualityView?.visibility = GONE
         if (!isShow) {
-            isStartTrack = false
             isFullMaxScreen = false
             fullScreenView = null
             lockScreen?.isSelected = false

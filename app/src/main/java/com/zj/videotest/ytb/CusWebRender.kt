@@ -2,6 +2,7 @@ package com.zj.videotest.ytb
 
 
 import android.content.Context
+import android.graphics.Color
 import android.view.Gravity
 import android.view.MotionEvent
 import android.view.ViewGroup
@@ -43,6 +44,7 @@ class CusWebRender(ctx: Context) : BaseRender(ctx) {
         }
 
         override fun onReady(totalDuration: Long) {
+            setBackgroundColor(Color.BLACK)
             super.onReady(totalDuration)
             notifyTo { this.onPrepare(curPath, totalDuration, false) }
             isReady = true

@@ -80,10 +80,11 @@ abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : Rec
     }
 
     override fun onViewDetachedFromWindow(holder: WeakReference<VH>?) {
-        holder?.get()?.let { h ->
+        holder?.get()?.let holder@{ h ->
             val position = h.adapterPosition
             getViewController(h)?.let {
-                if (it.isFullScreen) return@onViewDetachedFromWindow
+                if (it.isFullScreen) return@holder
+                if (it.isFullScreen) return@holder
                 getItem(position)?.let { p ->
                     val pac = getPathAndLogsCallId(p)
                     pac?.let { pv -> it.onBehaviorDetached(pv.first, pv.second) }
@@ -144,7 +145,30 @@ abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : Rec
 
     final override fun waitingForPlay(curPlayingIndex: Int, delay: Long, fromUser: Boolean) {
         if (curPlayingIndex !in 0 until adapter.itemCount) return
-        if (fromUser) recyclerView?.scrollToPosition(curPlayingIndex)
+        if (fromUser) {
+            recyclerView?.scrollToPosition(curPlayingIndex)
+            run scrollToCenter@{
+                @Suppress("UNCHECKED_CAST") val holder = recyclerView?.findViewHolderForAdapterPosition(curPlayingIndex) as? VH
+                val rect = Rect()
+                val itemView = holder?.itemView ?: return@scrollToCenter
+                itemView.getLocalVisibleRect(rect)
+                if (rect.isEmpty) return@scrollToCenter
+                val cp = Rect()
+                var pb = 0
+                recyclerView?.getLocalVisibleRect(cp)
+                recyclerView?.let {
+                    val pt = it.paddingTop
+                    pb = it.paddingBottom
+                    cp.top += pt + it.translationY.toInt()
+                    cp.bottom -= pb - it.translationY.toInt()
+                }
+                val hib = itemView.bottom
+                val hit = itemView.top
+                if (hit + cp.centerY() > cp.centerY()) {
+                    recyclerView?.scrollBy(0, hib - cp.centerY() - pb)
+                }
+            }
+        }
         handler?.removeMessages(waitingForPlayClicked)
         handler?.sendMessageDelayed(Message.obtain().apply {
             this.what = waitingForPlayClicked
@@ -252,7 +276,6 @@ abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : Rec
                 when (fvi) {
                     lv - 1 -> {
                         val ccf = Rect()
-                        val ccl = Rect()
                         var hft = 0
                         var hlt = 0
                         var hlb = 0
@@ -261,7 +284,6 @@ abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : Rec
                             hft = it.top
                         }
                         (recyclerView?.findViewHolderForAdapterPosition(lv) as? VH)?.itemView?.let {
-                            it.getLocalVisibleRect(ccl)
                             hlt = it.top
                             hlb = it.bottom
                         }
