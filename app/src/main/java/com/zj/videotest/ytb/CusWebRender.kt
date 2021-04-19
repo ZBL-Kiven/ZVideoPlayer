@@ -2,7 +2,7 @@ package com.zj.videotest.ytb
 
 
 import android.content.Context
-import android.graphics.Color
+import android.util.Log
 import android.view.Gravity
 import android.view.MotionEvent
 import android.view.ViewGroup
@@ -38,13 +38,12 @@ class CusWebRender(ctx: Context) : BaseRender(ctx) {
             this@CusWebRender.onSeekParsed(progress, fromUser)
         }
 
-        override fun onCurrentPlayerInfo(curVolume: Int, curSpeed: Float) {
-            super.onCurrentPlayerInfo(curVolume, curSpeed)
+        override fun onCurrentPlayerInfo(curVolume: Int, isMute: Boolean, curSpeed: Float) {
+            super.onCurrentPlayerInfo(curVolume, isMute, curSpeed)
             notifyTo { this.onPlayerInfo(curVolume, curPlayingRate) }
         }
 
         override fun onReady(totalDuration: Long) {
-            setBackgroundColor(Color.BLACK)
             super.onReady(totalDuration)
             notifyTo { this.onPrepare(curPath, totalDuration, false) }
             isReady = true
@@ -179,8 +178,9 @@ class CusWebRender(ctx: Context) : BaseRender(ctx) {
     }
 
     fun setVolume(volume: Int, maxVolume: Int) {
-        ytbDelegate.setVolume((volume * 1.0f / maxVolume * 100f).toInt(), true)
-        notifyTo { onPlayerInfo(ytbDelegate.curVolume, ytbDelegate.curPlayingRate) }
+        val curVolume = (volume * 1.0f / maxVolume * 100f).toInt()
+        ytbDelegate.setVolume(curVolume, true)
+        notifyTo { onPlayerInfo(curVolume, ytbDelegate.curPlayingRate) }
     }
 
     fun requirePlayQuality(level: PlayQualityLevel) {

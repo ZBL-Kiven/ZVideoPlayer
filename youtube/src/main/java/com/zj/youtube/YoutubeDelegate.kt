@@ -128,12 +128,13 @@ abstract class YoutubeDelegate(debugAble: Boolean) : YouTubePlayerListener {
     }
 
     fun setVolume(volumePercent: Int, isFollowToDevice: Boolean) {
+        Utils.log("user set the volume : new volume = $volumePercent , isFollowToDevice =  $isFollowToDevice")
         curVolume = volumePercent
         runWithWebView {
+            if (isFollowToDevice && volumePercent in 0..100) it.loadUrl("javascript:setVolume($volumePercent)")
+            else it.loadUrl("javascript:setVolume(${if (volumePercent <= 0) "0" else "100"})")
             if (volumePercent <= 0) it.loadUrl("javascript:mute()") else {
                 it.loadUrl("javascript:unMute()")
-                if (!isFollowToDevice && volumePercent in 0..100) it.loadUrl("javascript:setVolume($volumePercent)")
-                else it.loadUrl("javascript:setVolume(100)")
             }
         }
     }
@@ -185,7 +186,10 @@ abstract class YoutubeDelegate(debugAble: Boolean) : YouTubePlayerListener {
     override fun onReady(totalDuration: Long) {
         this.isPageReady = true
         this.totalDuration = totalDuration * 1000L
-        pendingIfNotReady?.let { mainThreadHandler.post(it) }
+        pendingIfNotReady?.let {
+            setVolume(curVolume, true)
+            mainThreadHandler.post(it)
+        }
     }
 
     final override fun onStateChange(state: PlayerConstants.PlayerState) {
@@ -235,10 +239,10 @@ abstract class YoutubeDelegate(debugAble: Boolean) : YouTubePlayerListener {
     }
 
     @CallSuper
-    override fun onCurrentPlayerInfo(curVolume: Int, curSpeed: Float) {
-        Utils.log("on video info parsed : volume = $curVolume  speed =  $curSpeed")
+    override fun onCurrentPlayerInfo(curVolume: Int, isMute: Boolean, curSpeed: Float) {
+        Utils.log("on video info parsed : volume = $curVolume isMuted = $isMute  speed =  $curSpeed")
         this.curPlayingRate = curSpeed
-        this.curVolume = curVolume
+        this.curVolume = if (isMute) 0 else curVolume
     }
 
     @CallSuper
@@ -317,7 +321,7 @@ abstract class YoutubeDelegate(debugAble: Boolean) : YouTubePlayerListener {
             if (it == PlayerConstants.PlayerState.BUFFERING) onStateChange(PlayerConstants.PlayerState.BUFFERING.setFrom("sync"))
             if (it == PlayerConstants.PlayerState.PLAYING || it == PlayerConstants.PlayerState.PAUSED.setFrom("sync")) onReady(totalDuration)
             if (it == PlayerConstants.PlayerState.PLAYING) onStateChange(PlayerConstants.PlayerState.PLAYING.setFrom("sync"))
-            onCurrentPlayerInfo(curVolume, curPlayingRate)
+            onCurrentPlayerInfo(curVolume, curVolume <= 0, curPlayingRate)
         }
     }
 }

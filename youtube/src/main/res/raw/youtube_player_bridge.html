@@ -106,9 +106,9 @@
                     return;
 
                 case YT.PlayerState.PLAYING:
-                    sendStateChange(PLAYING);
                     startSendCurrentTimeInterval();
                     sendVideoData(player);
+                    sendStateChange(PLAYING);
                     return;
 
                 case YT.PlayerState.PAUSED:
@@ -128,8 +128,7 @@
                 var videoDuration = player.getDuration();
                 YouTubePlayerBridge.sendVideoDuration(videoDuration);
                 var curVolume = player.getVolume();
-                if(player.isMuted()) {curVolume = 0;}
-                YouTubePlayerBridge.sendPlayerInfo(curVolume, player.getPlaybackRate());
+                YouTubePlayerBridge.sendPlayerInfo(curVolume, player.isMuted(), player.getPlaybackRate());
                 YouTubePlayerBridge.sendPlaybackQualityChange(player.getPlaybackQuality(), player.getAvailableQualityLevels());
             }
 

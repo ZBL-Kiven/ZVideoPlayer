@@ -24,7 +24,6 @@ internal object Utils {
                 sb.append(currentLine).append("\n")
                 currentLine = bufferedReader.readLine()
             }
-
             return sb.toString()
         } catch (e: Exception) {
             throw RuntimeException("Can't parse HTML file.")

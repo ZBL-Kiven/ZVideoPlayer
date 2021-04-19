@@ -51,7 +51,7 @@ interface YouTubePlayerListener {
      * @param curVolume current player volume,range in 0..100
      * @param curSpeed current player speed
      */
-    fun onCurrentPlayerInfo(curVolume: Int, curSpeed: Float)
+    fun onCurrentPlayerInfo(curVolume: Int, isMute: Boolean, curSpeed: Float)
 
     /**
      * Called when the total duration of the video is loaded. <br></br><br></br>

@@ -15,6 +15,7 @@ import android.graphics.drawable.ColorDrawable
 import android.os.Handler
 import android.os.Looper
 import android.os.Message
+import android.util.Log
 import android.view.*
 import android.view.animation.DecelerateInterpolator
 import android.widget.FrameLayout
@@ -474,7 +475,7 @@ internal class ZPlayerFullScreenView constructor(context: Context, private val c
     }
 
     private fun getWindowSize(isMaxFull: Boolean): RectF {
-        return if (isMaxFull || contentLayoutView == null) {
+        val r = if (isMaxFull || contentLayoutView == null) {
             val rp = getViewPoint(mDecorView)
             val w = mDecorView?.width ?: 0
             val h = mDecorView?.height ?: 0
@@ -490,6 +491,13 @@ internal class ZPlayerFullScreenView constructor(context: Context, private val c
                 }.invoke()
             } ?: throw IllegalArgumentException()
         }
+        return r
+    }
+
+    override fun onSizeChanged(w: Int, h: Int, ow: Int, oh: Int) {
+        _width = w * 1.0f
+        _height = h * 1.0f
+        super.onSizeChanged(w, h, ow, oh)
     }
 
     private fun getViewPoint(view: View?): PointF {

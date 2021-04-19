@@ -62,7 +62,7 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
     companion object {
         private const val dismissFullTools = 7817
         private const val loadingModeDelay = 7716
-        private var muteGlobalDefault: Boolean = false
+        var muteGlobalDefault: Boolean = false
         const val LOCK_SCREEN_UNSPECIFIED = -1
         const val LOCK_SCREEN_LANDSCAPE = 0
         const val LOCK_SCREEN_PORTRAIT = 1
@@ -347,15 +347,17 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
     }
 
     protected fun setVolume(isMute: Boolean) {
-        val audioManager = context.getSystemService(Service.AUDIO_SERVICE) as? AudioManager
-        val volume = if (isMute) 0 else {
-            audioManager?.getStreamVolume(AudioManager.STREAM_MUSIC)
-        } ?: 0
-        var max = (audioManager?.getStreamMaxVolume(AudioManager.STREAM_MUSIC) ?: 0)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            max -= (audioManager?.getStreamMinVolume(AudioManager.STREAM_MUSIC) ?: 0)
+        controller?.let {
+            val audioManager = context.getSystemService(Service.AUDIO_SERVICE) as? AudioManager
+            val volume = if (isMute) 0 else {
+                audioManager?.getStreamVolume(AudioManager.STREAM_MUSIC)
+            } ?: 0
+            var max = (audioManager?.getStreamMaxVolume(AudioManager.STREAM_MUSIC) ?: 0)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                max -= (audioManager?.getStreamMinVolume(AudioManager.STREAM_MUSIC) ?: 0)
+            }
+            it.setVolume(min(volume, max).coerceAtLeast(0), max.coerceAtLeast(0))
         }
-        controller?.setVolume(min(volume, max).coerceAtLeast(0), max.coerceAtLeast(0))
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -394,6 +396,7 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
 
     override fun onControllerBind(controller: ZController<*, *>?) {
         this.controller = controller
+        if (controller != null) setVolume(if (muteIsUseGlobal) getMuteGlobalDefault() else getMuteDefault())
     }
 
     override fun onDestroy(path: String?, isRegulate: Boolean) {
@@ -422,15 +425,11 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
         seekBar?.isEnabled = true
         this.videoTotalTime = videoSize
         tvEnd?.text = getDuration(videoSize)
-        if (muteIsUseGlobal) {
-            val isMute = muteGlobalDefault || muteDefault
-            if (muteView?.isSelected != isMute) muteView?.isSelected = isMute;setVolume(isMute)
-        } else {
-            if (muteView?.isSelected != muteDefault) muteView?.isSelected = muteDefault;setVolume(muteDefault)
-        }
+        onSyncVolume()
     }
 
     override fun onPlay(path: String, isRegulate: Boolean) {
+        onSyncVolume()
         if (!isFullScreen && playAutoFullScreen) {
             fullScreen?.let { onFullScreenClick(!it.isSelected, false) }
         }
@@ -454,8 +453,6 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
     @CallSuper
     override fun updateCurPlayerInfo(volume: Int, speed: Float) {
         val nextState = volume <= 0
-        if (muteIsUseGlobal) muteGlobalDefault = nextState
-        muteDefault = nextState
         muteView?.isSelected = nextState
         var lastMinValue = 100000f
         val realSpeed = speed.coerceAtLeast(supportedSpeedList.first())
@@ -574,6 +571,14 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
         return videoOverrideImageShaderView
     }
 
+    open fun getMuteDefault(): Boolean {
+        return muteDefault
+    }
+
+    open fun getMuteGlobalDefault(): Boolean {
+        return muteGlobalDefault
+    }
+
     open fun setScreenContentLayout(@LayoutRes layoutId: Int, onFullScreenLayoutInflateListener: ((v: View) -> Unit)? = null) {
         this.fullScreenContentLayoutId = layoutId
         this.onFullScreenLayoutInflateListener = onFullScreenLayoutInflateListener
@@ -589,6 +594,15 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
 
     open fun onTouchActionEvent(videoRoot: View?, event: MotionEvent, lastX: Float, lastY: Float, orientation: TrackOrientation?): Boolean {
         return false
+    }
+
+    open fun onSyncVolume(volume: Int = controller?.getCurVolume() ?: 0) {
+        if (muteIsUseGlobal) {
+            val isMute = getMuteGlobalDefault()
+            if (muteView?.isSelected != isMute) muteView?.isSelected = isMute;setVolume(isMute)
+        } else {
+            if (muteView?.isSelected != getMuteDefault()) muteView?.isSelected = getMuteDefault();setVolume(getMuteDefault())
+        }
     }
 
     open fun onPlayClick(fromUser: Boolean) {
@@ -676,6 +690,8 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
     open fun onMuteClick(nextState: Boolean) {
         resendAutoFullScreenAction()
         try {
+            if (muteIsUseGlobal) muteGlobalDefault = nextState
+            muteDefault = nextState
             setVolume(nextState)
         } catch (e: Exception) {
             error("the mute click to $nextState failed , trying to check the system audio manager as device type: ${Build.MANUFACTURER}")
@@ -1058,7 +1074,7 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
         onSeekChanged(0, 0, false, 0, 0)
         if (isRegulate) showOrHidePlayBtn(isShowPlayBtn, withState = false)
         full(false, isSetNow = isNow, ignoreStableVisibility = false)
-        muteView?.isSelected = if (muteIsUseGlobal) muteGlobalDefault || muteDefault else muteDefault
+        muteView?.isSelected = if (muteIsUseGlobal) getMuteGlobalDefault() || getMuteDefault() else getMuteDefault()
         qualityView?.visibility = View.GONE
     }
 

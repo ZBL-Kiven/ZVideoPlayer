@@ -61,7 +61,6 @@
         app:keepScreenOnWhenPlaying="true"
         app:loadingIgnoreTs="200"
         app:lockScreenRotation="LANDSCAPE"
-        app:muteDefault="true"
         app:muteIconEnable="DISPLAY_FOREVER"
         app:playIconEnable="DISPLAY_GONE"
         app:scrollXEnabled="false" />

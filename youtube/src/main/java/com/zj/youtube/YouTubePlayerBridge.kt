@@ -73,7 +73,7 @@ open class YouTubePlayerBridge(private val youTubePlayerOwner: YouTubePlayerList
     }
 
     @JavascriptInterface
-    fun sendPlayerInfo(volume: String, speed: String) {
+    fun sendPlayerInfo(volume: String, isMute: Boolean, speed: String) {
         val curSpeed: Float
         val curVolome: Int
         try {
@@ -84,7 +84,7 @@ open class YouTubePlayerBridge(private val youTubePlayerOwner: YouTubePlayerList
             return
         }
         mainThreadHandler.post {
-            youTubePlayerOwner.onCurrentPlayerInfo(curVolome, curSpeed)
+            youTubePlayerOwner.onCurrentPlayerInfo(curVolome, isMute, curSpeed)
         }
     }
 
