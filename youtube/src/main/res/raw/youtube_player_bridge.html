@@ -115,9 +115,7 @@
                         var brothers = [];
                         for (var index = 0; index < parent.childNodes.length; index++) {
                             var ele = parent.childNodes[index];
-                            var cls = ele.classList;
-                            var isLoading = cls && cls.contains('ytp-spinner');
-                            if (node != ele && ele.nodeName != 'SCRIPT' && ele.nodeName != 'NOSCRIPT' && !isLoading) {
+                            if (node != ele && ele.nodeName != 'SCRIPT' && ele.nodeName != 'NOSCRIPT') {
                                 brothers.push(ele);
                             }
                         }
