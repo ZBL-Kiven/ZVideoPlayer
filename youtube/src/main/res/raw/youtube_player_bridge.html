@@ -1,207 +1,200 @@
 <!DOCTYPE html>
 <html>
     <style type="text/css">
-        html, body {
+        html,
+        body {
             height: 100%;
             width: 100%;
             margin: 0;
             padding: 0;
-            background-color:transparent;
+            background-color: transparent;
         }
-
     </style>
     <head>
-        <meta
-                name="viewport"
-                content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
         <script src="https://www.youtube.com/iframe_api"></script>
     </head>
 
     <body>
         <div id="youTubePlayerDOM"></div>
-    </body>
+        <script type="text/javascript">
+            var UNSTARTED = 'UNSTARTED';
+            var ENDED = 'ENDED';
+            var PLAYING = 'PLAYING';
+            var PAUSED = 'PAUSED';
+            var BUFFERING = 'BUFFERING';
+            var CUED = 'CUED';
+            var YouTubePlayerBridge = window.YouTubePlayerBridge;
+            var player;
+            var timerId;
 
-</html>
-<script type="text/javascript">
-        
-        var UNSTARTED = "UNSTARTED";
-        var ENDED = "ENDED";
-        var PLAYING = "PLAYING";
-        var PAUSED = "PAUSED";
-        var BUFFERING = "BUFFERING";
-        var CUED = "CUED";
-        var YouTubePlayerBridge = window.YouTubePlayerBridge;
-        var player;
-        var timerId;
+            function onYouTubeIframeAPIReady() {
+                player = new YT.Player('youTubePlayerDOM', {
+                    events: {
+                        onReady: function (event) {
+                            YouTubePlayerBridge.sendReady(event.target.getDuration());
+                        },
+                        onStateChange: function (event) {
+                            sendPlayerStateChange(event.data);
+                        },
+                        onPlaybackQualityChange: function (event) {
+                            YouTubePlayerBridge.sendPlaybackQualityChange(event.data, event.target.getAvailableQualityLevels());
+                        },
+                        onPlaybackRateChange: function (event) {
+                            YouTubePlayerBridge.sendPlaybackRateChange(event.data);
+                        },
+                        onError: function (error) {
+                            YouTubePlayerBridge.sendError(error.data);
+                        },
+                        onApiChange: function (event) {
+                            YouTubePlayerBridge.sendApiChange();
+                        },
+                    },
 
-        function onYouTubeIframeAPIReady() {
-
-            player = new YT.Player('youTubePlayerDOM', {
-
-                events: {
-                    onReady: function(event) { YouTubePlayerBridge.sendReady(event.target.getDuration()) },
-                    onStateChange: function(event) { sendPlayerStateChange(event.data) },
-                    onPlaybackQualityChange: function(event) { YouTubePlayerBridge.sendPlaybackQualityChange(event.data, event.target.getAvailableQualityLevels()) },
-                    onPlaybackRateChange: function(event) { YouTubePlayerBridge.sendPlaybackRateChange(event.data) },
-                    onError: function(error) { YouTubePlayerBridge.sendError(error.data) },
-                    onApiChange: function(event) { YouTubePlayerBridge.sendApiChange() }
-                },
-
-                playerVars: <<injectedPlayerVars>>
-
-            });
-            player.setSize(window.innerWidth,window.innerHeight)
-            YouTubePlayerBridge.sendYouTubeIFrameAPIReady();
-        }
-
-        var times;
-
-        function hideInfo(){
-            var dom = player&&player.h&&player.h.contentWindow&&player.h.contentWindow.document;
-            if (!dom){return}
-            var div = dom.getElementsByClassName('ytp-chrome-top')[0];
-            if (div){
-                div.style.display='none';
+                    playerVars: <<injectedPlayerVars>>
+                });
+                player.setSize(window.innerWidth, window.innerHeight);
+                YouTubePlayerBridge.sendYouTubeIFrameAPIReady();
             }
-            var popups = dom.getElementsByClassName('ytp-popup')[0];
-            if (popups){
-                popups.style.display='none';
-            }
-            var b = dom.body;
-            if(b){
-                 b.setAttribute("style", "background-color:transparent;");
-            }
-            var div1 = dom.getElementsByClassName('ytp-gradient-top')[0];
-            if(div1){
-                 div1.style.display='none';
-            }
-            var ct = dom.getElementsByClassName('ytp-watermark')[0];
-            if(ct){
-                ct.style.display='none';
-            }
-            var pl = dom.getElementsByClassName('html5-video-player')[0];
-            if(pl){
-                pl.setAttribute("style", "background-color:transparent;");
-            }
-            var p1 = dom.getElementById('player');
-            if(p1){
-                p1.setAttribute("style", "background-color:transparent;");
-            }
-        }
+            function sendPlayerStateChange(playerState) {
+                clearTimeout(timerId);
+                hideOverlay();
+                switch (playerState) {
+                    case YT.PlayerState.UNSTARTED:
+                        sendStateChange(UNSTARTED);
+                        return;
 
-        function sendPlayerStateChange(playerState) {
-            clearTimeout(timerId);
-            hideOverlay();
-            switch (playerState) {
-                case YT.PlayerState.UNSTARTED:
-                    sendStateChange(UNSTARTED);
-                    return;
+                    case YT.PlayerState.ENDED:
+                        sendStateChange(ENDED);
+                        return;
 
-                case YT.PlayerState.ENDED:
-                    sendStateChange(ENDED);
-                    return;
+                    case YT.PlayerState.PLAYING:
+                        startSendCurrentTimeInterval();
+                        sendVideoData(player);
+                        sendStateChange(PLAYING);
+                        return;
 
-                case YT.PlayerState.PLAYING:
-                    startSendCurrentTimeInterval();
-                    sendVideoData(player);
-                    sendStateChange(PLAYING);
-                    return;
+                    case YT.PlayerState.PAUSED:
+                        sendStateChange(PAUSED);
+                        return;
 
-                case YT.PlayerState.PAUSED:
-                    sendStateChange(PAUSED);
-                    return;
+                    case YT.PlayerState.BUFFERING:
+                        sendStateChange(BUFFERING);
+                        return;
 
-                case YT.PlayerState.BUFFERING:
-                    sendStateChange(BUFFERING);
-                    return;
+                    case YT.PlayerState.CUED:
+                        sendStateChange(CUED);
+                        return;
+                }
 
-                case YT.PlayerState.CUED:
-                    sendStateChange(CUED);
-                    return;
-            }
+                function sendVideoData(player) {
+                    var videoDuration = player.getDuration();
+                    YouTubePlayerBridge.sendVideoDuration(videoDuration);
+                    var curVolume = player.getVolume();
+                    YouTubePlayerBridge.sendPlayerInfo(curVolume, player.isMuted(), player.getPlaybackRate());
+                    YouTubePlayerBridge.sendPlaybackQualityChange(player.getPlaybackQuality(), player.getAvailableQualityLevels());
+                }
 
-            function sendVideoData(player) {
-                var videoDuration = player.getDuration();
-                YouTubePlayerBridge.sendVideoDuration(videoDuration);
-                var curVolume = player.getVolume();
-                YouTubePlayerBridge.sendPlayerInfo(curVolume, player.isMuted(), player.getPlaybackRate());
-                YouTubePlayerBridge.sendPlaybackQualityChange(player.getPlaybackQuality(), player.getAvailableQualityLevels());
-            }
+                function hideOverlay() {
+                    var idom = player && player.h && player.h.contentWindow && player.h.contentWindow.document;
+                    var video = idom && idom.getElementsByTagName('video')[0];
+                    if (video) {
+                        removeRecursive(video);
+                    }
+                }
+                function removeRecursive(node) {
+                    if (node.nodeName == 'BODY') return;
+                    removeBrother(node);
+                    if (node.parentNode) {
+                        removeRecursive(node.parentNode);
+                    }
+                }
+                function removeBrother(node) {
+                    var parent = node.parentNode;
+                    if (parent) {
+                        var brothers = [];
+                        for (var index = 0; index < parent.childNodes.length; index++) {
+                            var ele = parent.childNodes[index];
+                            var cls = ele.classList;
+                            var isLoading = cls && cls.contains('ytp-spinner');
+                            if (node != ele && ele.nodeName != 'SCRIPT' && ele.nodeName != 'NOSCRIPT' && !isLoading) {
+                                brothers.push(ele);
+                            }
+                        }
+                        for (let index = 0; index < brothers.length; index++) {
+                            parent.removeChild(brothers[index]);
+                        }
+                    }
+                }
 
-            function hideOverlay(){
-                var idom = player&&player.h&&player.h.contentWindow&&player.h.contentWindow.document;
-                var div = idom && idom.getElementsByClassName('ytp-pause-overlay')[0];
-                if (div){
-                    div.style.display = 'none';
+                function sendStateChange(newState) {
+                    YouTubePlayerBridge.sendStateChange(newState);
+                }
+
+                function startSendCurrentTimeInterval() {
+                    timerId = setInterval(function () {
+                        YouTubePlayerBridge.sendVideoCurrentTime(player.getCurrentTime());
+                        YouTubePlayerBridge.sendVideoLoadedFraction(player.getVideoLoadedFraction());
+                    }, 500);
                 }
             }
 
-            function sendStateChange(newState) {
-                YouTubePlayerBridge.sendStateChange(newState);
+            // JAVA to WEB functions
+
+            function seekTo(startSeconds, formDrag) {
+                player.seekTo(startSeconds, formDrag);
             }
 
-            function startSendCurrentTimeInterval() {
-                timerId = setInterval(function() {
-                    YouTubePlayerBridge.sendVideoCurrentTime(player.getCurrentTime());
-                    YouTubePlayerBridge.sendVideoLoadedFraction(player.getVideoLoadedFraction());
-                }, 500 );
+            function pauseVideo() {
+                player.pauseVideo();
             }
-        }
 
-        // JAVA to WEB functions
+            function playVideo() {
+                player.playVideo();
+            }
 
-        function seekTo(startSeconds,formDrag) {
-            player.seekTo(startSeconds, formDrag);
-        }
+            function stop() {
+                player.pauseVideo();
+                player.setPlaybackRate(1.0);
+            }
 
-        function pauseVideo() {
-            player.pauseVideo();
-        }
+            function loadVideoById(videoId, startSeconds, suggestionQuality) {
+                player.loadVideoById(videoId, startSeconds, suggestionQuality);
+                YouTubePlayerBridge.sendVideoId(videoId);
+            }
 
-        function playVideo() {
-            player.playVideo();
-        }
+            function cueVideo(videoId, startSeconds) {
+                player.cueVideoById(videoId, startSeconds);
+                YouTubePlayerBridge.sendVideoId(videoId);
+            }
 
-        function stop(){
-            player.pauseVideo();
-            player.setPlaybackRate(1.0);
-        }
+            function mute() {
+                player.mute();
+            }
 
-        function loadVideoById(videoId, startSeconds, suggestionQuality) {
-            player.loadVideoById(videoId, startSeconds,suggestionQuality);
-            YouTubePlayerBridge.sendVideoId(videoId);
-        }
+            function unMute() {
+                player.unMute();
+            }
 
-        function cueVideo(videoId, startSeconds) {
-            player.cueVideoById(videoId, startSeconds);
-            YouTubePlayerBridge.sendVideoId(videoId);
-        }
+            function setPlaybackRate(rate) {
+                player.setPlaybackRate(rate);
+            }
 
-        function mute() {
-            player.mute();
-        }
+            // seems it's ignored in i-frame
+            function setPlaybackQuality(quality) {
+                player.setPlaybackQuality(quality);
+            }
 
-        function unMute() {
-            player.unMute();
-        }
+            function setVolume(volumePercent) {
+                player.setVolume(volumePercent);
+            }
 
-        function setPlaybackRate(rate) {
-            player.setPlaybackRate(rate);
-        }
-
-        // seems it's ignored in i-frame
-        function setPlaybackQuality(quality) {
-            player.setPlaybackQuality(quality);
-        }
-
-        function setVolume(volumePercent) {
-            player.setVolume(volumePercent);
-        }
-
-        function destroy(){
-            player.destroy();
-        }
-        window.onresize = function(){
-            player.setSize(window.innerWidth,window.innerHeight);
-        }
-    </script>
+            function destroy() {
+                player.destroy();
+            }
+            window.onresize = function () {
+                player.setSize(window.innerWidth, window.innerHeight);
+            };
+        </script>
+    </body>
+</html>
