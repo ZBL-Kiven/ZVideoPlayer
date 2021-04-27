@@ -7,8 +7,6 @@
             margin: 0;
             padding: 0;
             background-color:transparent;
-            overflow: hidden;
-            position: fixed;
         }
 
     </style>
@@ -23,7 +21,8 @@
         <div id="youTubePlayerDOM"></div>
     </body>
 
-    <script type="text/javascript">
+</html>
+<script type="text/javascript">
         
         var UNSTARTED = "UNSTARTED";
         var ENDED = "ENDED";
@@ -39,9 +38,6 @@
 
             player = new YT.Player('youTubePlayerDOM', {
 
-                height: '100%',
-                width: '100%',
-
                 events: {
                     onReady: function(event) { YouTubePlayerBridge.sendReady(event.target.getDuration()) },
                     onStateChange: function(event) { sendPlayerStateChange(event.data) },
@@ -54,7 +50,7 @@
                 playerVars: <<injectedPlayerVars>>
 
             });
-
+            player.setSize(window.innerWidth,window.innerHeight)
             YouTubePlayerBridge.sendYouTubeIFrameAPIReady();
         }
 
@@ -95,7 +91,7 @@
 
         function sendPlayerStateChange(playerState) {
             clearTimeout(timerId);
-
+            hideOverlay();
             switch (playerState) {
                 case YT.PlayerState.UNSTARTED:
                     sendStateChange(UNSTARTED);
@@ -130,6 +126,14 @@
                 var curVolume = player.getVolume();
                 YouTubePlayerBridge.sendPlayerInfo(curVolume, player.isMuted(), player.getPlaybackRate());
                 YouTubePlayerBridge.sendPlaybackQualityChange(player.getPlaybackQuality(), player.getAvailableQualityLevels());
+            }
+
+            function hideOverlay(){
+                var idom = player&&player.h&&player.h.contentWindow&&player.h.contentWindow.document;
+                var div = idom && idom.getElementsByClassName('ytp-pause-overlay')[0];
+                if (div){
+                    div.style.display = 'none';
+                }
             }
 
             function sendStateChange(newState) {
@@ -197,6 +201,7 @@
         function destroy(){
             player.destroy();
         }
-
+        window.onresize = function(){
+            player.setSize(window.innerWidth,window.innerHeight);
+        }
     </script>
-</html>

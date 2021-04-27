@@ -8,57 +8,24 @@
     </style>
 
     <style name="CustomSeekBarStyle">
-        <item name="android:maxHeight">3dp</item>
+        <item name="android:maxHeight">2dp</item>
         <item name="android:indeterminateOnly">false</item>
         <item name="android:indeterminateDrawable">@color/z_player_color_white</item>
         <item name="android:progressDrawable">@drawable/z_player_video_seek_bar_progress_drawable
         </item>
-        <item name="android:minHeight">1dp</item>
+        <item name="android:minHeight">2dp</item>
         <item name="android:thumb">@drawable/z_player_video_seek_thumb</item>
     </style>
 
     <style name="SingleCustomSeekBarStyle">
-        <item name="android:maxHeight">2dp</item>
+        <item name="android:maxHeight">1.5dp</item>
         <item name="android:indeterminateOnly">false</item>
         <item name="android:indeterminateDrawable">@color/z_player_color_white</item>
         <item name="android:progressDrawable">
             @drawable/z_player_video_seek_bar_progress_drawable_single
         </item>
-        <item name="android:minHeight">2dp</item>
+        <item name="android:minHeight">1.5dp</item>
         <item name="android:thumb">@drawable/z_player_video_seek_thumb_single</item>
     </style>
-
-    <style name="BaseGestureFullScreenDialogStyle" parent="Theme.AppCompat.Light.NoActionBar">
-        <item name="windowNoTitle">true</item>
-        <item name="android:keepScreenOn">true</item>
-        <item name="android:windowIsTranslucent">true</item>
-        <item name="android:windowBackground">@android:color/transparent</item>
-        <item name="android:backgroundDimEnabled">false</item>
-        <item name="android:fitsSystemWindows">false</item>
-        <item name="android:clipToPadding">false</item>
-        <item name="android:clipChildren">false</item>
-    </style>
-
-<!--    <style name="menuPopStyle">-->
-<!--        <item name="android:popupMenuStyle">@style/popMenuStyle</item>-->
-<!--        <item name="android:dropDownListViewStyle">@style/popMenuDivier</item>-->
-<!--        <item name="android:textAppearanceSmallPopupMenu">@style/popMeuText</item>-->
-<!--        <item name="android:textAppearanceLargePopupMenu">@style/popMeuText</item>-->
-<!--    </style>-->
-<!--    &lt;!&ndash;popMenu的Style&ndash;&gt;-->
-<!--    <style name="popMenuStyle" parent="@android:style/Widget.PopupMenu">-->
-<!--        <item name="android:popupBackground"></item>&lt;!&ndash; popMenu的背景色&ndash;&gt;-->
-<!--    </style>-->
-<!--    &lt;!&ndash;popmenu的字体颜色&ndash;&gt;-->
-<!--    <style name="popMeuText">-->
-<!--        <item name="android:textColor">@color/white</item>-->
-<!--        <item name="android:textSize">20sp</item>-->
-<!--        <item name="android:gravity">center</item>-->
-<!--    </style>-->
-<!--    &lt;!&ndash;popMenu分割线的颜色&ndash;&gt;-->
-<!--    <style name="popMenuDivier">-->
-<!--        <item name="android:divider">@color/blueSky</item>-->
-<!--        <item name="android:dividerHeight">2sp</item>-->
-<!--    </style>-->
 
 </resources>

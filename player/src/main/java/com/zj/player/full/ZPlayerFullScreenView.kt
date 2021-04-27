@@ -498,6 +498,7 @@ internal class ZPlayerFullScreenView constructor(context: Context, private val c
         _width = w * 1.0f
         _height = h * 1.0f
         super.onSizeChanged(w, h, ow, oh)
+        requestLayout()
     }
 
     private fun getViewPoint(view: View?): PointF {
@@ -548,24 +549,6 @@ internal class ZPlayerFullScreenView constructor(context: Context, private val c
         if (hasFocus) changeSystemWindowVisibility(true)
         checkSelfScreenLockAvailable(isScreenRotateLocked)
         config.onFullContentListener?.onFocusChange(this, isMaxFull)
-    }
-
-    override fun onConfigurationChanged(newConfig: Configuration?) {
-        super.onConfigurationChanged(newConfig)
-        if (newConfig == null) return
-        try {
-            val isPortrait = newConfig.screenWidthDp < newConfig.screenHeightDp
-            val isReduce = if (config.defaultScreenOrientation == ZVideoView.LOCK_SCREEN_LANDSCAPE) isPortrait else curScreenRotation?.isLandSpace() != false
-            runWithControllerView {
-                val w = _width.roundToInt()
-                val h = _height.roundToInt()
-                val vlp = LayoutParams(if (isReduce) h else w, if (isReduce) w else h)
-                vlp.gravity = Gravity.CENTER
-                it.layoutParams = vlp
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
     }
 
     private fun checkSelfScreenLockAvailable(newState: Boolean): Boolean {

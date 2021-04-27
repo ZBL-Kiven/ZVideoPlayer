@@ -25,7 +25,6 @@ internal abstract class GestureTouchListener(private val intercepted: () -> Bool
     private var paddingY: Float = 0.0f
     private var inTouching = false
     private var startTrack = false
-    private var isRemoved = false
     private var interpolator = 58f
     private var triggerX = 230f
     private var triggerY = 400f
@@ -64,7 +63,7 @@ internal abstract class GestureTouchListener(private val intercepted: () -> Bool
             }
             MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
                 try {
-                    val isTap = !isRemoved && (abs((noPaddingClickPointStart?.x ?: _x) - max(event.rawX, paddingX)) < toleranceClick && abs((noPaddingClickPointStart?.y ?: _y) - event.rawY) < toleranceClick)
+                    val isTap = (abs((noPaddingClickPointStart?.x ?: _x) - max(event.rawX, paddingX)) < toleranceClick && abs((noPaddingClickPointStart?.y ?: _y) - event.rawY) < toleranceClick)
                     val isDisInterrupted = if (!isTap) !onTouchActionEvent(event, lstX, lstY, null) else true
                     val isParseEnd = if (isDisInterrupted) onEventEnd(min(triggerY, event.rawY - _y) / triggerY, !isTap && isDisInterrupted) else false
                     if (isTap && (isDisInterrupted || isParseEnd)) {
@@ -94,13 +93,16 @@ internal abstract class GestureTouchListener(private val intercepted: () -> Bool
                 val x = event.rawX
                 val y = max(event.rawY, _y)
                 try {
-                    val orientation = parseCurOrientation(x, y)
-                    val interrupt = onTouchActionEvent(event, lstX, lstY, realOrientation)
-                    if (orientation || interrupt) {
-                        init(v, event); return true
+                    val xMoved = abs((noPaddingClickPointStart?.x ?: _x) - x) !in 0f..toleranceClick
+                    val yMoved = abs((noPaddingClickPointStart?.y ?: _y) - event.rawY) !in 0f..toleranceClick
+                    if (xMoved || yMoved) {
+                        val orientation = parseCurOrientation(x, y)
+                        val interrupt = onTouchActionEvent(event, lstX, lstY, realOrientation)
+                        if (orientation || interrupt) {
+                            init(v, event); return true
+                        }
+                        parseCurTouchOffset(x, y)
                     }
-                    isRemoved = true
-                    parseCurTouchOffset(x, y)
                 } finally {
                     lstX = event.rawX;lstY = max(event.rawY, _y)
                 }
@@ -110,7 +112,7 @@ internal abstract class GestureTouchListener(private val intercepted: () -> Bool
     }
 
     private fun reset() {
-        lstY = 0f;lstX = 0f;_x = 0f;_y = 0f;startX = 0f;startY = 0f;curOrientation = null;lastOrientation = null;realOrientation = null;inTouching = false;isRemoved = false
+        lstY = 0f;lstX = 0f;_x = 0f;_y = 0f;startX = 0f;startY = 0f;curOrientation = null;lastOrientation = null;realOrientation = null;inTouching = false
     }
 
     private fun init(v: View?, event: MotionEvent) {
