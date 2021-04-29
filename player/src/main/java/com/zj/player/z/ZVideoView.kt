@@ -83,6 +83,7 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
         }
         return@Handler false
     }
+    protected var whRatio: Float = 0f
     protected var autoFullTools = true
     protected var autoFullInterval = 3000
     protected var loadingIgnoreInterval = 0
@@ -1261,5 +1262,22 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
         return if ((menuView?.visibility ?: View.GONE) != View.GONE) {
             menuView?.visibility = View.GONE;true
         } else fullScreenView?.isInterruptTouchEvent() ?: false
+    }
+
+    override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
+        if (whRatio <= 0) super.onSizeChanged(w, h, oldw, oldh)
+        else {
+            val first = if (w > 0) w else if (h > 0) h else 0
+            var width = first
+            var height = first
+            when (first) {
+                w -> height = (w / whRatio + 0.5f).toInt()
+                h -> width = (h * whRatio + 0.5f).toInt()
+                else -> {
+                    super.onSizeChanged(w, h, oldw, oldh);return
+                }
+            }
+            super.onSizeChanged(width, height, oldw, oldh)
+        }
     }
 }

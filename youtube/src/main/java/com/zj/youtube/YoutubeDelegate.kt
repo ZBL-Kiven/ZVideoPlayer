@@ -71,6 +71,7 @@ abstract class YoutubeDelegate(debugAble: Boolean) : YouTubePlayerListener {
     fun initYoutubeScript(transparentWebBackground: Boolean, playerOptions: IFramePlayerOptions) {
         val ctx = getWebView()?.context ?: return
         val htmlPage = Utils.readHTMLFromUTF8File(ctx.resources.openRawResource(R.raw.youtube_player_bridge)).replace("<<injectedPlayerVars>>", playerOptions.toString())
+        Utils.log(htmlPage)
         runWithWebView {
             it.settings?.mediaPlaybackRequiresUserGesture = false
             it.settings?.cacheMode = WebSettings.LOAD_NO_CACHE
@@ -271,7 +272,6 @@ abstract class YoutubeDelegate(debugAble: Boolean) : YouTubePlayerListener {
         val state = playerState.level > PlayerConstants.PlayerState.ENDED.level || playerState == PlayerConstants.PlayerState.PAUSED
         Utils.log("query cur state isLoadData = $state")
         return state
-
     }
 
     fun isLoading(accurate: Boolean): Boolean {
