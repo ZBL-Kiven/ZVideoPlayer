@@ -36,6 +36,7 @@ abstract class BaseListVideoController @JvmOverloads constructor(c: Context, att
     }
 
     override fun onPlayClick(fromUser: Boolean) {
+        isCompleted = false
         load(false, fromUser)
     }
 
@@ -49,11 +50,13 @@ abstract class BaseListVideoController @JvmOverloads constructor(c: Context, att
     }
 
     override fun onPlay(path: String, isRegulate: Boolean) {
+        isCompleted = false
         super.onPlay(path, isRegulate)
         playingStateListener?.invoke(this)
     }
 
     private fun load(reload: Boolean, fromUser: Boolean) {
+        isCompleted = false
         if (controller?.isLoadData() == true) {
             if (reload) super.reload() else super.onPlayClick(false)
         } else {

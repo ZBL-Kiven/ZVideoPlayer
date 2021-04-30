@@ -11,7 +11,6 @@ class VideoRootView @JvmOverloads constructor(context: Context, attributeSet: At
 
     private var isInterceptOtherTouch: (() -> Boolean)? = null
     private var onTargetChanged: ((v: View, e: MotionEvent) -> Boolean?)? = null
-
     internal fun setTouchInterceptor(isInterceptOtherTouch: (() -> Boolean)? = null) {
         this.isInterceptOtherTouch = isInterceptOtherTouch
     }

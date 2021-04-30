@@ -3,7 +3,7 @@
     <item android:id="@android:id/background">
         <shape>
             <corners android:radius="5dp"/>
-            <solid android:color="@color/z_player_color_white"/>
+            <solid android:color="@color/z_player_color_seek_bar_bg"/>
         </shape>
     </item>
     <item android:id="@android:id/secondaryProgress">
@@ -15,7 +15,7 @@
                 <item>
                     <shape>
                         <corners android:radius="5dp"/>
-                        <solid android:color="@android:color/darker_gray"/>
+                        <solid android:color="@color/z_player_color_seek_bar_secondary_progress_bg"/>
                     </shape>
                 </item>
             </selector>

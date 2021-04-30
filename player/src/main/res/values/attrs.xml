@@ -2,8 +2,6 @@
 <resources>
 
     <declare-styleable name="ZVideoView">
-        <!-- the width & height auto ratio by this, if it not equals to 0-->
-        <attr name="whRatio" format="float" />
         <!-- Loading video shows the pre-shake time of loading animation -->
         <attr name="loadingIgnoreTs" format="integer" />
         <!-- The background color used for the video prompt layer -->

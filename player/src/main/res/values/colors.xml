@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="z_player_color_primary">#FF36485E</color>
+    <color name="z_player_color_seek_bar_bg">#FFF3F7FC</color>
+    <color name="z_player_color_seek_bar_secondary_progress_bg">#FFE7E7E7</color>
+    <color name="z_player_color_small_seek_bar_bg">#FFF3F7FC</color>
+    <color name="z_player_color_small_seek_bar_secondary_progress_bg">#FFE7E7E7</color>
+    <color name="z_player_color_small_seek_bar_secondary_stroke_progress_bg">#FFD9D9D9</color>
     <color name="z_player_color_white">#FFFFFFFF</color>
     <color name="z_player_color_gray">#FFA4A4A4</color>
     <color name="z_player_color_loading">#FFC4C6C0</color>
