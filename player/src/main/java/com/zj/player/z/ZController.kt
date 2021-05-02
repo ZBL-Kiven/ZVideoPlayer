@@ -298,7 +298,6 @@ open class ZController<P : BasePlayer<R>, R : BaseRender> internal constructor(v
             render = null
         }
         viewController = null
-        seekProgressInterval = -1
         curAccessKey = releaseKey
     }
 
