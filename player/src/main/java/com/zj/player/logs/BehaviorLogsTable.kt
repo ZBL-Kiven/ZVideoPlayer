@@ -35,6 +35,14 @@ internal object BehaviorLogsTable {
         return PlayerBaseData(detail = "video set volume", name = "setVolume", params = mapOf(Pair("volume", volume), Pair("callId", callId ?: "")))
     }
 
+    fun videoStartProgressListener(callId: Any?, curLookedPercent: Float): PlayerBaseData {
+        return PlayerBaseData(detail = "video add progress listener", name = "progressListenerAdd", params = mapOf(Pair("percent", curLookedPercent), Pair("callId", callId ?: "")))
+    }
+
+    fun videoRemoveProgressListener(callId: Any?, curLookedPercent: Float): PlayerBaseData {
+        return PlayerBaseData(detail = "video remove progress listener", name = "progressListenerRemove", params = mapOf(Pair("percent", curLookedPercent), Pair("callId", callId ?: "")))
+    }
+
     //------- ZController ------
     const val TYPE_CONTROLLER = "controllerEvent"
 

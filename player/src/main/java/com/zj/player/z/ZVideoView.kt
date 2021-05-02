@@ -7,6 +7,8 @@ import android.app.Activity
 import android.app.Service
 import android.content.Context
 import android.content.res.Resources
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.media.AudioManager
 import android.os.Build
 import android.os.Handler
@@ -591,10 +593,21 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
 
     open fun onFullMaxScreenChanged(isFull: Boolean, fromFocusChange: Boolean) {}
 
-    open fun onTrack(playAble: Boolean, start: Boolean, end: Boolean, formTrigDuration: Float) {}
+    open fun onTrack(playAble: Boolean, start: Boolean, end: Boolean, formTrigDuration: Float) {
+        onFullScreenTrackEnd(if (start || end) start else null)
+    }
 
     open fun onTouchActionEvent(videoRoot: View?, event: MotionEvent, lastX: Float, lastY: Float, orientation: TrackOrientation?): Boolean {
         return false
+    }
+
+    open fun onFullScreenTrackEnd(ifStart: Boolean?) {
+        try {
+            if (ifStart == null) return
+            controller?.getRender()?.background = ColorDrawable(if (ifStart) Color.TRANSPARENT else Color.BLACK)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
 
     open fun onSyncVolume(volume: Int = controller?.getCurVolume() ?: 0) {

@@ -91,6 +91,7 @@ abstract class BaseListVideoController @JvmOverloads constructor(c: Context, att
     }
 
     override fun onTrack(playAble: Boolean, start: Boolean, end: Boolean, formTrigDuration: Float) {
+        super.onTrack(playAble, start, end, formTrigDuration)
         onTrackListener?.invoke(playAble, start, end, formTrigDuration)
     }
 

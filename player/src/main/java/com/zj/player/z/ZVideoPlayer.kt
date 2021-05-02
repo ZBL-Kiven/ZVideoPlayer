@@ -305,10 +305,12 @@ open class ZVideoPlayer(var config: VideoConfig = VideoConfig.create()) : BasePl
     private fun startProgressListen() {
         stopProgressListen()
         val interval = controller?.progressInterval ?: -1
+        log("video start progress listener", BehaviorLogsTable.videoStartProgressListener(currentCallId(), _curLookedProgress / 100f))
         if (interval > 0) handler?.sendEmptyMessageDelayed(HANDLE_PROGRESS, interval)
     }
 
     private fun stopProgressListen() {
+        log("video removed progress listener", BehaviorLogsTable.videoRemoveProgressListener(currentCallId(), _curLookedProgress / 100f))
         handler?.removeMessages(HANDLE_PROGRESS)
     }
 

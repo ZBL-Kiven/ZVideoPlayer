@@ -232,6 +232,10 @@ open class ZController<P : BasePlayer<R>, R : BaseRender> internal constructor(v
         return player?.getSpeed() ?: 1f
     }
 
+    fun getRender(): R? {
+        return render
+    }
+
     fun isDefaultPlayerType(): Boolean {
         return checkPlayerType(ZVideoPlayer::class.java)
     }
