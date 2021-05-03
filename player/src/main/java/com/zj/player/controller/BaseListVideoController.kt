@@ -86,6 +86,7 @@ abstract class BaseListVideoController @JvmOverloads constructor(c: Context, att
 
     @CallSuper
     override fun onFullScreenChanged(isFull: Boolean, payloads: Map<String, Any?>?) {
+        super.onFullScreenChanged(isFull, payloads)
         videoControllerIn?.onFullScreenChanged(this, isFull)
         fullScreenChangeListener?.invoke(this, isFull, payloads)
     }

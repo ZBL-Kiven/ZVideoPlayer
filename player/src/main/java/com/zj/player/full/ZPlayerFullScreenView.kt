@@ -543,12 +543,24 @@ internal class ZPlayerFullScreenView constructor(context: Context, private val c
         return super.onKeyDown(keyCode, event)
     }
 
+    override fun onConfigurationChanged(newConfig: Configuration?) {
+        super.onConfigurationChanged(newConfig)
+        isFocusable = true
+        isFocusableInTouchMode = true
+        requestFocus()
+    }
+
     override fun onWindowFocusChanged(hasFocus: Boolean) {
         super.onWindowFocusChanged(hasFocus)
         isScreenRotateLocked = screenUtil?.checkAccelerometerSystem() != false || !hasFocus
         if (hasFocus) changeSystemWindowVisibility(true)
         checkSelfScreenLockAvailable(isScreenRotateLocked)
         config.onFullContentListener?.onFocusChange(this, isMaxFull)
+        if (hasFocus) {
+            isFocusable = true
+            isFocusableInTouchMode = true
+            requestFocus()
+        }
     }
 
     private fun checkSelfScreenLockAvailable(newState: Boolean): Boolean {

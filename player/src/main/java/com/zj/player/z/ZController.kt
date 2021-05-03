@@ -216,7 +216,7 @@ open class ZController<P : BasePlayer<R>, R : BaseRender> internal constructor(v
 
     fun isDestroyed(accurate: Boolean = false): Boolean {
         log("user query cur state is destroy or not")
-        return runWithPlayer { it.isDestroyed(accurate) } ?: true
+        return curAccessKey == releaseKey || runWithPlayer { it.isDestroyed(accurate) } ?: true
     }
 
     fun requirePlayQuality(level: PlayQualityLevel) {
@@ -298,6 +298,7 @@ open class ZController<P : BasePlayer<R>, R : BaseRender> internal constructor(v
             render = null
         }
         viewController = null
+        seekProgressInterval = -1
         curAccessKey = releaseKey
     }
 

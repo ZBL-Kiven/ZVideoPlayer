@@ -589,7 +589,10 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
 
     open fun onViewInit() {}
 
-    open fun onFullScreenChanged(isFull: Boolean, payloads: Map<String, Any?>?) {}
+    @CallSuper
+    open fun onFullScreenChanged(isFull: Boolean, payloads: Map<String, Any?>?) {
+        if (isFull) onFullScreenTrackEnd(false)
+    }
 
     open fun onFullMaxScreenChanged(isFull: Boolean, fromFocusChange: Boolean) {}
 
@@ -601,10 +604,11 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
         return false
     }
 
+    @CallSuper
     open fun onFullScreenTrackEnd(ifStart: Boolean?) {
         try {
             if (ifStart == null) return
-            controller?.getRender()?.background = ColorDrawable(if (ifStart) Color.TRANSPARENT else Color.BLACK)
+            videoRoot?.background = ColorDrawable(if (ifStart) Color.TRANSPARENT else Color.BLACK)
         } catch (e: Exception) {
             e.printStackTrace()
         }
