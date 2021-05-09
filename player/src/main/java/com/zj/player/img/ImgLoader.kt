@@ -31,7 +31,6 @@ class ImgLoader<T : Any> private constructor(private val path: String, private v
         fun load(path: String): ImgLoader<T> {
             return ImgLoader(path, tag)
         }
-
     }
 
     internal companion object : ComponentCallbacks {

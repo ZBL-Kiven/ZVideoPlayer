@@ -6,21 +6,23 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.gif.GifDrawable
 import com.zj.player.img.ImgLoader
 import com.zj.videotest.controllers.scroller.ScrollerController
+import jp.wasabeef.glide.transformations.BlurTransformation
 
 class CCVideoController @JvmOverloads constructor(c: Context, attr: AttributeSet? = null, def: Int = 0) : ScrollerController(c, attr, def) {
 
     override fun onImgGot(path: String, type: ImgLoader.ImgType, tag: String, e: Exception?) {
+        val transformation = if (path.startsWith("http")) RenderScriptBlur(context, 12) else BlurTransformation(12)
         val thumb = getThumbView() ?: return
         val background = getBackgroundView() ?: return
         val context = thumb.context
         when (type) {
             ImgLoader.ImgType.IMG -> {
                 Glide.with(context).asBitmap().skipMemoryCache(true).fitCenter().load(path).into(thumb)
-                Glide.with(context).asBitmap().load(path).centerCrop().thumbnail(0.35f).transform(RenderScriptBlur(background.context, 12)).into(background)
+                Glide.with(context).asBitmap().load(path).centerCrop().thumbnail(0.15f).transform(transformation).into(background)
             }
             ImgLoader.ImgType.GIF -> {
                 Glide.with(context).asGif().skipMemoryCache(true).fitCenter().load(path).into(thumb)
-                Glide.with(context).asBitmap().load(path).centerCrop().thumbnail(0.35f).transform(RenderScriptBlur(background.context, 12)).into(background)
+                Glide.with(context).asBitmap().load(path).centerCrop().thumbnail(0.15f).transform(transformation).into(background)
             }
         }
     }

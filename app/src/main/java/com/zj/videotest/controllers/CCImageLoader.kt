@@ -36,7 +36,6 @@ class CCImageLoader<T : Any> : ImageHandler<T>() {
                 override fun onResourceReady(resource: File, transition: Transition<in File>?) {
                     onResult(resource.path, tag, type, ex)
                 }
-
             })
         } catch (e: java.lang.Exception) {
             ex = e

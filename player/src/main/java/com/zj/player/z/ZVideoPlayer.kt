@@ -1,10 +1,13 @@
 package com.zj.player.z
 
+import android.content.ContentValues
 import android.content.Context
 import android.net.Uri
+import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.os.Message
+import android.provider.MediaStore
 import android.view.WindowManager
 import androidx.annotation.UiThread
 import com.google.android.exoplayer2.*
@@ -13,10 +16,7 @@ import com.google.android.exoplayer2.mediacodec.MediaCodecRenderer
 import com.google.android.exoplayer2.source.ExtractorMediaSource
 import com.google.android.exoplayer2.source.MediaSource
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector
-import com.google.android.exoplayer2.upstream.DataSource
-import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter
-import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
-import com.google.android.exoplayer2.upstream.DefaultHttpDataSourceFactory
+import com.google.android.exoplayer2.upstream.*
 import com.google.android.exoplayer2.upstream.cache.Cache
 import com.google.android.exoplayer2.upstream.cache.CacheDataSourceFactory
 import com.google.android.exoplayer2.upstream.cache.LeastRecentlyUsedCacheEvictor
@@ -35,7 +35,6 @@ import com.zj.player.ut.PlayQualityLevel
 import com.zj.player.ut.PlayerEventController
 import com.zj.player.ut.RenderEvent
 import java.io.File
-import java.lang.IllegalArgumentException
 import kotlin.math.max
 import kotlin.math.min
 
@@ -196,7 +195,7 @@ open class ZVideoPlayer(var config: VideoConfig = VideoConfig.create()) : BasePl
         }
         val f = File(videoUrl)
         val dataSource = if (f.exists() && f.isFile) {
-            createDefaultDataSource(context, Uri.parse(f.path))
+            createDefaultDataSource(context, f)
         } else {
             createCachedDataSource(context, videoUrl)
         }
@@ -215,11 +214,31 @@ open class ZVideoPlayer(var config: VideoConfig = VideoConfig.create()) : BasePl
         player?.videoScalingMode = config.videoScaleMod
     }
 
-    private fun createDefaultDataSource(context: Context, path: Uri?): MediaSource {
+    private fun createDefaultDataSource(context: Context, f: File): MediaSource {
+        val uri = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) getPathForSearchQ(context, f) else Uri.parse(f.path)
         log("create [default media data source]")
         val dataSourceFactory: DataSource.Factory = DefaultDataSourceFactory(context, Util.getUserAgent(context, context.packageName), DefaultBandwidthMeter())
-        return ExtractorMediaSource.Factory(dataSourceFactory).createMediaSource(path)
+        return ExtractorMediaSource.Factory(dataSourceFactory).createMediaSource(uri)
     }
+
+    @Suppress("DEPRECATION")
+    private fun getPathForSearchQ(context: Context, f: File): Uri? {
+        val cursor = context.contentResolver.query(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, arrayOf(MediaStore.Video.Media._ID), MediaStore.Video.Media.DATA + "=? ", arrayOf(f.path), null)
+        val uri = if (cursor != null && cursor.moveToFirst()) {
+            val id = cursor.getInt(cursor.getColumnIndex(MediaStore.MediaColumns._ID))
+            val baseUri = Uri.parse("content://media/external/video/media")
+            Uri.withAppendedPath(baseUri, "" + id)
+        } else {
+            if (f.exists()) {
+                val values = ContentValues()
+                values.put(MediaStore.Video.Media.DATA, f.absolutePath)
+                context.contentResolver.insert(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, values)
+            } else null
+        }
+        cursor?.close()
+        return uri
+    }
+
 
     private fun createCachedDataSource(context: Context, videoUrl: String): MediaSource? {
         val httpFactory = DefaultHttpDataSourceFactory(Util.getUserAgent(context, context.packageName), DefaultBandwidthMeter())
@@ -305,12 +324,10 @@ open class ZVideoPlayer(var config: VideoConfig = VideoConfig.create()) : BasePl
     private fun startProgressListen() {
         stopProgressListen()
         val interval = controller?.progressInterval ?: -1
-        log("video start progress listener", BehaviorLogsTable.videoStartProgressListener(currentCallId(), _curLookedProgress / 100f))
         if (interval > 0) handler?.sendEmptyMessageDelayed(HANDLE_PROGRESS, interval)
     }
 
     private fun stopProgressListen() {
-        log("video removed progress listener", BehaviorLogsTable.videoRemoveProgressListener(currentCallId(), _curLookedProgress / 100f))
         handler?.removeMessages(HANDLE_PROGRESS)
     }
 
