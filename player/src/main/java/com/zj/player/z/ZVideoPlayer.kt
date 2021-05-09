@@ -16,7 +16,10 @@ import com.google.android.exoplayer2.mediacodec.MediaCodecRenderer
 import com.google.android.exoplayer2.source.ExtractorMediaSource
 import com.google.android.exoplayer2.source.MediaSource
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector
-import com.google.android.exoplayer2.upstream.*
+import com.google.android.exoplayer2.upstream.DataSource
+import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter
+import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
+import com.google.android.exoplayer2.upstream.DefaultHttpDataSourceFactory
 import com.google.android.exoplayer2.upstream.cache.Cache
 import com.google.android.exoplayer2.upstream.cache.CacheDataSourceFactory
 import com.google.android.exoplayer2.upstream.cache.LeastRecentlyUsedCacheEvictor
@@ -35,6 +38,7 @@ import com.zj.player.ut.PlayQualityLevel
 import com.zj.player.ut.PlayerEventController
 import com.zj.player.ut.RenderEvent
 import java.io.File
+import java.io.FileNotFoundException
 import kotlin.math.max
 import kotlin.math.min
 
@@ -193,9 +197,15 @@ open class ZVideoPlayer(var config: VideoConfig = VideoConfig.create()) : BasePl
             controller?.onError(NullPointerException("the video path should not be null or empty !!"))
             return
         }
-        val f = File(videoUrl)
-        val dataSource = if (f.exists() && f.isFile) {
-            createDefaultDataSource(context, f)
+        val uri: Uri? = Uri.parse(videoUrl)
+        val scheme = uri?.scheme
+        val dataSource = if (scheme == null || !scheme.startsWith("http")) {
+            val realUri = if (scheme == "content" || (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q && (scheme == null || scheme == "file"))) {
+                Uri.parse(videoUrl)
+            } else {
+                getPathForSearchQ(context, videoUrl)
+            }
+            createDefaultDataSource(context, realUri)
         } else {
             createCachedDataSource(context, videoUrl)
         }
@@ -214,22 +224,26 @@ open class ZVideoPlayer(var config: VideoConfig = VideoConfig.create()) : BasePl
         player?.videoScalingMode = config.videoScaleMod
     }
 
-    private fun createDefaultDataSource(context: Context, f: File): MediaSource {
-        val uri = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) getPathForSearchQ(context, f) else Uri.parse(f.path)
+    private fun createDefaultDataSource(context: Context, uri: Uri?): MediaSource {
         log("create [default media data source]")
         val dataSourceFactory: DataSource.Factory = DefaultDataSourceFactory(context, Util.getUserAgent(context, context.packageName), DefaultBandwidthMeter())
         return ExtractorMediaSource.Factory(dataSourceFactory).createMediaSource(uri)
     }
 
     @Suppress("DEPRECATION")
-    private fun getPathForSearchQ(context: Context, f: File): Uri? {
-        val cursor = context.contentResolver.query(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, arrayOf(MediaStore.Video.Media._ID), MediaStore.Video.Media.DATA + "=? ", arrayOf(f.path), null)
+    private fun getPathForSearchQ(context: Context, path: String): Uri? {
+        val cursor = context.contentResolver.query(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, arrayOf(MediaStore.Video.Media._ID), MediaStore.Video.Media.DATA + "=? ", arrayOf(path), null)
         val uri = if (cursor != null && cursor.moveToFirst()) {
             val id = cursor.getInt(cursor.getColumnIndex(MediaStore.MediaColumns._ID))
             val baseUri = Uri.parse("content://media/external/video/media")
             Uri.withAppendedPath(baseUri, "" + id)
         } else {
-            if (f.exists()) {
+            val f = try {
+                File(path)
+            } catch (e: FileNotFoundException) {
+                log("create media data source failed case the file path $path is not exists");null
+            }
+            if (f != null && f.exists()) {
                 val values = ContentValues()
                 values.put(MediaStore.Video.Media.DATA, f.absolutePath)
                 context.contentResolver.insert(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, values)
