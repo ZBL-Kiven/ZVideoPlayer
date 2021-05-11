@@ -200,7 +200,7 @@ open class ZVideoPlayer(var config: VideoConfig = VideoConfig.create()) : BasePl
         val uri: Uri? = Uri.parse(videoUrl)
         val scheme = uri?.scheme
         val dataSource = if (scheme == null || !scheme.startsWith("http")) {
-            val realUri = if (scheme == "content" || (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q && (scheme == null || scheme == "file"))) {
+            val realUri = if (scheme == "content" || (Build.VERSION.SDK_INT != Build.VERSION_CODES.Q && (scheme == null || scheme == "file"))) {
                 Uri.parse(videoUrl)
             } else {
                 getPathForSearchQ(context, videoUrl)
