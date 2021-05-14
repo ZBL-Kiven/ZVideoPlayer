@@ -1,14 +1,11 @@
 package com.zj.videotest.feed.apis.init
 
-import android.os.Handler
-import android.os.Looper
 import com.zj.videotest.feed.apis.config.ApiErrorHandler
 import com.zj.videotest.feed.apis.config.Constance
 import com.zj.api.BaseApi
 import com.zj.api.interceptor.HeaderProvider
 import com.zj.api.interceptor.UrlProvider
 import com.zj.videotest.feed.bean.VideoSource
-import com.zj.videotest.feed.data.FeedDataIn
 import com.zj.videotest.feed.data.FeedMockImpl
 import retrofit2.HttpException
 

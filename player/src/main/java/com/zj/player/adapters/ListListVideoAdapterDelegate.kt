@@ -280,8 +280,8 @@ abstract class ListListVideoAdapterDelegate<T, V : BaseListVideoController<T, V>
                             hlt = it.top
                             hlb = it.bottom
                         }
-                        val offF = (ccf.bottom - ccf.top) / 2 - cp.centerY()
-                        val offL = (ccf.bottom - ccf.top) / 2 + hlt - cp.centerY()
+                        val offF = (ccf.bottom - ccf.top) / 2f - (cp.centerY() - 1.5f)
+                        val offL = (ccf.bottom - ccf.top) / 2f + hlt - cp.centerY()
                         val cy = min(abs(offF), abs(offL))
                         val next = if (cy == abs(offF)) fv else lv
                         offset = if (next == fv) if (hft >= 0) 0 else hft - pt else if (hlb <= cp.bottom) 0 else hlb - cp.bottom + pb

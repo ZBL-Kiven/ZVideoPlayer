@@ -42,16 +42,16 @@ class RFeedFragment : BaseLinkageFragment() {
     }
 
     private fun initData(isLoadMore: Boolean) {
+        if (!isLoadMore) VideoControllerPlayers.stopVideo()
         AppInitApi.getFeedMock { b, d, es ->
-            if (!isLoadMore) VideoControllerPlayers.stopVideo()
-            if (b) setAdapterData(d?.toMutableList(), isLoadMore)
-            else if (es != null) Toast.makeText(activity, es.message(), Toast.LENGTH_SHORT).show()
             if (isLoadMore) {
                 if (d.isNullOrEmpty()) refreshLayout?.setNoMoreData(true)
                 else refreshLayout?.finishLoadMore()
             } else {
-                refreshLayout?.finishRefresh(1700)
+                refreshLayout?.finishRefresh()
             }
+            if (b) setAdapterData(d?.toMutableList(), isLoadMore)
+            else if (es != null) Toast.makeText(activity, es.message(), Toast.LENGTH_SHORT).show()
         }
     }
 
