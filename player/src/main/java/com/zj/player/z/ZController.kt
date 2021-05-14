@@ -454,6 +454,10 @@ open class ZController<P : BasePlayer<R>, R : BaseRender> internal constructor(v
         internalPlayingStateListeners[delegateName] = l
     }
 
+    internal fun removeInternalPlayStateListener(delegateName: String) {
+        internalPlayingStateListeners.remove(delegateName)
+    }
+
     /**
      * Keep screen on
      * */

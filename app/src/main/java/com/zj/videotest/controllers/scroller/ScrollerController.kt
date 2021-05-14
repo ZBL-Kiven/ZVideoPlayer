@@ -12,7 +12,7 @@ import com.zj.player.full.TrackOrientation
 import com.zj.player.full.Transaction
 import com.zj.views.ut.DPUtils
 
-abstract class ScrollerController @JvmOverloads constructor(c: Context, attr: AttributeSet? = null, def: Int = 0) : BaseListVideoController(c, attr, def) {
+abstract class ScrollerController<T, VC> @JvmOverloads constructor(c: Context, attr: AttributeSet? = null, def: Int = 0) : BaseListVideoController<T, VC>(c, attr, def) {
     private var lastHeight = 0
     private var scrolled = 0f
     private var parseCancel = false

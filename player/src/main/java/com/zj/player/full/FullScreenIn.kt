@@ -5,7 +5,7 @@ import android.view.View
 
 internal interface FullContentListener : FullScreenListener {
 
-    fun onContentLayoutInflated(content: View)
+    fun onContentLayoutInflated(content: View, pl: Any?)
 
     fun onFullMaxChanged(dialog: ZPlayerFullScreenView, isMax: Boolean)
 }

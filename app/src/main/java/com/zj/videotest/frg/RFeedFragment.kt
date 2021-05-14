@@ -14,7 +14,7 @@ import com.zj.videotest.feed.FeedAdapterInterface
 import com.zj.videotest.feed.FeedContentAdapter
 import com.zj.videotest.feed.apis.config.Constance
 import com.zj.videotest.feed.apis.init.AppInitApi
-import com.zj.videotest.feed.data.FeedDataIn
+import com.zj.videotest.feed.bean.VideoSource
 import com.zj.views.list.refresh.layout.RefreshLayout
 import com.zj.views.list.refresh.layout.api.RefreshLayoutIn
 import com.zj.views.list.refresh.layout.listener.OnRefreshLoadMoreListener
@@ -22,9 +22,8 @@ import com.zj.views.list.refresh.layout.listener.OnRefreshLoadMoreListener
 class RFeedFragment : BaseLinkageFragment() {
 
     private var rvContent: RecyclerView? = null
-    private var adapter: FeedContentAdapter<FeedDataIn>? = null
+    private var adapter: FeedContentAdapter? = null
     private var refreshLayout: RefreshLayout? = null
-
 
     override fun getView(inflater: LayoutInflater, container: ViewGroup?): View {
         return inflater.inflate(R.layout.r_mian_fg_content, container, false)
@@ -56,7 +55,7 @@ class RFeedFragment : BaseLinkageFragment() {
         }
     }
 
-    private fun setAdapterData(d: MutableList<FeedDataIn>?, loadMore: Boolean) {
+    private fun setAdapterData(d: MutableList<VideoSource>?, loadMore: Boolean) {
         if (d.isNullOrEmpty()) return
         if (loadMore) {
             adapter?.add(d)
@@ -76,17 +75,20 @@ class RFeedFragment : BaseLinkageFragment() {
             }
         })
 
-        adapter?.setAdapterInterface(object : FeedAdapterInterface<FeedDataIn> {
-            override fun clap(d: FeedDataIn?, p: Int) {
-
+        adapter?.setAdapterInterface(object : FeedAdapterInterface<VideoSource> {
+            override fun clap(d: VideoSource?, p: Int) {
+                d?.let { it.clapped = !it.clapped }
+                adapter?.notifyItemChanged(p, "setData")
             }
 
-            override fun avatarClicked(d: FeedDataIn?, p: Int) {
-
+            override fun avatarClicked(d: VideoSource?, p: Int) {
+                d?.let { it.picClicked = !it.picClicked }
+                adapter?.notifyItemChanged(p, "setData")
             }
 
-            override fun onShare(v: View, d: FeedDataIn?, p: Int) {
-                Log.e("------- ", "onShare   ${d?.getSourceId()}")
+            override fun onShare(v: View, d: VideoSource?, p: Int) {
+                d?.let { it.shareCount++ }
+                adapter?.notifyItemChanged(p, "setData")
             }
 
             override fun onLoadMore(tag: Int) {

@@ -21,7 +21,6 @@ import android.view.animation.AccelerateDecelerateInterpolator
 import android.widget.*
 import androidx.annotation.CallSuper
 import androidx.annotation.IntRange
-import androidx.annotation.LayoutRes
 import androidx.core.content.ContextCompat
 import androidx.core.view.forEach
 import com.zj.player.R
@@ -35,6 +34,7 @@ import com.zj.player.full.FullScreenListener
 import com.zj.player.full.GestureTouchListener
 import com.zj.player.img.scale.ImageViewTouchEnableIn
 import com.zj.player.img.scale.TouchScaleImageView
+import com.zj.player.interfaces.VideoDetailIn
 import com.zj.player.logs.BehaviorData
 import com.zj.player.logs.BehaviorLogsTable
 import com.zj.player.logs.ZPlayerLogs
@@ -112,10 +112,8 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
     protected var isInterruptPlayBtnAnim = true
     protected var isFullingOrDismissing = false
     protected var isTickingSeekBarFromUser: Boolean = false
-    protected var fullScreenContentLayoutId: Int = -1
     protected var fullScreenSupported = false
     protected var alphaAnimViewsGroup: MutableList<View?>? = null
-    protected var onFullScreenLayoutInflateListener: ((v: View) -> Unit)? = null
     protected var isDefaultMaxScreen: Boolean = false
     protected var fullMaxScreenEnable: Boolean = true
     protected var scrollXEnabled: Boolean = true
@@ -143,6 +141,7 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
     open val supportedSpeedList = arrayListOf(1.0f, 1.5f, 2f)
     private var lockScreenRotation: Int = LOCK_SCREEN_UNSPECIFIED
     private var menuView: QualityMenuView? = null
+    private var videoDetailIn: VideoDetailIn? = null
     var isFullScreen = false
         private set(value) {
             if (field == value) return
@@ -582,9 +581,12 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
         return muteGlobalDefault
     }
 
-    open fun setScreenContentLayout(@LayoutRes layoutId: Int, onFullScreenLayoutInflateListener: ((v: View) -> Unit)? = null) {
-        this.fullScreenContentLayoutId = layoutId
-        this.onFullScreenLayoutInflateListener = onFullScreenLayoutInflateListener
+    open fun setVideoDetailIn(detailIn: VideoDetailIn?) {
+        this.videoDetailIn = detailIn
+    }
+
+    open fun onDetailViewNotifyChanged(pl: Any?) {
+        fullScreenView?.notifyContentViewChanged(pl)
     }
 
     open fun onViewInit() {}
@@ -607,7 +609,7 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
     @CallSuper
     open fun onFullScreenTrackEnd(ifStart: Boolean?) {
         try {
-            if (ifStart == null) return
+            if (ifStart == null || !isFullScreen) return
             videoRoot?.background = ColorDrawable(if (ifStart) Color.TRANSPARENT else Color.BLACK)
         } catch (e: Exception) {
             e.printStackTrace()
@@ -861,6 +863,8 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
     protected fun showOrHidePlayBtn(isShow: Boolean, withState: Boolean = false, byAnim: Boolean = false) {
         if ((isShow && playIconEnable < 2) || (!isPlayable && isShow)) return
         vPlay?.let {
+            if (controller?.isPlaying(true) == true && !it.isSelected) it.isSelected = true
+            if (controller?.isPause() == true && it.isSelected) it.isSelected = false
             var isNeedSetFreePlayBtn = true
             try {
                 if (!withState) {
@@ -998,8 +1002,8 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
             this@ZVideoView.onDisplayChanged(isShow, payloads)
         }
 
-        override fun onContentLayoutInflated(content: View) {
-            onFullScreenLayoutInflateListener?.invoke(content)
+        override fun onContentLayoutInflated(content: View, pl: Any?) {
+            videoDetailIn?.onFullScreenLayoutInflated(content, pl)
         }
 
         override fun onFullMaxChanged(dialog: ZPlayerFullScreenView, isMax: Boolean) {
@@ -1036,7 +1040,7 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
                             qualityView?.visibility = View.VISIBLE
                             config.withFullMaxScreen(fullScreenListener)
                         } else {
-                            config.withFullContentScreen(fullScreenContentLayoutId, fullMaxScreenEnable, fullContentListener)
+                            config.withFullContentScreen(videoDetailIn?.getVideoDetailLayoutId() ?: 0, fullMaxScreenEnable, fullContentListener)
                         }
                         config.start(context)
                     }

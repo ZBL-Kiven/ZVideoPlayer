@@ -29,5 +29,15 @@ internal interface AdapterDelegateIn<T, VH : RecyclerView.ViewHolder> {
     /**
      * call in with the overridden form data adapter [RecyclerView.Adapter.bindViewHolder]
      * */
-    fun bindData(holder: SoftReference<VH>?, p: Int, d: T?, pl: MutableList<Any>?)
+    fun bindData(holder: SoftReference<VH>?, p: Int, d: T?, pl: MutableList<Any?>?)
+
+    /**
+     * call in with the overridden form data adapter [RecyclerView.Adapter.onViewAttachedToWindow]
+     * */
+    fun onViewAttachedToWindow(holder: VH)
+
+    /**
+     * call in with the overridden form data adapter [RecyclerView.Adapter.onViewRecycled]
+     * */
+    fun onViewRecycled(holder: VH)
 }

@@ -14,7 +14,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.zj.player.R
 import com.zj.player.z.ZController
 import com.zj.player.controller.BaseListVideoController
-import com.zj.player.list.VideoControllerIn
+import com.zj.player.interfaces.ListVideoControllerIn
 import com.zj.player.logs.ZPlayerLogs
 import com.zj.player.ut.InternalPlayStateChangeListener
 import java.lang.NullPointerException
@@ -29,10 +29,10 @@ import kotlin.math.min
  * of course ZPlayer running in the list adapter as so well.
  * create an instance of [BaseListVideoController] in your data Adapter ,and see [AdapterDelegateIn]
  **/
-@Suppress("MemberVisibilityCanBePrivate")
-abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : RecyclerView.ViewHolder>(private val delegateName: String, private val adapter: RecyclerView.Adapter<VH>) : AdapterDelegateIn<T, VH>, VideoControllerIn, InternalPlayStateChangeListener {
+@Suppress("MemberVisibilityCanBePrivate", "unused")
+abstract class ListListVideoAdapterDelegate<T, V : BaseListVideoController<T, V>, VH : RecyclerView.ViewHolder, ADAPTER : RecyclerView.Adapter<VH>>(private val delegateName: String, private val adapter: ADAPTER) : AdapterDelegateIn<T, VH>, ListVideoControllerIn<T, V>, InternalPlayStateChangeListener, RecyclerView.AdapterDataObserver() {
 
-    var curFullScreenController: BaseListVideoController? = null
+    var curFullScreenController: V? = null
     private var controller: ZController<*, *>? = null
     private var curPlayingIndex: Int = -1
     private var isStopWhenItemDetached = true
@@ -45,12 +45,12 @@ abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : Rec
     private val waitingForPlayIdle = R.id.delegate_waiting_for_play_idle
     protected abstract fun createZController(delegateName: String, data: T?, vc: V): ZController<*, *>
     protected abstract fun getViewController(holder: VH?): V?
-    protected abstract fun getItem(p: Int): T?
+    protected abstract fun getItem(p: Int, adapter: ADAPTER): T?
     protected abstract fun isInflateMediaType(d: T?): Boolean
     protected abstract fun getPathAndLogsCallId(d: T?): Pair<String, Any?>?
-    protected abstract fun onBindData(holder: VH?, p: Int, d: T?, playAble: Boolean, vc: V?, pl: MutableList<Any>?)
-    protected open fun onBindTypeData(holder: SoftReference<VH>?, d: T?, p: Int, pl: MutableList<Any>?) {}
-    protected open fun onBindDelegate(holder: VH?, p: Int, d: T?, pl: MutableList<Any>?) {}
+    protected abstract fun onBindData(holder: VH?, p: Int, d: T?, playAble: Boolean, vc: V?, pl: MutableList<Any?>?)
+    protected open fun onBindTypeData(holder: SoftReference<VH>?, d: T?, p: Int, pl: MutableList<Any?>?) {}
+    protected open fun onBindDelegate(holder: VH?, p: Int, d: T?, pl: MutableList<Any?>?) {}
     protected open fun onPlayStateChanged(runningName: String, isPlaying: Boolean, desc: String?, controller: ZController<*, *>?) {}
     protected open fun checkControllerMatching(data: T?, controller: ZController<*, *>?): Boolean {
         return controller != null && !controller.isDestroyed() && controller.runningName != delegateName
@@ -84,8 +84,7 @@ abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : Rec
             val position = h.adapterPosition
             getViewController(h)?.let {
                 if (it.isFullScreen) return@holder
-                if (it.isFullScreen) return@holder
-                getItem(position)?.let { p ->
+                getItem(position, adapter)?.let { p ->
                     val pac = getPathAndLogsCallId(p)
                     pac?.let { pv -> it.onBehaviorDetached(pv.first, pv.second) }
                 }
@@ -96,11 +95,23 @@ abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : Rec
         holder?.clear()
     }
 
-    override fun bindData(holder: SoftReference<VH>?, p: Int, d: T?, pl: MutableList<Any>?) {
+    override fun onViewAttachedToWindow(holder: VH) {}
+
+    override fun onViewRecycled(holder: VH) {
+        getViewController(holder)?.let {
+            it.clearVideoListDataIn()
+            if (curFullScreenController != null && curFullScreenController == it) {
+                curFullScreenController = null
+                it.fullScreen(isFull = false, fromUser = false, payloads = null)
+            }
+        }
+    }
+
+    override fun bindData(holder: SoftReference<VH>?, p: Int, d: T?, pl: MutableList<Any?>?) {
         holder?.get()?.let { h ->
             if (isInflateMediaType(d)) {
                 val playAble = isSourcePlayAble(d)
-                if (!pl.isNullOrEmpty() && !pl[0].toString().startsWith(DEFAULT_LOADER)) {
+                if (!pl.isNullOrEmpty() && pl[0]?.toString()?.startsWith(DEFAULT_LOADER) == false) {
                     val vc = getViewController(h)
                     onBindData(h, p, d, playAble, vc, pl)
                 } else {
@@ -131,14 +142,6 @@ abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : Rec
         return null
     }
 
-    private fun onBindVideoView(d: T?, vc: V) {
-        if (!checkControllerMatching(d, controller)) {
-            controller = getZController(d, vc)
-        } else {
-            controller?.updateViewController(delegateName, vc)
-        }
-    }
-
     open fun waitingForPlay(index: Int, delay: Long = 16L) {
         waitingForPlay(index, delay, true)
     }
@@ -147,27 +150,6 @@ abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : Rec
         if (curPlayingIndex !in 0 until adapter.itemCount) return
         if (fromUser) {
             recyclerView?.scrollToPosition(curPlayingIndex)
-            run scrollToCenter@{
-                @Suppress("UNCHECKED_CAST") val holder = recyclerView?.findViewHolderForAdapterPosition(curPlayingIndex) as? VH
-                val rect = Rect()
-                val itemView = holder?.itemView ?: return@scrollToCenter
-                itemView.getLocalVisibleRect(rect)
-                if (rect.isEmpty) return@scrollToCenter
-                val cp = Rect()
-                var pb = 0
-                recyclerView?.getLocalVisibleRect(cp)
-                recyclerView?.let {
-                    val pt = it.paddingTop
-                    pb = it.paddingBottom
-                    cp.top += pt + it.translationY.toInt()
-                    cp.bottom -= pb - it.translationY.toInt()
-                }
-                val hib = itemView.bottom
-                val hit = itemView.top
-                if (hit + cp.centerY() > cp.centerY()) {
-                    recyclerView?.scrollBy(0, hib - cp.centerY() - pb)
-                }
-            }
         }
         handler?.removeMessages(waitingForPlayClicked)
         handler?.sendMessageDelayed(Message.obtain().apply {
@@ -177,8 +159,12 @@ abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : Rec
         }, delay)
     }
 
-    override fun onFullScreenChanged(vc: BaseListVideoController, isFull: Boolean) {
-        this.curFullScreenController = vc
+    override fun onFullScreenChanged(vc: V, isFull: Boolean) {
+        this.curFullScreenController = if (isFull) {
+            this.adapter.registerAdapterDataObserver(this);vc
+        } else {
+            this.adapter.unregisterAdapterDataObserver(this); null
+        }
     }
 
     final override fun onState(runningName: String, isPlaying: Boolean, desc: String?, controller: ZController<*, *>?) {
@@ -189,22 +175,12 @@ abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : Rec
         this.onPlayStateChanged(runningName, isPlaying, desc, controller)
     }
 
-    private fun getZController(data: T?, vc: V): ZController<*, *>? {
-        val c = createZController(delegateName, data, vc)
-        if (c != controller) {
-            controller = c
-        }
-        controller?.bindInternalPlayStateListener(delegateName, this)
-        return controller
-    }
-
-    private fun bindDelegateData(h: VH, p: Int, d: T?, playAble: Boolean, pl: MutableList<Any>?) {
+    private fun bindDelegateData(h: VH, p: Int, d: T?, playAble: Boolean, pl: MutableList<Any?>?) {
         getViewController(h)?.let { vc ->
-            vc.onBindHolder(p)
-            vc.setControllerIn(this)
+            vc.setVideoListDetailIn(p, d, this)
             if (playAble != vc.isPlayable) vc.isPlayable = playAble
             if (pl?.isNullOrEmpty() == false) {
-                val pls = pl.last().toString()
+                val pls = pl.first()?.toString() ?: ""
                 if (pls.isNotEmpty() && pls.startsWith(DEFAULT_LOADER)) {
                     var index: Int
                     var fromUser: Boolean
@@ -230,7 +206,7 @@ abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : Rec
                     return@bindDelegateData
                 }
             }
-            onBindData(h, p, getItem(p), playAble, vc, pl)
+            onBindData(h, p, getItem(p, adapter), playAble, vc, pl)
             getPathAndLogsCallId(d)?.let {
                 vc.post {
                     if (curPlayingIndex == p && controller?.getPath() == it.first && controller?.isPlaying() == true) {
@@ -241,6 +217,23 @@ abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : Rec
                 }
             }
         }
+    }
+
+    private fun onBindVideoView(d: T?, vc: V) {
+        if (!checkControllerMatching(d, controller)) {
+            controller = getZController(d, vc)
+        } else {
+            controller?.updateViewController(delegateName, vc)
+        }
+    }
+
+    private fun getZController(data: T?, vc: V): ZController<*, *>? {
+        val c = createZController(delegateName, data, vc)
+        if (c != controller) {
+            controller = c
+        }
+        controller?.bindInternalPlayStateListener(delegateName, this)
+        return controller
     }
 
     @Suppress("UNCHECKED_CAST")
@@ -321,7 +314,7 @@ abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : Rec
         }
         controller = if (checkControllerMatching(data, controller)) controller else getZController(data, vc)
         controller?.let { ctr ->
-            getPathAndLogsCallId(data ?: getItem(p))?.let { d ->
+            getPathAndLogsCallId(data ?: getItem(p, adapter))?.let { d ->
                 fun play() {
                     ctr.playOrResume(d.first, d.second)
                     vc.onBehaviorAttached(d.first, d.second)
@@ -370,6 +363,7 @@ abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : Rec
     fun release(destroyPlayer: Boolean) {
         handler?.removeCallbacksAndMessages(null)
         curFullScreenController = null
+        controller?.removeInternalPlayStateListener(delegateName)
         controller?.release(destroyPlayer)
         controller = null
         recyclerView?.clearOnScrollListeners()
@@ -414,5 +408,30 @@ abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController, VH : Rec
     companion object {
         private const val DEFAULT_LOADER = "loadOrReset"
         private const val LOAD_STR_DEFAULT_LOADER = "$DEFAULT_LOADER#%d#%s"
+    }
+
+    override fun onChanged() {
+        super.onChanged()
+        curFullScreenController?.onDetailViewNotifyChanged(null)
+    }
+
+    override fun onItemRangeChanged(positionStart: Int, itemCount: Int) {
+        super.onItemRangeChanged(positionStart, itemCount)
+        curFullScreenController?.onDetailViewNotifyChanged(null)
+    }
+
+    override fun onItemRangeChanged(positionStart: Int, itemCount: Int, payload: Any?) {
+        super.onItemRangeChanged(positionStart, itemCount, payload)
+        curFullScreenController?.onDetailViewNotifyChanged(payload)
+    }
+
+    override fun onItemRangeMoved(fromPosition: Int, toPosition: Int, itemCount: Int) {
+        super.onItemRangeMoved(fromPosition, toPosition, itemCount)
+        if (curFullScreenController?.curPlayingIndex in fromPosition..toPosition) curFullScreenController?.fullScreen(false, fromUser = false)
+    }
+
+    override fun onItemRangeRemoved(positionStart: Int, itemCount: Int) {
+        super.onItemRangeRemoved(positionStart, itemCount)
+        if (curFullScreenController?.curPlayingIndex in positionStart..(positionStart + itemCount)) curFullScreenController?.fullScreen(false, fromUser = false)
     }
 }

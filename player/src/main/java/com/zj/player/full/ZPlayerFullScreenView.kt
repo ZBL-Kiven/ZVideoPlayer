@@ -15,7 +15,6 @@ import android.graphics.drawable.ColorDrawable
 import android.os.Handler
 import android.os.Looper
 import android.os.Message
-import android.util.Log
 import android.view.*
 import android.view.animation.DecelerateInterpolator
 import android.widget.FrameLayout
@@ -165,8 +164,8 @@ internal class ZPlayerFullScreenView constructor(context: Context, private val c
                 it.findViewById<ViewGroup>(R.id.player_gesture_full_screen_content)?.let { v ->
                     if (controllerNeedAdd) v.addView(controller, vlp)
                 } ?: if (controllerNeedAdd) (it as? ViewGroup)?.addView(controller, vlp) ?: throw IllegalArgumentException("the content layout view your set is not container a view group that id`s [R.id.playerFullScreenContent] ,and your content layout is not a view group!")
-                config.onFullContentListener?.onContentLayoutInflated(it)
             }
+            notifyContentViewChanged(null)
         } finally {
             if (isInit) {
                 initListeners()
@@ -475,7 +474,7 @@ internal class ZPlayerFullScreenView constructor(context: Context, private val c
     }
 
     private fun getWindowSize(isMaxFull: Boolean): RectF {
-        val r = if (isMaxFull || contentLayoutView == null) {
+        return if (isMaxFull || contentLayoutView == null) {
             val rp = getViewPoint(mDecorView)
             val w = mDecorView?.width ?: 0
             val h = mDecorView?.height ?: 0
@@ -491,7 +490,6 @@ internal class ZPlayerFullScreenView constructor(context: Context, private val c
                 }.invoke()
             } ?: throw IllegalArgumentException()
         }
-        return r
     }
 
     override fun onSizeChanged(w: Int, h: Int, ow: Int, oh: Int) {
@@ -525,6 +523,10 @@ internal class ZPlayerFullScreenView constructor(context: Context, private val c
         return screenUtil?.let {
             if (!it.checkAccelerometerSystem()) true else isScreenRotateLocked
         } ?: false
+    }
+
+    fun notifyContentViewChanged(pl: Any?) {
+        contentLayoutView?.let { config.onFullContentListener?.onContentLayoutInflated(it, pl) }
     }
 
     private fun onTracked(isStart: Boolean, isEnd: Boolean, formTrigDuration: Float) {

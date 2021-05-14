@@ -1,145 +1,63 @@
 package com.zj.videotest.feed.bean;
 
+import android.content.res.Resources;
+
 import com.zj.videotest.feed.data.DataType;
 import com.zj.videotest.feed.data.FeedDataIn;
+import com.zj.views.ut.DPUtils;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.util.List;
+import java.util.UUID;
 
 public class VideoSource implements FeedDataIn {
 
-    private String sourceId;
+    public boolean picClicked = false;
+
+    public boolean clapped = false;
+
+    public int shareCount = 0;
+
+    public VideoSource(String imgPath, DataType dataType, String videoPath) {
+        imgPreviewRemoteStorageUrl = imgPath;
+        videoRemoteStorageUrl = videoPath;
+        type = dataType;
+    }
+
+    public String sourceId = UUID.randomUUID().toString();
 
     /**
      * 视频标题
      */
-    private String videoTitle;
+    public String videoTitle = "it`s a simple desc for mock impl";
 
     /***
      *
      * 视频远程仓库地址
      *
      * */
-    private String videoRemoteStorageUrl;
+    public String videoRemoteStorageUrl;
 
     /**
      * 预览图远程仓库地址
      */
-    private String imgPreviewRemoteStorageUrl;
-
-    /**
-     * 下载地址
-     */
-    private String downloadVideoUrl;
-
-    /**
-     * 时长
-     */
-    private Double duration;
-
-
-    /**
-     * bitRate
-     **/
-    private Long bitRate;
-
-    /**
-     * width
-     */
-    private Integer width;
-
-    /**
-     * height
-     */
-    private Integer height;
-
-    /**
-     * size
-     */
-    private Long size;
-
-    /**
-     * 创建日期
-     */
-    private String createTime;
+    public String imgPreviewRemoteStorageUrl;
 
     /**
      * data 类型 ，video & img
      */
-    private String type;
-
-
-    /*************************上传者信息***********************/
-
-    /**
-     * user open id
-     */
-    private String userOpenId;
-
-    /**
-     * code 号
-     **/
-    private String authorClapCode;
+    public DataType type;
 
     /**
      * 名字
      */
-    private String authorName;
+    public String authorName = "user-01";
 
     /**
      * 头像
      */
-    private String authorAvatar;
+    public String authorAvatar = "https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcRc96kcLicYy25CFi7P_ocMargwSC_vjRxIMg&usqp=CAU";
 
-
-    /************************************互动信息***************************************/
-    /**
-     * 点赞数量
-     */
-    private Long clapNum;
-
-    /**
-     * 收藏数量
-     */
-    private Long favoriteNum;
-
-    /**
-     * 转发数量
-     */
-    private Long shareNum;
-
-
-    /**
-     * 评论数量
-     */
-    private Long commentsNum;
-
-    /**
-     * 播放数量
-     */
-    private Long viewNum;
-
-    /**
-     * 完播数量
-     */
-    private Long fullViewNum;
-
-
-    /****************************价值相关字段*********************************/
-    /**
-     * 获得金币总数
-     */
-    private Long coinValue;
-
-    /**
-     * 是否达到上限制
-     */
-    private Boolean isMaxCoins;
-
-
-    /***************************视频动态**********************************************/
-    private List<MomentUser> clapMoment;
 
     @NotNull
     @Override
@@ -179,28 +97,23 @@ public class VideoSource implements FeedDataIn {
 
     @Override
     public int getClapsCount() {
-        return clapNum.intValue();
+        return 9986;
     }
 
     @Override
     public int getViewWidth() {
-        return width;
+        return Resources.getSystem().getDisplayMetrics().widthPixels;
     }
 
     @Override
     public int getViewHeight() {
-        return height;
+        return DPUtils.dp2px(252f);
     }
 
     @NotNull
     @Override
     public DataType getType() {
-        if (type.equalsIgnoreCase("video")) {
-            return DataType.VIDEO;
-        } else if (type.equalsIgnoreCase("img")) {
-            return DataType.IMG;
-        }
-        return DataType.IMG;
+        return type;
     }
 }
 

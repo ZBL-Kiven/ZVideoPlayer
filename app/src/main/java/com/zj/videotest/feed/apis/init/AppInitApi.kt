@@ -46,7 +46,7 @@ object AppInitApi {
         getDefaultApi<AppInitService>().request({ it.getFeed() }, r)
     }
 
-    fun getFeedMock(r: (b: Boolean, d: List<FeedDataIn>?, es: HttpException?) -> Unit) {
+    fun getFeedMock(r: (b: Boolean, d: List<VideoSource>?, es: HttpException?) -> Unit) {
         r(true, FeedMockImpl.createMock(), null)
     }
 }

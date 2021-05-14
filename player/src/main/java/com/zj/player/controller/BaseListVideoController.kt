@@ -2,38 +2,34 @@ package com.zj.player.controller
 
 import android.content.Context
 import android.util.AttributeSet
+import android.view.View
 import androidx.annotation.CallSuper
-import com.zj.player.list.VideoControllerIn
+import com.zj.player.interfaces.ListVideoControllerIn
+import com.zj.player.interfaces.VideoDetailIn
 
 /**
  * @author ZJJ on 2020.6.16
  * the view controller and adapt use in list view,
  * implements the data binder interfaces.
  **/
-@Suppress("unused")
-abstract class BaseListVideoController @JvmOverloads constructor(c: Context, attr: AttributeSet? = null, def: Int = 0) : BackgroundVideoController(c, attr, def) {
+@Suppress("unused", "MemberVisibilityCanBePrivate")
+abstract class BaseListVideoController<T, VC> @JvmOverloads constructor(c: Context, attr: AttributeSet? = null, def: Int = 0) : BackgroundVideoController(c, attr, def) {
 
-    private var videoControllerIn: VideoControllerIn? = null
-
-    private var curPlayingIndex: Int = -1
-
-    var isCompleted: Boolean = false
-
-    private var completedListener: ((BaseListVideoController) -> Unit)? = null
-    private var playingStateListener: ((BaseListVideoController) -> Unit)? = null
-    private var fullScreenChangeListener: ((BaseListVideoController, Boolean, payloads: Map<String, Any?>?) -> Unit)? = null
-    private var resetListener: ((BaseListVideoController) -> Unit)? = null
+    internal var curPlayingIndex: Int = -1
+    abstract val getController: VC
+    private var videoControllerIn: ListVideoControllerIn<T, VC>? = null
+    private var completedListener: ((VC) -> Unit)? = null
+    private var playingStateListener: ((VC) -> Unit)? = null
+    private var fullScreenChangeListener: ((VC, Boolean, payloads: Map<String, Any?>?) -> Unit)? = null
+    private var resetListener: ((VC) -> Unit)? = null
     private var onTrackListener: ((playAble: Boolean, start: Boolean, end: Boolean, formTrigDuration: Float) -> Unit)? = null
 
+    var curBean: T? = null
+    var isCompleted: Boolean = false
     val isBindingController: Boolean
         get() {
             return controller != null
         }
-
-    @CallSuper
-    open fun onBindHolder(index: Int) {
-        curPlayingIndex = index
-    }
 
     override fun onPlayClick(fromUser: Boolean) {
         isCompleted = false
@@ -46,13 +42,13 @@ abstract class BaseListVideoController @JvmOverloads constructor(c: Context, att
 
     override fun onLoading(path: String, isRegulate: Boolean) {
         super.onLoading(path, isRegulate)
-        playingStateListener?.invoke(this)
+        playingStateListener?.invoke(getController)
     }
 
     override fun onPlay(path: String, isRegulate: Boolean) {
         isCompleted = false
         super.onPlay(path, isRegulate)
-        playingStateListener?.invoke(this)
+        playingStateListener?.invoke(getController)
     }
 
     private fun load(reload: Boolean, fromUser: Boolean) {
@@ -69,26 +65,44 @@ abstract class BaseListVideoController @JvmOverloads constructor(c: Context, att
     override fun onCompleted(path: String, isRegulate: Boolean) {
         super.onCompleted(path, isRegulate)
         isCompleted = true
-        completedListener?.invoke(this)
+        completedListener?.invoke(getController)
     }
 
-    internal fun setControllerIn(ci: VideoControllerIn) {
+    internal fun setVideoListDetailIn(index: Int, curBean: T?, ci: ListVideoControllerIn<T, VC>) {
         this.videoControllerIn = ci
+        this.curPlayingIndex = index
+        this.curBean = curBean
+        super.setVideoDetailIn(object : VideoDetailIn {
+            override fun onFullScreenLayoutInflated(v: View, pl: Any?) {
+                ci.onBindFullScreenLayout(v, getController, curBean, curPlayingIndex, listOf(pl))
+            }
+
+            override fun getVideoDetailLayoutId(): Int {
+                return ci.getVideoDetailLayoutId()
+            }
+        })
+    }
+
+    internal fun clearVideoListDataIn() {
+        this.videoControllerIn = null
+        this.curPlayingIndex = -1
+        this.curBean = null
+        setVideoDetailIn(null)
     }
 
     @CallSuper
     open fun resetWhenDisFocus() {
-        controller?.updateViewController("", null)
+        controller?.updateViewController("reset", null)
         controller = null
-        resetListener?.invoke(this)
+        resetListener?.invoke(getController)
         this.reset()
     }
 
     @CallSuper
     override fun onFullScreenChanged(isFull: Boolean, payloads: Map<String, Any?>?) {
         super.onFullScreenChanged(isFull, payloads)
-        videoControllerIn?.onFullScreenChanged(this, isFull)
-        fullScreenChangeListener?.invoke(this, isFull, payloads)
+        videoControllerIn?.onFullScreenChanged(getController, isFull)
+        fullScreenChangeListener?.invoke(getController, isFull, payloads)
     }
 
     override fun onTrack(playAble: Boolean, start: Boolean, end: Boolean, formTrigDuration: Float) {
@@ -98,7 +112,7 @@ abstract class BaseListVideoController @JvmOverloads constructor(c: Context, att
 
     /**
      * It should be noted that this method will be called in [resetWhenDisFocus],
-     * [com.zj.player.adapters.ListVideoAdapterDelegate] is mainly the way to reset the Controller in the list
+     * [com.zj.player.adapters.ListListVideoAdapterDelegate] is mainly the way to reset the Controller in the list
      * Therefore, this method cannot be exposed or overridden.
      * */
     private fun reset(isShowThumb: Boolean = true, isShowBackground: Boolean = true, isSinkBottomShader: Boolean = false) {
@@ -106,15 +120,15 @@ abstract class BaseListVideoController @JvmOverloads constructor(c: Context, att
         isCompleted = false
     }
 
-    fun setOnCompletedListener(l: ((BaseListVideoController) -> Unit)? = null) {
+    fun setOnCompletedListener(l: ((VC) -> Unit)? = null) {
         this.completedListener = l
     }
 
-    fun setPlayingStateListener(l: ((BaseListVideoController) -> Unit)? = null) {
+    fun setPlayingStateListener(l: ((VC) -> Unit)? = null) {
         this.playingStateListener = l
     }
 
-    fun setOnFullScreenChangedListener(l: ((BaseListVideoController, Boolean, payloads: Map<String, Any?>?) -> Unit)? = null) {
+    fun setOnFullScreenChangedListener(l: ((VC, Boolean, payloads: Map<String, Any?>?) -> Unit)? = null) {
         this.fullScreenChangeListener = l
     }
 
@@ -122,7 +136,7 @@ abstract class BaseListVideoController @JvmOverloads constructor(c: Context, att
         this.onTrackListener = l
     }
 
-    fun setOnResetListener(l: ((BaseListVideoController) -> Unit)? = null) {
+    fun setOnResetListener(l: ((VC) -> Unit)? = null) {
         this.resetListener = l
     }
 
