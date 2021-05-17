@@ -30,6 +30,15 @@ abstract class BaseListVideoController<T, VC> @JvmOverloads constructor(c: Conte
         get() {
             return controller != null
         }
+    var detailBindIn = object : VideoDetailIn {
+        override fun onFullScreenLayoutInflated(v: View, pl: Any?) {
+            videoControllerIn?.onBindFullScreenLayout(v, getController, curBean, curPlayingIndex, listOf(pl))
+        }
+
+        override fun getVideoDetailLayoutId(): Int {
+            return videoControllerIn?.getVideoDetailLayoutId() ?: 0
+        }
+    }
 
     override fun onPlayClick(fromUser: Boolean) {
         isCompleted = false
@@ -72,15 +81,7 @@ abstract class BaseListVideoController<T, VC> @JvmOverloads constructor(c: Conte
         this.videoControllerIn = ci
         this.curPlayingIndex = index
         this.curBean = curBean
-        super.setVideoDetailIn(object : VideoDetailIn {
-            override fun onFullScreenLayoutInflated(v: View, pl: Any?) {
-                ci.onBindFullScreenLayout(v, getController, curBean, curPlayingIndex, listOf(pl))
-            }
-
-            override fun getVideoDetailLayoutId(): Int {
-                return ci.getVideoDetailLayoutId()
-            }
-        })
+        super.setVideoDetailIn(detailBindIn)
     }
 
     internal fun clearVideoListDataIn() {

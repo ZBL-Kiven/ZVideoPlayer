@@ -593,6 +593,11 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
     open fun onViewInit() {}
 
     @CallSuper
+    open fun onContentLayoutInflated(content: View, pl: Any?){
+        videoDetailIn?.onFullScreenLayoutInflated(content, pl)
+    }
+
+    @CallSuper
     open fun onFullScreenChanged(isFull: Boolean, payloads: Map<String, Any?>?) {
         if (isFull) onFullScreenTrackEnd(false)
     }
@@ -1004,7 +1009,7 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
         }
 
         override fun onContentLayoutInflated(content: View, pl: Any?) {
-            videoDetailIn?.onFullScreenLayoutInflated(content, pl)
+            this@ZVideoView.onContentLayoutInflated(content, pl)
         }
 
         override fun onFullMaxChanged(dialog: ZPlayerFullScreenView, isMax: Boolean) {

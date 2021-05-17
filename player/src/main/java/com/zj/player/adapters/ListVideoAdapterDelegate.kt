@@ -186,7 +186,7 @@ abstract class ListVideoAdapterDelegate<T, VC, C : BaseListVideoController<T, VC
 
     private fun bindDelegateData(h: VH, p: Int, d: T?, playAble: Boolean, pl: MutableList<Any?>?) {
         getViewController(h)?.let { vc ->
-            vc.setVideoListDetailIn(p, d, this)
+            if (pl.isNullOrEmpty()) vc.setVideoListDetailIn(p, d, this)
             if (playAble != vc.isPlayable) vc.isPlayable = playAble
             if (pl?.isNullOrEmpty() == false) {
                 val pls = pl.first()?.toString() ?: ""
