@@ -30,9 +30,9 @@ import kotlin.math.min
  * create an instance of [BaseListVideoController] in your data Adapter ,and see [AdapterDelegateIn]
  **/
 @Suppress("MemberVisibilityCanBePrivate", "unused")
-abstract class ListVideoAdapterDelegate<T, VC, C : BaseListVideoController<T, VC>, VH : RecyclerView.ViewHolder, ADAPTER : RecyclerView.Adapter<VH>>(private val delegateName: String, private val adapter: ADAPTER) : AdapterDelegateIn<T, VH>, ListVideoControllerIn<T, VC, C>, InternalPlayStateChangeListener, RecyclerView.AdapterDataObserver() {
+abstract class ListVideoAdapterDelegate<T, VC : BaseListVideoController<T, *>, C : BaseListVideoController<T, VC>, VH : RecyclerView.ViewHolder, ADAPTER : RecyclerView.Adapter<VH>>(private val delegateName: String, private val adapter: ADAPTER) : AdapterDelegateIn<T, VH>, ListVideoControllerIn<T, VC>, InternalPlayStateChangeListener, RecyclerView.AdapterDataObserver() {
 
-    var curFullScreenController: C? = null
+    var curFullScreenController: VC? = null
     private var controller: ZController<*, *>? = null
     private var curPlayingIndex: Int = -1
     private var isStopWhenItemDetached = true
@@ -159,7 +159,7 @@ abstract class ListVideoAdapterDelegate<T, VC, C : BaseListVideoController<T, VC
         }, delay)
     }
 
-    override fun onFullScreenChanged(vc: C, isFull: Boolean) {
+    override fun onFullScreenChanged(vc: VC, isFull: Boolean) {
         this.curFullScreenController = if (isFull) {
             this.adapter.registerAdapterDataObserver(this);vc
         } else {

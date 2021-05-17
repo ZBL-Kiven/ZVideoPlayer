@@ -112,7 +112,7 @@ abstract class BaseListVideoController<T, VC> @JvmOverloads constructor(c: Conte
 
     /**
      * It should be noted that this method will be called in [resetWhenDisFocus],
-     * [com.zj.player.adapters.ListListVideoAdapterDelegate] is mainly the way to reset the Controller in the list
+     * [com.zj.player.adapters.ListVideoAdapterDelegate] is mainly the way to reset the Controller in the list
      * Therefore, this method cannot be exposed or overridden.
      * */
     private fun reset(isShowThumb: Boolean = true, isShowBackground: Boolean = true, isSinkBottomShader: Boolean = false) {

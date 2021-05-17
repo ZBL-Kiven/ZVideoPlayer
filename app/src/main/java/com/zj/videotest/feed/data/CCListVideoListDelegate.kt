@@ -17,7 +17,7 @@ import com.zj.views.list.holders.BaseViewHolder
 import java.lang.IllegalArgumentException
 import java.lang.ref.SoftReference
 
-abstract class CCListVideoListDelegate(delegateName: String, adapter: FeedContentAdapter) : ListVideoAdapterDelegate<VideoSource, CCVideoController, BaseViewHolder, BaseRecyclerAdapter<BaseViewHolder, VideoSource>>(delegateName, adapter) {
+abstract class CCListVideoListDelegate(delegateName: String, adapter: FeedContentAdapter) : ListVideoAdapterDelegate<VideoSource, CCVideoController, CCVideoController, BaseViewHolder, BaseRecyclerAdapter<BaseViewHolder, VideoSource>>(delegateName, adapter) {
 
     companion object {
         const val TAG_POSITION = R.id.special_feed_adapter_tag_id_position
