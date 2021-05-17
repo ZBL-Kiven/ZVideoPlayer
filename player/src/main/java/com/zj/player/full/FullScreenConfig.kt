@@ -3,7 +3,14 @@ package com.zj.player.full
 import android.content.Context
 import android.view.View
 
-internal class FullScreenConfig internal constructor(private var controllerView: View?) {
+internal class FullScreenConfig private constructor(private var controllerView: View?) {
+
+    companion object {
+
+        internal fun open(view: View): FullScreenConfig {
+            return FullScreenConfig(view)
+        }
+    }
 
     var contentLayout: Int = -1; private set
     var fullMaxScreenEnable: Boolean = false; private set
@@ -85,8 +92,8 @@ internal class FullScreenConfig internal constructor(private var controllerView:
         return this
     }
 
-    fun start(context: Context): ZPlayerFullScreenView {
-        return ZPlayerFullScreenView(context, this)
+    fun start(context: Context) {
+        ZPlayerFullScreenView.start(context, this)
     }
 
     fun clear() {

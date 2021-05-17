@@ -4,6 +4,7 @@ import android.graphics.Rect
 import android.os.Handler
 import android.os.Looper
 import android.os.Message
+import android.view.KeyEvent
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewGroup.FOCUS_BLOCK_DESCENDANTS
@@ -17,6 +18,8 @@ import com.zj.player.controller.BaseListVideoController
 import com.zj.player.interfaces.ListVideoControllerIn
 import com.zj.player.logs.ZPlayerLogs
 import com.zj.player.ut.InternalPlayStateChangeListener
+import com.zj.player.z.ZVideoView
+import java.lang.Exception
 import java.lang.NullPointerException
 import java.lang.ref.SoftReference
 import java.lang.ref.WeakReference
@@ -30,7 +33,7 @@ import kotlin.math.min
  * create an instance of [BaseListVideoController] in your data Adapter ,and see [AdapterDelegateIn]
  **/
 @Suppress("MemberVisibilityCanBePrivate", "unused")
-abstract class ListVideoAdapterDelegate<T, VC : BaseListVideoController<T, *>, C : BaseListVideoController<T, VC>, VH : RecyclerView.ViewHolder, ADAPTER : RecyclerView.Adapter<VH>>(private val delegateName: String, private val adapter: ADAPTER) : AdapterDelegateIn<T, VH>, ListVideoControllerIn<T, VC>, InternalPlayStateChangeListener, RecyclerView.AdapterDataObserver() {
+abstract class ListVideoAdapterDelegate<T, VC, C : BaseListVideoController<T, VC>, VH : RecyclerView.ViewHolder, ADAPTER : RecyclerView.Adapter<VH>>(private val delegateName: String, private val adapter: ADAPTER) : AdapterDelegateIn<T, VH>, ListVideoControllerIn<T, VC>, InternalPlayStateChangeListener, RecyclerView.AdapterDataObserver() {
 
     var curFullScreenController: VC? = null
     private var controller: ZController<*, *>? = null
@@ -160,10 +163,16 @@ abstract class ListVideoAdapterDelegate<T, VC : BaseListVideoController<T, *>, C
     }
 
     override fun onFullScreenChanged(vc: VC, isFull: Boolean) {
-        this.curFullScreenController = if (isFull) {
-            this.adapter.registerAdapterDataObserver(this);vc
-        } else {
-            this.adapter.unregisterAdapterDataObserver(this); null
+        this.curFullScreenController = if (isFull) vc else null
+        try {
+            if (isFull) {
+                this.adapter.registerAdapterDataObserver(this)
+            } else {
+                this.adapter.unregisterAdapterDataObserver(this)
+            }
+        } catch (e: Exception) {
+            ZPlayerLogs.onError(e, false)
+            if (isFull) (vc as? ZVideoView)?.fullScreen(isFull = false, fromUser = false, payloads = null)
         }
     }
 
@@ -410,28 +419,38 @@ abstract class ListVideoAdapterDelegate<T, VC : BaseListVideoController<T, *>, C
         private const val LOAD_STR_DEFAULT_LOADER = "$DEFAULT_LOADER#%d#%s"
     }
 
+    open fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
+        return ZVideoView.fullScreenView?.let {
+            if (!it.hasFocus()) it.onKeyDown(keyCode, event) else false
+        } ?: false
+    }
+
     override fun onChanged() {
         super.onChanged()
-        curFullScreenController?.onDetailViewNotifyChanged(null)
+        (curFullScreenController as? BaseListVideoController<*, *>)?.onDetailViewNotifyChanged(null)
     }
 
     override fun onItemRangeChanged(positionStart: Int, itemCount: Int) {
         super.onItemRangeChanged(positionStart, itemCount)
-        curFullScreenController?.onDetailViewNotifyChanged(null)
+        (curFullScreenController as? BaseListVideoController<*, *>)?.onDetailViewNotifyChanged(null)
     }
 
     override fun onItemRangeChanged(positionStart: Int, itemCount: Int, payload: Any?) {
         super.onItemRangeChanged(positionStart, itemCount, payload)
-        curFullScreenController?.onDetailViewNotifyChanged(payload)
+        (curFullScreenController as? BaseListVideoController<*, *>)?.onDetailViewNotifyChanged(payload)
     }
 
     override fun onItemRangeMoved(fromPosition: Int, toPosition: Int, itemCount: Int) {
         super.onItemRangeMoved(fromPosition, toPosition, itemCount)
-        if (curFullScreenController?.curPlayingIndex in fromPosition..toPosition) curFullScreenController?.fullScreen(false, fromUser = false)
+        (curFullScreenController as? BaseListVideoController<*, *>)?.let {
+            if (it.curPlayingIndex in fromPosition..toPosition) it.fullScreen(false, fromUser = false)
+        }
     }
 
     override fun onItemRangeRemoved(positionStart: Int, itemCount: Int) {
         super.onItemRangeRemoved(positionStart, itemCount)
-        if (curFullScreenController?.curPlayingIndex in positionStart..(positionStart + itemCount)) curFullScreenController?.fullScreen(false, fromUser = false)
+        (curFullScreenController as? BaseListVideoController<*, *>)?.let {
+            if (it.curPlayingIndex in positionStart..(positionStart + itemCount)) it.fullScreen(false, fromUser = false)
+        }
     }
 }

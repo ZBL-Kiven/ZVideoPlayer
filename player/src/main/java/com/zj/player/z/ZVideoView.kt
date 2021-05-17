@@ -69,6 +69,8 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
         const val LOCK_SCREEN_LANDSCAPE = 0
         const val LOCK_SCREEN_PORTRAIT = 1
 
+        internal var fullScreenView: ZPlayerFullScreenView? = null
+
         /**
          * After setting this property, all ViewController instances configured with app:useMuteGlobal in xml take effect。
          * @see muteIsUseGlobal  bind to [muteGlobalDefault]
@@ -133,7 +135,6 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
     protected var curBufferedTime: Long = 0L
     private var curSpeedIndex = 0
     private var fullScreenTransactionTime = 250
-    private var fullScreenView: ZPlayerFullScreenView? = null
     private var muteDefault: Boolean = false
     private var muteIsUseGlobal: Boolean = false
     private var isTransactionNavigation: Boolean = false
@@ -1033,7 +1034,7 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
                 qualityView?.visibility = GONE
                 fullScreenView?.dismiss()
             } else {
-                if (fullScreenView == null) fullScreenView = ZPlayerFullScreenView.let { d ->
+                FullScreenConfig.let { d ->
                     d.open(root).defaultOrientation(lockScreenRotation).allowReversePortrait(isAllowReversePortrait).transactionNavigation(isTransactionNavigation).transactionAnimDuration(transaction.transactionTime, transaction.isStartOnly, fullScreenTransactionTime).setPreDismissInterceptor { onPreToDismissFullScreen(it) }.setPreFullMaxChangeInterceptor { onPreToFullMaxScreen(it) }.payLoads(transaction.payloads).let { config ->
                         if (isDefaultMaxScreen) {
                             lockScreen?.visibility = View.VISIBLE
@@ -1045,6 +1046,7 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
                         config.start(context)
                     }
                 }
+                fullScreenView = ZPlayerFullScreenView.cachedFullScreenView
                 lockScreenRotate(lockScreenRotation != LOCK_SCREEN_UNSPECIFIED)
             }
         }

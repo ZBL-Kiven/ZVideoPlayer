@@ -28,7 +28,7 @@ object ZPlayerLogs {
     }
 
     internal fun debug(s: String) {
-        if (debugAble) Log.d("ZPlayer.logs ---> ", "\ncase:$s")
+        if (debugAble) Log.d("ZPlayer.logs ---> ", "error detected, case:\n$s")
     }
 
     internal fun onLog(s: String, curPath: String, accessKey: String, modeName: String, data: BehaviorData?) {
