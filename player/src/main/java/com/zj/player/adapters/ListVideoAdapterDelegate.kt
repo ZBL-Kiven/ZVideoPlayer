@@ -30,9 +30,9 @@ import kotlin.math.min
  * create an instance of [BaseListVideoController] in your data Adapter ,and see [AdapterDelegateIn]
  **/
 @Suppress("MemberVisibilityCanBePrivate", "unused")
-abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController<T, V>, VH : RecyclerView.ViewHolder, ADAPTER : RecyclerView.Adapter<VH>>(private val delegateName: String, private val adapter: ADAPTER) : AdapterDelegateIn<T, VH>, ListVideoControllerIn<T, V>, InternalPlayStateChangeListener, RecyclerView.AdapterDataObserver() {
+abstract class ListVideoAdapterDelegate<T, VC, C : BaseListVideoController<T, VC>, VH : RecyclerView.ViewHolder, ADAPTER : RecyclerView.Adapter<VH>>(private val delegateName: String, private val adapter: ADAPTER) : AdapterDelegateIn<T, VH>, ListVideoControllerIn<T, VC, C>, InternalPlayStateChangeListener, RecyclerView.AdapterDataObserver() {
 
-    var curFullScreenController: V? = null
+    var curFullScreenController: C? = null
     private var controller: ZController<*, *>? = null
     private var curPlayingIndex: Int = -1
     private var isStopWhenItemDetached = true
@@ -43,12 +43,12 @@ abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController<T, V>, VH
     private val waitingForPlayClicked = R.id.delegate_waiting_for_play_clicked
     private val waitingForPlayScrolled = R.id.delegate_waiting_for_play_scrolled
     private val waitingForPlayIdle = R.id.delegate_waiting_for_play_idle
-    protected abstract fun createZController(delegateName: String, data: T?, vc: V): ZController<*, *>
-    protected abstract fun getViewController(holder: VH?): V?
+    protected abstract fun createZController(delegateName: String, data: T?, vc: C): ZController<*, *>
+    protected abstract fun getViewController(holder: VH?): C?
     protected abstract fun getItem(p: Int, adapter: ADAPTER): T?
     protected abstract fun isInflateMediaType(d: T?): Boolean
     protected abstract fun getPathAndLogsCallId(d: T?): Pair<String, Any?>?
-    protected abstract fun onBindData(holder: VH?, p: Int, d: T?, playAble: Boolean, vc: V?, pl: MutableList<Any?>?)
+    protected abstract fun onBindData(holder: VH?, p: Int, d: T?, playAble: Boolean, vc: C?, pl: MutableList<Any?>?)
     protected open fun onBindTypeData(holder: SoftReference<VH>?, d: T?, p: Int, pl: MutableList<Any?>?) {}
     protected open fun onBindDelegate(holder: VH?, p: Int, d: T?, pl: MutableList<Any?>?) {}
     protected open fun onPlayStateChanged(runningName: String, isPlaying: Boolean, desc: String?, controller: ZController<*, *>?) {}
@@ -159,7 +159,7 @@ abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController<T, V>, VH
         }, delay)
     }
 
-    override fun onFullScreenChanged(vc: V, isFull: Boolean) {
+    override fun onFullScreenChanged(vc: C, isFull: Boolean) {
         this.curFullScreenController = if (isFull) {
             this.adapter.registerAdapterDataObserver(this);vc
         } else {
@@ -219,7 +219,7 @@ abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController<T, V>, VH
         }
     }
 
-    private fun onBindVideoView(d: T?, vc: V) {
+    private fun onBindVideoView(d: T?, vc: C) {
         if (!checkControllerMatching(d, controller)) {
             controller = getZController(d, vc)
         } else {
@@ -227,7 +227,7 @@ abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController<T, V>, VH
         }
     }
 
-    private fun getZController(data: T?, vc: V): ZController<*, *>? {
+    private fun getZController(data: T?, vc: C): ZController<*, *>? {
         val c = createZController(delegateName, data, vc)
         if (c != controller) {
             controller = c
@@ -307,7 +307,7 @@ abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController<T, V>, VH
         }
     }
 
-    private fun playOrResume(vc: V?, p: Int, data: T?, fromUser: Boolean = false) {
+    private fun playOrResume(vc: C?, p: Int, data: T?, fromUser: Boolean = false) {
         if (vc == null) {
             ZPlayerLogs.onError(NullPointerException("use a null view controller ,means show what?"))
             return
