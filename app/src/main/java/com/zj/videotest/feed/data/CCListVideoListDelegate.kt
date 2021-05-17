@@ -3,7 +3,7 @@ package com.zj.videotest.feed.data
 import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
-import com.zj.player.adapters.ListListVideoAdapterDelegate
+import com.zj.player.adapters.ListVideoAdapterDelegate
 import com.zj.player.img.ImgLoader
 import com.zj.player.z.ZController
 import com.zj.videotest.R
@@ -17,7 +17,7 @@ import com.zj.views.list.holders.BaseViewHolder
 import java.lang.IllegalArgumentException
 import java.lang.ref.SoftReference
 
-abstract class CCListVideoListDelegate(delegateName: String, adapter: FeedContentAdapter) : ListListVideoAdapterDelegate<VideoSource, CCVideoController, BaseViewHolder, BaseRecyclerAdapter<BaseViewHolder, VideoSource>>(delegateName, adapter) {
+abstract class CCListVideoListDelegate(delegateName: String, adapter: FeedContentAdapter) : ListVideoAdapterDelegate<VideoSource, CCVideoController, BaseViewHolder, BaseRecyclerAdapter<BaseViewHolder, VideoSource>>(delegateName, adapter) {
 
     companion object {
         const val TAG_POSITION = R.id.special_feed_adapter_tag_id_position

@@ -30,7 +30,7 @@ import kotlin.math.min
  * create an instance of [BaseListVideoController] in your data Adapter ,and see [AdapterDelegateIn]
  **/
 @Suppress("MemberVisibilityCanBePrivate", "unused")
-abstract class ListListVideoAdapterDelegate<T, V : BaseListVideoController<T, V>, VH : RecyclerView.ViewHolder, ADAPTER : RecyclerView.Adapter<VH>>(private val delegateName: String, private val adapter: ADAPTER) : AdapterDelegateIn<T, VH>, ListVideoControllerIn<T, V>, InternalPlayStateChangeListener, RecyclerView.AdapterDataObserver() {
+abstract class ListVideoAdapterDelegate<T, V : BaseListVideoController<T, V>, VH : RecyclerView.ViewHolder, ADAPTER : RecyclerView.Adapter<VH>>(private val delegateName: String, private val adapter: ADAPTER) : AdapterDelegateIn<T, VH>, ListVideoControllerIn<T, V>, InternalPlayStateChangeListener, RecyclerView.AdapterDataObserver() {
 
     var curFullScreenController: V? = null
     private var controller: ZController<*, *>? = null
