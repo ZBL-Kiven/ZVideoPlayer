@@ -252,15 +252,21 @@ open class ZController<P : BasePlayer<R>, R : BaseRender> internal constructor(v
         return render?.let { cls == it::class.java } ?: false
     }
 
+    fun clearRender() {
+        withRenderAndControllerView(false)
+        this.viewController = null
+    }
+
     /**
      * Use another View to bind to the Controller. The bound ViewController will take effect immediately and receive the method callback from the player.
      * */
     fun updateViewController(runningName: String, viewController: Controller?, syncCurState: Boolean = false) {
         if (this.runningName != runningName) stopNow(true)
+        val isNotSame = this.viewController != viewController
         this.viewController = viewController
         this.runningName = runningName
         if (viewController != null) {
-            if (this.viewController != viewController) {
+            if (isNotSame) {
                 log("user update the view controller names ${viewController::class.java.simpleName}")
                 if (syncCurState) syncPlayerState()
                 withRenderAndControllerView(false)

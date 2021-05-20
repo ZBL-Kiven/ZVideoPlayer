@@ -32,7 +32,8 @@ abstract class BaseListVideoController<T, VC> @JvmOverloads constructor(c: Conte
         }
     var detailBindIn = object : VideoDetailIn {
         override fun onFullScreenLayoutInflated(v: View, pl: Any?) {
-            videoControllerIn?.onBindFullScreenLayout(v, getController, curBean, curPlayingIndex, listOf(pl))
+            val p = if (pl == null) null else listOf(pl)
+            videoControllerIn?.onBindFullScreenLayout(v, getController, curBean, curPlayingIndex, p)
         }
 
         override fun getVideoDetailLayoutId(): Int {
@@ -73,14 +74,14 @@ abstract class BaseListVideoController<T, VC> @JvmOverloads constructor(c: Conte
 
     override fun onCompleted(path: String, isRegulate: Boolean) {
         super.onCompleted(path, isRegulate)
+        controller?.clearRender()
+        setOverlayViews(isShowThumb = true, isShowBackground = true, isSinkBottomShader = false)
         isCompleted = true
         completedListener?.invoke(getController)
     }
 
-    internal fun setVideoListDetailIn(index: Int, curBean: T?, ci: ListVideoControllerIn<T, VC>) {
+    internal fun setVideoListDetailIn(ci: ListVideoControllerIn<T, VC>) {
         this.videoControllerIn = ci
-        this.curPlayingIndex = index
-        this.curBean = curBean
         super.setVideoDetailIn(detailBindIn)
     }
 
@@ -97,6 +98,11 @@ abstract class BaseListVideoController<T, VC> @JvmOverloads constructor(c: Conte
         controller = null
         resetListener?.invoke(getController)
         this.reset()
+    }
+
+    open fun onBindData(index: Int, curBean: T?, playAble: Boolean, pl: MutableList<Any?>?) {
+        this.curPlayingIndex = index
+        this.curBean = curBean
     }
 
     @CallSuper

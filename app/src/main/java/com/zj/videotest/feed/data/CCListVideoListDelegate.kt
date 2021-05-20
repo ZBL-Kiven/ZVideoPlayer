@@ -56,6 +56,7 @@ abstract class CCListVideoListDelegate(delegateName: String, adapter: FeedConten
 
     /**bind normal media item data*/
     override fun onBindData(holder: BaseViewHolder?, p: Int, d: VideoSource?, playAble: Boolean, vc: CCVideoController?, pl: MutableList<Any?>?) {
+        super.onBindData(holder, p, d, playAble, vc, pl)
         holder?.let { h ->
             if (pl.isNullOrEmpty()) {
                 val avatarPath = d?.getAvatarPath() ?: ""

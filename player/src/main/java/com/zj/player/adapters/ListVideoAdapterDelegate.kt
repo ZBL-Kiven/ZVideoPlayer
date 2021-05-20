@@ -9,6 +9,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.ViewGroup.FOCUS_BLOCK_DESCENDANTS
 import android.view.animation.AccelerateInterpolator
+import androidx.annotation.CallSuper
 import androidx.annotation.MainThread
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -51,10 +52,15 @@ abstract class ListVideoAdapterDelegate<T, VC, C : BaseListVideoController<T, VC
     protected abstract fun getItem(p: Int, adapter: ADAPTER): T?
     protected abstract fun isInflateMediaType(d: T?): Boolean
     protected abstract fun getPathAndLogsCallId(d: T?): Pair<String, Any?>?
-    protected abstract fun onBindData(holder: VH?, p: Int, d: T?, playAble: Boolean, vc: C?, pl: MutableList<Any?>?)
     protected open fun onBindTypeData(holder: SoftReference<VH>?, d: T?, p: Int, pl: MutableList<Any?>?) {}
     protected open fun onBindDelegate(holder: VH?, p: Int, d: T?, pl: MutableList<Any?>?) {}
     protected open fun onPlayStateChanged(runningName: String, isPlaying: Boolean, desc: String?, controller: ZController<*, *>?) {}
+
+    @CallSuper
+    protected open fun onBindData(holder: VH?, p: Int, d: T?, playAble: Boolean, vc: C?, pl: MutableList<Any?>?) {
+        vc?.onBindData(p, d, playAble, pl)
+    }
+
     protected open fun checkControllerMatching(data: T?, controller: ZController<*, *>?): Boolean {
         return controller != null && !controller.isDestroyed() && controller.runningName != delegateName
     }
@@ -186,7 +192,7 @@ abstract class ListVideoAdapterDelegate<T, VC, C : BaseListVideoController<T, VC
 
     private fun bindDelegateData(h: VH, p: Int, d: T?, playAble: Boolean, pl: MutableList<Any?>?) {
         getViewController(h)?.let { vc ->
-            if (pl.isNullOrEmpty()) vc.setVideoListDetailIn(p, d, this)
+            if (pl.isNullOrEmpty()) vc.setVideoListDetailIn(this)
             if (playAble != vc.isPlayable) vc.isPlayable = playAble
             if (pl?.isNullOrEmpty() == false) {
                 val pls = pl.first()?.toString() ?: ""

@@ -2,7 +2,6 @@ package com.zj.videotest.ytb
 
 
 import android.content.Context
-import android.util.Log
 import android.view.Gravity
 import android.view.MotionEvent
 import android.view.ViewGroup

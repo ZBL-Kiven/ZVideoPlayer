@@ -582,6 +582,7 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
         return muteGlobalDefault
     }
 
+    @CallSuper
     open fun setVideoDetailIn(detailIn: VideoDetailIn?) {
         this.videoDetailIn = detailIn
     }

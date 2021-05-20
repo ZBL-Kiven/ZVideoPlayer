@@ -122,9 +122,9 @@ class FeedContentAdapter : ListenerAnimAdapter<VideoSource>(R.layout.r_main_fg_f
                 it.setOnCompletedListener(null)
                 it.setOnResetListener(null)
                 it.setOnTrackListener(null)
+                adapterDelegate?.onViewRecycled(holder)
                 super.onViewRecycled(holder)
             }
-            adapterDelegate?.onViewRecycled(holder)
         } ?: super.onViewRecycled(holder)
     }
 
