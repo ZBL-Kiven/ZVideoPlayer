@@ -38,11 +38,10 @@ internal class ZPlayerFullScreenView constructor(context: Context) : FrameLayout
         private const val MAX_DEEP_RATIO = 0.55f
         private const val HANDLE_RESIZE_CONTROLLER = 19283
         private const val HANDLE_ORIENTATION_CHANGE = 19285
-        internal var cachedFullScreenView: ZPlayerFullScreenView? = null
 
-        fun start(context: Context, config: FullScreenConfig) {
-            if (cachedFullScreenView == null) cachedFullScreenView = ZPlayerFullScreenView(context)
-            cachedFullScreenView?.let {
+        fun start(context: Context, config: FullScreenConfig): ZPlayerFullScreenView? {
+            val cachedFullScreenView = ZPlayerFullScreenView(context)
+            cachedFullScreenView.let {
                 it.config = config
                 it.isMaxFull = config.isDefaultMaxScreen
                 it.originWidth = config.getControllerView()?.measuredWidth ?: 0
@@ -52,18 +51,16 @@ internal class ZPlayerFullScreenView constructor(context: Context) : FrameLayout
                 it.mDecorView = (context as? Activity)?.findViewById(android.R.id.content) as? ViewGroup
                 if (it.mDecorView == null) {
                     ZPlayerLogs.onError("the full screen view open failed ,case the [context $context] was not an Activity!", true)
-                    return@start
+                    return@start null
                 }
                 it.startFullScreen()
             }
+            return cachedFullScreenView
         }
     }
 
     fun startFullScreen() {
         runWithControllerView {
-            isFocusable = true
-            isFocusableInTouchMode = true
-            requestFocus()
             (it.context?.applicationContext?.getSystemService(Context.WINDOW_SERVICE) as? WindowManager)?.defaultDisplay?.getRealSize(realWindowSize)
             if (!config.isDefaultMaxScreen && config.contentLayout > 0) contentLayoutView = View.inflate(it.context, config.contentLayout, null)
             val actionViews = mutableMapOf<Int, View>()
@@ -87,6 +84,9 @@ internal class ZPlayerFullScreenView constructor(context: Context) : FrameLayout
                 fullHandler.sendMessageDelayed(Message.obtain().apply { what = HANDLE_ORIENTATION_CHANGE;obj = it }, 100)
             }
         }
+        isFocusable = true
+        isFocusableInTouchMode = true
+        requestFocus()
     }
 
     private lateinit var config: FullScreenConfig

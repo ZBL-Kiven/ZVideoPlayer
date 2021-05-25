@@ -45,6 +45,7 @@ import com.zj.player.view.QualityMenuView
 import com.zj.player.view.VideoLoadingView
 import com.zj.player.view.VideoRootView
 import java.lang.ref.WeakReference
+import java.util.*
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
@@ -69,7 +70,12 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
         const val LOCK_SCREEN_LANDSCAPE = 0
         const val LOCK_SCREEN_PORTRAIT = 1
 
-        internal var fullScreenView: ZPlayerFullScreenView? = null
+        private var fullScreenViews = WeakHashMap<Context, ZPlayerFullScreenView>()
+
+        internal fun getCurFullscreenView(context: Context): ZPlayerFullScreenView? {
+            ZPlayerLogs.onLog("get fullscreen view by context : the cur fullscreen view size is ${fullScreenViews.size}", "", "", "ZVideoView")
+            return fullScreenViews[context]
+        }
 
         /**
          * After setting this property, all ViewController instances configured with app:useMuteGlobal in xml take effect。
@@ -162,7 +168,7 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
     private var touchListener: GestureTouchListener? = object : GestureTouchListener({ isInterrupted() }) {
 
         override fun onEventEnd(formTrigDuration: Float, parseAutoScale: Boolean): Boolean {
-            return fullScreenView?.onEventEnd(formTrigDuration, parseAutoScale) ?: true
+            return getCurFullscreenView(context)?.onEventEnd(formTrigDuration, parseAutoScale) ?: true
         }
 
         override fun onClick(x: Float, y: Float) {
@@ -178,13 +184,13 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
         }
 
         override fun onTracked(isStart: Boolean, offsetX: Float, offsetY: Float, easeY: Float, orientation: TrackOrientation, formTrigDuration: Float) {
-            fullScreenView?.let {
+            getCurFullscreenView(context)?.let {
                 if (isFullScreen && it.parent != null) it.onTracked(isStart, if (scrollXEnabled) offsetX else 0f, offsetY, easeY, formTrigDuration)
             }
         }
 
         override fun onTouchActionEvent(event: MotionEvent, lastX: Float, lastY: Float, orientation: TrackOrientation?): Boolean {
-            return fullScreenView?.let {
+            return getCurFullscreenView(context)?.let {
                 if (isFullScreen && it.parent != null && !it.isMaxFull()) this@ZVideoView.onTouchActionEvent(videoRoot, event, lastX, lastY, orientation) else false
             } ?: false
         }
@@ -403,7 +409,7 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
     }
 
     override fun onDestroy(path: String?, isRegulate: Boolean) {
-        fullScreenView?.let {
+        getCurFullscreenView(context)?.let {
             if (it.parent != null) it.dismiss()
         }
         controller = null
@@ -588,13 +594,13 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
     }
 
     open fun onDetailViewNotifyChanged(pl: Any?) {
-        fullScreenView?.notifyContentViewChanged(pl)
+        getCurFullscreenView(context)?.notifyContentViewChanged(pl)
     }
 
     open fun onViewInit() {}
 
     @CallSuper
-    open fun onContentLayoutInflated(content: View, pl: Any?){
+    open fun onContentLayoutInflated(content: View, pl: Any?) {
         videoDetailIn?.onFullScreenLayoutInflated(content, pl)
     }
 
@@ -675,7 +681,7 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
 
     open fun onFullScreenViewDoubleClick(x: Float, y: Float) {
         log("on full screen view double click", BehaviorLogsTable.onRootDoubleClick())
-        fullScreenView?.onDoubleClick()
+        getCurFullscreenView(context)?.onDoubleClick()
     }
 
     private fun onFullScreenClick(nextState: Boolean, fromUser: Boolean, payloads: Map<String, Any?>? = null) {
@@ -837,7 +843,7 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
      * */
     @CallSuper
     open fun lockScreenRotate(isLock: Boolean): Boolean {
-        return if (fullScreenView?.lockScreenRotation(isLock) == true) {
+        return if (getCurFullscreenView(context)?.lockScreenRotation(isLock) == true) {
             lockScreen?.isSelected = isLock
             true
         } else false
@@ -1038,10 +1044,10 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
             if (!full) {
                 lockScreen?.visibility = GONE
                 qualityView?.visibility = GONE
-                fullScreenView?.dismiss()
+                getCurFullscreenView(context)?.dismiss()
             } else {
                 FullScreenConfig.let { d ->
-                    d.open(root).defaultOrientation(lockScreenRotation).allowReversePortrait(isAllowReversePortrait).transactionNavigation(isTransactionNavigation).transactionAnimDuration(transaction.transactionTime, transaction.isStartOnly, fullScreenTransactionTime).setPreDismissInterceptor { onPreToDismissFullScreen(it) }.setPreFullMaxChangeInterceptor { onPreToFullMaxScreen(it) }.payLoads(transaction.payloads).let { config ->
+                    val fv = d.open(root).defaultOrientation(lockScreenRotation).allowReversePortrait(isAllowReversePortrait).transactionNavigation(isTransactionNavigation).transactionAnimDuration(transaction.transactionTime, transaction.isStartOnly, fullScreenTransactionTime).setPreDismissInterceptor { onPreToDismissFullScreen(it) }.setPreFullMaxChangeInterceptor { onPreToFullMaxScreen(it) }.payLoads(transaction.payloads).let { config ->
                         if (isDefaultMaxScreen) {
                             lockScreen?.visibility = View.VISIBLE
                             qualityView?.visibility = View.VISIBLE
@@ -1051,8 +1057,8 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
                         }
                         config.start(context)
                     }
+                    if (fv != null) fullScreenViews[context] = fv
                 }
-                fullScreenView = ZPlayerFullScreenView.cachedFullScreenView
                 lockScreenRotate(lockScreenRotation != LOCK_SCREEN_UNSPECIFIED)
             }
         }
@@ -1115,7 +1121,7 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
         qualityView?.visibility = GONE
         if (!isShow) {
             isFullMaxScreen = false
-            fullScreenView = null
+            fullScreenViews.remove(context)
             lockScreen?.isSelected = false
             this@ZVideoView.onTracked(isStart = false, isEnd = true, formTrigDuration = 1.0f, resumeFullState = resumeToolsWhenFullscreenChanged())
         }
@@ -1290,6 +1296,6 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
     private fun isInterrupted(): Boolean {
         return if ((menuView?.visibility ?: View.GONE) != View.GONE) {
             menuView?.visibility = View.GONE;true
-        } else fullScreenView?.isInterruptTouchEvent() ?: false
+        } else getCurFullscreenView(context)?.isInterruptTouchEvent() ?: false
     }
 }

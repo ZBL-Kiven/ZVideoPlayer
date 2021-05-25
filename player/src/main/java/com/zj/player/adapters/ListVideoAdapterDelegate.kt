@@ -426,7 +426,8 @@ abstract class ListVideoAdapterDelegate<T, VC, C : BaseListVideoController<T, VC
     }
 
     open fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
-        return ZVideoView.fullScreenView?.let {
+        val ctx = recyclerView?.context ?: return false
+        return ZVideoView.getCurFullscreenView(ctx)?.let {
             if (!it.hasFocus()) it.onKeyDown(keyCode, event) else false
         } ?: false
     }

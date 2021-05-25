@@ -223,8 +223,8 @@
 
     <ImageView
         android:id="@+id/r_main_fg_list_iv_avatar"
-        android:layout_width="80dp"
-        android:layout_height="80dp"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
         android:layout_marginStart="18dp"
         android:layout_marginTop="38dp"
         android:background="#f00"

@@ -3,6 +3,7 @@ package com.zj.videotest.feed
 import android.animation.Animator
 import android.animation.ObjectAnimator
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.os.Handler
 import android.os.Looper
 import android.view.LayoutInflater
@@ -15,6 +16,7 @@ import com.bumptech.glide.Glide
 import com.zj.player.z.ZController
 import com.zj.player.base.BasePlayer
 import com.zj.videotest.R
+import com.zj.videotest.TestActivity2
 import com.zj.videotest.controllers.CCVideoController
 import com.zj.videotest.feed.bean.VideoSource
 import com.zj.videotest.feed.data.CCListVideoListDelegate
@@ -91,6 +93,13 @@ class FeedContentAdapter : ListenerAnimAdapter<VideoSource>(R.layout.r_main_fg_f
                 vc?.setOnCompletedListener(if (playAble) onVcCompletedListener else null)
                 vc?.setOnResetListener(if (playAble) onResetListener else null)
                 vc?.setOnTrackListener(if (playAble) onTrackListener else null)
+            }
+        }
+
+        override fun onBindFullScreenLayout(contentLayout: View, vc: CCVideoController?, d: VideoSource?, p: Int, pl: List<Any?>?) {
+            super.onBindFullScreenLayout(contentLayout, vc, d, p, pl)
+            contentLayout.findViewById<View>(R.id.r_main_fg_list_iv_avatar).setOnClickListener {
+                it.context.startActivity(Intent(it.context, TestActivity2::class.java))
             }
         }
     }

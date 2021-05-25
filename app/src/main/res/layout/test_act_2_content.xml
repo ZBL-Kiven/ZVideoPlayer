@@ -16,7 +16,7 @@
     <View
         android:id="@+id/tv1"
         android:layout_width="200dp"
-        android:layout_height="match_parent"
+        android:layout_height="100dp"
         android:layout_gravity="center"
         android:background="#cac"
         android:onClick="clickFull" />

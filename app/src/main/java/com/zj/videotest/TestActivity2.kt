@@ -47,12 +47,4 @@ class TestActivity2 : AppCompatActivity() {
         }
         mVideoView.fullScreen(!isFull, fromUser = true, payloads = null)
     }
-
-    override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
-        if (keyCode == KeyEvent.KEYCODE_BACK) {
-            clickFull(tv1);return false
-        }
-        return super.onKeyDown(keyCode, event)
-    }
-
 }
