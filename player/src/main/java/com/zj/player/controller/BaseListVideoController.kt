@@ -74,7 +74,7 @@ abstract class BaseListVideoController<T, VC> @JvmOverloads constructor(c: Conte
 
     override fun onCompleted(path: String, isRegulate: Boolean) {
         super.onCompleted(path, isRegulate)
-        controller?.clearRender()
+        if (clearControllerWhenCompleted()) controller?.clearRender()
         setOverlayViews(isShowThumb = true, isShowBackground = true, isSinkBottomShader = false)
         isCompleted = true
         completedListener?.invoke(getController)
@@ -103,6 +103,10 @@ abstract class BaseListVideoController<T, VC> @JvmOverloads constructor(c: Conte
     open fun onBindData(index: Int, curBean: T?, playAble: Boolean, pl: MutableList<Any?>?) {
         this.curPlayingIndex = index
         this.curBean = curBean
+    }
+
+    open fun clearControllerWhenCompleted(): Boolean {
+        return true
     }
 
     @CallSuper
