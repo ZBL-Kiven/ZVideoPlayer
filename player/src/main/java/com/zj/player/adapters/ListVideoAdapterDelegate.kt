@@ -177,7 +177,7 @@ abstract class ListVideoAdapterDelegate<T, VC, C : BaseListVideoController<T, VC
                 this.adapter.unregisterAdapterDataObserver(this)
             }
         } catch (e: Exception) {
-            ZPlayerLogs.onError(e, false)
+            ZPlayerLogs.onError(e, true)
             if (isFull) (vc as? ZVideoView)?.fullScreen(isFull = false, fromUser = false, payloads = null)
         }
     }

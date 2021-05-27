@@ -79,7 +79,7 @@ internal class ZPlayerFullScreenView constructor(context: Context) : FrameLayout
             }
         }
         screenUtil = ScreenOrientationListener(WeakReference(context)) {
-            handler.removeMessages(HANDLE_ORIENTATION_CHANGE)
+            fullHandler.removeMessages(HANDLE_ORIENTATION_CHANGE)
             if (!isScreenRotateLocked && isMaxFull) {
                 fullHandler.sendMessageDelayed(Message.obtain().apply { what = HANDLE_ORIENTATION_CHANGE;obj = it }, 100)
             }
@@ -358,6 +358,7 @@ internal class ZPlayerFullScreenView constructor(context: Context) : FrameLayout
         runWithControllerView {
             val rect = calculateUtils?.calculate(offset)
             getFrameLayoutParams(it, rect)
+            it.post { it.requestLayout() }
         }
     }
 
@@ -512,7 +513,8 @@ internal class ZPlayerFullScreenView constructor(context: Context) : FrameLayout
         _width = w * 1.0f
         _height = h * 1.0f
         super.onSizeChanged(w, h, ow, oh)
-        requestLayout()
+        initCalculate()
+        updateContent(0f)
     }
 
     private fun getViewPoint(view: View?): PointF {
