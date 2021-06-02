@@ -36,7 +36,6 @@ internal class ZPlayerFullScreenView constructor(context: Context) : FrameLayout
 
     companion object {
         private const val MAX_DEEP_RATIO = 0.55f
-        private const val HANDLE_RESIZE_CONTROLLER = 19283
         private const val HANDLE_ORIENTATION_CHANGE = 19285
 
         fun start(context: Context, config: FullScreenConfig): ZPlayerFullScreenView? {
@@ -84,6 +83,7 @@ internal class ZPlayerFullScreenView constructor(context: Context) : FrameLayout
                 fullHandler.sendMessageDelayed(Message.obtain().apply { what = HANDLE_ORIENTATION_CHANGE;obj = it }, 100)
             }
         }
+        screenRotationsChanged(true)
         isFocusable = true
         isFocusableInTouchMode = true
         requestFocus()
@@ -113,20 +113,6 @@ internal class ZPlayerFullScreenView constructor(context: Context) : FrameLayout
     private var isScreenRotateLocked: Boolean = false
     private var fullHandler = Handler(Looper.getMainLooper()) {
         when (it.what) {
-            HANDLE_RESIZE_CONTROLLER -> {
-                if (it.arg1 == 0) init(0f, false)
-                try {
-                    runWithControllerView { controller ->
-                        val v = (controller.parent as? ViewGroup) ?: return@runWithControllerView
-                        if (v.height > 0 && controller.height > v.height) {
-                            controller.layoutParams.let { l -> l.height = l.height.coerceAtMost(v.height) }
-                            controller.requestLayout()
-                        }
-                    }
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                }
-            }
             HANDLE_ORIENTATION_CHANGE -> {
                 (it.obj as? RotateOrientation)?.let { o -> curScreenRotation = o }
             }
@@ -151,10 +137,18 @@ internal class ZPlayerFullScreenView constructor(context: Context) : FrameLayout
             }
         }
 
-    private fun setContent(controller: View, isMaxFull: Boolean, isResizeCalculate: Boolean = false, isInit: Boolean = true) {
+    private fun initCalculate() {
+        val cps = getViewPoint(vp)
+        originViewRectF = RectF(cps.x, cps.y, cps.x + originWidth, cps.y + originHeight)
+        val viewRectF = getWindowSize(isMaxFull)
+        _width = viewRectF.right - viewRectF.left
+        _height = viewRectF.bottom - viewRectF.top
+        calculateUtils = RectFCalculateUtil(viewRectF, originViewRectF ?: return)
+    }
+
+    private fun setContent(controller: View, isMaxFull: Boolean, isInit: Boolean = true) {
         if (this.isMaxFull && !isMaxFull && curScreenRotation?.isLandSpace() != false) curScreenRotation = RotateOrientation.P0
         this.isMaxFull = isMaxFull
-        fullHandler.removeMessages(HANDLE_RESIZE_CONTROLLER)
         changeSystemWindowVisibility(true)
         try {
             val controllerNeedAdd = (controller.parent as? ViewGroup)?.let { parent ->
@@ -187,13 +181,12 @@ internal class ZPlayerFullScreenView constructor(context: Context) : FrameLayout
                 initListeners()
                 showAnim()
             }
-            fullHandler.sendMessageDelayed(Message.obtain().apply { what = HANDLE_RESIZE_CONTROLLER;arg1 = if (isResizeCalculate && !isInit) 0 else 1 }, 100)
         }
     }
 
     private fun showAnim() {
         mDecorView?.addView(this, LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT))
-        init();post {
+        post {
             if (config.transactionAnimDuration <= 0) {
                 initCalculate()
                 updateContent(0f)
@@ -205,21 +198,6 @@ internal class ZPlayerFullScreenView constructor(context: Context) : FrameLayout
                 startScaleAnim(true)
             }
         }
-    }
-
-    private fun init(contentValue: Float = 1f, updateContent: Boolean = true) {
-        initCalculate()
-        if (isMaxFull || updateContent) updateContent(contentValue)
-        screenRotationsChanged(true)
-    }
-
-    private fun initCalculate() {
-        val cps = getViewPoint(vp)
-        originViewRectF = RectF(cps.x, cps.y, cps.x + originWidth, cps.y + originHeight)
-        val viewRectF = getWindowSize(isMaxFull)
-        _width = viewRectF.right - viewRectF.left
-        _height = viewRectF.bottom - viewRectF.top
-        calculateUtils = RectFCalculateUtil(viewRectF, originViewRectF ?: return)
     }
 
     private fun dismissed(fromAnimEnd: Boolean = false) {
@@ -318,7 +296,7 @@ internal class ZPlayerFullScreenView constructor(context: Context) : FrameLayout
                         isScreenRotateLocked = config.defaultScreenOrientation != ZVideoView.LOCK_SCREEN_UNSPECIFIED
                         checkSelfScreenLockAvailable(isScreenRotateLocked)
                     }
-                    setContent(it, !isMaxFull, true, isInit = false)
+                    setContent(it, !isMaxFull, isInit = false)
                     config.onFullContentListener?.onFullMaxChanged(this@ZPlayerFullScreenView, isMaxFull)
                     if (isMaxFull) {
                         curScreenRotation = when (config.defaultScreenOrientation) {
@@ -346,7 +324,6 @@ internal class ZPlayerFullScreenView constructor(context: Context) : FrameLayout
     private fun <T> runWithControllerView(i: (View) -> T): T? {
         val cv = config.getControllerView()
         if (cv == null) {
-            //            dismissed()
             ZPlayerLogs.debug("case the controller view is null ,so what`s your displaying wishes")
         } else {
             return i(cv)
