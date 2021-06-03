@@ -45,7 +45,6 @@ import com.zj.player.view.QualityMenuView
 import com.zj.player.view.VideoLoadingView
 import com.zj.player.view.VideoRootView
 import java.lang.ref.WeakReference
-import java.util.*
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
@@ -70,11 +69,11 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
         const val LOCK_SCREEN_LANDSCAPE = 0
         const val LOCK_SCREEN_PORTRAIT = 1
 
-        private var fullScreenViews = WeakHashMap<Context, ZPlayerFullScreenView>()
-
         internal fun getCurFullscreenView(context: Context): ZPlayerFullScreenView? {
-            ZPlayerLogs.onLog("get fullscreen view by context : the cur fullscreen view size is ${fullScreenViews.size}", "", "", "ZVideoView")
-            return fullScreenViews[context]
+            return ZPlayerFullScreenView.fullScreenViews.let {
+                ZPlayerLogs.onLog("get fullscreen view by context : the cur fullscreen view size is ${it.size}", "", "", "ZVideoView")
+                it[context.hashCode()]
+            }
         }
 
         /**
@@ -1044,20 +1043,20 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
             if (!full) {
                 lockScreen?.visibility = GONE
                 qualityView?.visibility = GONE
-                getCurFullscreenView(context)?.dismiss()
+                getCurFullscreenView(context)?.let {
+                    it.onTracked(true, 0f, 0f, 0f, 0f)
+                    it.dismiss()
+                }
             } else {
-                FullScreenConfig.let { d ->
-                    val fv = d.open(root).defaultOrientation(lockScreenRotation).allowReversePortrait(isAllowReversePortrait).transactionNavigation(isTransactionNavigation).transactionAnimDuration(transaction.transactionTime, transaction.isStartOnly, fullScreenTransactionTime).setPreDismissInterceptor { onPreToDismissFullScreen(it) }.setPreFullMaxChangeInterceptor { onPreToFullMaxScreen(it) }.payLoads(transaction.payloads).let { config ->
-                        if (isDefaultMaxScreen) {
-                            lockScreen?.visibility = View.VISIBLE
-                            qualityView?.visibility = View.VISIBLE
-                            config.withFullMaxScreen(fullScreenListener)
-                        } else {
-                            config.withFullContentScreen(videoDetailIn?.getVideoDetailLayoutId() ?: 0, fullMaxScreenEnable, fullContentListener)
-                        }
-                        config.start(context)
+                FullScreenConfig.open(root).defaultOrientation(lockScreenRotation).allowReversePortrait(isAllowReversePortrait).transactionNavigation(isTransactionNavigation).transactionAnimDuration(transaction.transactionTime, transaction.isStartOnly, fullScreenTransactionTime).setPreDismissInterceptor { onPreToDismissFullScreen(it) }.setPreFullMaxChangeInterceptor { onPreToFullMaxScreen(it) }.payLoads(transaction.payloads).let { config ->
+                    if (isDefaultMaxScreen) {
+                        lockScreen?.visibility = View.VISIBLE
+                        qualityView?.visibility = View.VISIBLE
+                        config.withFullMaxScreen(fullScreenListener)
+                    } else {
+                        config.withFullContentScreen(videoDetailIn?.getVideoDetailLayoutId() ?: 0, fullMaxScreenEnable, fullContentListener)
                     }
-                    if (fv != null) fullScreenViews[context] = fv
+                    config.start(context)
                 }
                 lockScreenRotate(lockScreenRotation != LOCK_SCREEN_UNSPECIFIED)
             }
@@ -1121,7 +1120,6 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
         qualityView?.visibility = GONE
         if (!isShow) {
             isFullMaxScreen = false
-            fullScreenViews.remove(context)
             lockScreen?.isSelected = false
             this@ZVideoView.onTracked(isStart = false, isEnd = true, formTrigDuration = 1.0f, resumeFullState = resumeToolsWhenFullscreenChanged())
         }

@@ -92,8 +92,8 @@ internal class FullScreenConfig private constructor(private var controllerView: 
         return this
     }
 
-    fun start(context: Context): ZPlayerFullScreenView? {
-        return ZPlayerFullScreenView.start(context, this)
+    fun start(context: Context) {
+        ZPlayerFullScreenView.start(context, this)
     }
 
     fun clear() {

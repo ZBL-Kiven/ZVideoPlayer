@@ -28,6 +28,7 @@ import com.zj.player.logs.ZPlayerLogs
 import com.zj.player.z.ZVideoView
 import java.lang.IllegalArgumentException
 import java.lang.ref.WeakReference
+import java.util.*
 import kotlin.math.max
 import kotlin.math.roundToInt
 
@@ -37,9 +38,10 @@ internal class ZPlayerFullScreenView constructor(context: Context) : FrameLayout
     companion object {
         private const val MAX_DEEP_RATIO = 0.55f
         private const val HANDLE_ORIENTATION_CHANGE = 19285
+        internal var fullScreenViews = HashMap<Int, ZPlayerFullScreenView>()
 
-        fun start(context: Context, config: FullScreenConfig): ZPlayerFullScreenView? {
-            val cachedFullScreenView = ZPlayerFullScreenView(context)
+        fun start(context: Context, config: FullScreenConfig) {
+            val cachedFullScreenView = fullScreenViews[context.hashCode()] ?: ZPlayerFullScreenView(context)
             cachedFullScreenView.let {
                 it.config = config
                 it.isMaxFull = config.isDefaultMaxScreen
@@ -49,16 +51,20 @@ internal class ZPlayerFullScreenView constructor(context: Context) : FrameLayout
                 it.vlp = config.getControllerView()?.layoutParams
                 it.mDecorView = (context as? Activity)?.findViewById(android.R.id.content) as? ViewGroup
                 if (it.mDecorView == null) {
-                    ZPlayerLogs.onError("the full screen view open failed ,case the [context $context] was not an Activity!", true)
-                    return@start null
+                    ZPlayerLogs.onError("the full screen view open failed ,case the [context $context] was not an Activity!", true);return@let
                 }
                 it.startFullScreen()
             }
-            return cachedFullScreenView
         }
     }
 
-    fun startFullScreen() {
+    private fun startFullScreen() {
+        fullScreenViews[context.hashCode()] = this
+        (this.parent as? ViewGroup?)?.let {
+            it.removeView(this)
+            mDecorView?.removeView(this)
+        }
+        mDecorView?.addView(this, LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT))
         runWithControllerView {
             (it.context?.applicationContext?.getSystemService(Context.WINDOW_SERVICE) as? WindowManager)?.defaultDisplay?.getRealSize(realWindowSize)
             if (!config.isDefaultMaxScreen && config.contentLayout > 0) contentLayoutView = View.inflate(it.context, config.contentLayout, null)
@@ -74,7 +80,7 @@ internal class ZPlayerFullScreenView constructor(context: Context) : FrameLayout
             backgroundView?.layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
             this.addView(backgroundView, 0)
             config.preToFullMaxChange {
-                setContent(it, isMaxFull)
+                post { initCalculate();updateContent(1.0f);setContent(it, isMaxFull) }
             }
         }
         screenUtil = ScreenOrientationListener(WeakReference(context)) {
@@ -185,11 +191,8 @@ internal class ZPlayerFullScreenView constructor(context: Context) : FrameLayout
     }
 
     private fun showAnim() {
-        mDecorView?.addView(this, LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT))
         post {
             if (config.transactionAnimDuration <= 0) {
-                initCalculate()
-                updateContent(0f)
                 setBackground(1f, true)
                 onDisplayChange(true)
                 if (config.isAnimDurationOnlyStart) config.resetDurationWithDefault()
@@ -224,6 +227,7 @@ internal class ZPlayerFullScreenView constructor(context: Context) : FrameLayout
             isDismissing = false
             backgroundView = null
             config.clear()
+            fullScreenViews.remove(context.hashCode())
             mDecorView?.removeView(this)
         }
     }
