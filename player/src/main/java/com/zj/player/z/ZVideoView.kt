@@ -22,11 +22,11 @@ import android.widget.*
 import androidx.annotation.CallSuper
 import androidx.annotation.IntRange
 import androidx.core.content.ContextCompat
-import androidx.core.view.forEach
 import com.zj.player.R
 import com.zj.player.anim.ZFullValueAnimator
 import com.zj.player.base.InflateInfo
 import com.zj.player.base.LoadingMode
+import com.zj.player.config.forEach
 import com.zj.player.full.*
 import com.zj.player.full.ZPlayerFullScreenView
 import com.zj.player.full.FullContentListener
@@ -158,7 +158,7 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
     var isPlayable = true
         set(value) {
             if (value != field) {
-                vPlay?.visibility = if (value && playIconEnable > 1) View.VISIBLE else GONE
+                vPlay?.visibility = if (value && playIconEnable > 1) VISIBLE else GONE
                 checkVisibleViews()
                 field = value
             }
@@ -247,7 +247,7 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
             setSecondarySeekBarEnable(secondarySeekBarEnable)
             setBottomToolsEnable(defaultControllerVisibility)
             setLockRotationEnable(lockRotationEnable)
-            isFull = bottomToolsBar?.visibility == View.VISIBLE
+            isFull = bottomToolsBar?.visibility == VISIBLE
             speedView?.text = context.getString(R.string.z_player_str_speed, "1")
             touchListener?.let {
                 setTouchTorques(context, it)
@@ -303,7 +303,7 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
 
     private fun <T : View> getViewByDefaultConfig(id: Int, mode: Int, default: T? = null): T? {
         val v: T? = default ?: videoRoot?.findViewById(id)
-        v?.visibility = if (mode < 2) View.GONE else View.VISIBLE
+        v?.visibility = if (mode < 2) GONE else VISIBLE
         v?.setTag(R.id.tag_view_enabled, mode)
         return if (mode == 0) null else v
     }
@@ -449,7 +449,7 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
         if (!isTickingSeekBarFromUser) {
             showOrHidePlayBtn(isShow = false, withState = false, byAnim = true)
             full(false)
-            seekBarSmall?.visibility = View.VISIBLE
+            seekBarSmall?.visibility = VISIBLE
         }
     }
 
@@ -485,13 +485,13 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
 
     override fun updateCurPlayingQuality(level: PlayQualityLevel, supportedQualities: MutableList<PlayQualityLevel>?) {
         if (supportedQualities.isNullOrEmpty()) {
-            qualityView?.visibility = View.GONE
+            qualityView?.visibility = GONE
             qualityView = null
         } else {
             if (qualityView == null) qualityView = getViewByDefaultConfig(R.id.z_player_video_preview_tv_quality, qualityEnable)
             qualityView?.let {
                 it.text = context.getText(level.textId)
-                it.visibility = if (isDefaultMaxScreen) View.VISIBLE else View.GONE
+                it.visibility = if (isDefaultMaxScreen) VISIBLE else GONE
                 it.setOnClickListener {
                     menuView?.setSupportedMenusAndShow(level, supportedQualities) { l ->
                         controller?.requirePlayQuality(l)
@@ -512,7 +512,7 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
     }
 
     override fun onCompleted(path: String, isRegulate: Boolean) {
-        if (loadingView?.visibility != View.GONE) {
+        if (loadingView?.visibility != GONE) {
             onLoadingEvent(LoadingMode.None)
             completing(path, isRegulate)
         }
@@ -552,7 +552,7 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
     override fun onError(e: Exception?) {
         seekBar?.isSelected = false
         isInterruptPlayBtnAnim = true
-        seekBarSmall?.visibility = View.GONE
+        seekBarSmall?.visibility = GONE
         onSeekChanged(0, 0, false, 0, 0)
         showOrHidePlayBtn(false)
         onLoadingEvent(LoadingMode.Fail)
@@ -881,7 +881,7 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
             try {
                 if (!withState) {
                     it.isSelected = !isShow
-                    if (isShow && it.visibility == View.VISIBLE && it.tag == null) return
+                    if (isShow && it.visibility == VISIBLE && it.tag == null) return
                 }
                 if (withState && it.tag != null) return
                 if (isShow && it.tag == 0) return
@@ -892,18 +892,18 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
                     val start = if (isShow) 0.0f else 1.0f
                     val end = if (isShow) 1.0f else 0.0f
                     it.alpha = start
-                    if (isShow) it.visibility = View.VISIBLE
+                    if (isShow) it.visibility = VISIBLE
                     it.animation?.cancel()
                     it.clearAnimation()
                     it.animate()?.alpha(end)?.setDuration(Constance.ANIMATE_DURATION)?.withEndAction {
                         it.alpha = end
-                        it.visibility = if (isShow) View.VISIBLE else View.GONE
+                        it.visibility = if (isShow) VISIBLE else GONE
                         it.animation = null
                         it.tag = null
                         it.isEnabled = true
                     }?.start()
                 } else {
-                    it.visibility = if (isShow) View.VISIBLE else View.GONE
+                    it.visibility = if (isShow) VISIBLE else GONE
                     it.isEnabled = true
                 }
             } finally {
@@ -932,7 +932,7 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
                 anim?.start(isFull, ignoreStableVisibility)
                 log("on tools bar hidden ${!isFull}", BehaviorLogsTable.onToolsBarShow(isFull))
             }
-            if (isFull) seekBarSmall?.visibility = View.GONE
+            if (isFull) seekBarSmall?.visibility = GONE
         }
         onToolsBarChanged(isFull, isSetNow)
         if (autoFullTools && isFull) mHandler.sendEmptyMessageDelayed(dismissFullTools, autoFullInterval.toLong())
@@ -940,8 +940,8 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
 
     protected fun setOverlayViews(isShowThumb: Boolean, isShowBackground: Boolean, isSinkBottomShader: Boolean) {
         log("on overlay views visibility  thumb = $isShowThumb  bg = $isShowBackground", BehaviorLogsTable.thumbImgVisible(isShowThumb, isShowBackground))
-        videoOverrideImageView?.visibility = if (isShowThumb) View.VISIBLE else View.GONE
-        videoOverrideImageShaderView?.visibility = if (isShowBackground) View.VISIBLE else View.GONE
+        videoOverrideImageView?.visibility = if (isShowThumb) VISIBLE else GONE
+        videoOverrideImageShaderView?.visibility = if (isShowBackground) VISIBLE else GONE
         videoOverrideImageShaderView?.z = if (isSinkBottomShader) 0f else Resources.getSystem().displayMetrics.density * 3 + 0.5f
     }
 
@@ -969,7 +969,7 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
                 bTranslateY -= bottomTrans
                 it.translationY = bTranslateY
                 it.alpha += d
-                if (isFull && it.visibility != View.VISIBLE) it.visibility = View.VISIBLE
+                if (isFull && it.visibility != VISIBLE) it.visibility = VISIBLE
             }
             topToolsBar?.let {
                 hideTopViews(true, duration, isFull, (obj as? Boolean?) ?: false)
@@ -982,8 +982,8 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
                 val toolsBottomHeight = (it.measuredHeight) * 1.0f
                 it.translationY = if (isFull) 0f else toolsBottomHeight
                 it.alpha = if (isFull) 1f else 0f
-                if (!isFull) it.visibility = View.GONE
-                if (!isFull && !isStartTrack && (controller?.isPlaying() == true || controller?.isPause(true) == true)) seekBarSmall?.visibility = View.VISIBLE
+                if (!isFull) it.visibility = GONE
+                if (!isFull && !isStartTrack && (controller?.isPlaying() == true || controller?.isPause(true) == true)) seekBarSmall?.visibility = VISIBLE
             }
             topToolsBar?.let {
                 hideTopViews(false, if (isFull) 1f else 0f, isFull, (obj as? Boolean?) ?: false)
@@ -1019,8 +1019,8 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
         }
 
         override fun onFullMaxChanged(dialog: ZPlayerFullScreenView, isMax: Boolean) {
-            lockScreen?.visibility = if (isFull && isPlayable && isMax) View.VISIBLE else GONE
-            qualityView?.visibility = if (isFull && isPlayable && isMax) View.VISIBLE else GONE
+            lockScreen?.visibility = if (isFull && isPlayable && isMax) VISIBLE else GONE
+            qualityView?.visibility = if (isFull && isPlayable && isMax) VISIBLE else GONE
             this@ZVideoView.onFocusChanged(dialog, isMax, false)
         }
 
@@ -1050,8 +1050,8 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
             } else {
                 FullScreenConfig.open(root).defaultOrientation(lockScreenRotation).allowReversePortrait(isAllowReversePortrait).transactionNavigation(isTransactionNavigation).transactionAnimDuration(transaction.transactionTime, transaction.isStartOnly, fullScreenTransactionTime).setPreDismissInterceptor { onPreToDismissFullScreen(it) }.setPreFullMaxChangeInterceptor { onPreToFullMaxScreen(it) }.payLoads(transaction.payloads).let { config ->
                     if (isDefaultMaxScreen) {
-                        lockScreen?.visibility = View.VISIBLE
-                        qualityView?.visibility = View.VISIBLE
+                        lockScreen?.visibility = VISIBLE
+                        qualityView?.visibility = VISIBLE
                         config.withFullMaxScreen(fullScreenListener)
                     } else {
                         config.withFullContentScreen(videoDetailIn?.getVideoDetailLayoutId() ?: 0, fullMaxScreenEnable, fullContentListener)
@@ -1102,7 +1102,7 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
         seekBar?.isSelected = false
         seekBar?.isEnabled = false
         isInterruptPlayBtnAnim = true
-        seekBarSmall?.visibility = View.GONE
+        seekBarSmall?.visibility = GONE
         videoTotalTime = 0L
         curPlayingTime = 0L
         curBufferedTime = 0L
@@ -1110,7 +1110,7 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
         if (isRegulate) showOrHidePlayBtn(isShowPlayBtn, withState = false)
         full(false, isSetNow = isNow, ignoreStableVisibility = false)
         muteView?.isSelected = if (muteIsUseGlobal) getMuteGlobalDefault() || getMuteDefault() else getMuteDefault()
-        qualityView?.visibility = View.GONE
+        qualityView?.visibility = GONE
     }
 
     private fun onDisplayChanged(isShow: Boolean, payloads: Map<String, Any?>?) {
@@ -1174,7 +1174,7 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
                     if (isFull && it.alpha == 1.0f) it.alpha = 0f
                     val d = if (isFull) duration else -duration
                     it.alpha += d
-                    if (isFull && it.visibility != View.VISIBLE) it.visibility = View.VISIBLE
+                    if (isFull && it.visibility != VISIBLE) it.visibility = VISIBLE
                 } else {
                     it.alpha = duration
                     it.visibility = if (isFull) VISIBLE else GONE
@@ -1192,7 +1192,7 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
 
     private fun checkDisableView(it: View): Boolean {
         return if (!isPlayable || (it == lockScreen || it == qualityView) && !isFullMaxScreen) {
-            it.visibility = View.GONE
+            it.visibility = GONE
             false
         } else true
     }
@@ -1200,11 +1200,11 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
     private fun checkVisibleView(it: View): Boolean {
         val mod = (it.getTag(R.id.tag_view_enabled) as? Int?) ?: 0
         if ((mod >= 3 && !isStartTrack) || mod == 0) {
-            if (mod == 3 && it.visibility != View.VISIBLE || it.alpha < 1.0f) {
+            if (mod == 3 && it.visibility != VISIBLE || it.alpha < 1.0f) {
                 it.alpha = 1.0f
-                it.visibility = View.VISIBLE
+                it.visibility = VISIBLE
             }
-            if (mod == 0 && it.visibility != View.GONE) it.visibility = View.GONE
+            if (mod == 0 && it.visibility != GONE) it.visibility = GONE
             return false
         }
         return true
@@ -1292,8 +1292,8 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
     }
 
     private fun isInterrupted(): Boolean {
-        return if ((menuView?.visibility ?: View.GONE) != View.GONE) {
-            menuView?.visibility = View.GONE;true
+        return if ((menuView?.visibility ?: GONE) != GONE) {
+            menuView?.visibility = GONE;true
         } else getCurFullscreenView(context)?.isInterruptTouchEvent() ?: false
     }
 }

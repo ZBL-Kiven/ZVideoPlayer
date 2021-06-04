@@ -19,13 +19,14 @@ import android.view.*
 import android.view.animation.DecelerateInterpolator
 import android.widget.FrameLayout
 import androidx.annotation.FloatRange
-import androidx.core.view.children
 import com.gyf.immersionbar.BarHide
 import com.gyf.immersionbar.ImmersionBar
 import com.zj.player.R
 import com.zj.player.anim.ZFullValueAnimator
+import com.zj.player.config.forEach
 import com.zj.player.logs.ZPlayerLogs
 import com.zj.player.z.ZVideoView
+import java.lang.Exception
 import java.lang.IllegalArgumentException
 import java.lang.ref.WeakReference
 import java.util.*
@@ -80,7 +81,7 @@ internal class ZPlayerFullScreenView constructor(context: Context) : FrameLayout
             backgroundView?.layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
             this.addView(backgroundView, 0)
             config.preToFullMaxChange {
-                post { initCalculate();updateContent(1.0f);setContent(it, isMaxFull) }
+                post { setContent(it, isMaxFull) }
             }
         }
         screenUtil = ScreenOrientationListener(WeakReference(context)) {
@@ -181,8 +182,14 @@ internal class ZPlayerFullScreenView constructor(context: Context) : FrameLayout
                     if (controllerNeedAdd) v.addView(controller, vlp)
                 } ?: if (controllerNeedAdd) (it as? ViewGroup)?.addView(controller, vlp) ?: throw IllegalArgumentException("the content layout view your set is not container a view group that id`s [R.id.playerFullScreenContent] ,and your content layout is not a view group!")
             }
-            notifyContentViewChanged(null)
         } finally {
+            try {
+                notifyContentViewChanged(null)
+            } catch (e: Exception) {
+                ZPlayerLogs.onError("player error with fullscreen notify changed ! case: ${e.message}")
+            }
+            initCalculate()
+            updateContent(1.0f)
             if (isInit) {
                 initListeners()
                 showAnim()
@@ -220,11 +227,11 @@ internal class ZPlayerFullScreenView constructor(context: Context) : FrameLayout
             }
             curScaleOffset = 0f
             screenUtil?.release()
-            screenUtil = null
             scaleAnim?.cancel()
             scaleAnim = null
-            calculateUtils = null
+            screenUtil = null
             isDismissing = false
+            calculateUtils = null
             backgroundView = null
             config.clear()
             fullScreenViews.remove(context.hashCode())
@@ -448,14 +455,12 @@ internal class ZPlayerFullScreenView constructor(context: Context) : FrameLayout
      * The function considers that the View without ID is not used as a display estimate, and improves performance.
      * */
     private fun hiddenAllChildIfNotScreenContent(child: View?, views: MutableMap<Int, View>) {
-        (child as? ViewGroup)?.let {
-            it.children.forEach { cv ->
-                if (cv.id == R.id.player_gesture_full_screen_content) {
-                    removeSelfActionParent(cv, views)
-                } else {
-                    views[cv.id] = cv
-                    hiddenAllChildIfNotScreenContent(cv, views)
-                }
+        (child as? ViewGroup)?.forEach { cv ->
+            if (cv.id == R.id.player_gesture_full_screen_content) {
+                removeSelfActionParent(cv, views)
+            } else {
+                views[cv.id] = cv
+                hiddenAllChildIfNotScreenContent(cv, views)
             }
         }
     }
