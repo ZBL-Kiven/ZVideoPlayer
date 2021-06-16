@@ -1,6 +1,7 @@
 package com.zj.player.logs
 
 import android.util.Log
+import com.zj.player.ut.Constance
 import java.lang.IllegalStateException
 
 object ZPlayerLogs {
@@ -9,9 +10,12 @@ object ZPlayerLogs {
     internal var debugAble: Boolean = false
 
     /**
-     * Set a listener for events generated during video playback.
+     * Set a listener for events generated during video playback. And open the player core logs.
+     * This may generate a large amount of data during use.
+     * It is recommended to start collecting information in Debug mode or UAT environment.
      * */
     fun setVideoEventListener(videoEventListener: VideoEventListener?) {
+        Constance.CORE_LOG_ABLE = true
         this.videoEventListener = videoEventListener
     }
 
@@ -32,13 +36,12 @@ object ZPlayerLogs {
     }
 
     internal fun onLog(s: String, curPath: String, accessKey: String, modeName: String, data: BehaviorData?) {
-        videoEventListener?.onLog(s, curPath, accessKey, modeName, convertBean(data))
+        if (Constance.CORE_LOG_ABLE) videoEventListener?.onLog(s, curPath, accessKey, modeName, convertBean(data))
     }
 
     internal fun onLog(s: String, curPath: String, accessKey: String, modeName: String, vararg params: Pair<String, Any>) {
-        videoEventListener?.onLog(s, curPath, accessKey, modeName, params.toMap())
+        if (Constance.CORE_LOG_ABLE) videoEventListener?.onLog(s, curPath, accessKey, modeName, params.toMap())
     }
-
 
     private fun convertBean(bean: BehaviorData?): Map<String, Any>? {
         if (bean == null) return null
@@ -57,5 +60,4 @@ object ZPlayerLogs {
             null
         }
     }
-
 }

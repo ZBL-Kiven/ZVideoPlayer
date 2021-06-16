@@ -131,7 +131,9 @@ internal class VideoLoadControl internal constructor(allocator: DefaultAllocator
         /** Creates a [VideoLoadControl].  */
         fun createDefaultLoadControl(minBufferMs: Int, maxBufferMs: Int, bufferForPlaybackMs: Int, bufferForPlaybackAfterBufferMs: Int): VideoLoadControl {
             createDefaultLoadControlCalled = true
-            val allocator = this.allocator ?: { val a = DefaultAllocator(true, C.DEFAULT_BUFFER_SEGMENT_SIZE);allocator = a;a }.invoke()
+            val allocator = this.allocator ?: run {
+                val a = DefaultAllocator(true, C.DEFAULT_BUFFER_SEGMENT_SIZE); allocator = a;a
+            }
             return VideoLoadControl(allocator, minBufferMs, maxBufferMs, bufferForPlaybackMs, bufferForPlaybackAfterBufferMs, targetBufferBytes, prioritizeTimeOverSizeThresholds, priorityTaskManager, backBufferDurationMs, retainBackBufferFromKeyframe)
         }
 

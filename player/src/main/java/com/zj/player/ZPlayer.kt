@@ -40,5 +40,4 @@ object ZPlayer {
     fun setGlobalMuteDefault(isMute: Boolean) {
         ZVideoView.setGlobalMuteDefault(isMute)
     }
-
 }

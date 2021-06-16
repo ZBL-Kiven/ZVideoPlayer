@@ -5,6 +5,7 @@ package com.zj.player.view
 import android.animation.Animator
 import android.animation.ArgbEvaluator
 import android.animation.ValueAnimator
+import android.annotation.SuppressLint
 import android.content.Context
 import android.util.AttributeSet
 import android.util.TypedValue
@@ -280,7 +281,8 @@ internal class VideoLoadingView @JvmOverloads constructor(context: Context, attr
             alpha = 1.0f - duration
             if (alpha <= 0.05f) {
                 alpha = 0f
-                setBackgroundColor({ oldBackgroundColor = 0;oldBackgroundColor }.invoke())
+                oldBackgroundColor = 0
+                setBackgroundColor(oldBackgroundColor)
                 visibility = View.GONE
             }
         }
@@ -298,6 +300,7 @@ internal class VideoLoadingView @JvmOverloads constructor(context: Context, attr
         return contentView?.findViewById(id)
     }
 
+    @SuppressLint("Recycle")
     private class BaseLoadingValueAnimator constructor(private var listener: BaseLoadingAnimatorListener?) : ValueAnimator() {
 
         private var curMode: DisplayMode? = null

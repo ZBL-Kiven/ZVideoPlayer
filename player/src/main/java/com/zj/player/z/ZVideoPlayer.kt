@@ -106,7 +106,7 @@ open class ZVideoPlayer(var config: VideoConfig = VideoConfig.create()) : BasePl
             }
             field.setObj(null)
             if (field == value) return
-            log("update player status form ${field.name} to ${value.name}")
+            if (CORE_LOG_ABLE) log("update player status form ${field.name} to ${value.name}")
             when (value) {
                 VideoState.SEEK_LOADING -> {
                     controller?.onSeekingLoading(currentPlayPath(), false)
@@ -185,10 +185,10 @@ open class ZVideoPlayer(var config: VideoConfig = VideoConfig.create()) : BasePl
         val context = controller?.context ?: return
         handler?.removeCallbacksAndMessages(null)
         if (player == null) {
-            log("new player create")
+            if (CORE_LOG_ABLE) log("new player create")
             createPlayer(context)
         }
-        log("video $videoUrl in loading...")
+        if (CORE_LOG_ABLE) log("video $videoUrl in loading...")
         (controller?.playerView)?.let {
             it.setPlayer(player, Constance.SURFACE_TYPE_TEXTURE_VIEW)
             it.setRenderListener(renderListener)
@@ -225,7 +225,7 @@ open class ZVideoPlayer(var config: VideoConfig = VideoConfig.create()) : BasePl
     }
 
     private fun createDefaultDataSource(context: Context, uri: Uri?): MediaSource {
-        log("create [default media data source]")
+        if (CORE_LOG_ABLE) log("create [default media data source]")
         val dataSourceFactory: DataSource.Factory = DefaultDataSourceFactory(context, Util.getUserAgent(context, context.packageName), DefaultBandwidthMeter())
         return ExtractorMediaSource.Factory(dataSourceFactory).createMediaSource(uri)
     }
@@ -241,7 +241,7 @@ open class ZVideoPlayer(var config: VideoConfig = VideoConfig.create()) : BasePl
             val f = try {
                 File(path)
             } catch (e: FileNotFoundException) {
-                log("create media data source failed case the file path $path is not exists");null
+                if (CORE_LOG_ABLE) log("create media data source failed case the file path $path is not exists");null
             }
             if (f != null && f.exists()) {
                 val values = ContentValues()
@@ -257,7 +257,7 @@ open class ZVideoPlayer(var config: VideoConfig = VideoConfig.create()) : BasePl
     private fun createCachedDataSource(context: Context, videoUrl: String): MediaSource? {
         val httpFactory = DefaultHttpDataSourceFactory(Util.getUserAgent(context, context.packageName), DefaultBandwidthMeter())
         config.requestProperty?.let {
-            log("set request property $it", BehaviorLogsTable.requestParams(currentCallId(), it.toMap()))
+            if (CORE_LOG_ABLE) log("set request property $it", BehaviorLogsTable.requestParams(currentCallId(), it.toMap()))
             httpFactory.defaultRequestProperties.set(it.toMap())
         }
         if (cache == null) {
@@ -267,9 +267,9 @@ open class ZVideoPlayer(var config: VideoConfig = VideoConfig.create()) : BasePl
         }
         val cachedDataSourceFactory = CacheDataSourceFactory(cache, httpFactory)
         return ExtractorMediaSource.Factory(if (config.cacheEnable) {
-            log("create [http cache media data source] media data source");cachedDataSourceFactory
+            if (CORE_LOG_ABLE) log("create [http cache media data source] media data source");cachedDataSourceFactory
         } else {
-            log("create [http media data source] media data source"); httpFactory
+            if (CORE_LOG_ABLE) log("create [http media data source] media data source"); httpFactory
         }).createMediaSource(Uri.parse(videoUrl))
     }
 
@@ -287,7 +287,7 @@ open class ZVideoPlayer(var config: VideoConfig = VideoConfig.create()) : BasePl
             if (fromUser) {
                 controller?.onSeekChanged(seekProgress, player?.bufferedPosition ?: 0L, true, progress, duration)
             }
-            log("video seek to $progress", BehaviorLogsTable.seekTo(currentCallId(), progress))
+            if (CORE_LOG_ABLE) log("video seek to $progress", BehaviorLogsTable.seekTo(currentCallId(), progress))
         }
     }
 
@@ -313,7 +313,7 @@ open class ZVideoPlayer(var config: VideoConfig = VideoConfig.create()) : BasePl
         player = null
         if (e != null) controller?.onError(e)
         else controller?.onStop(notifyStop, currentPlayPath(), isRegulate)
-        log("video finished , current progress at $_curLookedProgress%", BehaviorLogsTable.videoStopped(currentCallId(), _curLookedProgress / 100f))
+        if (CORE_LOG_ABLE) log("video finished , current progress at $_curLookedProgress%", BehaviorLogsTable.videoStopped(currentCallId(), _curLookedProgress / 100f))
     }
 
     private fun updateProgress() {
@@ -367,7 +367,7 @@ open class ZVideoPlayer(var config: VideoConfig = VideoConfig.create()) : BasePl
                 if (it.type == TYPE_SOURCE) sb.append("sourceException : ").append(it.sourceException?.message).append(" \n")
                 if (it.type == TYPE_UNEXPECTED) sb.append("unexpectedException : ").append(it.unexpectedException?.message)
             }
-            log("video on play error case : $sb", BehaviorLogsTable.playError(currentCallId(), "$sb"))
+            if (CORE_LOG_ABLE) log("video on play error case : $sb", BehaviorLogsTable.playError(currentCallId(), "$sb"))
             if (error?.type == TYPE_RENDERER && error.rendererException is MediaCodecRenderer.DecoderInitializationException) {
                 player?.release()
                 player = null
@@ -380,7 +380,7 @@ open class ZVideoPlayer(var config: VideoConfig = VideoConfig.create()) : BasePl
                 setPlayerState(VideoState.STOP.setObj(error))
             }
         } catch (e: Exception) {
-            log("video on play error and uncaught exception: type =  ${error?.type} some message: $sb", BehaviorLogsTable.playError(currentCallId(), "$sb"))
+            if (CORE_LOG_ABLE) log("video on play error and uncaught exception: type =  ${error?.type} some message: $sb", BehaviorLogsTable.playError(currentCallId(), "$sb"))
             setPlayerState(VideoState.STOP)
         }
     }
@@ -424,7 +424,7 @@ open class ZVideoPlayer(var config: VideoConfig = VideoConfig.create()) : BasePl
     override fun requirePlayQuality(level: PlayQualityLevel) {}
 
     override fun setData(path: String, autoPlay: Boolean, callId: Any?) {
-        log("set video data to $path")
+        if (CORE_LOG_ABLE) log("set video data to $path")
         val isNewData = playPath?.first != path
         playPath = Pair(path, callId)
         if (autoPlay || isNewData) setPlayerState(VideoState.LOADING)
@@ -432,7 +432,7 @@ open class ZVideoPlayer(var config: VideoConfig = VideoConfig.create()) : BasePl
 
     override fun play() {
         if (isReady) {
-            log("video call play and ready")
+            if (CORE_LOG_ABLE) log("video call play and ready")
             setPlayerState(VideoState.PLAY)
         } else {
             setPlayerState(VideoState.LOADING)
@@ -441,12 +441,12 @@ open class ZVideoPlayer(var config: VideoConfig = VideoConfig.create()) : BasePl
     }
 
     override fun pause() {
-        log("video call pause")
+        if (CORE_LOG_ABLE) log("video call pause")
         setPlayerState(VideoState.PAUSE)
     }
 
     override fun stop() {
-        log("video call stop")
+        if (CORE_LOG_ABLE) log("video call stop")
         setPlayerState(VideoState.STOP)
     }
 
@@ -474,14 +474,14 @@ open class ZVideoPlayer(var config: VideoConfig = VideoConfig.create()) : BasePl
 
     override fun release() {
         setPlayerState(VideoState.DESTROY)
-        log("video call release", BehaviorLogsTable.released())
+        if (CORE_LOG_ABLE) log("video call release", BehaviorLogsTable.released())
     }
 
     override fun setSpeed(s: Float) {
         runWithPlayer {
             val p = it.playbackParameters
             val np = PlaybackParameters(s, p.pitch, p.skipSilence)
-            log("video update speed from ${p.speed} to $s", BehaviorLogsTable.newSpeed(currentCallId(), s))
+            if (CORE_LOG_ABLE) log("video update speed from ${p.speed} to $s", BehaviorLogsTable.newSpeed(currentCallId(), s))
             it.playbackParameters = np
             controller?.onPlayerInfo(getVolume(), s)
         }
@@ -495,7 +495,7 @@ open class ZVideoPlayer(var config: VideoConfig = VideoConfig.create()) : BasePl
         this.curVolume = volume
         this.maxVolume = maxVolume
         runWithPlayer {
-            log("video set volume to $volume", BehaviorLogsTable.newVolume(currentCallId(), volume))
+            if (CORE_LOG_ABLE) log("video set volume to $volume", BehaviorLogsTable.newVolume(currentCallId(), volume))
             it.volume = volume * 1.0f / maxVolume
             controller?.onPlayerInfo(volume, getSpeed())
         }
@@ -506,7 +506,7 @@ open class ZVideoPlayer(var config: VideoConfig = VideoConfig.create()) : BasePl
     }
 
     override fun autoPlay(autoPlay: Boolean) {
-        log("set video auto play to $autoPlay")
+        if (CORE_LOG_ABLE) log("set video auto play to $autoPlay")
         this.autoPlay = autoPlay
         if (curState == VideoState.READY) {
             setPlayerState(VideoState.PLAY)
@@ -539,6 +539,6 @@ open class ZVideoPlayer(var config: VideoConfig = VideoConfig.create()) : BasePl
     }
 
     private fun log(s: String, bd: BehaviorData? = null) {
-        if (CORE_LOG_ABLE) ZPlayerLogs.onLog(s, currentPlayPath(), curAccessKey, "ZPlayer", bd)
+        ZPlayerLogs.onLog(s, currentPlayPath(), curAccessKey, "ZPlayer", bd)
     }
 }

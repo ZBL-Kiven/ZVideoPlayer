@@ -90,7 +90,7 @@ abstract class ListVideoAdapterDelegate<T, VC, C : BaseListVideoController<T, VC
 
     override fun onViewDetachedFromWindow(holder: WeakReference<VH>?) {
         holder?.get()?.let holder@{ h ->
-            val position = h.adapterPosition
+            val position = h.absoluteAdapterPosition
             getViewController(h)?.let {
                 if (it.isFullScreen) return@holder
                 getItem(position, adapter)?.let { p ->
@@ -333,8 +333,7 @@ abstract class ListVideoAdapterDelegate<T, VC, C : BaseListVideoController<T, VC
                 fun play() {
                     ctr.playOrResume(d.first, d.second)
                     vc.onBehaviorAttached(d.first, d.second)
-                }
-                //when ctr is playing another path or in other positions
+                } //when ctr is playing another path or in other positions
                 if ((ctr.isLoadData() && p != curPlayingIndex) || (ctr.isLoadData() && ctr.getPath() != d.first)) {
                     ctr.stopNow(false)
                 }

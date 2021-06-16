@@ -487,10 +487,10 @@ internal class ZPlayerFullScreenView constructor(context: Context) : FrameLayout
                 cv.findViewById<View>(R.id.player_gesture_full_screen_content)?.let { fv ->
                     val pf = getViewPoint(fv)
                     RectF(pf.x, pf.y, pf.x + fv.width, pf.y + fv.height)
-                } ?: {
+                } ?: run {
                     val pf = getViewPoint(cv)
                     RectF(pf.x, pf.y, pf.x + cv.width, pf.y + cv.height)
-                }.invoke()
+                }
             } ?: throw IllegalArgumentException()
         }
     }
