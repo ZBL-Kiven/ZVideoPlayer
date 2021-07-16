@@ -75,7 +75,7 @@ open class ZController<P : BasePlayer<R>, R : BaseRender> internal constructor(v
             }
             val info = c.controllerInfo ?: throw NullPointerException("the controller view is required")
             val ctr = info.container ?: throw NullPointerException("the view controller post a null container parent , which the renderer add to?")
-            if (render == null) render = BaseRender.create(ctr.context ?: throw NullPointerException("context should not be null!"), renderCls)
+            if (render == null) render = BaseRender.create(ctr.context.applicationContext ?: throw NullPointerException("context should not be null!"), renderCls)
             render?.let { r ->
                 r.init(this)
                 val parent = (r.parent as? ViewGroup) ?: if (r.parent != null) throw IllegalArgumentException("the renderer added in and without a viewGroup?") else null
