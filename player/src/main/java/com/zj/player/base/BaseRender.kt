@@ -6,6 +6,7 @@ import androidx.annotation.CallSuper
 import com.zj.player.ut.PlayerEventController
 import com.zj.player.view.AspectRatioFrameLayout
 
+@Suppress("unused")
 abstract class BaseRender @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) : AspectRatioFrameLayout(context, attrs, defStyleAttr) {
 
     private var controller: PlayerEventController<*>? = null
@@ -24,6 +25,10 @@ abstract class BaseRender @JvmOverloads constructor(context: Context, attrs: Att
 
     protected fun notifyTo(func: PlayerEventController<*>.() -> Unit) {
         this.controller?.let { func.invoke(it) }
+    }
+
+    fun getVideoViewContext(): Context? {
+        return controller?.context
     }
 
     @CallSuper
