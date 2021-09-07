@@ -1,11 +1,12 @@
 package com.zj.videotest
 
 import android.os.Bundle
+import android.view.View
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.zj.videotest.delegate.VideoControllerPlayers
 import com.zj.videotest.ytb.YtbContentChecker
 import com.zj.webkit.CCWebView
-import kotlinx.android.synthetic.main.test_act_content.*
 
 class TestActivity : AppCompatActivity() {
 
@@ -14,7 +15,9 @@ class TestActivity : AppCompatActivity() {
         CCWebView.onAppAttached(this, "")
         setContentView(R.layout.test_act_content)
 
-        val str = text.text.toString()
+        val str = findViewById<TextView>(R.id.text).text.toString()
+        val mPlay = findViewById<View>(R.id.mPlay)
+        val mResult = findViewById<TextView>(R.id.mResult)
 
         mPlay.setOnClickListener {
             mResult.text = "checking..."

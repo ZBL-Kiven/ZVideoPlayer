@@ -7,7 +7,6 @@ import android.view.ViewGroup
 import com.zj.cf.fragments.BaseLinkageFragment
 import com.zj.videotest.R
 import com.zj.videotest.TestActivity2
-import kotlinx.android.synthetic.main.r_other_fg_content.*
 
 class SingleFragment : BaseLinkageFragment() {
 
@@ -17,7 +16,7 @@ class SingleFragment : BaseLinkageFragment() {
 
     override fun onCreate() {
         super.onCreate()
-        a_other.setOnClickListener {
+        find<View>(R.id.a_other)?.setOnClickListener {
             startActivity(Intent(it.context, TestActivity2::class.java))
         }
     }
