@@ -1,16 +1,16 @@
 package com.zj.player.base
 
-import com.google.android.exoplayer2.C
-import com.google.android.exoplayer2.DefaultLoadControl.*
-import com.google.android.exoplayer2.LoadControl
-import com.google.android.exoplayer2.Renderer
-import com.google.android.exoplayer2.source.TrackGroupArray
-import com.google.android.exoplayer2.trackselection.TrackSelectionArray
-import com.google.android.exoplayer2.upstream.Allocator
-import com.google.android.exoplayer2.upstream.DefaultAllocator
-import com.google.android.exoplayer2.util.Assertions
-import com.google.android.exoplayer2.util.PriorityTaskManager
-import com.google.android.exoplayer2.util.Util
+import com.zj.playerLib.C
+import com.zj.playerLib.DefaultLoadControl.*
+import com.zj.playerLib.LoadControl
+import com.zj.playerLib.Renderer
+import com.zj.playerLib.source.TrackGroupArray
+import com.zj.playerLib.trackselection.TrackSelectionArray
+import com.zj.playerLib.upstream.Allocator
+import com.zj.playerLib.upstream.DefaultAllocator
+import com.zj.playerLib.util.Assertions
+import com.zj.playerLib.util.PriorityTaskManager
+import com.zj.playerLib.util.Util
 
 /**
  * @author ZJJ on 2020/6/22.

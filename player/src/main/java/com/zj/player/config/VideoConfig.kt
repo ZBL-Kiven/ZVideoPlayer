@@ -1,6 +1,6 @@
 package com.zj.player.config
 
-import com.google.android.exoplayer2.C
+import com.zj.playerLib.C
 import com.zj.player.ut.ScalingMode
 import com.zj.player.z.ZVideoPlayer
 import com.zj.player.logs.ZPlayerLogs

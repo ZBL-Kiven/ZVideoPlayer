@@ -7,14 +7,13 @@ import com.bumptech.glide.load.resource.gif.GifDrawable
 import com.zj.player.img.ImgLoader
 import com.zj.videotest.controllers.scroller.ScrollerController
 import com.zj.videotest.feed.bean.VideoSource
-import jp.wasabeef.glide.transformations.BlurTransformation
 
 class CCVideoController @JvmOverloads constructor(c: Context, attr: AttributeSet? = null, def: Int = 0) : ScrollerController<VideoSource, CCVideoController>(c, attr, def) {
 
     override val getController: CCVideoController = this
 
     override fun onImgGot(path: String, type: ImgLoader.ImgType, tag: String, e: Exception?) {
-        val transformation = if (path.startsWith("http")) RenderScriptBlur(context, 12) else BlurTransformation(12)
+        val transformation = RenderScriptBlur(context, 12)
         val thumb = getThumbView() ?: return
         val background = getBackgroundView() ?: return
         val context = thumb.context

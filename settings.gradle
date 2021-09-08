@@ -1,4 +1,5 @@
-include ':youtube'
 rootProject.name='VideoTest'
 include ':app'
+include ':youtube'
 include ':player'
+include ':playerLib'

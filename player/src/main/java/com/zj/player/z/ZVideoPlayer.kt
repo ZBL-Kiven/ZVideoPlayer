@@ -10,21 +10,20 @@ import android.os.Message
 import android.provider.MediaStore
 import android.view.WindowManager
 import androidx.annotation.UiThread
-import com.google.android.exoplayer2.*
-import com.google.android.exoplayer2.ExoPlaybackException.*
-import com.google.android.exoplayer2.mediacodec.MediaCodecRenderer
-import com.google.android.exoplayer2.source.ExtractorMediaSource
-import com.google.android.exoplayer2.source.MediaSource
-import com.google.android.exoplayer2.trackselection.DefaultTrackSelector
-import com.google.android.exoplayer2.upstream.DataSource
-import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter
-import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
-import com.google.android.exoplayer2.upstream.DefaultHttpDataSourceFactory
-import com.google.android.exoplayer2.upstream.cache.Cache
-import com.google.android.exoplayer2.upstream.cache.CacheDataSourceFactory
-import com.google.android.exoplayer2.upstream.cache.LeastRecentlyUsedCacheEvictor
-import com.google.android.exoplayer2.upstream.cache.SimpleCache
-import com.google.android.exoplayer2.util.Util
+import com.zj.playerLib.*
+import com.zj.playerLib.mediacodec.MediaCodecRenderer
+import com.zj.playerLib.source.ExtractorMediaSource
+import com.zj.playerLib.source.MediaSource
+import com.zj.playerLib.trackselection.DefaultTrackSelector
+import com.zj.playerLib.upstream.DataSource
+import com.zj.playerLib.upstream.DefaultBandwidthMeter
+import com.zj.playerLib.upstream.DefaultDataSourceFactory
+import com.zj.playerLib.upstream.DefaultHttpDataSourceFactory
+import com.zj.playerLib.upstream.cache.Cache
+import com.zj.playerLib.upstream.cache.CacheDataSourceFactory
+import com.zj.playerLib.upstream.cache.LeastRecentlyUsedCacheEvictor
+import com.zj.playerLib.upstream.cache.SimpleCache
+import com.zj.playerLib.util.Util
 import com.zj.player.base.BasePlayer
 import com.zj.player.base.VideoLoadControl
 import com.zj.player.base.VideoState
@@ -37,6 +36,7 @@ import com.zj.player.ut.Constance.CORE_LOG_ABLE
 import com.zj.player.ut.PlayQualityLevel
 import com.zj.player.ut.PlayerEventController
 import com.zj.player.ut.RenderEvent
+import com.zj.playerLib.PlaybackException.*
 import java.io.File
 import java.io.FileNotFoundException
 import kotlin.math.max
@@ -45,7 +45,7 @@ import kotlin.math.min
 /**
  * @author ZJJ on 2020.6.16
  *
- * The core component used in video playback is based on Google [ExoPlayer].
+ * The core component used in video playback is based on [Player].
  * In most cases, you don’t have to rewrite the interaction mode and monitoring logic it provides, but it is supported in special cases.
  * ZPlayer supports user behavior Collection and full logging,see [log]. and output through [ZController].
  * In addition, if you use the configuration method to build, you can configure some required parameters for video loading, see [VideoConfig] .
@@ -70,7 +70,7 @@ open class ZVideoPlayer(var config: VideoConfig = VideoConfig.create()) : BasePl
     }
 
     private var playPath: Pair<String, Any?>? = null
-    protected var player: SimpleExoPlayer? = null
+    protected var player: SimplePlayer? = null
     private var isReady = false
     private var duration = 0L
     private var controller: PlayerEventController<ZRender>? = null
@@ -109,13 +109,17 @@ open class ZVideoPlayer(var config: VideoConfig = VideoConfig.create()) : BasePl
             if (CORE_LOG_ABLE) log("update player status form ${field.name} to ${value.name}")
             when (value) {
                 VideoState.SEEK_LOADING -> {
+                    field = value
                     controller?.onSeekingLoading(currentPlayPath(), false)
+                    return
                 }
                 VideoState.LOADING -> {
                     isReady = false
+                    field = value
                     controller?.onPlayQualityChanged(PlayQualityLevel.AUTO, null)
                     controller?.onLoading(currentPlayPath(), false)
                     loading()
+                    return
                 }
                 VideoState.READY -> {
                     duration = player?.duration ?: 0
@@ -158,7 +162,7 @@ open class ZVideoPlayer(var config: VideoConfig = VideoConfig.create()) : BasePl
                 }
 
                 VideoState.STOP -> {
-                    val error = (value.obj() as? ExoPlaybackException)
+                    val error = (value.obj() as? PlaybackException)
                     if (isStop()) return
                     if (isPlaying()) setPlayerState(VideoState.PAUSE)
                     resetAndStop(true, isRegulate = false, e = error)
@@ -220,7 +224,7 @@ open class ZVideoPlayer(var config: VideoConfig = VideoConfig.create()) : BasePl
             VideoLoadControl.Builder().createDefaultLoadControl(it.minBufferMs, it.maxBufferMs, it.bufferForPlaybackMs, it.bufferForPlaybackAfterBufferMs)
         }
         val renderFactory = DefaultRenderersFactory(context)
-        player = ExoPlayerFactory.newSimpleInstance(context, renderFactory, DefaultTrackSelector(), control)
+        player = PlayerFactory.newSimpleInstance(context, renderFactory, DefaultTrackSelector(), control)
         player?.videoScalingMode = config.videoScaleMod
     }
 
@@ -291,7 +295,7 @@ open class ZVideoPlayer(var config: VideoConfig = VideoConfig.create()) : BasePl
         }
     }
 
-    private fun runWithPlayer(block: (SimpleExoPlayer) -> Unit) {
+    private fun runWithPlayer(block: (SimplePlayer) -> Unit) {
         player?.let {
             try {
                 block(it)
@@ -302,7 +306,7 @@ open class ZVideoPlayer(var config: VideoConfig = VideoConfig.create()) : BasePl
     }
 
     @Suppress("SameParameterValue")
-    private fun resetAndStop(notifyStop: Boolean = false, isRegulate: Boolean = false, e: ExoPlaybackException?) {
+    private fun resetAndStop(notifyStop: Boolean = false, isRegulate: Boolean = false, e: PlaybackException?) {
         isReady = false
         autoPlay(false)
         runWithPlayer {
@@ -359,7 +363,7 @@ open class ZVideoPlayer(var config: VideoConfig = VideoConfig.create()) : BasePl
         }
     }
 
-    override fun onPlayerError(error: ExoPlaybackException?) {
+    override fun onPlayerError(error: PlaybackException?) {
         val sb = StringBuilder()
         try {
             error?.let {
@@ -527,7 +531,7 @@ open class ZVideoPlayer(var config: VideoConfig = VideoConfig.create()) : BasePl
                 VideoState.COMPLETED -> controller?.onCompleted(currentPlayPath(), true)
                 VideoState.PAUSE -> controller?.onPause(currentPlayPath(), true)
                 VideoState.STOP, VideoState.DESTROY -> {
-                    val e = (it.obj() as? ExoPlaybackException)
+                    val e = (it.obj() as? PlaybackException)
                     if (e != null) controller?.onError(e)
                     else controller?.onStop(true, currentPlayPath(), true)
                 }

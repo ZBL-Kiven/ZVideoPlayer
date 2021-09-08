@@ -7,10 +7,10 @@ import android.os.Looper
 import android.util.AttributeSet
 import android.view.*
 import androidx.annotation.Nullable
-import com.google.android.exoplayer2.Player
-import com.google.android.exoplayer2.text.TextOutput
-import com.google.android.exoplayer2.util.Assertions
-import com.google.android.exoplayer2.video.VideoListener
+import com.zj.playerLib.Player
+import com.zj.playerLib.text.TextOutput
+import com.zj.playerLib.util.Assertions
+import com.zj.playerLib.video.VideoListener
 import com.zj.player.base.BaseRender
 import com.zj.player.logs.BehaviorLogsTable
 import com.zj.player.logs.ZPlayerLogs
