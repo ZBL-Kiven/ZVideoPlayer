@@ -97,10 +97,4 @@ abstract class CCListVideoListDelegate(delegateName: String, adapter: FeedConten
             loadAvatar(d?.getAvatarPath() ?: "", it)
         }
     }
-
-    private fun loadToolsData(vc: CCVideoController?, d: VideoSource?, p: Int, pl: MutableList<Any>?) {
-        if (pl?.get(0).toString() == "setData") {
-
-        }
-    }
 }

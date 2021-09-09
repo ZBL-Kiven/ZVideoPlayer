@@ -124,8 +124,8 @@ class ImgLoader<T : Any> private constructor(private val path: String, private v
         val utl = ImageCacheUtil(wkc, tag, loader, width, height, path, fillType, payloads)
         loadCachePool[tag] = utl
         utl.load(type) { p, t, tag, e ->
-            onResult(p, t, tag, e)
             loadCachePool.remove(tag)
+            onResult(p, t, tag, e)
         }
     }
 

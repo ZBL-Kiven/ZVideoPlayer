@@ -2,6 +2,7 @@ package com.zj.videotest.controllers
 
 import android.content.Context
 import android.graphics.drawable.Drawable
+import android.util.Log
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.BaseRequestOptions
 import com.bumptech.glide.request.target.CustomTarget
@@ -34,6 +35,7 @@ class CCImageLoader<T : Any> : ImageHandler<T>() {
                 }
 
                 override fun onResourceReady(resource: File, transition: Transition<in File>?) {
+                    Log.e("------ ", "${this@CCImageLoader}    tag = $tag    path = ${resource.path}")
                     onResult(resource.path, tag, type, ex)
                 }
             })

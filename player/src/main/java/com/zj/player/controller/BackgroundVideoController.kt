@@ -2,6 +2,7 @@ package com.zj.player.controller
 
 import android.content.Context
 import android.util.AttributeSet
+import com.zj.player.R
 import com.zj.player.z.ZVideoView
 import com.zj.player.img.ImgLoader
 import com.zj.player.img.cache.ImageHandler
@@ -13,8 +14,10 @@ abstract class BackgroundVideoController @JvmOverloads constructor(c: Context, a
         ImgLoader.autoTrimMemory(c)
     }
 
+    private var imgTag = R.id.tag_image_view_loader
     private var path: String = ""
     private var tag: String? = null
+    private var lastTag: String? = null
     private var isLoading = false
 
     abstract fun onImgGot(path: String, type: ImgLoader.ImgType, tag: String, e: Exception?)
@@ -23,22 +26,24 @@ abstract class BackgroundVideoController @JvmOverloads constructor(c: Context, a
         return 0
     }
 
-    fun <L : ImageHandler<String>> loadBackground(tag: String, p: String, imageWidth: Int, imageHeight: Int, type: ImgLoader.ImgType, loader: L) {
-        if (tag == this.tag) {
+    open fun <L : ImageHandler<String>> loadBackground(tag: String, p: String, imageWidth: Int, imageHeight: Int, type: ImgLoader.ImgType, loader: L) {
+        if (tag == this.getTag(imgTag)) {
             return
         } else {
-            this.tag?.let { if (isLoading) cancel() }
-            this.tag = tag
+            if (isLoading) cancel()
+            this.lastTag = tag
+            this.setTag(imgTag, lastTag)
         }
         isLoading = true
         post {
+            if (this.getTag(imgTag) != lastTag) return@post
             val w = this.width
             val h = this.height
             if (w <= 0 || h <= 0) return@post
             val ctx = WeakReference(context)
-            ImgLoader.with(tag).load(p).asType(type).override(imageWidth, imageHeight).limitSize(w, h, 0.5f).quality(0.5f).start(ctx, loader) { filePath, type, tag, e ->
-                if (tag == this.tag) {
-                    try {
+            ImgLoader.with(this.getTag(imgTag).toString()).load(p).asType(type).override(imageWidth, imageHeight).limitSize(w, h, 0.5f).quality(0.5f).start(ctx, loader) { filePath, type, tag, e ->
+                try {
+                    if (this.getTag(imgTag) == tag) {
                         if (filePath.isNullOrEmpty()) {
                             val thumb = getThumbView()
                             val bg = getBackgroundView()
@@ -52,9 +57,9 @@ abstract class BackgroundVideoController @JvmOverloads constructor(c: Context, a
                         }
                         val fp = filePath ?: ""
                         onImgGot(fp, type, tag, e)
-                    } finally {
-                        isLoading = false
                     }
+                } finally {
+                    isLoading = false
                 }
             }
         }

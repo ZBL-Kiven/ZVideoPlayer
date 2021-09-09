@@ -314,7 +314,7 @@ public class ImageViewTouch extends ImageViewTouchBase {
     }
 
     public boolean scrollAble() {
-        return canScroll(top | right | left | bottom, false);
+        return canScroll(top | right | left | bottom, true);
     }
 
     public interface OnImageViewTouchDoubleTapListener {
