@@ -543,20 +543,14 @@ internal class ZPlayerFullScreenView constructor(context: Context) : FrameLayout
 
     override fun dispatchKeyEvent(event: KeyEvent?): Boolean {
         event?.let {
-            if (it.keyCode == KeyEvent.KEYCODE_BACK) {
-                onKeyDown(event.keyCode, event)
-                return true
+            if (config.onFullContentListener?.onKeyEvent(event.keyCode, event) == true) return true
+            if (event.keyCode == KeyEvent.KEYCODE_BACK) {
+                if (!isAnimRun) {
+                    dismiss();return true
+                }
             }
         }
         return super.dispatchKeyEvent(event)
-    }
-
-    override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
-        if (config.onFullContentListener?.onKeyEvent(keyCode, event) == true) return true
-        if (keyCode == KeyEvent.KEYCODE_BACK) {
-            if (!isAnimRun) dismiss();return true
-        }
-        return super.onKeyDown(keyCode, event)
     }
 
     override fun onConfigurationChanged(newConfig: Configuration?) {

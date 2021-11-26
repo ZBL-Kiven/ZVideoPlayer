@@ -11,7 +11,7 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal">
 
-        <TextView
+        <EditText
             android:id="@+id/text"
             android:layout_width="match_parent"
             android:layout_height="50dp"
@@ -20,7 +20,6 @@
             android:background="#f7f7f7"
             android:gravity="center"
             android:padding="10dp"
-            android:text="https://youtu.be/zxU0Bvfpa70"
             android:textColor="#333"
             android:textColorHint="#999"
             android:textSize="14dp" />

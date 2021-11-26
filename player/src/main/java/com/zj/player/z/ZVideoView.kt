@@ -19,7 +19,6 @@ import android.view.*
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.animation.AccelerateDecelerateInterpolator
 import android.widget.*
-import androidx.annotation.CallSuper
 import androidx.annotation.IntRange
 import androidx.core.content.ContextCompat
 import com.zj.player.R
@@ -458,7 +457,6 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
         showOrHidePlayBtn(true)
     }
 
-    @CallSuper
     override fun updateCurPlayerInfo(volume: Int, speed: Float) {
         val nextState = volume <= 0
         muteView?.isSelected = nextState
@@ -587,7 +585,6 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
         return muteGlobalDefault
     }
 
-    @CallSuper
     open fun setVideoDetailIn(detailIn: VideoDetailIn?) {
         this.videoDetailIn = detailIn
     }
@@ -598,12 +595,10 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
 
     open fun onViewInit() {}
 
-    @CallSuper
     open fun onContentLayoutInflated(content: View, pl: Any?) {
         videoDetailIn?.onFullScreenLayoutInflated(content, pl)
     }
 
-    @CallSuper
     open fun onFullScreenChanged(isFull: Boolean, payloads: Map<String, Any?>?) {
         if (isFull) onFullScreenTrackEnd(false)
     }
@@ -618,15 +613,7 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
         return false
     }
 
-    @CallSuper
-    open fun onFullScreenTrackEnd(ifStart: Boolean?) {
-        try {
-            if (ifStart == null || !isFullScreen) return
-            videoRoot?.background = ColorDrawable(if (ifStart) Color.TRANSPARENT else Color.BLACK)
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-    }
+    open fun onFullScreenTrackEnd(ifStart: Boolean?) {}
 
     open fun onSyncVolume(volume: Int = controller?.getCurVolume() ?: 0) {
         if (muteIsUseGlobal) {
@@ -735,7 +722,6 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
         if (!lockScreenRotate(nextState)) Toast.makeText(context, R.string.z_player_str_screen_locked_tint, Toast.LENGTH_SHORT).show()
     }
 
-    @CallSuper
     open fun removeView(tag: Any?, nullAbleView: WeakReference<View?>? = null) {
         getVideoRootView()?.let { v ->
             v.post {
@@ -766,7 +752,6 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
      * The difference is that calling this method provides a stable width and height under various conditions,
      * suitable for covering the full layout of the covered view, and can follow the full screen animation zoom
      * */
-    @CallSuper
     open fun addOverlayView(tag: Any, zPoint: Float, view: WeakReference<View?>?, paramsBuilder: ((RelativeLayout.LayoutParams) -> RelativeLayout.LayoutParams)? = null) {
 
         fun generateLp(invoke: (RelativeLayout.LayoutParams) -> Unit) {
@@ -806,7 +791,6 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
      * of course, additional calls [RelativeLayout.bringChildToFront] or [View.bringToFront] will only take effect when the layout is stable
      * if current [zPoint] less tha 6 ,the adding view may below of the video controller children.
      * */
-    @CallSuper
     open fun addViewWithZPoint(tag: Any?, view: WeakReference<View?>?, zPoint: Float, nlp: RelativeLayout.LayoutParams? = null) {
         getVideoRootView()?.let { rv ->
             rv.post {
@@ -840,7 +824,6 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
      * it also merge with the system screen rotate settings.
      * @return the status form this operation
      * */
-    @CallSuper
     open fun lockScreenRotate(isLock: Boolean): Boolean {
         return if (getCurFullscreenView(context)?.lockScreenRotation(isLock) == true) {
             lockScreen?.isSelected = isLock
@@ -1094,7 +1077,6 @@ open class ZVideoView @JvmOverloads constructor(context: Context, attributeSet: 
         onTrack(isPlayable, isStart, isEnd, formTrigDuration)
     }
 
-    @CallSuper
     open fun reset(isNow: Boolean, isRegulate: Boolean, isShowPlayBtn: Boolean, isShowThumb: Boolean = true, isShowBackground: Boolean = true, isSinkBottomShader: Boolean = false) {
         vPlay?.isEnabled = isShowPlayBtn
         onLoadingEvent(LoadingMode.None, true)

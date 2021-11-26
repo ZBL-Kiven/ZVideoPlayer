@@ -99,6 +99,7 @@ class YtbContentChecker(context: ComponentActivity, private val path: String, ti
     override fun onControllerBind(p0: ZController<*, *>?) {
         controller = p0
         if (p0 == null) return
+        controller?.setVolume(0,0)
         p0.playOrResume(path)
     }
 
