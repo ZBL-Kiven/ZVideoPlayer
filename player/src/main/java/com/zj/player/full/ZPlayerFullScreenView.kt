@@ -7,14 +7,14 @@ import android.app.Activity
 import android.content.Context
 import android.content.pm.ActivityInfo
 import android.content.res.Configuration
-import android.graphics.Color
-import android.graphics.Point
-import android.graphics.PointF
-import android.graphics.RectF
+import android.content.res.Resources
+import android.graphics.*
 import android.graphics.drawable.ColorDrawable
+import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.os.Message
+import android.util.Log
 import android.view.*
 import android.view.animation.DecelerateInterpolator
 import android.widget.FrameLayout
@@ -67,7 +67,20 @@ internal class ZPlayerFullScreenView constructor(context: Context) : FrameLayout
         }
         mDecorView?.addView(this, LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT))
         runWithControllerView {
-            (it.context?.applicationContext?.getSystemService(Context.WINDOW_SERVICE) as? WindowManager)?.defaultDisplay?.getRealSize(realWindowSize)
+            val wm = (it.context?.applicationContext?.getSystemService(Context.WINDOW_SERVICE) as? WindowManager)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                val bounds = wm?.currentWindowMetrics?.bounds ?: Rect()
+                realWindowSize.set(bounds.width(), bounds.height())
+                Log.e("----- ", "11111 ${realWindowSize.x} , ${realWindowSize.y}")
+            } else {
+                val dm = Resources.getSystem().displayMetrics
+                realWindowSize.set(dm.widthPixels, dm.heightPixels)
+                Log.e("----- ", "22222 ${realWindowSize.x} , ${realWindowSize.y}")
+            }
+            if (realWindowSize.x <= 0 || realWindowSize.y <= 0) {
+                @Suppress("DEPRECATION") wm?.defaultDisplay?.getRealSize(realWindowSize)
+                Log.e("----- ", "33333 ${realWindowSize.x} , ${realWindowSize.y}")
+            }
             if (!config.isDefaultMaxScreen && config.contentLayout > 0) contentLayoutView = View.inflate(it.context, config.contentLayout, null)
             val actionViews = mutableMapOf<Int, View>()
             hiddenAllChildIfNotScreenContent(contentLayoutView, actionViews)

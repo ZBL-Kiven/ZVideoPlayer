@@ -8,7 +8,7 @@ import java.net.UnknownHostException
 
 object ApiErrorHandler : ErrorHandler {
 
-    override fun onError(throwable: Throwable) {
+    override fun onError(throwable: Throwable?): Pair<Boolean, Any?> {
         if (throwable is HttpException) {
             try {
                 val errorInfo = throwable.response()?.body()?.toString()
@@ -20,10 +20,11 @@ object ApiErrorHandler : ErrorHandler {
             if (throwable is UnknownHostException) {
                 Log.e("http test", "net work error")
             } else {
-                Log.e("http test", "onHttpError ----- case: ${throwable.message}")
-                throw UnknownError(throwable.message)
+                Log.e("http test", "onHttpError ----- case: ${throwable?.message}")
+                throw UnknownError(throwable?.message)
             }
         }
         throwable.printStackTrace()
+        return Pair(false, null)
     }
 }

@@ -38,8 +38,7 @@ class MainActivity : AppCompatActivity() {
                 Log.e("------ ", " ================ error !!     ${e.message}")
             }
 
-            override fun onLog(s: String, curPath: String, accessKey: String, modeName: String, params: Map<String, Any>?) {
-                //                Log.e("------ ", s)
+            override fun onLog(s: String, curPath: String, accessKey: String, modeName: String, params: Map<String, Any>?) { //                Log.e("------ ", s)
             }
         })
     }
@@ -59,20 +58,7 @@ class MainActivity : AppCompatActivity() {
         mRewardFragmentR = OtherFragment()
         mMeFragmentR = SingleFragment()
         fragmentManager = object : BaseFragmentManager(this, R.id.r_main_act_fragment_content, 0, listOfNotNull(mFeedNavView, mRewardNavView, mMeNavView), mRFeedFragment, mRewardFragmentR, mMeFragmentR) {
-            override fun syncSelectState(selectId: String) {
-                super.syncSelectState(selectId)
-                if (selectId == mRFeedFragment?.fId) {
 
-                } else {
-                    //todo hide time bar
-                }
-            }
-
-            override fun whenShowSameFragment(shownId: String) {
-                if (shownId == mRFeedFragment?.fId) {
-
-                }
-            }
         }
     }
 }

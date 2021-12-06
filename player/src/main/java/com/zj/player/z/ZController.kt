@@ -30,7 +30,7 @@ import java.util.concurrent.ConcurrentHashMap
  * A controller that interacts with the user interface, player, and renderer.
  * */
 @Suppress("unused", "MemberVisibilityCanBePrivate")
-open class ZController<P : BasePlayer<R>, R : BaseRender> internal constructor(var runningName: String, private var player: P?, private var renderCls: Class<R>, viewController: Controller?) : PlayerEventController<R> {
+open class ZController<P : BasePlayer<R>, R : BaseRender> constructor(var runningName: String, private var player: P?, private var renderCls: Class<R>, viewController: Controller?) : PlayerEventController<R> {
 
     private var seekProgressInterval: Long = 16
     private var curAccessKey: String = ""

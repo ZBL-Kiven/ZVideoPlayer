@@ -17,7 +17,7 @@ import com.zj.views.list.holders.BaseViewHolder
 import java.lang.IllegalArgumentException
 import java.lang.ref.SoftReference
 
-abstract class CCListVideoListDelegate(delegateName: String, adapter: FeedContentAdapter) : ListVideoAdapterDelegate<VideoSource, CCVideoController, CCVideoController, BaseViewHolder, BaseRecyclerAdapter<BaseViewHolder, VideoSource>>(delegateName, adapter) {
+abstract class CCListVideoListDelegate(delegateName: String, adapter: FeedContentAdapter) : ListVideoAdapterDelegate<VideoSource, CCVideoController, CCVideoController, BaseViewHolder<VideoSource?>, BaseRecyclerAdapter<BaseViewHolder<VideoSource?>, VideoSource>>(delegateName, adapter) {
 
     companion object {
         const val TAG_POSITION = R.id.special_feed_adapter_tag_id_position
@@ -32,11 +32,11 @@ abstract class CCListVideoListDelegate(delegateName: String, adapter: FeedConten
         return VideoControllerPlayers.getOrCreatePlayerWithVc(delegateName, vc) { data?.getType() ?: DataType.VIDEO }
     }
 
-    override fun getViewController(holder: BaseViewHolder?): CCVideoController? {
+    override fun getViewController(holder: BaseViewHolder<VideoSource?>?): CCVideoController? {
         return holder?.getView(R.id.r_main_fg_feed_item_vc)
     }
 
-    override fun getItem(p: Int, adapter: BaseRecyclerAdapter<BaseViewHolder, VideoSource>): VideoSource? {
+    override fun getItem(p: Int, adapter: BaseRecyclerAdapter<BaseViewHolder<VideoSource?>, VideoSource>): VideoSource? {
         return adapter.getItem(p)
     }
 
@@ -55,7 +55,7 @@ abstract class CCListVideoListDelegate(delegateName: String, adapter: FeedConten
     override val isSourcePlayAble: (d: VideoSource?) -> Boolean = { d -> d?.getType() == DataType.VIDEO || d?.getType() == DataType.YTB }
 
     /**bind normal media item data*/
-    override fun onBindData(holder: BaseViewHolder?, p: Int, d: VideoSource?, playAble: Boolean, vc: CCVideoController?, pl: MutableList<Any?>?) {
+    override fun onBindData(holder: BaseViewHolder<VideoSource?>?, p: Int, d: VideoSource?, playAble: Boolean, vc: CCVideoController?, pl: MutableList<Any?>?) {
         super.onBindData(holder, p, d, playAble, vc, pl)
         holder?.let { h ->
             if (pl.isNullOrEmpty()) {
@@ -87,7 +87,7 @@ abstract class CCListVideoListDelegate(delegateName: String, adapter: FeedConten
     }
 
     /**bind special item data , call when the #[isInflateMediaType] returns false */
-    override fun onBindTypeData(holder: SoftReference<BaseViewHolder>?, d: VideoSource?, p: Int, pl: MutableList<Any?>?) {
+    override fun onBindTypeData(holder: SoftReference<BaseViewHolder<VideoSource?>>?, d: VideoSource?, p: Int, pl: MutableList<Any?>?) {
 
     }
 

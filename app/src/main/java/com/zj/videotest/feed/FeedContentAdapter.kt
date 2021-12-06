@@ -87,7 +87,7 @@ class FeedContentAdapter : ListenerAnimAdapter<VideoSource>(R.layout.r_main_fg_f
             this@FeedContentAdapter.onState(isPlaying, controller)
         }
 
-        override fun onBindData(holder: BaseViewHolder?, p: Int, d: VideoSource?, playAble: Boolean, vc: CCVideoController?, pl: MutableList<Any?>?) {
+        override fun onBindData(holder: BaseViewHolder<VideoSource?>?, p: Int, d: VideoSource?, playAble: Boolean, vc: CCVideoController?, pl: MutableList<Any?>?) {
             super.onBindData(holder, p, d, playAble, vc, pl)
             if (pl.isNullOrEmpty()) {
                 vc?.setOnCompletedListener(if (playAble) onVcCompletedListener else null)
@@ -114,18 +114,18 @@ class FeedContentAdapter : ListenerAnimAdapter<VideoSource>(R.layout.r_main_fg_f
         adapterDelegate?.onDetachedFromRecyclerView(recyclerView)
     }
 
-    override fun onViewDetachedFromWindow(holder: BaseViewHolder) {
+    override fun onViewDetachedFromWindow(holder: BaseViewHolder<VideoSource?>) {
         super.onViewDetachedFromWindow(holder)
         stopOrResumeGif(true, holder)
         adapterDelegate?.onViewDetachedFromWindow(WeakReference(holder))
     }
 
-    override fun onViewAttachedToWindow(holder: BaseViewHolder) {
+    override fun onViewAttachedToWindow(holder: BaseViewHolder<VideoSource?>) {
         super.onViewAttachedToWindow(holder)
         stopOrResumeGif(false, holder)
     }
 
-    override fun onViewRecycled(holder: BaseViewHolder) {
+    override fun onViewRecycled(holder: BaseViewHolder<VideoSource?>) {
         holder.getView<CCVideoController>(R.id.r_main_fg_feed_item_vc)?.let {
             if (!it.isFullScreen) {
                 it.setOnCompletedListener(null)
@@ -137,11 +137,11 @@ class FeedContentAdapter : ListenerAnimAdapter<VideoSource>(R.layout.r_main_fg_f
         } ?: super.onViewRecycled(holder)
     }
 
-    private fun stopOrResumeGif(stop: Boolean, holder: BaseViewHolder) {
+    private fun stopOrResumeGif(stop: Boolean, holder: BaseViewHolder<VideoSource?>) {
         holder.getView<CCVideoController>(R.id.r_main_fg_feed_item_vc)?.stopOrResumeGif(stop)
     }
 
-    override fun bindData(holder: BaseViewHolder?, p: Int, d: VideoSource?, pl: MutableList<Any?>?) {
+    override fun bindData(holder: BaseViewHolder<VideoSource?>?, p: Int, d: VideoSource?, pl: MutableList<Any?>?) {
         if (pl == null) {
             if (curLoadingTentaclePosition != maxPosition && p >= maxPosition - loadDistance) {
                 curLoadingTentaclePosition = maxPosition

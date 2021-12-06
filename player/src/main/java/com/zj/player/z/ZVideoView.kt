@@ -7,8 +7,6 @@ import android.app.Activity
 import android.app.Service
 import android.content.Context
 import android.content.res.Resources
-import android.graphics.Color
-import android.graphics.drawable.ColorDrawable
 import android.media.AudioManager
 import android.os.Build
 import android.os.Handler
@@ -27,10 +25,6 @@ import com.zj.player.base.InflateInfo
 import com.zj.player.base.LoadingMode
 import com.zj.player.config.forEach
 import com.zj.player.full.*
-import com.zj.player.full.ZPlayerFullScreenView
-import com.zj.player.full.FullContentListener
-import com.zj.player.full.FullScreenListener
-import com.zj.player.full.GestureTouchListener
 import com.zj.player.img.scale.ImageViewTouchEnableIn
 import com.zj.player.img.scale.TouchScaleImageView
 import com.zj.player.interfaces.VideoDetailIn
