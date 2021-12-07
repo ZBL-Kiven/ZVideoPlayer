@@ -238,7 +238,7 @@ open class ZVideoPlayer(var config: VideoConfig = VideoConfig.create()) : BasePl
     private fun getPathForSearchQ(context: Context, path: String): Uri? {
         val cursor = context.contentResolver.query(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, arrayOf(MediaStore.Video.Media._ID), MediaStore.Video.Media.DATA + "=? ", arrayOf(path), null)
         val uri = if (cursor != null && cursor.moveToFirst()) {
-            val id = cursor.getInt(cursor.getColumnIndex(MediaStore.MediaColumns._ID))
+            val id = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.MediaColumns._ID))
             val baseUri = Uri.parse("content://media/external/video/media")
             Uri.withAppendedPath(baseUri, "" + id)
         } else {
