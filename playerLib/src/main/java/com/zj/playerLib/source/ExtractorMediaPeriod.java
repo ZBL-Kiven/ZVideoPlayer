@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.source;
 
 import android.net.Uri;
@@ -94,23 +89,23 @@ final class ExtractorMediaPeriod implements MediaPeriod, ExtractorOutput, Callba
         this.listener = listener;
         this.allocator = allocator;
         this.customCacheKey = customCacheKey;
-        this.continueLoadingCheckIntervalBytes = (long) continueLoadingCheckIntervalBytes;
+        this.continueLoadingCheckIntervalBytes = continueLoadingCheckIntervalBytes;
         this.loader = new Loader("Loader:ExtractorMediaPeriod");
         this.extractorHolder = new ExtractorHolder(extractors);
         this.loadCondition = new ConditionVariable();
         this.maybeFinishPrepareRunnable = this::maybeFinishPrepare;
         this.onContinueLoadingRequestedRunnable = () -> {
             if (!this.released) {
-                ((Callback) Assertions.checkNotNull(this.callback)).onContinueLoadingRequested(this);
+                Assertions.checkNotNull(this.callback).onContinueLoadingRequested(this);
             }
 
         };
         this.handler = new Handler();
         this.sampleQueueTrackIds = new int[0];
         this.sampleQueues = new SampleQueue[0];
-        this.pendingResetPositionUs = -9223372036854775807L;
+        this.pendingResetPositionUs = -Long.MAX_VALUE;
         this.length = -1L;
-        this.durationUs = -9223372036854775807L;
+        this.durationUs = -Long.MAX_VALUE;
         this.dataType = 1;
         eventDispatcher.mediaPeriodCreated();
     }
@@ -127,7 +122,7 @@ final class ExtractorMediaPeriod implements MediaPeriod, ExtractorOutput, Callba
         }
 
         this.loader.release(this);
-        this.handler.removeCallbacksAndMessages((Object) null);
+        this.handler.removeCallbacksAndMessages(null);
         this.callback = null;
         this.released = true;
         this.eventDispatcher.mediaPeriodReleased();
@@ -274,7 +269,7 @@ final class ExtractorMediaPeriod implements MediaPeriod, ExtractorOutput, Callba
         }
 
         if (!this.notifyDiscontinuity || !this.loadingFinished && this.getExtractedSamplesCount() <= this.extractedSamplesCountAtStartOfLoad) {
-            return -9223372036854775807L;
+            return -Long.MAX_VALUE;
         } else {
             this.notifyDiscontinuity = false;
             return this.lastSeekPositionUs;
@@ -290,7 +285,7 @@ final class ExtractorMediaPeriod implements MediaPeriod, ExtractorOutput, Callba
         } else {
             long largestQueuedTimestampUs;
             if (this.haveAudioVideoTracks) {
-                largestQueuedTimestampUs = 9223372036854775807L;
+                largestQueuedTimestampUs = Long.MAX_VALUE;
                 int trackCount = this.sampleQueues.length;
 
                 for (int i = 0; i < trackCount; ++i) {
@@ -399,7 +394,7 @@ final class ExtractorMediaPeriod implements MediaPeriod, ExtractorOutput, Callba
         boolean[] trackNotifiedDownstreamFormats = preparedState.trackNotifiedDownstreamFormats;
         if (!trackNotifiedDownstreamFormats[track]) {
             Format trackFormat = preparedState.tracks.get(track).getFormat(0);
-            this.eventDispatcher.downstreamFormatChanged(MimeTypes.getTrackType(trackFormat.sampleMimeType), trackFormat, 0, (Object) null, this.lastSeekPositionUs);
+            this.eventDispatcher.downstreamFormatChanged(MimeTypes.getTrackType(trackFormat.sampleMimeType), trackFormat, 0, null, this.lastSeekPositionUs);
             trackNotifiedDownstreamFormats[track] = true;
         }
 
@@ -421,7 +416,7 @@ final class ExtractorMediaPeriod implements MediaPeriod, ExtractorOutput, Callba
                 sampleQueue.reset();
             }
 
-            ((Callback) Assertions.checkNotNull(this.callback)).onContinueLoadingRequested(this);
+            Assertions.checkNotNull(this.callback).onContinueLoadingRequested(this);
         }
     }
 
@@ -430,21 +425,21 @@ final class ExtractorMediaPeriod implements MediaPeriod, ExtractorOutput, Callba
     }
 
     public void onLoadCompleted(ExtractingLoadable loadable, long elapsedRealtimeMs, long loadDurationMs) {
-        if (this.durationUs == -9223372036854775807L) {
-            SeekMap seekMap = (SeekMap) Assertions.checkNotNull(this.seekMap);
+        if (this.durationUs == -Long.MAX_VALUE) {
+            SeekMap seekMap = Assertions.checkNotNull(this.seekMap);
             long largestQueuedTimestampUs = this.getLargestQueuedTimestampUs();
             this.durationUs = largestQueuedTimestampUs == -9223372036854775808L ? 0L : largestQueuedTimestampUs + 10000L;
             this.listener.onSourceInfoRefreshed(this.durationUs, seekMap.isSeekable());
         }
 
-        this.eventDispatcher.loadCompleted(loadable.dataSpec, loadable.dataSource.getLastOpenedUri(), loadable.dataSource.getLastResponseHeaders(), 1, -1, (Format) null, 0, (Object) null, loadable.seekTimeUs, this.durationUs, elapsedRealtimeMs, loadDurationMs, loadable.dataSource.getBytesRead());
+        this.eventDispatcher.loadCompleted(loadable.dataSpec, loadable.dataSource.getLastOpenedUri(), loadable.dataSource.getLastResponseHeaders(), 1, -1, null, 0, null, loadable.seekTimeUs, this.durationUs, elapsedRealtimeMs, loadDurationMs, loadable.dataSource.getBytesRead());
         this.copyLengthFromLoader(loadable);
         this.loadingFinished = true;
-        ((Callback) Assertions.checkNotNull(this.callback)).onContinueLoadingRequested(this);
+        Assertions.checkNotNull(this.callback).onContinueLoadingRequested(this);
     }
 
     public void onLoadCanceled(ExtractingLoadable loadable, long elapsedRealtimeMs, long loadDurationMs, boolean released) {
-        this.eventDispatcher.loadCanceled(loadable.dataSpec, loadable.dataSource.getLastOpenedUri(), loadable.dataSource.getLastResponseHeaders(), 1, -1, (Format) null, 0, (Object) null, loadable.seekTimeUs, this.durationUs, elapsedRealtimeMs, loadDurationMs, loadable.dataSource.getBytesRead());
+        this.eventDispatcher.loadCanceled(loadable.dataSpec, loadable.dataSource.getLastOpenedUri(), loadable.dataSource.getLastResponseHeaders(), 1, -1, null, 0, null, loadable.seekTimeUs, this.durationUs, elapsedRealtimeMs, loadDurationMs, loadable.dataSource.getBytesRead());
         if (!released) {
             this.copyLengthFromLoader(loadable);
             SampleQueue[] var7 = this.sampleQueues;
@@ -456,7 +451,7 @@ final class ExtractorMediaPeriod implements MediaPeriod, ExtractorOutput, Callba
             }
 
             if (this.enabledTrackCount > 0) {
-                ((Callback) Assertions.checkNotNull(this.callback)).onContinueLoadingRequested(this);
+                Assertions.checkNotNull(this.callback).onContinueLoadingRequested(this);
             }
         }
 
@@ -466,7 +461,7 @@ final class ExtractorMediaPeriod implements MediaPeriod, ExtractorOutput, Callba
         this.copyLengthFromLoader(loadable);
         long retryDelayMs = this.loadErrorHandlingPolicy.getRetryDelayMsFor(this.dataType, this.durationUs, error, errorCount);
         LoadErrorAction loadErrorAction;
-        if (retryDelayMs == -9223372036854775807L) {
+        if (retryDelayMs == -Long.MAX_VALUE) {
             loadErrorAction = Loader.DONT_RETRY_FATAL;
         } else {
             int extractedSamplesCount = this.getExtractedSamplesCount();
@@ -474,7 +469,7 @@ final class ExtractorMediaPeriod implements MediaPeriod, ExtractorOutput, Callba
             loadErrorAction = this.configureRetry(loadable, extractedSamplesCount) ? Loader.createRetryAction(madeProgress, retryDelayMs) : Loader.DONT_RETRY;
         }
 
-        this.eventDispatcher.loadError(loadable.dataSpec, loadable.dataSource.getLastOpenedUri(), loadable.dataSource.getLastResponseHeaders(), 1, -1, (Format) null, 0, (Object) null, loadable.seekTimeUs, this.durationUs, elapsedRealtimeMs, loadDurationMs, loadable.dataSource.getBytesRead(), error, !loadErrorAction.isRetry());
+        this.eventDispatcher.loadError(loadable.dataSpec, loadable.dataSource.getLastOpenedUri(), loadable.dataSource.getLastResponseHeaders(), 1, -1, null, 0, null, loadable.seekTimeUs, this.durationUs, elapsedRealtimeMs, loadDurationMs, loadable.dataSource.getBytesRead(), error, !loadErrorAction.isRetry());
         return loadErrorAction;
     }
 
@@ -491,9 +486,9 @@ final class ExtractorMediaPeriod implements MediaPeriod, ExtractorOutput, Callba
         trackOutput.setUpstreamFormatChangeListener(this);
         this.sampleQueueTrackIds = Arrays.copyOf(this.sampleQueueTrackIds, trackCount + 1);
         this.sampleQueueTrackIds[trackCount] = id;
-        SampleQueue[] sampleQueues = (SampleQueue[]) Arrays.copyOf(this.sampleQueues, trackCount + 1);
+        SampleQueue[] sampleQueues = Arrays.copyOf(this.sampleQueues, trackCount + 1);
         sampleQueues[trackCount] = trackOutput;
-        this.sampleQueues = (SampleQueue[]) Util.castNonNullTypeArray(sampleQueues);
+        this.sampleQueues = Util.castNonNullTypeArray(sampleQueues);
         return trackOutput;
     }
 
@@ -532,23 +527,23 @@ final class ExtractorMediaPeriod implements MediaPeriod, ExtractorOutput, Callba
 
             for (int i = 0; i < trackCount; ++i) {
                 Format trackFormat = this.sampleQueues[i].getUpstreamFormat();
-                trackArray[i] = new TrackGroup(new Format[]{trackFormat});
+                trackArray[i] = new TrackGroup(trackFormat);
                 String mimeType = trackFormat.sampleMimeType;
                 boolean isAudioVideo = MimeTypes.isVideo(mimeType) || MimeTypes.isAudio(mimeType);
                 trackIsAudioVideoFlags[i] = isAudioVideo;
                 this.haveAudioVideoTracks |= isAudioVideo;
             }
 
-            this.dataType = this.length == -1L && seekMap.getDurationUs() == -9223372036854775807L ? 7 : 1;
+            this.dataType = this.length == -1L && seekMap.getDurationUs() == -Long.MAX_VALUE ? 7 : 1;
             this.preparedState = new PreparedState(seekMap, new TrackGroupArray(trackArray), trackIsAudioVideoFlags);
             this.prepared = true;
             this.listener.onSourceInfoRefreshed(this.durationUs, seekMap.isSeekable());
-            ((Callback) Assertions.checkNotNull(this.callback)).onPrepared(this);
+            Assertions.checkNotNull(this.callback).onPrepared(this);
         }
     }
 
     private PreparedState getPreparedState() {
-        return (PreparedState) Assertions.checkNotNull(this.preparedState);
+        return Assertions.checkNotNull(this.preparedState);
     }
 
     private void copyLengthFromLoader(ExtractingLoadable loadable) {
@@ -563,23 +558,23 @@ final class ExtractorMediaPeriod implements MediaPeriod, ExtractorOutput, Callba
         if (this.prepared) {
             SeekMap seekMap = this.getPreparedState().seekMap;
             Assertions.checkState(this.isPendingReset());
-            if (this.durationUs != -9223372036854775807L && this.pendingResetPositionUs >= this.durationUs) {
+            if (this.durationUs != -Long.MAX_VALUE && this.pendingResetPositionUs >= this.durationUs) {
                 this.loadingFinished = true;
-                this.pendingResetPositionUs = -9223372036854775807L;
+                this.pendingResetPositionUs = -Long.MAX_VALUE;
                 return;
             }
 
             loadable.setLoadPosition(seekMap.getSeekPoints(this.pendingResetPositionUs).first.position, this.pendingResetPositionUs);
-            this.pendingResetPositionUs = -9223372036854775807L;
+            this.pendingResetPositionUs = -Long.MAX_VALUE;
         }
 
         this.extractedSamplesCountAtStartOfLoad = this.getExtractedSamplesCount();
         long elapsedRealtimeMs = this.loader.startLoading(loadable, this, this.loadErrorHandlingPolicy.getMinimumLoadableRetryCount(this.dataType));
-        this.eventDispatcher.loadStarted(loadable.dataSpec, 1, -1, (Format) null, 0, (Object) null, loadable.seekTimeUs, this.durationUs, elapsedRealtimeMs);
+        this.eventDispatcher.loadStarted(loadable.dataSpec, 1, -1, null, 0, null, loadable.seekTimeUs, this.durationUs, elapsedRealtimeMs);
     }
 
     private boolean configureRetry(ExtractingLoadable loadable, int currentExtractedSampleCount) {
-        if (this.length == -1L && (this.seekMap == null || this.seekMap.getDurationUs() == -9223372036854775807L)) {
+        if (this.length == -1L && (this.seekMap == null || this.seekMap.getDurationUs() == -Long.MAX_VALUE)) {
             if (this.prepared && !this.suppressRead()) {
                 this.pendingDeferredRetry = true;
                 return false;
@@ -646,7 +641,7 @@ final class ExtractorMediaPeriod implements MediaPeriod, ExtractorOutput, Callba
     }
 
     private boolean isPendingReset() {
-        return this.pendingResetPositionUs != -9223372036854775807L;
+        return this.pendingResetPositionUs != -Long.MAX_VALUE;
     }
 
     private static final class PreparedState {
@@ -756,7 +751,7 @@ final class ExtractorMediaPeriod implements MediaPeriod, ExtractorOutput, Callba
                         this.length += position;
                     }
 
-                    Uri uri = (Uri) Assertions.checkNotNull(this.dataSource.getUri());
+                    Uri uri = Assertions.checkNotNull(this.dataSource.getUri());
                     input = new DefaultExtractorInput(this.dataSource, position, this.length);
                     Extractor extractor = this.extractorHolder.selectExtractor(input, this.extractorOutput, uri);
                     if (this.pendingExtractorSeek) {

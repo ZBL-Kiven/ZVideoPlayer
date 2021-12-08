@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.metadata.id3;
 
 import android.os.Parcel;
@@ -32,9 +27,9 @@ public final class TextInformationFrame extends Id3Frame {
     }
 
     TextInformationFrame(Parcel in) {
-        super((String)Util.castNonNull(in.readString()));
+        super(Util.castNonNull(in.readString()));
         this.description = in.readString();
-        this.value = (String)Util.castNonNull(in.readString());
+        this.value = Util.castNonNull(in.readString());
     }
 
     public boolean equals(@Nullable Object obj) {

@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.source;
 
 import com.zj.playerLib.SeekParameters;
@@ -35,7 +30,7 @@ public interface MediaPeriod extends SequenceableLoader {
 
     void reevaluateBuffer(long var1);
 
-    public interface Callback extends SequenceableLoader.Callback<MediaPeriod> {
+    interface Callback extends SequenceableLoader.Callback<MediaPeriod> {
         void onPrepared(MediaPeriod var1);
     }
 }

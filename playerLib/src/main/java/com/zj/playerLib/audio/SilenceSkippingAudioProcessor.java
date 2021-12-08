@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.audio;
 
 import com.zj.playerLib.util.Util;
@@ -105,7 +100,7 @@ public final class SilenceSkippingAudioProcessor implements AudioProcessor {
         }
 
         if (!this.hasOutputNoise) {
-            this.skippedFrames += (long)(this.paddingSize / this.bytesPerFrame);
+            this.skippedFrames += this.paddingSize / this.bytesPerFrame;
         }
 
     }
@@ -183,9 +178,9 @@ public final class SilenceSkippingAudioProcessor implements AudioProcessor {
             if (this.maybeSilenceBufferSize == this.maybeSilenceBuffer.length) {
                 if (this.hasOutputNoise) {
                     this.output(this.maybeSilenceBuffer, this.paddingSize);
-                    this.skippedFrames += (long)((this.maybeSilenceBufferSize - this.paddingSize * 2) / this.bytesPerFrame);
+                    this.skippedFrames += (this.maybeSilenceBufferSize - this.paddingSize * 2) / this.bytesPerFrame;
                 } else {
-                    this.skippedFrames += (long)((this.maybeSilenceBufferSize - this.paddingSize) / this.bytesPerFrame);
+                    this.skippedFrames += (this.maybeSilenceBufferSize - this.paddingSize) / this.bytesPerFrame;
                 }
 
                 this.updatePaddingBuffer(inputBuffer, this.maybeSilenceBuffer, this.maybeSilenceBufferSize);
@@ -202,7 +197,7 @@ public final class SilenceSkippingAudioProcessor implements AudioProcessor {
         int limit = inputBuffer.limit();
         int noisyPosition = this.findNoisePosition(inputBuffer);
         inputBuffer.limit(noisyPosition);
-        this.skippedFrames += (long)(inputBuffer.remaining() / this.bytesPerFrame);
+        this.skippedFrames += inputBuffer.remaining() / this.bytesPerFrame;
         this.updatePaddingBuffer(inputBuffer, this.paddingBuffer, this.paddingSize);
         if (noisyPosition < limit) {
             this.output(this.paddingBuffer, this.paddingSize);

@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib;
 
 import androidx.annotation.Nullable;
@@ -21,7 +16,7 @@ public abstract class BasePlayer implements Player {
     }
 
     public final void seekToDefaultPosition(int windowIndex) {
-        this.seekTo(windowIndex, -9223372036854775807L);
+        this.seekTo(windowIndex, -Long.MAX_VALUE);
     }
 
     public final void seekTo(long positionMs) {
@@ -76,7 +71,7 @@ public abstract class BasePlayer implements Player {
     public final int getBufferedPercentage() {
         long position = this.getBufferedPosition();
         long duration = this.getDuration();
-        return position != -9223372036854775807L && duration != -9223372036854775807L ? (duration == 0L ? 100 : Util.constrainValue((int)(position * 100L / duration), 0, 100)) : 0;
+        return position != -Long.MAX_VALUE && duration != -Long.MAX_VALUE ? (duration == 0L ? 100 : Util.constrainValue((int)(position * 100L / duration), 0, 100)) : 0;
     }
 
     public final boolean isCurrentWindowDynamic() {
@@ -91,7 +86,7 @@ public abstract class BasePlayer implements Player {
 
     public final long getContentDuration() {
         Timeline timeline = this.getCurrentTimeline();
-        return timeline.isEmpty() ? -9223372036854775807L : timeline.getWindow(this.getCurrentWindowIndex(), this.window).getDurationMs();
+        return timeline.isEmpty() ? -Long.MAX_VALUE : timeline.getWindow(this.getCurrentWindowIndex(), this.window).getDurationMs();
     }
 
     private int getRepeatModeForNavigation() {

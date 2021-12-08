@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.mediacodec;
 
 import android.annotation.TargetApi;
@@ -37,7 +32,7 @@ public final class MediaCodecInfo {
     private final boolean isVideo;
 
     public static MediaCodecInfo newPassthroughInstance(String name) {
-        return new MediaCodecInfo(name, (String) null, (CodecCapabilities) null, true, false, false);
+        return new MediaCodecInfo(name, null, null, true, false, false);
     }
 
     public static MediaCodecInfo newInstance(String name, String mimeType, CodecCapabilities capabilities) {

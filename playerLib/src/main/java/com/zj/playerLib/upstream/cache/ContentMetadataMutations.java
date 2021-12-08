@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.upstream.cache;
 
 import com.zj.playerLib.util.Assertions;
@@ -52,7 +47,7 @@ public class ContentMetadataMutations {
             Entry<String, Object> entry = (Entry)var2.next();
             Object value = entry.getValue();
             if (value instanceof byte[]) {
-                byte[] bytes = (byte[])((byte[])value);
+                byte[] bytes = (byte[]) value;
                 entry.setValue(Arrays.copyOf(bytes, bytes.length));
             }
         }

@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.upstream;
 
 import android.net.Uri;
@@ -33,7 +28,7 @@ public final class ByteArrayDataSource extends BaseDataSource {
         if (this.bytesRemaining > 0 && this.readPosition + this.bytesRemaining <= this.data.length) {
             this.opened = true;
             this.transferStarted(dataSpec);
-            return (long)this.bytesRemaining;
+            return this.bytesRemaining;
         } else {
             throw new IOException("Unsatisfiable range: [" + this.readPosition + ", " + dataSpec.length + "], length: " + this.data.length);
         }

@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.util;
 
 import android.annotation.TargetApi;
@@ -43,7 +38,7 @@ public final class EGLSurfaceTexture implements OnFrameAvailableListener, Runnab
     private SurfaceTexture texture;
 
     public EGLSurfaceTexture(Handler handler) {
-        this(handler, (TextureImageListener)null);
+        this(handler, null);
     }
 
     public EGLSurfaceTexture(Handler handler, @Nullable EGLSurfaceTexture.TextureImageListener callback) {
@@ -100,7 +95,7 @@ public final class EGLSurfaceTexture implements OnFrameAvailableListener, Runnab
     }
 
     public SurfaceTexture getSurfaceTexture() {
-        return (SurfaceTexture)Assertions.checkNotNull(this.texture);
+        return Assertions.checkNotNull(this.texture);
     }
 
     public void onFrameAvailable(SurfaceTexture surfaceTexture) {
@@ -147,7 +142,7 @@ public final class EGLSurfaceTexture implements OnFrameAvailableListener, Runnab
         if (success && numConfigs[0] > 0 && configs[0] != null) {
             return configs[0];
         } else {
-            throw new GlException(Util.formatInvariant("eglChooseConfig failed: success=%b, numConfigs[0]=%d, configs[0]=%s", new Object[]{success, numConfigs[0], configs[0]}));
+            throw new GlException(Util.formatInvariant("eglChooseConfig failed: success=%b, numConfigs[0]=%d, configs[0]=%s", success, numConfigs[0], configs[0]));
         }
     }
 

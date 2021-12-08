@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.extractor.ts;
 
 import com.zj.playerLib.Format;
@@ -72,7 +67,7 @@ public final class DtsReader implements ElementaryStreamReader {
                 this.output.sampleData(data, bytesToRead);
                 this.bytesRead += bytesToRead;
                 if (this.bytesRead == this.sampleSize) {
-                    this.output.sampleMetadata(this.timeUs, 1, this.sampleSize, 0, (CryptoData)null);
+                    this.output.sampleMetadata(this.timeUs, 1, this.sampleSize, 0, null);
                     this.timeUs += this.sampleDurationUs;
                     this.state = 0;
                 }
@@ -119,11 +114,11 @@ public final class DtsReader implements ElementaryStreamReader {
     private void parseHeader() {
         byte[] frameData = this.headerScratchBytes.data;
         if (this.format == null) {
-            this.format = DtsUtil.parseDtsFormat(frameData, this.formatId, this.language, (DrmInitData)null);
+            this.format = DtsUtil.parseDtsFormat(frameData, this.formatId, this.language, null);
             this.output.format(this.format);
         }
 
         this.sampleSize = DtsUtil.getDtsFrameSize(frameData);
-        this.sampleDurationUs = (long)((int)(1000000L * (long)DtsUtil.parseDtsAudioSampleCount(frameData) / (long)this.format.sampleRate));
+        this.sampleDurationUs = (int)(1000000L * (long)DtsUtil.parseDtsAudioSampleCount(frameData) / (long)this.format.sampleRate);
     }
 }

@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.extractor;
 
 import com.zj.playerLib.upstream.DataSource;
@@ -191,7 +186,7 @@ public final class DefaultExtractorInput implements ExtractorInput {
 
     private void commitBytesRead(int bytesRead) {
         if (bytesRead != -1) {
-            this.position += (long)bytesRead;
+            this.position += bytesRead;
         }
 
     }

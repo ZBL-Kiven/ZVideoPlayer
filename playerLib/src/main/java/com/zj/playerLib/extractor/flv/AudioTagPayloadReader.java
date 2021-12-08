@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.extractor.flv;
 
 import android.util.Pair;
@@ -46,7 +41,7 @@ final class AudioTagPayloadReader extends TagPayloadReader {
             if (this.audioFormat == 2) {
                 int sampleRateIndex = header >> 2 & 3;
                 pcmEncoding = AUDIO_SAMPLING_RATE_TABLE[sampleRateIndex];
-                format = Format.createAudioSampleFormat((String)null, "audio/mpeg", (String)null, -1, -1, 1, pcmEncoding, (List)null, (DrmInitData)null, 0, (String)null);
+                format = Format.createAudioSampleFormat(null, "audio/mpeg", null, -1, -1, 1, pcmEncoding, null, null, 0, null);
                 this.output.format(format);
                 this.hasOutputFormat = true;
             } else if (this.audioFormat != 7 && this.audioFormat != 8) {
@@ -56,7 +51,7 @@ final class AudioTagPayloadReader extends TagPayloadReader {
             } else {
                 String type = this.audioFormat == 7 ? "audio/g711-alaw" : "audio/g711-mlaw";
                 pcmEncoding = (header & 1) == 1 ? 2 : 3;
-                format = Format.createAudioSampleFormat((String)null, type, (String)null, -1, -1, 1, 8000, pcmEncoding, (List)null, (DrmInitData)null, 0, (String)null);
+                format = Format.createAudioSampleFormat(null, type, null, -1, -1, 1, 8000, pcmEncoding, null, null, 0, null);
                 this.output.format(format);
                 this.hasOutputFormat = true;
             }
@@ -74,20 +69,20 @@ final class AudioTagPayloadReader extends TagPayloadReader {
         if (this.audioFormat == 2) {
             packetType = data.bytesLeft();
             this.output.sampleData(data, packetType);
-            this.output.sampleMetadata(timeUs, 1, packetType, 0, (CryptoData)null);
+            this.output.sampleMetadata(timeUs, 1, packetType, 0, null);
         } else {
             packetType = data.readUnsignedByte();
             if (packetType == 0 && !this.hasOutputFormat) {
                 byte[] audioSpecificConfig = new byte[data.bytesLeft()];
                 data.readBytes(audioSpecificConfig, 0, audioSpecificConfig.length);
                 Pair<Integer, Integer> audioParams = CodecSpecificDataUtil.parseAacAudioSpecificConfig(audioSpecificConfig);
-                Format format = Format.createAudioSampleFormat((String)null, "audio/mp4a-latm", (String)null, -1, -1, (Integer)audioParams.second, (Integer)audioParams.first, Collections.singletonList(audioSpecificConfig), (DrmInitData)null, 0, (String)null);
+                Format format = Format.createAudioSampleFormat(null, "audio/mp4a-latm", null, -1, -1, audioParams.second, audioParams.first, Collections.singletonList(audioSpecificConfig), null, 0, null);
                 this.output.format(format);
                 this.hasOutputFormat = true;
             } else if (this.audioFormat != 10 || packetType == 1) {
                 int sampleSize = data.bytesLeft();
                 this.output.sampleData(data, sampleSize);
-                this.output.sampleMetadata(timeUs, 1, sampleSize, 0, (CryptoData)null);
+                this.output.sampleMetadata(timeUs, 1, sampleSize, 0, null);
             }
         }
 

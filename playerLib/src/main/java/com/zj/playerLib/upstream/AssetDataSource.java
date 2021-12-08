@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.upstream;
 
 import android.content.Context;
@@ -59,7 +54,7 @@ public final class AssetDataSource extends BaseDataSource {
             if (dataSpec.length != -1L) {
                 this.bytesRemaining = dataSpec.length;
             } else {
-                this.bytesRemaining = (long)this.inputStream.available();
+                this.bytesRemaining = this.inputStream.available();
                 if (this.bytesRemaining == 2147483647L) {
                     this.bytesRemaining = -1L;
                 }
@@ -81,7 +76,7 @@ public final class AssetDataSource extends BaseDataSource {
         } else {
             int bytesRead;
             try {
-                int bytesToRead = this.bytesRemaining == -1L ? readLength : (int)Math.min(this.bytesRemaining, (long)readLength);
+                int bytesToRead = this.bytesRemaining == -1L ? readLength : (int)Math.min(this.bytesRemaining, readLength);
                 bytesRead = this.inputStream.read(buffer, offset, bytesToRead);
             } catch (IOException var6) {
                 throw new AssetDataSourceException(var6);
@@ -95,7 +90,7 @@ public final class AssetDataSource extends BaseDataSource {
                 }
             } else {
                 if (this.bytesRemaining != -1L) {
-                    this.bytesRemaining -= (long)bytesRead;
+                    this.bytesRemaining -= bytesRead;
                 }
 
                 this.bytesTransferred(bytesRead);

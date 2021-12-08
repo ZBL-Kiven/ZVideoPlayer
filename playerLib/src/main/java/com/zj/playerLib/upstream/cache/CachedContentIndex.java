@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.upstream.cache;
 
 import android.util.SparseArray;
@@ -52,7 +47,7 @@ class CachedContentIndex {
     private ReusableBufferedOutputStream bufferedOutputStream;
 
     public CachedContentIndex(File cacheDir) {
-        this(cacheDir, (byte[]) null);
+        this(cacheDir, null);
     }
 
     public CachedContentIndex(File cacheDir, byte[] secretKey) {
@@ -107,12 +102,12 @@ class CachedContentIndex {
     }
 
     public CachedContent getOrAdd(String key) {
-        CachedContent cachedContent = (CachedContent) this.keyToContent.get(key);
+        CachedContent cachedContent = this.keyToContent.get(key);
         return cachedContent == null ? this.addNew(key) : cachedContent;
     }
 
     public CachedContent get(String key) {
-        return (CachedContent) this.keyToContent.get(key);
+        return this.keyToContent.get(key);
     }
 
     public Collection<CachedContent> getAll() {
@@ -165,7 +160,7 @@ class CachedContentIndex {
 
     public ContentMetadata getContentMetadata(String key) {
         CachedContent cachedContent = this.get(key);
-        return (ContentMetadata) (cachedContent != null ? cachedContent.getMetadata() : DefaultContentMetadata.EMPTY);
+        return cachedContent != null ? cachedContent.getMetadata() : DefaultContentMetadata.EMPTY;
     }
 
     private boolean readFile() {

@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.trackselection;
 
 import androidx.annotation.Nullable;
@@ -39,7 +34,7 @@ public abstract class TrackSelector {
     }
 
     protected final BandwidthMeter getBandwidthMeter() {
-        return (BandwidthMeter)Assertions.checkNotNull(this.bandwidthMeter);
+        return Assertions.checkNotNull(this.bandwidthMeter);
     }
 
     public interface InvalidationListener {

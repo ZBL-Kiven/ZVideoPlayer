@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.upstream;
 
 import android.net.Uri;
@@ -30,7 +25,7 @@ public interface DataSource {
 
     void close() throws IOException;
 
-    public interface Factory {
+    interface Factory {
         DataSource createDataSource();
     }
 }

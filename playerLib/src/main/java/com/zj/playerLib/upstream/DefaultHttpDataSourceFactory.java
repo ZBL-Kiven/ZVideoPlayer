@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.upstream;
 
 import androidx.annotation.Nullable;
@@ -20,7 +15,7 @@ public final class DefaultHttpDataSourceFactory extends BaseFactory {
     private final boolean allowCrossProtocolRedirects;
 
     public DefaultHttpDataSourceFactory(String userAgent) {
-        this(userAgent, (TransferListener)null);
+        this(userAgent, null);
     }
 
     public DefaultHttpDataSourceFactory(String userAgent, @Nullable TransferListener listener) {
@@ -28,7 +23,7 @@ public final class DefaultHttpDataSourceFactory extends BaseFactory {
     }
 
     public DefaultHttpDataSourceFactory(String userAgent, int connectTimeoutMillis, int readTimeoutMillis, boolean allowCrossProtocolRedirects) {
-        this(userAgent, (TransferListener)null, connectTimeoutMillis, readTimeoutMillis, allowCrossProtocolRedirects);
+        this(userAgent, null, connectTimeoutMillis, readTimeoutMillis, allowCrossProtocolRedirects);
     }
 
     public DefaultHttpDataSourceFactory(String userAgent, @Nullable TransferListener listener, int connectTimeoutMillis, int readTimeoutMillis, boolean allowCrossProtocolRedirects) {
@@ -40,7 +35,7 @@ public final class DefaultHttpDataSourceFactory extends BaseFactory {
     }
 
     protected DefaultHttpDataSource createDataSourceInternal(RequestProperties defaultRequestProperties) {
-        DefaultHttpDataSource dataSource = new DefaultHttpDataSource(this.userAgent, (Predicate)null, this.connectTimeoutMillis, this.readTimeoutMillis, this.allowCrossProtocolRedirects, defaultRequestProperties);
+        DefaultHttpDataSource dataSource = new DefaultHttpDataSource(this.userAgent, null, this.connectTimeoutMillis, this.readTimeoutMillis, this.allowCrossProtocolRedirects, defaultRequestProperties);
         if (this.listener != null) {
             dataSource.addTransferListener(this.listener);
         }

@@ -111,7 +111,7 @@ final class AudioTimestampPoller {
     }
 
     public long getTimestampSystemTimeUs() {
-        return this.audioTimestamp != null ? this.audioTimestamp.getTimestampSystemTimeUs() : -9223372036854775807L;
+        return this.audioTimestamp != null ? this.audioTimestamp.getTimestampSystemTimeUs() : -Long.MAX_VALUE;
     }
 
     public long getTimestampPositionFrames() {

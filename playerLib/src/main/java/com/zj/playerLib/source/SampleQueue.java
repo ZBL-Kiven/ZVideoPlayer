@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.source;
 
 import androidx.annotation.Nullable;
@@ -186,7 +181,7 @@ public class SampleQueue implements TrackOutput {
     private void readEncryptionData(DecoderInputBuffer buffer, SampleExtrasHolder extrasHolder) {
         long offset = extrasHolder.offset;
         this.scratch.reset(1);
-        this.readData(offset, (byte[])this.scratch.data, 1);
+        this.readData(offset, this.scratch.data, 1);
         ++offset;
         byte signalByte = this.scratch.data[0];
         boolean subsampleEncryption = (signalByte & 128) != 0;
@@ -196,11 +191,11 @@ public class SampleQueue implements TrackOutput {
         }
 
         this.readData(offset, buffer.cryptoInfo.iv, ivSize);
-        offset += (long)ivSize;
+        offset += ivSize;
         int subsampleCount;
         if (subsampleEncryption) {
             this.scratch.reset(2);
-            this.readData(offset, (byte[])this.scratch.data, 2);
+            this.readData(offset, this.scratch.data, 2);
             offset += 2L;
             subsampleCount = this.scratch.readUnsignedShort();
         } else {
@@ -222,7 +217,7 @@ public class SampleQueue implements TrackOutput {
             int subsampleDataLength = 6 * subsampleCount;
             this.scratch.reset(subsampleDataLength);
             this.readData(offset, this.scratch.data, subsampleDataLength);
-            offset += (long)subsampleDataLength;
+            offset += subsampleDataLength;
             this.scratch.setPosition(0);
 
             for(i = 0; i < subsampleCount; ++i) {
@@ -237,7 +232,7 @@ public class SampleQueue implements TrackOutput {
         CryptoData cryptoData = extrasHolder.cryptoData;
         buffer.cryptoInfo.set(subsampleCount, clearDataSizes, encryptedDataSizes, cryptoData.encryptionKey, buffer.cryptoInfo.iv, cryptoData.cryptoMode, cryptoData.encryptedBlocks, cryptoData.clearBlocks);
         i = (int)(offset - extrasHolder.offset);
-        extrasHolder.offset += (long)i;
+        extrasHolder.offset += i;
         extrasHolder.size -= i;
     }
 
@@ -250,7 +245,7 @@ public class SampleQueue implements TrackOutput {
             Allocation allocation = this.readAllocationNode.allocation;
             target.put(allocation.data, this.readAllocationNode.translateOffset(absolutePosition), toCopy);
             remaining -= toCopy;
-            absolutePosition += (long)toCopy;
+            absolutePosition += toCopy;
             if (absolutePosition == this.readAllocationNode.endPosition) {
                 this.readAllocationNode = this.readAllocationNode.next;
             }
@@ -267,7 +262,7 @@ public class SampleQueue implements TrackOutput {
             Allocation allocation = this.readAllocationNode.allocation;
             System.arraycopy(allocation.data, this.readAllocationNode.translateOffset(absolutePosition), target, length - remaining, toCopy);
             remaining -= toCopy;
-            absolutePosition += (long)toCopy;
+            absolutePosition += toCopy;
             if (absolutePosition == this.readAllocationNode.endPosition) {
                 this.readAllocationNode = this.readAllocationNode.next;
             }
@@ -386,7 +381,7 @@ public class SampleQueue implements TrackOutput {
     }
 
     private void postAppend(int length) {
-        this.totalBytesWritten += (long)length;
+        this.totalBytesWritten += length;
         if (this.totalBytesWritten == this.writeAllocationNode.endPosition) {
             this.writeAllocationNode = this.writeAllocationNode.next;
         }
@@ -397,7 +392,7 @@ public class SampleQueue implements TrackOutput {
         if (format == null) {
             return null;
         } else {
-            if (sampleOffsetUs != 0L && format.subSampleOffsetUs != 9223372036854775807L) {
+            if (sampleOffsetUs != 0L && format.subSampleOffsetUs != Long.MAX_VALUE) {
                 format = format.copyWithSubSampleOffsetUs(format.subSampleOffsetUs + sampleOffsetUs);
             }
 

@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.metadata.id3;
 
 import android.os.Parcel;
@@ -31,8 +26,8 @@ public final class BinaryFrame extends Id3Frame {
     }
 
     BinaryFrame(Parcel in) {
-        super((String)Util.castNonNull(in.readString()));
-        this.data = (byte[])Util.castNonNull(in.createByteArray());
+        super(Util.castNonNull(in.readString()));
+        this.data = Util.castNonNull(in.createByteArray());
     }
 
     public boolean equals(@Nullable Object obj) {

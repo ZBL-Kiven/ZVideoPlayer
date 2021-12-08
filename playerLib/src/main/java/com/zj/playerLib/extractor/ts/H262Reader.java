@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.extractor.ts;
 
 import android.util.Pair;
@@ -44,7 +39,7 @@ public final class H262Reader implements ElementaryStreamReader {
     private boolean sampleHasPicture;
 
     public H262Reader() {
-        this((UserDataReader)null);
+        this(null);
     }
 
     public H262Reader(UserDataReader userDataReader) {
@@ -90,7 +85,7 @@ public final class H262Reader implements ElementaryStreamReader {
         int offset = data.getPosition();
         int limit = data.limit();
         byte[] dataArray = data.data;
-        this.totalBytesWritten += (long)data.bytesLeft();
+        this.totalBytesWritten += data.bytesLeft();
         this.output.sampleData(data, data.bytesLeft());
 
         while(true) {
@@ -118,8 +113,8 @@ public final class H262Reader implements ElementaryStreamReader {
                 bytesWrittenPastStartCode = lengthToStartCode < 0 ? -lengthToStartCode : 0;
                 if (this.csdBuffer.onStartCode(startCodeValue, bytesWrittenPastStartCode)) {
                     Pair<Format, Long> result = parseCsdBuffer(this.csdBuffer, this.formatId);
-                    this.output.format((Format)result.first);
-                    this.frameDurationUs = (Long)result.second;
+                    this.output.format(result.first);
+                    this.frameDurationUs = result.second;
                     this.hasOutputFormat = true;
                 }
             }
@@ -153,14 +148,14 @@ public final class H262Reader implements ElementaryStreamReader {
                 if (this.startedFirstSample && this.sampleHasPicture && this.hasOutputFormat) {
                     unescapedLength = this.sampleIsKeyframe ? 1 : 0;
                     int size = (int)(this.totalBytesWritten - this.samplePosition) - bytesWrittenPastStartCode;
-                    this.output.sampleMetadata(this.sampleTimeUs, unescapedLength, size, bytesWrittenPastStartCode, (CryptoData)null);
+                    this.output.sampleMetadata(this.sampleTimeUs, unescapedLength, size, bytesWrittenPastStartCode, null);
                 }
 
                 if (!this.startedFirstSample || this.sampleHasPicture) {
                     this.samplePosition = this.totalBytesWritten - (long)bytesWrittenPastStartCode;
-                    this.sampleTimeUs = this.pesTimeUs != -9223372036854775807L ? this.pesTimeUs : (this.startedFirstSample ? this.sampleTimeUs + this.frameDurationUs : 0L);
+                    this.sampleTimeUs = this.pesTimeUs != -Long.MAX_VALUE ? this.pesTimeUs : (this.startedFirstSample ? this.sampleTimeUs + this.frameDurationUs : 0L);
                     this.sampleIsKeyframe = false;
-                    this.pesTimeUs = -9223372036854775807L;
+                    this.pesTimeUs = -Long.MAX_VALUE;
                     this.startedFirstSample = true;
                 }
 
@@ -194,7 +189,7 @@ public final class H262Reader implements ElementaryStreamReader {
             pixelWidthHeightRatio = (float)(121 * height) / (float)(100 * width);
         }
 
-        Format format = Format.createVideoSampleFormat(formatId, "video/mpeg2", (String)null, -1, -1, width, height, -1.0F, Collections.singletonList(csdData), -1, pixelWidthHeightRatio, (DrmInitData)null);
+        Format format = Format.createVideoSampleFormat(formatId, "video/mpeg2", null, -1, -1, width, height, -1.0F, Collections.singletonList(csdData), -1, pixelWidthHeightRatio, null);
         long frameDurationUs = 0L;
         int frameRateCodeMinusOne = (csdData[7] & 15) - 1;
         if (0 <= frameRateCodeMinusOne && frameRateCodeMinusOne < FRAME_RATE_VALUES.length) {

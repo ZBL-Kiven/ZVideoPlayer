@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.extractor.ts;
 
 import com.zj.playerLib.Format;
@@ -34,7 +29,7 @@ public final class MpegAudioReader implements ElementaryStreamReader {
     private long timeUs;
 
     public MpegAudioReader() {
-        this((String)null);
+        this(null);
     }
 
     public MpegAudioReader(String language) {
@@ -119,7 +114,7 @@ public final class MpegAudioReader implements ElementaryStreamReader {
                 this.frameSize = this.header.frameSize;
                 if (!this.hasOutputFormat) {
                     this.frameDurationUs = 1000000L * (long)this.header.samplesPerFrame / (long)this.header.sampleRate;
-                    Format format = Format.createAudioSampleFormat(this.formatId, this.header.mimeType, (String)null, -1, 4096, this.header.channels, this.header.sampleRate, (List)null, (DrmInitData)null, 0, this.language);
+                    Format format = Format.createAudioSampleFormat(this.formatId, this.header.mimeType, null, -1, 4096, this.header.channels, this.header.sampleRate, null, null, 0, this.language);
                     this.output.format(format);
                     this.hasOutputFormat = true;
                 }
@@ -136,7 +131,7 @@ public final class MpegAudioReader implements ElementaryStreamReader {
         this.output.sampleData(source, bytesToRead);
         this.frameBytesRead += bytesToRead;
         if (this.frameBytesRead >= this.frameSize) {
-            this.output.sampleMetadata(this.timeUs, 1, this.frameSize, 0, (CryptoData)null);
+            this.output.sampleMetadata(this.timeUs, 1, this.frameSize, 0, null);
             this.timeUs += this.frameDurationUs;
             this.frameBytesRead = 0;
             this.state = 0;

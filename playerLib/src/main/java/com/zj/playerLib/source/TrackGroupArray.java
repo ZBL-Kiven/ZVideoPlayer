@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.source;
 
 import android.os.Parcel;
@@ -13,7 +8,7 @@ import androidx.annotation.Nullable;
 import java.util.Arrays;
 
 public final class TrackGroupArray implements Parcelable {
-    public static final TrackGroupArray EMPTY = new TrackGroupArray(new TrackGroup[0]);
+    public static final TrackGroupArray EMPTY = new TrackGroupArray();
     public final int length;
     private final TrackGroup[] trackGroups;
     private int hashCode;
@@ -37,7 +32,7 @@ public final class TrackGroupArray implements Parcelable {
         this.trackGroups = new TrackGroup[this.length];
 
         for(int i = 0; i < this.length; ++i) {
-            this.trackGroups[i] = (TrackGroup)in.readParcelable(TrackGroup.class.getClassLoader());
+            this.trackGroups[i] = in.readParcelable(TrackGroup.class.getClassLoader());
         }
 
     }

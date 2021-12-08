@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.source.ads;
 
 import android.view.ViewGroup;
@@ -22,7 +17,7 @@ public interface AdsLoader {
 
     void handlePrepareError(int var1, int var2, IOException var3);
 
-    public interface EventListener {
+    interface EventListener {
         void onAdPlaybackState(AdPlaybackState var1);
 
         void onAdLoadError(AdLoadException var1, DataSpec var2);

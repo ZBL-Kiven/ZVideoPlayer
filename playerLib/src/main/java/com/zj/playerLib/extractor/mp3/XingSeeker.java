@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.extractor.mp3;
 
 import androidx.annotation.Nullable;
@@ -32,15 +27,15 @@ final class XingSeeker implements Seeker {
         int flags = frame.readInt();
         int frameCount;
         if ((flags & 1) == 1 && (frameCount = frame.readUnsignedIntToInt()) != 0) {
-            long durationUs = Util.scaleLargeTimestamp((long)frameCount, (long)samplesPerFrame * 1000000L, (long)sampleRate);
+            long durationUs = Util.scaleLargeTimestamp(frameCount, (long)samplesPerFrame * 1000000L, sampleRate);
             if ((flags & 6) != 6) {
                 return new XingSeeker(position, mpegAudioHeader.frameSize, durationUs);
             } else {
-                long dataSize = (long)frame.readUnsignedIntToInt();
+                long dataSize = frame.readUnsignedIntToInt();
                 long[] tableOfContents = new long[100];
 
                 for(int i = 0; i < 100; ++i) {
-                    tableOfContents[i] = (long)frame.readUnsignedByte();
+                    tableOfContents[i] = frame.readUnsignedByte();
                 }
 
                 if (inputLength != -1L && inputLength != position + dataSize) {
@@ -55,7 +50,7 @@ final class XingSeeker implements Seeker {
     }
 
     private XingSeeker(long dataStartPosition, int xingFrameSize, long durationUs) {
-        this(dataStartPosition, xingFrameSize, durationUs, -1L, (long[])null);
+        this(dataStartPosition, xingFrameSize, durationUs, -1L, null);
     }
 
     private XingSeeker(long dataStartPosition, int xingFrameSize, long durationUs, long dataSize, @Nullable long[] tableOfContents) {
@@ -84,7 +79,7 @@ final class XingSeeker implements Seeker {
                 scaledPosition = 256.0D;
             } else {
                 int prevTableIndex = (int)percent;
-                long[] tableOfContents = (long[])Assertions.checkNotNull(this.tableOfContents);
+                long[] tableOfContents = Assertions.checkNotNull(this.tableOfContents);
                 double prevScaledPosition = (double)tableOfContents[prevTableIndex];
                 double nextScaledPosition = prevTableIndex == 99 ? 256.0D : (double)tableOfContents[prevTableIndex + 1];
                 double interpolateFraction = percent - (double)prevTableIndex;
@@ -92,7 +87,7 @@ final class XingSeeker implements Seeker {
             }
 
             long positionOffset = Math.round(scaledPosition / 256.0D * (double)this.dataSize);
-            positionOffset = Util.constrainValue(positionOffset, (long)this.xingFrameSize, this.dataSize - 1L);
+            positionOffset = Util.constrainValue(positionOffset, this.xingFrameSize, this.dataSize - 1L);
             return new SeekPoints(new SeekPoint(timeUs, this.dataStartPosition + positionOffset));
         }
     }
@@ -100,7 +95,7 @@ final class XingSeeker implements Seeker {
     public long getTimeUs(long position) {
         long positionOffset = position - this.dataStartPosition;
         if (this.isSeekable() && positionOffset > (long)this.xingFrameSize) {
-            long[] tableOfContents = (long[])Assertions.checkNotNull(this.tableOfContents);
+            long[] tableOfContents = Assertions.checkNotNull(this.tableOfContents);
             double scaledPosition = (double)positionOffset * 256.0D / (double)this.dataSize;
             int prevTableIndex = Util.binarySearchFloor(tableOfContents, (long)scaledPosition, true, true);
             long prevTimeUs = this.getTimeUsForTableIndex(prevTableIndex);

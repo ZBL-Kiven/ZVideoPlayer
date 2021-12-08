@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.extractor.ts;
 
 import com.zj.playerLib.ParserException;
@@ -88,7 +83,7 @@ public final class PesReader implements TsPayloadReader {
                 break;
             case 2:
                 readLength = Math.min(10, this.extendedHeaderLength);
-                if (this.continueRead(data, this.pesScratch.data, readLength) && this.continueRead(data, (byte[])null, this.extendedHeaderLength)) {
+                if (this.continueRead(data, this.pesScratch.data, readLength) && this.continueRead(data, null, this.extendedHeaderLength)) {
                     this.parseHeaderExtension();
                     flags |= this.dataAlignmentIndicator ? 4 : 0;
                     this.reader.packetStarted(this.timeUs, flags);
@@ -169,22 +164,22 @@ public final class PesReader implements TsPayloadReader {
 
     private void parseHeaderExtension() {
         this.pesScratch.setPosition(0);
-        this.timeUs = -9223372036854775807L;
+        this.timeUs = -Long.MAX_VALUE;
         if (this.ptsFlag) {
             this.pesScratch.skipBits(4);
             long pts = (long)this.pesScratch.readBits(3) << 30;
             this.pesScratch.skipBits(1);
-            pts |= (long)(this.pesScratch.readBits(15) << 15);
+            pts |= this.pesScratch.readBits(15) << 15;
             this.pesScratch.skipBits(1);
-            pts |= (long)this.pesScratch.readBits(15);
+            pts |= this.pesScratch.readBits(15);
             this.pesScratch.skipBits(1);
             if (!this.seenFirstDts && this.dtsFlag) {
                 this.pesScratch.skipBits(4);
                 long dts = (long)this.pesScratch.readBits(3) << 30;
                 this.pesScratch.skipBits(1);
-                dts |= (long)(this.pesScratch.readBits(15) << 15);
+                dts |= this.pesScratch.readBits(15) << 15;
                 this.pesScratch.skipBits(1);
-                dts |= (long)this.pesScratch.readBits(15);
+                dts |= this.pesScratch.readBits(15);
                 this.pesScratch.skipBits(1);
                 this.timestampAdjuster.adjustTsTimestamp(dts);
                 this.seenFirstDts = true;

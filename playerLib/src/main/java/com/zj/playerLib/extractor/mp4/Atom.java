@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.extractor.mp4;
 
 import androidx.annotation.Nullable;
@@ -166,7 +161,7 @@ abstract class Atom {
             int childrenSize = this.leafChildren.size();
 
             for(int i = 0; i < childrenSize; ++i) {
-                LeafAtom atom = (LeafAtom)this.leafChildren.get(i);
+                LeafAtom atom = this.leafChildren.get(i);
                 if (atom.type == type) {
                     return atom;
                 }
@@ -180,7 +175,7 @@ abstract class Atom {
             int childrenSize = this.containerChildren.size();
 
             for(int i = 0; i < childrenSize; ++i) {
-                ContainerAtom atom = (ContainerAtom)this.containerChildren.get(i);
+                ContainerAtom atom = this.containerChildren.get(i);
                 if (atom.type == type) {
                     return atom;
                 }
@@ -195,7 +190,7 @@ abstract class Atom {
 
             int i;
             for(i = 0; i < size; ++i) {
-                LeafAtom atom = (LeafAtom)this.leafChildren.get(i);
+                LeafAtom atom = this.leafChildren.get(i);
                 if (atom.type == type) {
                     ++count;
                 }
@@ -204,7 +199,7 @@ abstract class Atom {
             size = this.containerChildren.size();
 
             for(i = 0; i < size; ++i) {
-                ContainerAtom atom = (ContainerAtom)this.containerChildren.get(i);
+                ContainerAtom atom = this.containerChildren.get(i);
                 if (atom.type == type) {
                     ++count;
                 }

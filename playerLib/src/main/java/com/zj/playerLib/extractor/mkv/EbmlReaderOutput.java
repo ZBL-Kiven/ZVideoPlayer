@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.extractor.mkv;
 
 import com.zj.playerLib.ParserException;
@@ -39,6 +34,6 @@ interface EbmlReaderOutput {
 
     @Documented
     @Retention(RetentionPolicy.SOURCE)
-    public @interface ElementType {
+    @interface ElementType {
     }
 }

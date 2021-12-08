@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.source;
 
 import androidx.annotation.Nullable;
@@ -24,7 +19,7 @@ public final class SinglePeriodTimeline extends Timeline {
     private final Object tag;
 
     public SinglePeriodTimeline(long durationUs, boolean isSeekable, boolean isDynamic) {
-        this(durationUs, isSeekable, isDynamic, (Object)null);
+        this(durationUs, isSeekable, isDynamic, null);
     }
 
     public SinglePeriodTimeline(long durationUs, boolean isSeekable, boolean isDynamic, @Nullable Object tag) {
@@ -32,7 +27,7 @@ public final class SinglePeriodTimeline extends Timeline {
     }
 
     public SinglePeriodTimeline(long periodDurationUs, long windowDurationUs, long windowPositionInPeriodUs, long windowDefaultStartPositionUs, boolean isSeekable, boolean isDynamic, @Nullable Object tag) {
-        this(-9223372036854775807L, -9223372036854775807L, periodDurationUs, windowDurationUs, windowPositionInPeriodUs, windowDefaultStartPositionUs, isSeekable, isDynamic, tag);
+        this(-Long.MAX_VALUE, -Long.MAX_VALUE, periodDurationUs, windowDurationUs, windowPositionInPeriodUs, windowDefaultStartPositionUs, isSeekable, isDynamic, tag);
     }
 
     public SinglePeriodTimeline(long presentationStartTimeMs, long windowStartTimeMs, long periodDurationUs, long windowDurationUs, long windowPositionInPeriodUs, long windowDefaultStartPositionUs, boolean isSeekable, boolean isDynamic, @Nullable Object tag) {
@@ -56,12 +51,12 @@ public final class SinglePeriodTimeline extends Timeline {
         Object tag = setTag ? this.tag : null;
         long windowDefaultStartPositionUs = this.windowDefaultStartPositionUs;
         if (this.isDynamic && defaultPositionProjectionUs != 0L) {
-            if (this.windowDurationUs == -9223372036854775807L) {
-                windowDefaultStartPositionUs = -9223372036854775807L;
+            if (this.windowDurationUs == -Long.MAX_VALUE) {
+                windowDefaultStartPositionUs = -Long.MAX_VALUE;
             } else {
                 windowDefaultStartPositionUs += defaultPositionProjectionUs;
                 if (windowDefaultStartPositionUs > this.windowDurationUs) {
-                    windowDefaultStartPositionUs = -9223372036854775807L;
+                    windowDefaultStartPositionUs = -Long.MAX_VALUE;
                 }
             }
         }
@@ -76,7 +71,7 @@ public final class SinglePeriodTimeline extends Timeline {
     public Period getPeriod(int periodIndex, Period period, boolean setIds) {
         Assertions.checkIndex(periodIndex, 0, 1);
         Object uid = setIds ? UID : null;
-        return period.set((Object)null, uid, 0, this.periodDurationUs, -this.windowPositionInPeriodUs);
+        return period.set(null, uid, 0, this.periodDurationUs, -this.windowPositionInPeriodUs);
     }
 
     public int getIndexOfPeriod(Object uid) {

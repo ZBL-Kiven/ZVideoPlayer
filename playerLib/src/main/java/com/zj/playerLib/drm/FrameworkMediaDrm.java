@@ -7,7 +7,6 @@ import android.media.MediaCryptoException;
 import android.media.MediaDrmException;
 import android.media.NotProvisionedException;
 import android.media.UnsupportedSchemeException;
-import android.os.Handler;
 import android.text.TextUtils;
 
 import androidx.annotation.Nullable;
@@ -20,14 +19,13 @@ import com.zj.playerLib.util.Util;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
 @TargetApi(23)
 public final class FrameworkMediaDrm implements MediaDrm<FrameworkMediaCrypto> {
-    private static final String CENC_SCHEME_MIME_TYPE = "cenc";
+    private static final String CEN_C_SCHEME_MIME_TYPE = "cenc";
     private final UUID uuid;
     private final android.media.MediaDrm mediaDrm;
 
@@ -43,7 +41,7 @@ public final class FrameworkMediaDrm implements MediaDrm<FrameworkMediaCrypto> {
 
     private FrameworkMediaDrm(UUID uuid) throws UnsupportedSchemeException {
         Assertions.checkNotNull(uuid);
-        Assertions.checkArgument(!C.COMMON_PSSH_UUID.equals(uuid), "Use C.CLEARKEY_UUID instead");
+        Assertions.checkArgument(!C.COMMON_PSSH_UUID.equals(uuid), "Use C.CLEAR_KEY_UUID instead");
         this.uuid = uuid;
         this.mediaDrm = new android.media.MediaDrm(adjustUuid(uuid));
         if (C.WIDEVINE_UUID.equals(uuid) && needsForceWidevineL3Workaround()) {
@@ -53,9 +51,7 @@ public final class FrameworkMediaDrm implements MediaDrm<FrameworkMediaCrypto> {
     }
 
     public void setOnEventListener(OnEventListener<? super FrameworkMediaCrypto> listener) {
-        this.mediaDrm.setOnEventListener(listener == null ? null : (mediaDrm, sessionId, event, extra, data) -> {
-            listener.onEvent(this, sessionId, event, extra, data);
-        });
+        this.mediaDrm.setOnEventListener(listener == null ? null : (mediaDrm, sessionId, event, extra, data) -> listener.onEvent(this, sessionId, event, extra, data));
     }
 
     public void setOnKeyStatusChangeListener(OnKeyStatusChangeListener<? super FrameworkMediaCrypto> listener) {
@@ -63,16 +59,12 @@ public final class FrameworkMediaDrm implements MediaDrm<FrameworkMediaCrypto> {
             throw new UnsupportedOperationException();
         } else {
             this.mediaDrm.setOnKeyStatusChangeListener(listener == null ? null : (mediaDrm, sessionId, keyInfo, hasNewUsableKey) -> {
-                List<KeyStatus> exoKeyInfo = new ArrayList();
-                Iterator var7 = keyInfo.iterator();
-
-                while (var7.hasNext()) {
-                    android.media.MediaDrm.KeyStatus keyStatus = (android.media.MediaDrm.KeyStatus) var7.next();
+                List<KeyStatus> exoKeyInfo = new ArrayList<>();
+                for (android.media.MediaDrm.KeyStatus keyStatus : keyInfo) {
                     exoKeyInfo.add(new KeyStatus(keyStatus.getStatusCode(), keyStatus.getKeyId()));
                 }
-
                 listener.onKeyStatusChange(this, sessionId, exoKeyInfo, hasNewUsableKey);
-            }, (Handler) null);
+            }, null);
         }
     }
 
@@ -153,33 +145,31 @@ public final class FrameworkMediaDrm implements MediaDrm<FrameworkMediaCrypto> {
         return new FrameworkMediaCrypto(new android.media.MediaCrypto(adjustUuid(this.uuid), initData), false);
     }
 
-    private static SchemeData getSchemeData(UUID uuid, List<SchemeData> schemeDatas) {
-        if (!C.WIDEVINE_UUID.equals(uuid)) {
-            return (SchemeData) schemeDatas.get(0);
-        } else {
-            if (Util.SDK_INT >= 28 && schemeDatas.size() > 1) {
-                SchemeData firstSchemeData = (SchemeData) schemeDatas.get(0);
+    private static SchemeData getSchemeData(UUID uuid, List<SchemeData> schemeData) {
+        if (C.WIDEVINE_UUID.equals(uuid)) {
+            if (Util.SDK_INT >= 28 && schemeData.size() > 1) {
+                SchemeData firstSchemeData = schemeData.get(0);
                 int concatenatedDataLength = 0;
                 boolean canConcatenateData = true;
 
-                for (int i = 0; i < schemeDatas.size(); ++i) {
-                    SchemeData schemeData = (SchemeData) schemeDatas.get(i);
-                    if (schemeData.requiresSecureDecryption != firstSchemeData.requiresSecureDecryption || !Util.areEqual(schemeData.mimeType, firstSchemeData.mimeType) || !Util.areEqual(schemeData.licenseServerUrl, firstSchemeData.licenseServerUrl) || !PsshAtomUtil.isPsshAtom(schemeData.data)) {
+                for (int i = 0; i < schemeData.size(); ++i) {
+                    SchemeData sd = schemeData.get(i);
+                    if (sd.requiresSecureDecryption != firstSchemeData.requiresSecureDecryption || !Util.areEqual(sd.mimeType, firstSchemeData.mimeType) || !Util.areEqual(sd.licenseServerUrl, firstSchemeData.licenseServerUrl) || !PsshAtomUtil.isPsshAtom(sd.data)) {
                         canConcatenateData = false;
                         break;
                     }
 
-                    concatenatedDataLength += schemeData.data.length;
+                    concatenatedDataLength += sd.data.length;
                 }
 
                 if (canConcatenateData) {
                     byte[] concatenatedData = new byte[concatenatedDataLength];
                     int concatenatedDataPosition = 0;
 
-                    for (int i = 0; i < schemeDatas.size(); ++i) {
-                        SchemeData schemeData = (SchemeData) schemeDatas.get(i);
-                        int schemeDataLength = schemeData.data.length;
-                        System.arraycopy(schemeData.data, 0, concatenatedData, concatenatedDataPosition, schemeDataLength);
+                    for (int i = 0; i < schemeData.size(); ++i) {
+                        SchemeData sd = schemeData.get(i);
+                        int schemeDataLength = sd.data.length;
+                        System.arraycopy(sd.data, 0, concatenatedData, concatenatedDataPosition, schemeDataLength);
                         concatenatedDataPosition += schemeDataLength;
                     }
 
@@ -187,20 +177,19 @@ public final class FrameworkMediaDrm implements MediaDrm<FrameworkMediaCrypto> {
                 }
             }
 
-            for (int i = 0; i < schemeDatas.size(); ++i) {
-                SchemeData schemeData = (SchemeData) schemeDatas.get(i);
-                int version = PsshAtomUtil.parseVersion(schemeData.data);
+            for (int i = 0; i < schemeData.size(); ++i) {
+                SchemeData sd = schemeData.get(i);
+                int version = PsshAtomUtil.parseVersion(sd.data);
                 if (Util.SDK_INT < 23 && version == 0) {
-                    return schemeData;
+                    return sd;
                 }
 
                 if (Util.SDK_INT >= 23 && version == 1) {
-                    return schemeData;
+                    return sd;
                 }
             }
-
-            return (SchemeData) schemeDatas.get(0);
         }
+        return schemeData.get(0);
     }
 
     private static UUID adjustUuid(UUID uuid) {
@@ -208,7 +197,7 @@ public final class FrameworkMediaDrm implements MediaDrm<FrameworkMediaCrypto> {
     }
 
     private static byte[] adjustRequestInitData(UUID uuid, byte[] initData) {
-        if (Util.SDK_INT < 21 && C.WIDEVINE_UUID.equals(uuid) || C.PLAYREADY_UUID.equals(uuid) && "Amazon".equals(Util.MANUFACTURER) && ("AFTB".equals(Util.MODEL) || "AFTS".equals(Util.MODEL) || "AFTM".equals(Util.MODEL))) {
+        if (C.PLAYREADY_UUID.equals(uuid) && "Amazon".equals(Util.MANUFACTURER) && ("AFTB".equals(Util.MODEL) || "AFTS".equals(Util.MODEL) || "AFTM".equals(Util.MODEL))) {
             byte[] psshData = PsshAtomUtil.parseSchemeSpecificData(initData, uuid);
             if (psshData != null) {
                 return psshData;
@@ -219,7 +208,7 @@ public final class FrameworkMediaDrm implements MediaDrm<FrameworkMediaCrypto> {
     }
 
     private static String adjustRequestMimeType(UUID uuid, String mimeType) {
-        return Util.SDK_INT >= 26 || !C.CLEARKEY_UUID.equals(uuid) || !"video/mp4".equals(mimeType) && !"audio/mp4".equals(mimeType) ? mimeType : "cenc";
+        return Util.SDK_INT >= 26 || !C.CLEARKEY_UUID.equals(uuid) || !"video/mp4".equals(mimeType) && !"audio/mp4".equals(mimeType) ? mimeType : CEN_C_SCHEME_MIME_TYPE;
     }
 
     private static byte[] adjustRequestData(UUID uuid, byte[] requestData) {

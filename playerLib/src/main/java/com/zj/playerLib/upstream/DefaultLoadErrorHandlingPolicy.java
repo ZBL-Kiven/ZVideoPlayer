@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.upstream;
 
 import com.zj.playerLib.ParserException;
@@ -26,15 +21,15 @@ public class DefaultLoadErrorHandlingPolicy implements LoadErrorHandlingPolicy {
 
     public long getBlacklistDurationMsFor(int dataType, long loadDurationMs, IOException exception, int errorCount) {
         if (!(exception instanceof InvalidResponseCodeException)) {
-            return -9223372036854775807L;
+            return -Long.MAX_VALUE;
         } else {
             int responseCode = ((InvalidResponseCodeException)exception).responseCode;
-            return responseCode != 404 && responseCode != 410 ? -9223372036854775807L : 60000L;
+            return responseCode != 404 && responseCode != 410 ? -Long.MAX_VALUE : 60000L;
         }
     }
 
     public long getRetryDelayMsFor(int dataType, long loadDurationMs, IOException exception, int errorCount) {
-        return exception instanceof ParserException ? -9223372036854775807L : (long)Math.min((errorCount - 1) * 1000, 5000);
+        return exception instanceof ParserException ? -Long.MAX_VALUE : (long)Math.min((errorCount - 1) * 1000, 5000);
     }
 
     public int getMinimumLoadableRetryCount(int dataType) {

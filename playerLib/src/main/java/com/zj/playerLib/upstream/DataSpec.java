@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.upstream;
 
 import android.net.Uri;
@@ -39,7 +34,7 @@ public final class DataSpec {
     }
 
     public DataSpec(Uri uri, int flags) {
-        this(uri, 0L, -1L, (String)null, flags);
+        this(uri, 0L, -1L, null, flags);
     }
 
     public DataSpec(Uri uri, long absoluteStreamPosition, long length, @Nullable String key) {
@@ -51,7 +46,7 @@ public final class DataSpec {
     }
 
     public DataSpec(Uri uri, long absoluteStreamPosition, long position, long length, @Nullable String key, int flags) {
-        this(uri, (byte[])null, absoluteStreamPosition, position, length, key, flags);
+        this(uri, null, absoluteStreamPosition, position, length, key, flags);
     }
 
     public DataSpec(Uri uri, @Nullable byte[] postBody, long absoluteStreamPosition, long position, long length, @Nullable String key, int flags) {

@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.text.cea;
 
 import androidx.annotation.NonNull;
@@ -53,7 +48,7 @@ abstract class CeaDecoder implements SubtitleDecoder {
         if (this.availableInputBuffers.isEmpty()) {
             return null;
         } else {
-            this.dequeuedInputBuffer = (CeaInputBuffer)this.availableInputBuffers.pollFirst();
+            this.dequeuedInputBuffer = this.availableInputBuffers.pollFirst();
             return this.dequeuedInputBuffer;
         }
     }
@@ -63,7 +58,7 @@ abstract class CeaDecoder implements SubtitleDecoder {
         if (inputBuffer.isDecodeOnly()) {
             this.releaseInputBuffer(this.dequeuedInputBuffer);
         } else {
-            this.dequeuedInputBuffer.queuedInputBufferCount = (long)(this.queuedInputBufferCount++);
+            this.dequeuedInputBuffer.queuedInputBufferCount = this.queuedInputBufferCount++;
             this.queuedInputBuffers.add(this.dequeuedInputBuffer);
         }
 
@@ -75,10 +70,10 @@ abstract class CeaDecoder implements SubtitleDecoder {
             return null;
         } else {
             CeaInputBuffer inputBuffer;
-            for(; !this.queuedInputBuffers.isEmpty() && ((CeaInputBuffer)this.queuedInputBuffers.peek()).timeUs <= this.playbackPositionUs; this.releaseInputBuffer(inputBuffer)) {
-                inputBuffer = (CeaInputBuffer)this.queuedInputBuffers.poll();
+            for(; !this.queuedInputBuffers.isEmpty() && this.queuedInputBuffers.peek().timeUs <= this.playbackPositionUs; this.releaseInputBuffer(inputBuffer)) {
+                inputBuffer = this.queuedInputBuffers.poll();
                 if (inputBuffer.isEndOfStream()) {
-                    SubtitleOutputBuffer outputBuffer = (SubtitleOutputBuffer)this.availableOutputBuffers.pollFirst();
+                    SubtitleOutputBuffer outputBuffer = this.availableOutputBuffers.pollFirst();
                     outputBuffer.addFlag(4);
                     this.releaseInputBuffer(inputBuffer);
                     return outputBuffer;
@@ -88,8 +83,8 @@ abstract class CeaDecoder implements SubtitleDecoder {
                 if (this.isNewSubtitleDataAvailable()) {
                     Subtitle subtitle = this.createSubtitle();
                     if (!inputBuffer.isDecodeOnly()) {
-                        SubtitleOutputBuffer outputBuffer = (SubtitleOutputBuffer)this.availableOutputBuffers.pollFirst();
-                        outputBuffer.setContent(inputBuffer.timeUs, subtitle, 9223372036854775807L);
+                        SubtitleOutputBuffer outputBuffer = this.availableOutputBuffers.pollFirst();
+                        outputBuffer.setContent(inputBuffer.timeUs, subtitle, Long.MAX_VALUE);
                         this.releaseInputBuffer(inputBuffer);
                         return outputBuffer;
                     }
@@ -115,7 +110,7 @@ abstract class CeaDecoder implements SubtitleDecoder {
         this.playbackPositionUs = 0L;
 
         while(!this.queuedInputBuffers.isEmpty()) {
-            this.releaseInputBuffer((CeaInputBuffer)this.queuedInputBuffers.poll());
+            this.releaseInputBuffer(this.queuedInputBuffers.poll());
         }
 
         if (this.dequeuedInputBuffer != null) {

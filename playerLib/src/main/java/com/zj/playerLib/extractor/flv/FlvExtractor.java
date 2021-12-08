@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.extractor.flv;
 
 import com.zj.playerLib.extractor.Extractor;
@@ -36,7 +31,7 @@ public final class FlvExtractor implements Extractor {
     private final ScriptTagPayloadReader metadataReader = new ScriptTagPayloadReader();
     private ExtractorOutput extractorOutput;
     private int state = 1;
-    private long mediaTagTimestampOffsetUs = -9223372036854775807L;
+    private long mediaTagTimestampOffsetUs = -Long.MAX_VALUE;
     private int bytesToNextTagHeader;
     private int tagType;
     private int tagDataSize;
@@ -77,7 +72,7 @@ public final class FlvExtractor implements Extractor {
 
     public void seek(long position, long timeUs) {
         this.state = 1;
-        this.mediaTagTimestampOffsetUs = -9223372036854775807L;
+        this.mediaTagTimestampOffsetUs = -Long.MAX_VALUE;
         this.bytesToNextTagHeader = 0;
     }
 
@@ -151,7 +146,7 @@ public final class FlvExtractor implements Extractor {
             this.tagHeaderBuffer.setPosition(0);
             this.tagType = this.tagHeaderBuffer.readUnsignedByte();
             this.tagDataSize = this.tagHeaderBuffer.readUnsignedInt24();
-            this.tagTimestampUs = (long)this.tagHeaderBuffer.readUnsignedInt24();
+            this.tagTimestampUs = this.tagHeaderBuffer.readUnsignedInt24();
             this.tagTimestampUs = ((long)(this.tagHeaderBuffer.readUnsignedByte() << 24) | this.tagTimestampUs) * 1000L;
             this.tagHeaderBuffer.skipBytes(3);
             this.state = 4;
@@ -170,7 +165,7 @@ public final class FlvExtractor implements Extractor {
         } else if (this.tagType == 18 && !this.outputSeekMap) {
             this.metadataReader.consume(this.prepareTagData(input), this.tagTimestampUs);
             long durationUs = this.metadataReader.getDurationUs();
-            if (durationUs != -9223372036854775807L) {
+            if (durationUs != -Long.MAX_VALUE) {
                 this.extractorOutput.seekMap(new Unseekable(durationUs));
                 this.outputSeekMap = true;
             }
@@ -198,12 +193,12 @@ public final class FlvExtractor implements Extractor {
 
     private void ensureReadyForMediaOutput() {
         if (!this.outputSeekMap) {
-            this.extractorOutput.seekMap(new Unseekable(-9223372036854775807L));
+            this.extractorOutput.seekMap(new Unseekable(-Long.MAX_VALUE));
             this.outputSeekMap = true;
         }
 
-        if (this.mediaTagTimestampOffsetUs == -9223372036854775807L) {
-            this.mediaTagTimestampOffsetUs = this.metadataReader.getDurationUs() == -9223372036854775807L ? -this.tagTimestampUs : 0L;
+        if (this.mediaTagTimestampOffsetUs == -Long.MAX_VALUE) {
+            this.mediaTagTimestampOffsetUs = this.metadataReader.getDurationUs() == -Long.MAX_VALUE ? -this.tagTimestampUs : 0L;
         }
 
     }

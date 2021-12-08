@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.text.webvtt;
 
 import android.text.TextUtils;
@@ -272,7 +267,7 @@ final class CssParser {
             }
 
             if (classDivision.length > 1) {
-                style.setTargetClasses((String[])Arrays.copyOfRange(classDivision, 1, classDivision.length));
+                style.setTargetClasses(Arrays.copyOfRange(classDivision, 1, classDivision.length));
             }
 
         }

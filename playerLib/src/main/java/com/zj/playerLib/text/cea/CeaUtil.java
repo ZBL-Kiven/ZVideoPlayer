@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.text.cea;
 
 import com.zj.playerLib.extractor.TrackOutput;
@@ -72,7 +67,7 @@ public final class CeaUtil {
                 TrackOutput output = var9[var11];
                 ccDataBuffer.setPosition(sampleStartPosition);
                 output.sampleData(ccDataBuffer, sampleLength);
-                output.sampleMetadata(presentationTimeUs, 1, sampleLength, 0, (CryptoData)null);
+                output.sampleMetadata(presentationTimeUs, 1, sampleLength, 0, null);
             }
 
         }

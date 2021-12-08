@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.text.ttml;
 
 import android.text.SpannableStringBuilder;
@@ -22,7 +17,7 @@ final class TtmlRenderUtil {
         if (style == null && styleIds == null) {
             return null;
         } else if (style == null && styleIds.length == 1) {
-            return (TtmlStyle)globalStyles.get(styleIds[0]);
+            return globalStyles.get(styleIds[0]);
         } else {
             int var5;
             if (style == null && styleIds.length > 1) {
@@ -32,19 +27,19 @@ final class TtmlRenderUtil {
 
                 for(int var10 = 0; var10 < var5; ++var10) {
                     String id = var9[var10];
-                    chainedStyle.chain((TtmlStyle)globalStyles.get(id));
+                    chainedStyle.chain(globalStyles.get(id));
                 }
 
                 return chainedStyle;
             } else if (style != null && styleIds != null && styleIds.length == 1) {
-                return style.chain((TtmlStyle)globalStyles.get(styleIds[0]));
+                return style.chain(globalStyles.get(styleIds[0]));
             } else if (style != null && styleIds != null && styleIds.length > 1) {
                 String[] var3 = styleIds;
                 int var4 = styleIds.length;
 
                 for(var5 = 0; var5 < var4; ++var5) {
                     String id = var3[var5];
-                    style.chain((TtmlStyle)globalStyles.get(id));
+                    style.chain(globalStyles.get(id));
                 }
 
                 return style;

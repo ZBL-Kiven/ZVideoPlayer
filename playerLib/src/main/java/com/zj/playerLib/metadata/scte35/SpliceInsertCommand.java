@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.metadata.scte35;
 
 import android.os.Parcel;
@@ -82,13 +77,13 @@ public final class SpliceInsertCommand extends SpliceCommand {
         boolean outOfNetworkIndicator = false;
         boolean programSpliceFlag = false;
         boolean spliceImmediateFlag = false;
-        long programSplicePts = -9223372036854775807L;
+        long programSplicePts = -Long.MAX_VALUE;
         List<ComponentSplice> componentSplices = Collections.emptyList();
         int uniqueProgramId = 0;
         int availNum = 0;
         int availsExpected = 0;
         boolean autoReturn = false;
-        long breakDurationUs = -9223372036854775807L;
+        long breakDurationUs = -Long.MAX_VALUE;
         if (!spliceEventCancelIndicator) {
             int headerByte = sectionData.readUnsignedByte();
             outOfNetworkIndicator = (headerByte & 128) != 0;
@@ -105,17 +100,17 @@ public final class SpliceInsertCommand extends SpliceCommand {
 
                 for(int i = 0; i < componentCount; ++i) {
                     int componentTag = sectionData.readUnsignedByte();
-                    long componentSplicePts = -9223372036854775807L;
+                    long componentSplicePts = -Long.MAX_VALUE;
                     if (!spliceImmediateFlag) {
                         componentSplicePts = TimeSignalCommand.parseSpliceTime(sectionData, ptsAdjustment);
                     }
 
-                    ((List)componentSplices).add(new ComponentSplice(componentTag, componentSplicePts, timestampAdjuster.adjustTsTimestamp(componentSplicePts)));
+                    componentSplices.add(new ComponentSplice(componentTag, componentSplicePts, timestampAdjuster.adjustTsTimestamp(componentSplicePts)));
                 }
             }
 
             if (durationFlag) {
-                long firstByte = (long)sectionData.readUnsignedByte();
+                long firstByte = sectionData.readUnsignedByte();
                 autoReturn = (firstByte & 128L) != 0L;
                 long breakDuration90khz = (firstByte & 1L) << 32 | sectionData.readUnsignedInt();
                 breakDurationUs = breakDuration90khz * 1000L / 90L;
@@ -126,7 +121,7 @@ public final class SpliceInsertCommand extends SpliceCommand {
             availsExpected = sectionData.readUnsignedByte();
         }
 
-        return new SpliceInsertCommand(spliceEventId, spliceEventCancelIndicator, outOfNetworkIndicator, programSpliceFlag, spliceImmediateFlag, programSplicePts, timestampAdjuster.adjustTsTimestamp(programSplicePts), (List)componentSplices, autoReturn, breakDurationUs, uniqueProgramId, availNum, availsExpected);
+        return new SpliceInsertCommand(spliceEventId, spliceEventCancelIndicator, outOfNetworkIndicator, programSpliceFlag, spliceImmediateFlag, programSplicePts, timestampAdjuster.adjustTsTimestamp(programSplicePts), componentSplices, autoReturn, breakDurationUs, uniqueProgramId, availNum, availsExpected);
     }
 
     public void writeToParcel(Parcel dest, int flags) {
@@ -141,7 +136,7 @@ public final class SpliceInsertCommand extends SpliceCommand {
         dest.writeInt(componentSpliceListSize);
 
         for(int i = 0; i < componentSpliceListSize; ++i) {
-            ((ComponentSplice)this.componentSpliceList.get(i)).writeToParcel(dest);
+            this.componentSpliceList.get(i).writeToParcel(dest);
         }
 
         dest.writeByte((byte)(this.autoReturn ? 1 : 0));

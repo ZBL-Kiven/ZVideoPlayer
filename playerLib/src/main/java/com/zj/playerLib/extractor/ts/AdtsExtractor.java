@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.extractor.ts;
 
 import androidx.annotation.Nullable;
@@ -162,7 +157,7 @@ public final class AdtsExtractor implements Extractor {
                 input.resetPeekPosition();
                 input.advancePeekPosition(firstFramePosition);
                 if (this.firstFramePosition == -1L) {
-                    this.firstFramePosition = (long)firstFramePosition;
+                    this.firstFramePosition = firstFramePosition;
                 }
 
                 return firstFramePosition;
@@ -178,12 +173,12 @@ public final class AdtsExtractor implements Extractor {
     private void maybeOutputSeekMap(long inputLength, boolean canUseConstantBitrateSeeking, boolean readEndOfStream) {
         if (!this.hasOutputSeekMap) {
             boolean useConstantBitrateSeeking = canUseConstantBitrateSeeking && this.averageFrameSize > 0;
-            if (!useConstantBitrateSeeking || this.reader.getSampleDurationUs() != -9223372036854775807L || readEndOfStream) {
-                ExtractorOutput extractorOutput = (ExtractorOutput)Assertions.checkNotNull(this.extractorOutput);
-                if (useConstantBitrateSeeking && this.reader.getSampleDurationUs() != -9223372036854775807L) {
+            if (!useConstantBitrateSeeking || this.reader.getSampleDurationUs() != -Long.MAX_VALUE || readEndOfStream) {
+                ExtractorOutput extractorOutput = Assertions.checkNotNull(this.extractorOutput);
+                if (useConstantBitrateSeeking && this.reader.getSampleDurationUs() != -Long.MAX_VALUE) {
                     extractorOutput.seekMap(this.getConstantBitrateSeekMap(inputLength));
                 } else {
-                    extractorOutput.seekMap(new Unseekable(-9223372036854775807L));
+                    extractorOutput.seekMap(new Unseekable(-Long.MAX_VALUE));
                 }
 
                 this.hasOutputSeekMap = true;
@@ -221,7 +216,7 @@ public final class AdtsExtractor implements Extractor {
                     throw new ParserException("Malformed ADTS stream");
                 }
 
-                totalValidFramesSize += (long)currentFrameSize;
+                totalValidFramesSize += currentFrameSize;
                 ++numValidFrames;
                 if (numValidFrames == 1000 || !input.advancePeekPosition(currentFrameSize - 6, true)) {
                     break;

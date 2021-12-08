@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.upstream;
 
 import android.net.Uri;
@@ -22,8 +17,8 @@ public final class TeeDataSource implements DataSource {
     private long bytesRemaining;
 
     public TeeDataSource(DataSource upstream, DataSink dataSink) {
-        this.upstream = (DataSource)Assertions.checkNotNull(upstream);
-        this.dataSink = (DataSink)Assertions.checkNotNull(dataSink);
+        this.upstream = Assertions.checkNotNull(upstream);
+        this.dataSink = Assertions.checkNotNull(dataSink);
     }
 
     public void addTransferListener(TransferListener transferListener) {
@@ -53,7 +48,7 @@ public final class TeeDataSource implements DataSource {
             if (bytesRead > 0) {
                 this.dataSink.write(buffer, offset, bytesRead);
                 if (this.bytesRemaining != -1L) {
-                    this.bytesRemaining -= (long)bytesRead;
+                    this.bytesRemaining -= bytesRead;
                 }
             }
 

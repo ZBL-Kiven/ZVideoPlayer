@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.text.webvtt;
 
 import android.text.Layout.Alignment;
@@ -67,14 +62,14 @@ public final class WebvttCueParser {
         } else {
             Matcher cueHeaderMatcher = CUE_HEADER_PATTERN.matcher(firstLine);
             if (cueHeaderMatcher.matches()) {
-                return parseCue((String)null, cueHeaderMatcher, webvttData, builder, this.textBuilder, styles);
+                return parseCue(null, cueHeaderMatcher, webvttData, builder, this.textBuilder, styles);
             } else {
                 String secondLine = webvttData.readLine();
                 if (secondLine == null) {
                     return false;
                 } else {
                     cueHeaderMatcher = CUE_HEADER_PATTERN.matcher(secondLine);
-                    return cueHeaderMatcher.matches() ? parseCue(firstLine.trim(), cueHeaderMatcher, webvttData, builder, this.textBuilder, styles) : false;
+                    return cueHeaderMatcher.matches() && parseCue(firstLine.trim(), cueHeaderMatcher, webvttData, builder, this.textBuilder, styles);
                 }
             }
         }
@@ -146,7 +141,7 @@ public final class WebvttCueParser {
                             if (tagName != null && isSupportedTag(tagName)) {
                                 if (isClosingTag) {
                                     while(!startTagStack.isEmpty()) {
-                                        StartTag startTag = (StartTag)startTagStack.pop();
+                                        StartTag startTag = startTagStack.pop();
                                         applySpansForTag(id, startTag, spannedText, styles, scratchStyleMatches);
                                         if (startTag.name.equals(tagName)) {
                                             break;
@@ -165,7 +160,7 @@ public final class WebvttCueParser {
                 }
 
                 while(!startTagStack.isEmpty()) {
-                    applySpansForTag(id, (StartTag)startTagStack.pop(), spannedText, styles, scratchStyleMatches);
+                    applySpansForTag(id, startTagStack.pop(), spannedText, styles, scratchStyleMatches);
                 }
 
                 applySpansForTag(id, StartTag.buildWholeCueVirtualTag(), spannedText, styles, scratchStyleMatches);
@@ -479,7 +474,7 @@ public final class WebvttCueParser {
         int styleMatchesCount = scratchStyleMatches.size();
 
         for(int i = 0; i < styleMatchesCount; ++i) {
-            applyStyleToText(text, ((StyleMatch)scratchStyleMatches.get(i)).style, start, end);
+            applyStyleToText(text, scratchStyleMatches.get(i).style, start, end);
         }
 
     }
@@ -541,7 +536,7 @@ public final class WebvttCueParser {
         int styleCount = declaredStyles.size();
 
         for(int i = 0; i < styleCount; ++i) {
-            WebvttCssStyle style = (WebvttCssStyle)declaredStyles.get(i);
+            WebvttCssStyle style = declaredStyles.get(i);
             int score = style.getSpecificityScore(id, tag.name, tag.classes, tag.voice);
             if (score > 0) {
                 output.add(new StyleMatch(score, style));
@@ -583,7 +578,7 @@ public final class WebvttCueParser {
                 String name = nameAndClasses[0];
                 String[] classes;
                 if (nameAndClasses.length > 1) {
-                    classes = (String[])Arrays.copyOfRange(nameAndClasses, 1, nameAndClasses.length);
+                    classes = Arrays.copyOfRange(nameAndClasses, 1, nameAndClasses.length);
                 } else {
                     classes = NO_CLASSES;
                 }

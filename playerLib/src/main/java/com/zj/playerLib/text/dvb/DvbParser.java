@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.text.dvb;
 
 import android.graphics.Bitmap;
@@ -58,11 +53,11 @@ final class DvbParser {
     public DvbParser(int subtitlePageId, int ancillaryPageId) {
         this.defaultPaint.setStyle(Style.FILL_AND_STROKE);
         this.defaultPaint.setXfermode(new PorterDuffXfermode(Mode.SRC));
-        this.defaultPaint.setPathEffect((PathEffect)null);
+        this.defaultPaint.setPathEffect(null);
         this.fillRegionPaint = new Paint();
         this.fillRegionPaint.setStyle(Style.FILL);
         this.fillRegionPaint.setXfermode(new PorterDuffXfermode(Mode.DST_OVER));
-        this.fillRegionPaint.setPathEffect((PathEffect)null);
+        this.fillRegionPaint.setPathEffect(null);
         this.canvas = new Canvas();
         this.defaultDisplayDefinition = new DisplayDefinition(719, 575, 0, 719, 0, 575);
         this.defaultClutDefinition = new ClutDefinition(0, generateDefault2BitClutEntries(), generateDefault4BitClutEntries(), generateDefault8BitClutEntries());
@@ -93,17 +88,17 @@ final class DvbParser {
             SparseArray<PageRegion> pageRegions = this.subtitleService.pageComposition.regions;
 
             for(int i = 0; i < pageRegions.size(); ++i) {
-                PageRegion pageRegion = (PageRegion)pageRegions.valueAt(i);
+                PageRegion pageRegion = pageRegions.valueAt(i);
                 int regionId = pageRegions.keyAt(i);
-                RegionComposition regionComposition = (RegionComposition)this.subtitleService.regions.get(regionId);
+                RegionComposition regionComposition = this.subtitleService.regions.get(regionId);
                 int baseHorizontalAddress = pageRegion.horizontalAddress + displayDefinition.horizontalPositionMinimum;
                 int baseVerticalAddress = pageRegion.verticalAddress + displayDefinition.verticalPositionMinimum;
                 int clipRight = Math.min(baseHorizontalAddress + regionComposition.width, displayDefinition.horizontalPositionMaximum);
                 int clipBottom = Math.min(baseVerticalAddress + regionComposition.height, displayDefinition.verticalPositionMaximum);
                 this.canvas.clipRect((float)baseHorizontalAddress, (float)baseVerticalAddress, (float)clipRight, (float)clipBottom, Op.REPLACE);
-                ClutDefinition clutDefinition = (ClutDefinition)this.subtitleService.cluts.get(regionComposition.clutId);
+                ClutDefinition clutDefinition = this.subtitleService.cluts.get(regionComposition.clutId);
                 if (clutDefinition == null) {
-                    clutDefinition = (ClutDefinition)this.subtitleService.ancillaryCluts.get(regionComposition.clutId);
+                    clutDefinition = this.subtitleService.ancillaryCluts.get(regionComposition.clutId);
                     if (clutDefinition == null) {
                         clutDefinition = this.defaultClutDefinition;
                     }
@@ -114,10 +109,10 @@ final class DvbParser {
                 int color;
                 for(color = 0; color < regionObjects.size(); ++color) {
                     int objectId = regionObjects.keyAt(color);
-                    RegionObject regionObject = (RegionObject)regionObjects.valueAt(color);
-                    ObjectData objectData = (ObjectData)this.subtitleService.objects.get(objectId);
+                    RegionObject regionObject = regionObjects.valueAt(color);
+                    ObjectData objectData = this.subtitleService.objects.get(objectId);
                     if (objectData == null) {
-                        objectData = (ObjectData)this.subtitleService.ancillaryObjects.get(objectId);
+                        objectData = this.subtitleService.ancillaryObjects.get(objectId);
                     }
 
                     if (objectData != null) {
@@ -178,7 +173,7 @@ final class DvbParser {
                 if (pageId == service.subtitlePageId && current != null) {
                     RegionComposition regionComposition = parseRegionComposition(data, dataFieldLength);
                     if (current.state == 0) {
-                        regionComposition.mergeFrom((RegionComposition)service.regions.get(regionComposition.id));
+                        regionComposition.mergeFrom(service.regions.get(regionComposition.id));
                     }
 
                     service.regions.put(regionComposition.id, regionComposition);
@@ -495,7 +490,7 @@ final class DvbParser {
                 data.byteAlign();
                 break;
             case 18:
-                column = paint8BitPixelCodeString(data, clutEntries, (byte[])null, column, line, paint, canvas);
+                column = paint8BitPixelCodeString(data, clutEntries, null, column, line, paint, canvas);
                 break;
             case 32:
                 clutMapTable2To4 = buildClutMapTable(4, 4, data);

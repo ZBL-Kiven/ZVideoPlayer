@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.extractor.ogg;
 
 import com.zj.playerLib.Format;
@@ -57,7 +52,7 @@ final class FlacReader extends StreamReader {
             byte[] metadata = Arrays.copyOfRange(data, 9, packet.limit());
             metadata[4] = -128;
             List<byte[]> initializationData = Collections.singletonList(metadata);
-            setupData.format = Format.createAudioSampleFormat((String)null, "audio/flac", (String)null, -1, this.streamInfo.bitRate(), this.streamInfo.channels, this.streamInfo.sampleRate, initializationData, (DrmInitData)null, 0, (String)null);
+            setupData.format = Format.createAudioSampleFormat(null, "audio/flac", null, -1, this.streamInfo.bitRate(), this.streamInfo.channels, this.streamInfo.sampleRate, initializationData, null, 0, null);
         } else if ((data[0] & 127) == 3) {
             this.flacOggSeeker = new FlacOggSeeker();
             this.flacOggSeeker.parseSeekTable(packet);

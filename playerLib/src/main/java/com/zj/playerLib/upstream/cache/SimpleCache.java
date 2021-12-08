@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.upstream.cache;
 
 import android.os.ConditionVariable;
@@ -43,7 +38,7 @@ public final class SimpleCache implements Cache {
     }
 
     public SimpleCache(File cacheDir, CacheEvictor evictor) {
-        this(cacheDir, evictor, (byte[])null, false);
+        this(cacheDir, evictor, null, false);
     }
 
     public SimpleCache(File cacheDir, CacheEvictor evictor, byte[] secretKey) {
@@ -95,7 +90,7 @@ public final class SimpleCache implements Cache {
 
     public synchronized NavigableSet<CacheSpan> addListener(String key, Listener listener) {
         Assertions.checkState(!this.released);
-        ArrayList<Listener> listenersForKey = (ArrayList)this.listeners.get(key);
+        ArrayList<Listener> listenersForKey = this.listeners.get(key);
         if (listenersForKey == null) {
             listenersForKey = new ArrayList();
             this.listeners.put(key, listenersForKey);
@@ -107,7 +102,7 @@ public final class SimpleCache implements Cache {
 
     public synchronized void removeListener(String key, Listener listener) {
         if (!this.released) {
-            ArrayList<Listener> listenersForKey = (ArrayList)this.listeners.get(key);
+            ArrayList<Listener> listenersForKey = this.listeners.get(key);
             if (listenersForKey != null) {
                 listenersForKey.remove(listener);
                 if (listenersForKey.isEmpty()) {
@@ -336,16 +331,16 @@ public final class SimpleCache implements Cache {
         }
 
         for(int i = 0; i < spansToBeRemoved.size(); ++i) {
-            this.removeSpanInternal((CacheSpan)spansToBeRemoved.get(i));
+            this.removeSpanInternal(spansToBeRemoved.get(i));
         }
 
     }
 
     private void notifySpanRemoved(CacheSpan span) {
-        ArrayList<Listener> keyListeners = (ArrayList)this.listeners.get(span.key);
+        ArrayList<Listener> keyListeners = this.listeners.get(span.key);
         if (keyListeners != null) {
             for(int i = keyListeners.size() - 1; i >= 0; --i) {
-                ((Listener)keyListeners.get(i)).onSpanRemoved(this, span);
+                keyListeners.get(i).onSpanRemoved(this, span);
             }
         }
 
@@ -353,10 +348,10 @@ public final class SimpleCache implements Cache {
     }
 
     private void notifySpanAdded(SimpleCacheSpan span) {
-        ArrayList<Listener> keyListeners = (ArrayList)this.listeners.get(span.key);
+        ArrayList<Listener> keyListeners = this.listeners.get(span.key);
         if (keyListeners != null) {
             for(int i = keyListeners.size() - 1; i >= 0; --i) {
-                ((Listener)keyListeners.get(i)).onSpanAdded(this, span);
+                keyListeners.get(i).onSpanAdded(this, span);
             }
         }
 
@@ -364,10 +359,10 @@ public final class SimpleCache implements Cache {
     }
 
     private void notifySpanTouched(SimpleCacheSpan oldSpan, CacheSpan newSpan) {
-        ArrayList<Listener> keyListeners = (ArrayList)this.listeners.get(oldSpan.key);
+        ArrayList<Listener> keyListeners = this.listeners.get(oldSpan.key);
         if (keyListeners != null) {
             for(int i = keyListeners.size() - 1; i >= 0; --i) {
-                ((Listener)keyListeners.get(i)).onSpanTouched(this, oldSpan, newSpan);
+                keyListeners.get(i).onSpanTouched(this, oldSpan, newSpan);
             }
         }
 
@@ -375,7 +370,7 @@ public final class SimpleCache implements Cache {
     }
 
     private static synchronized boolean lockFolder(File cacheDir) {
-        return cacheFolderLockingDisabled ? true : lockedCacheDirs.add(cacheDir.getAbsoluteFile());
+        return cacheFolderLockingDisabled || lockedCacheDirs.add(cacheDir.getAbsoluteFile());
     }
 
     private static synchronized void unlockFolder(File cacheDir) {

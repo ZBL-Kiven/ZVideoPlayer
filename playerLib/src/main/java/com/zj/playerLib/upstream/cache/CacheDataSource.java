@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.upstream.cache;
 
 import android.net.Uri;
@@ -77,11 +72,11 @@ public final class CacheDataSource implements DataSource {
     }
 
     public CacheDataSource(Cache cache, DataSource upstream, int flags, long maxCacheFileSize) {
-        this(cache, upstream, new FileDataSource(), new CacheDataSink(cache, maxCacheFileSize), flags, (EventListener)null);
+        this(cache, upstream, new FileDataSource(), new CacheDataSink(cache, maxCacheFileSize), flags, null);
     }
 
     public CacheDataSource(Cache cache, DataSource upstream, DataSource cacheReadDataSource, DataSink cacheWriteDataSink, int flags, @Nullable CacheDataSource.EventListener eventListener) {
-        this(cache, upstream, cacheReadDataSource, cacheWriteDataSink, flags, eventListener, (CacheKeyFactory)null);
+        this(cache, upstream, cacheReadDataSource, cacheWriteDataSink, flags, eventListener, null);
     }
 
     public CacheDataSource(Cache cache, DataSource upstream, DataSource cacheReadDataSource, DataSink cacheWriteDataSink, int flags, @Nullable CacheDataSource.EventListener eventListener, @Nullable CacheKeyFactory cacheKeyFactory) {
@@ -154,12 +149,12 @@ public final class CacheDataSource implements DataSource {
                 int bytesRead = this.currentDataSource.read(buffer, offset, readLength);
                 if (bytesRead != -1) {
                     if (this.isReadingFromCache()) {
-                        this.totalCachedBytesRead += (long)bytesRead;
+                        this.totalCachedBytesRead += bytesRead;
                     }
 
-                    this.readPosition += (long)bytesRead;
+                    this.readPosition += bytesRead;
                     if (this.bytesRemaining != -1L) {
-                        this.bytesRemaining -= (long)bytesRead;
+                        this.bytesRemaining -= bytesRead;
                     }
                 } else if (this.currentDataSpecLengthUnset) {
                     this.setNoBytesRemainingAndMaybeStoreLength();
@@ -225,7 +220,7 @@ public final class CacheDataSource implements DataSource {
         long resolvedLength;
         if (nextSpan == null) {
             nextDataSource = this.upstreamDataSource;
-            nextDataSpec = new DataSpec(this.uri, this.httpMethod, (byte[])null, this.readPosition, this.readPosition, this.bytesRemaining, this.key, this.flags);
+            nextDataSpec = new DataSpec(this.uri, this.httpMethod, null, this.readPosition, this.readPosition, this.bytesRemaining, this.key, this.flags);
         } else if (nextSpan.isCached) {
             Uri fileUri = Uri.fromFile(nextSpan.file);
             long filePosition = this.readPosition - nextSpan.position;
@@ -246,7 +241,7 @@ public final class CacheDataSource implements DataSource {
                 }
             }
 
-            nextDataSpec = new DataSpec(this.uri, this.httpMethod, (byte[])null, this.readPosition, this.readPosition, resolvedLength, this.key, this.flags);
+            nextDataSpec = new DataSpec(this.uri, this.httpMethod, null, this.readPosition, this.readPosition, resolvedLength, this.key, this.flags);
             if (this.cacheWriteDataSource != null) {
                 nextDataSource = this.cacheWriteDataSource;
             } else {
@@ -256,7 +251,7 @@ public final class CacheDataSource implements DataSource {
             }
         }
 
-        this.checkCachePosition = !this.currentRequestIgnoresCache && nextDataSource == this.upstreamDataSource ? this.readPosition + 102400L : 9223372036854775807L;
+        this.checkCachePosition = !this.currentRequestIgnoresCache && nextDataSource == this.upstreamDataSource ? this.readPosition + 102400L : Long.MAX_VALUE;
         if (checkCache) {
             Assertions.checkState(this.isBypassingCache());
             if (nextDataSource == this.upstreamDataSource) {

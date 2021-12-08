@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.source.chunk;
 
 import com.zj.playerLib.Format;
@@ -23,7 +18,7 @@ public final class SingleSampleMediaChunk extends BaseMediaChunk {
     private boolean loadCompleted;
 
     public SingleSampleMediaChunk(DataSource dataSource, DataSpec dataSpec, Format trackFormat, int trackSelectionReason, Object trackSelectionData, long startTimeUs, long endTimeUs, long chunkIndex, int trackType, Format sampleFormat) {
-        super(dataSource, dataSpec, trackFormat, trackSelectionReason, trackSelectionData, startTimeUs, endTimeUs, -9223372036854775807L, -9223372036854775807L, chunkIndex);
+        super(dataSource, dataSpec, trackFormat, trackSelectionReason, trackSelectionData, startTimeUs, endTimeUs, -Long.MAX_VALUE, -Long.MAX_VALUE, chunkIndex);
         this.trackType = trackType;
         this.sampleFormat = sampleFormat;
     }
@@ -54,11 +49,11 @@ public final class SingleSampleMediaChunk extends BaseMediaChunk {
             while(true) {
                 if (result == -1) {
                     int sampleSize = (int)this.nextLoadPosition;
-                    trackOutput.sampleMetadata(this.startTimeUs, 1, sampleSize, 0, (CryptoData)null);
+                    trackOutput.sampleMetadata(this.startTimeUs, 1, sampleSize, 0, null);
                     break;
                 }
 
-                this.nextLoadPosition += (long)result;
+                this.nextLoadPosition += result;
                 result = trackOutput.sampleData(extractorInput, 2147483647, true);
             }
         } finally {

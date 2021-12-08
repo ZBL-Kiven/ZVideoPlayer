@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.upstream;
 
 import android.text.TextUtils;
@@ -41,7 +36,7 @@ public interface HttpDataSource extends DataSource {
 
     Map<String, List<String>> getResponseHeaders();
 
-    public static final class InvalidResponseCodeException extends HttpDataSourceException {
+    final class InvalidResponseCodeException extends HttpDataSourceException {
         public final int responseCode;
         @Nullable
         public final String responseMessage;
@@ -50,27 +45,27 @@ public interface HttpDataSource extends DataSource {
         /** @deprecated */
         @Deprecated
         public InvalidResponseCodeException(int responseCode, Map<String, List<String>> headerFields, DataSpec dataSpec) {
-            this(responseCode, (String)null, headerFields, dataSpec);
+            this(responseCode, null, headerFields, dataSpec);
         }
 
         public InvalidResponseCodeException(int responseCode, @Nullable String responseMessage, Map<String, List<String>> headerFields, DataSpec dataSpec) {
-            super((String)("Response code: " + responseCode), dataSpec, 1);
+            super("Response code: " + responseCode, dataSpec, 1);
             this.responseCode = responseCode;
             this.responseMessage = responseMessage;
             this.headerFields = headerFields;
         }
     }
 
-    public static final class InvalidContentTypeException extends HttpDataSourceException {
+    final class InvalidContentTypeException extends HttpDataSourceException {
         public final String contentType;
 
         public InvalidContentTypeException(String contentType, DataSpec dataSpec) {
-            super((String)("Invalid content type: " + contentType), dataSpec, 1);
+            super("Invalid content type: " + contentType, dataSpec, 1);
             this.contentType = contentType;
         }
     }
 
-    public static class HttpDataSourceException extends IOException {
+    class HttpDataSourceException extends IOException {
         public static final int TYPE_OPEN = 1;
         public static final int TYPE_READ = 2;
         public static final int TYPE_CLOSE = 3;
@@ -106,7 +101,7 @@ public interface HttpDataSource extends DataSource {
         }
     }
 
-    public abstract static class BaseFactory implements Factory {
+    abstract class BaseFactory implements Factory {
         private final RequestProperties defaultRequestProperties = new RequestProperties();
 
         public BaseFactory() {
@@ -141,7 +136,7 @@ public interface HttpDataSource extends DataSource {
         protected abstract HttpDataSource createDataSourceInternal(RequestProperties var1);
     }
 
-    public static final class RequestProperties {
+    final class RequestProperties {
         private final Map<String, String> requestProperties = new HashMap();
         private Map<String, String> requestPropertiesSnapshot;
 
@@ -183,7 +178,7 @@ public interface HttpDataSource extends DataSource {
         }
     }
 
-    public interface Factory extends DataSource.Factory {
+    interface Factory extends DataSource.Factory {
         HttpDataSource createDataSource();
 
         RequestProperties getDefaultRequestProperties();

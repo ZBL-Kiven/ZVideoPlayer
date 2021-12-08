@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.source.chunk;
 
 import androidx.annotation.Nullable;
@@ -27,7 +22,7 @@ public final class InitializationChunk extends Chunk {
     private volatile boolean loadCanceled;
 
     public InitializationChunk(DataSource dataSource, DataSpec dataSpec, Format trackFormat, int trackSelectionReason, @Nullable Object trackSelectionData, ChunkExtractorWrapper extractorWrapper) {
-        super(dataSource, dataSpec, 2, trackFormat, trackSelectionReason, trackSelectionData, -9223372036854775807L, -9223372036854775807L);
+        super(dataSource, dataSpec, 2, trackFormat, trackSelectionReason, trackSelectionData, -Long.MAX_VALUE, -Long.MAX_VALUE);
         this.extractorWrapper = extractorWrapper;
     }
 
@@ -41,7 +36,7 @@ public final class InitializationChunk extends Chunk {
         try {
             ExtractorInput input = new DefaultExtractorInput(this.dataSource, loadDataSpec.absoluteStreamPosition, this.dataSource.open(loadDataSpec));
             if (this.nextLoadPosition == 0L) {
-                this.extractorWrapper.init((TrackOutputProvider)null, -9223372036854775807L, -9223372036854775807L);
+                this.extractorWrapper.init(null, -Long.MAX_VALUE, -Long.MAX_VALUE);
             }
 
             try {

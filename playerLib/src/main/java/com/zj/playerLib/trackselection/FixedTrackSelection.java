@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.trackselection;
 
 import androidx.annotation.Nullable;
@@ -21,11 +16,11 @@ public final class FixedTrackSelection extends BaseTrackSelection {
     private final Object data;
 
     public FixedTrackSelection(TrackGroup group, int track) {
-        this(group, track, 0, (Object)null);
+        this(group, track, 0, null);
     }
 
     public FixedTrackSelection(TrackGroup group, int track, int reason, @Nullable Object data) {
-        super(group, new int[]{track});
+        super(group, track);
         this.reason = reason;
         this.data = data;
     }

@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.upstream;
 
 import com.zj.playerLib.util.Assertions;
@@ -81,7 +76,7 @@ public final class DefaultAllocator implements Allocator {
 
     public synchronized void release(Allocation[] allocations) {
         if (this.availableCount + allocations.length >= this.availableAllocations.length) {
-            this.availableAllocations = (Allocation[])Arrays.copyOf(this.availableAllocations, Math.max(this.availableAllocations.length * 2, this.availableCount + allocations.length));
+            this.availableAllocations = Arrays.copyOf(this.availableAllocations, Math.max(this.availableAllocations.length * 2, this.availableCount + allocations.length));
         }
 
         Allocation[] var2 = allocations;
@@ -125,7 +120,7 @@ public final class DefaultAllocator implements Allocator {
                 }
             }
 
-            Arrays.fill(this.availableAllocations, targetAvailableCount, this.availableCount, (Object)null);
+            Arrays.fill(this.availableAllocations, targetAvailableCount, this.availableCount, null);
             this.availableCount = targetAvailableCount;
         }
     }

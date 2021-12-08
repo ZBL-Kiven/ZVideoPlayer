@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.upstream.cache;
 
 import com.zj.playerLib.upstream.DataSink;
@@ -44,7 +39,7 @@ public final class CacheDataSink implements DataSink {
     }
 
     public CacheDataSink(Cache cache, long maxCacheFileSize, int bufferSize, boolean syncFileDescriptor) {
-        this.cache = (Cache)Assertions.checkNotNull(cache);
+        this.cache = Assertions.checkNotNull(cache);
         this.maxCacheFileSize = maxCacheFileSize;
         this.bufferSize = bufferSize;
         this.syncFileDescriptor = syncFileDescriptor;
@@ -69,16 +64,16 @@ public final class CacheDataSink implements DataSink {
         if (this.dataSpec != null) {
             try {
                 int bytesToWrite;
-                for(int bytesWritten = 0; bytesWritten < length; this.dataSpecBytesWritten += (long)bytesToWrite) {
+                for(int bytesWritten = 0; bytesWritten < length; this.dataSpecBytesWritten += bytesToWrite) {
                     if (this.outputStreamBytesWritten == this.maxCacheFileSize) {
                         this.closeCurrentOutputStream();
                         this.openNextOutputStream();
                     }
 
-                    bytesToWrite = (int)Math.min((long)(length - bytesWritten), this.maxCacheFileSize - this.outputStreamBytesWritten);
+                    bytesToWrite = (int)Math.min(length - bytesWritten, this.maxCacheFileSize - this.outputStreamBytesWritten);
                     this.outputStream.write(buffer, offset + bytesWritten, bytesToWrite);
                     bytesWritten += bytesToWrite;
-                    this.outputStreamBytesWritten += (long)bytesToWrite;
+                    this.outputStreamBytesWritten += bytesToWrite;
                 }
 
             } catch (IOException var6) {

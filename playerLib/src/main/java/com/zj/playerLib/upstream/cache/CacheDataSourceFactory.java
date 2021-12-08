@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.upstream.cache;
 
 import com.zj.playerLib.upstream.FileDataSourceFactory;
@@ -26,7 +21,7 @@ public final class CacheDataSourceFactory implements Factory {
     }
 
     public CacheDataSourceFactory(Cache cache, Factory upstreamFactory, int flags, long maxCacheFileSize) {
-        this(cache, upstreamFactory, new FileDataSourceFactory(), new CacheDataSinkFactory(cache, maxCacheFileSize), flags, (EventListener)null);
+        this(cache, upstreamFactory, new FileDataSourceFactory(), new CacheDataSinkFactory(cache, maxCacheFileSize), flags, null);
     }
 
     public CacheDataSourceFactory(Cache cache, Factory upstreamFactory, Factory cacheReadDataSourceFactory, com.zj.playerLib.upstream.DataSink.Factory cacheWriteDataSinkFactory, int flags, EventListener eventListener) {

@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.upstream;
 
 import android.net.Uri;
@@ -22,8 +17,8 @@ public final class PriorityDataSource implements DataSource {
     private final int priority;
 
     public PriorityDataSource(DataSource upstream, PriorityTaskManager priorityTaskManager, int priority) {
-        this.upstream = (DataSource)Assertions.checkNotNull(upstream);
-        this.priorityTaskManager = (PriorityTaskManager)Assertions.checkNotNull(priorityTaskManager);
+        this.upstream = Assertions.checkNotNull(upstream);
+        this.priorityTaskManager = Assertions.checkNotNull(priorityTaskManager);
         this.priority = priority;
     }
 

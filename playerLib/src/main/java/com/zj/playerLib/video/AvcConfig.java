@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.video;
 
 import com.zj.playerLib.ParserException;
@@ -47,8 +42,8 @@ public final class AvcConfig {
                 int height = -1;
                 float pixelWidthAspectRatio = 1.0F;
                 if (numSequenceParameterSets > 0) {
-                    byte[] sps = (byte[])initializationData.get(0);
-                    SpsData spsData = NalUnitUtil.parseSpsNalUnit((byte[])initializationData.get(0), nalUnitLengthFieldLength, sps.length);
+                    byte[] sps = initializationData.get(0);
+                    SpsData spsData = NalUnitUtil.parseSpsNalUnit(initializationData.get(0), nalUnitLengthFieldLength, sps.length);
                     width = spsData.width;
                     height = spsData.height;
                     pixelWidthAspectRatio = spsData.pixelWidthAspectRatio;

@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.video;
 
 import android.annotation.SuppressLint;
@@ -101,11 +96,11 @@ public class MediaCodecVideoRenderer extends MediaCodecRenderer {
     }
 
     public MediaCodecVideoRenderer(Context context, MediaCodecSelector mediaCodecSelector, long allowedJoiningTimeMs) {
-        this(context, mediaCodecSelector, allowedJoiningTimeMs, (Handler)null, (VideoRendererEventListener)null, -1);
+        this(context, mediaCodecSelector, allowedJoiningTimeMs, null, null, -1);
     }
 
     public MediaCodecVideoRenderer(Context context, MediaCodecSelector mediaCodecSelector, long allowedJoiningTimeMs, @Nullable Handler eventHandler, @Nullable VideoRendererEventListener eventListener, int maxDroppedFramesToNotify) {
-        this(context, mediaCodecSelector, allowedJoiningTimeMs, (DrmSessionManager)null, false, eventHandler, eventListener, maxDroppedFramesToNotify);
+        this(context, mediaCodecSelector, allowedJoiningTimeMs, null, false, eventHandler, eventListener, maxDroppedFramesToNotify);
     }
 
     public MediaCodecVideoRenderer(Context context, MediaCodecSelector mediaCodecSelector, long allowedJoiningTimeMs, @Nullable DrmSessionManager<FrameworkMediaCrypto> drmSessionManager, boolean playClearSamplesWithoutKeys, @Nullable Handler eventHandler, @Nullable VideoRendererEventListener eventListener, int maxDroppedFramesToNotify) {
@@ -118,9 +113,9 @@ public class MediaCodecVideoRenderer extends MediaCodecRenderer {
         this.deviceNeedsNoPostProcessWorkaround = deviceNeedsNoPostProcessWorkaround();
         this.pendingOutputStreamOffsetsUs = new long[10];
         this.pendingOutputStreamSwitchTimesUs = new long[10];
-        this.outputStreamOffsetUs = -9223372036854775807L;
-        this.lastInputTimeUs = -9223372036854775807L;
-        this.joiningDeadlineMs = -9223372036854775807L;
+        this.outputStreamOffsetUs = -Long.MAX_VALUE;
+        this.lastInputTimeUs = -Long.MAX_VALUE;
+        this.joiningDeadlineMs = -Long.MAX_VALUE;
         this.currentWidth = -1;
         this.currentHeight = -1;
         this.currentPixelWidthHeightRatio = -1.0F;
@@ -147,7 +142,7 @@ public class MediaCodecVideoRenderer extends MediaCodecRenderer {
                 if (!supportsFormatDrm(drmSessionManager, drmInitData)) {
                     return 2;
                 } else {
-                    MediaCodecInfo decoderInfo = (MediaCodecInfo)decoderInfos.get(0);
+                    MediaCodecInfo decoderInfo = decoderInfos.get(0);
                     boolean isFormatSupported = decoderInfo.isFormatSupported(format);
                     int adaptiveSupport = decoderInfo.isSeamlessAdaptationSupported(format) ? 16 : 8;
                     int tunnelingSupport = decoderInfo.tunneling ? 32 : 0;
@@ -169,7 +164,7 @@ public class MediaCodecVideoRenderer extends MediaCodecRenderer {
     }
 
     protected void onStreamChanged(Format[] formats, long offsetUs) throws PlaybackException {
-        if (this.outputStreamOffsetUs == -9223372036854775807L) {
+        if (this.outputStreamOffsetUs == -Long.MAX_VALUE) {
             this.outputStreamOffsetUs = offsetUs;
         } else {
             if (this.pendingOutputStreamOffsetCount == this.pendingOutputStreamOffsetsUs.length) {
@@ -188,9 +183,9 @@ public class MediaCodecVideoRenderer extends MediaCodecRenderer {
     protected void onPositionReset(long positionUs, boolean joining) throws PlaybackException {
         super.onPositionReset(positionUs, joining);
         this.clearRenderedFirstFrame();
-        this.initialPositionUs = -9223372036854775807L;
+        this.initialPositionUs = -Long.MAX_VALUE;
         this.consecutiveDroppedFrameCount = 0;
-        this.lastInputTimeUs = -9223372036854775807L;
+        this.lastInputTimeUs = -Long.MAX_VALUE;
         if (this.pendingOutputStreamOffsetCount != 0) {
             this.outputStreamOffsetUs = this.pendingOutputStreamOffsetsUs[this.pendingOutputStreamOffsetCount - 1];
             this.pendingOutputStreamOffsetCount = 0;
@@ -199,21 +194,21 @@ public class MediaCodecVideoRenderer extends MediaCodecRenderer {
         if (joining) {
             this.setJoiningDeadlineMs();
         } else {
-            this.joiningDeadlineMs = -9223372036854775807L;
+            this.joiningDeadlineMs = -Long.MAX_VALUE;
         }
 
     }
 
     public boolean isReady() {
         if (super.isReady() && (this.renderedFirstFrame || this.dummySurface != null && this.surface == this.dummySurface || this.getCodec() == null || this.tunneling)) {
-            this.joiningDeadlineMs = -9223372036854775807L;
+            this.joiningDeadlineMs = -Long.MAX_VALUE;
             return true;
-        } else if (this.joiningDeadlineMs == -9223372036854775807L) {
+        } else if (this.joiningDeadlineMs == -Long.MAX_VALUE) {
             return false;
         } else if (SystemClock.elapsedRealtime() < this.joiningDeadlineMs) {
             return true;
         } else {
-            this.joiningDeadlineMs = -9223372036854775807L;
+            this.joiningDeadlineMs = -Long.MAX_VALUE;
             return false;
         }
     }
@@ -226,7 +221,7 @@ public class MediaCodecVideoRenderer extends MediaCodecRenderer {
     }
 
     protected void onStopped() {
-        this.joiningDeadlineMs = -9223372036854775807L;
+        this.joiningDeadlineMs = -Long.MAX_VALUE;
         this.maybeNotifyDroppedFrames();
         super.onStopped();
     }
@@ -236,8 +231,8 @@ public class MediaCodecVideoRenderer extends MediaCodecRenderer {
         this.currentHeight = -1;
         this.currentPixelWidthHeightRatio = -1.0F;
         this.pendingPixelWidthHeightRatio = -1.0F;
-        this.outputStreamOffsetUs = -9223372036854775807L;
-        this.lastInputTimeUs = -9223372036854775807L;
+        this.outputStreamOffsetUs = -Long.MAX_VALUE;
+        this.lastInputTimeUs = -Long.MAX_VALUE;
         this.pendingOutputStreamOffsetCount = 0;
         this.clearReportedVideoSize();
         this.clearRenderedFirstFrame();
@@ -420,7 +415,7 @@ public class MediaCodecVideoRenderer extends MediaCodecRenderer {
     }
 
     protected boolean processOutputBuffer(long positionUs, long elapsedRealtimeUs, MediaCodec codec, ByteBuffer buffer, int bufferIndex, int bufferFlags, long bufferPresentationTimeUs, boolean shouldSkip, Format format) throws PlaybackException {
-        if (this.initialPositionUs == -9223372036854775807L) {
+        if (this.initialPositionUs == -Long.MAX_VALUE) {
             this.initialPositionUs = positionUs;
         }
 
@@ -625,7 +620,7 @@ public class MediaCodecVideoRenderer extends MediaCodecRenderer {
     }
 
     private void setJoiningDeadlineMs() {
-        this.joiningDeadlineMs = this.allowedJoiningTimeMs > 0L ? SystemClock.elapsedRealtime() + this.allowedJoiningTimeMs : -9223372036854775807L;
+        this.joiningDeadlineMs = this.allowedJoiningTimeMs > 0L ? SystemClock.elapsedRealtime() + this.allowedJoiningTimeMs : -Long.MAX_VALUE;
     }
 
     private void clearRenderedFirstFrame() {
@@ -803,7 +798,7 @@ public class MediaCodecVideoRenderer extends MediaCodecRenderer {
             if (Util.SDK_INT >= 21) {
                 Point alignedSize = codecInfo.alignVideoSizeV21(isVerticalVideo ? shortEdgePx : longEdgePx, isVerticalVideo ? longEdgePx : shortEdgePx);
                 float frameRate = format.frameRate;
-                if (codecInfo.isVideoSizeAndRateSupportedV21(alignedSize.x, alignedSize.y, (double)frameRate)) {
+                if (codecInfo.isVideoSizeAndRateSupportedV21(alignedSize.x, alignedSize.y, frameRate)) {
                     return alignedSize;
                 }
             } else {
@@ -826,7 +821,7 @@ public class MediaCodecVideoRenderer extends MediaCodecRenderer {
             int initializationDataCount = format.initializationData.size();
 
             for(int i = 0; i < initializationDataCount; ++i) {
-                totalInitializationDataSize += ((byte[])format.initializationData.get(i)).length;
+                totalInitializationDataSize += format.initializationData.get(i).length;
             }
 
             return format.maxInputSize + totalInitializationDataSize;

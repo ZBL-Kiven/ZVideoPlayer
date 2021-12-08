@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.upstream;
 
 import android.content.Context;
@@ -18,15 +13,15 @@ public final class DefaultDataSourceFactory implements Factory {
     private final Factory baseDataSourceFactory;
 
     public DefaultDataSourceFactory(Context context, String userAgent) {
-        this(context, (String)userAgent, (TransferListener)null);
+        this(context, userAgent, null);
     }
 
     public DefaultDataSourceFactory(Context context, String userAgent, @Nullable TransferListener listener) {
-        this(context, (TransferListener)listener, (Factory)(new DefaultHttpDataSourceFactory(userAgent, listener)));
+        this(context, listener, new DefaultHttpDataSourceFactory(userAgent, listener));
     }
 
     public DefaultDataSourceFactory(Context context, Factory baseDataSourceFactory) {
-        this(context, (TransferListener)null, (Factory)baseDataSourceFactory);
+        this(context, null, baseDataSourceFactory);
     }
 
     public DefaultDataSourceFactory(Context context, @Nullable TransferListener listener, Factory baseDataSourceFactory) {

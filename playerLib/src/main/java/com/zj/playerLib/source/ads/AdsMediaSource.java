@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.source.ads;
 
 import android.net.Uri;
@@ -56,17 +51,17 @@ public final class AdsMediaSource extends CompositeMediaSource<MediaPeriodId> {
     private Timeline[][] adGroupTimelines;
 
     public AdsMediaSource(MediaSource contentMediaSource, Factory dataSourceFactory, AdsLoader adsLoader, ViewGroup adUiViewGroup) {
-        this(contentMediaSource, (MediaSourceFactory)(new com.zj.playerLib.source.ExtractorMediaSource.Factory(dataSourceFactory)), adsLoader, adUiViewGroup, (Handler)null, (EventListener)null);
+        this(contentMediaSource, new com.zj.playerLib.source.ExtractorMediaSource.Factory(dataSourceFactory), adsLoader, adUiViewGroup, null, null);
     }
 
     public AdsMediaSource(MediaSource contentMediaSource, MediaSourceFactory adMediaSourceFactory, AdsLoader adsLoader, ViewGroup adUiViewGroup) {
-        this(contentMediaSource, (MediaSourceFactory)adMediaSourceFactory, adsLoader, adUiViewGroup, (Handler)null, (EventListener)null);
+        this(contentMediaSource, adMediaSourceFactory, adsLoader, adUiViewGroup, null, null);
     }
 
     /** @deprecated */
     @Deprecated
     public AdsMediaSource(MediaSource contentMediaSource, Factory dataSourceFactory, AdsLoader adsLoader, ViewGroup adUiViewGroup, @Nullable Handler eventHandler, @Nullable AdsMediaSource.EventListener eventListener) {
-        this(contentMediaSource, (MediaSourceFactory)(new com.zj.playerLib.source.ExtractorMediaSource.Factory(dataSourceFactory)), adsLoader, adUiViewGroup, eventHandler, eventListener);
+        this(contentMediaSource, new com.zj.playerLib.source.ExtractorMediaSource.Factory(dataSourceFactory), adsLoader, adUiViewGroup, eventHandler, eventListener);
     }
 
     /** @deprecated */
@@ -113,8 +108,8 @@ public final class AdsMediaSource extends CompositeMediaSource<MediaPeriodId> {
                 int oldAdCount = this.adGroupMediaSources[adGroupIndex].length;
                 if (adIndexInAdGroup >= oldAdCount) {
                     int adCount = adIndexInAdGroup + 1;
-                    this.adGroupMediaSources[adGroupIndex] = (MediaSource[])Arrays.copyOf(this.adGroupMediaSources[adGroupIndex], adCount);
-                    this.adGroupTimelines[adGroupIndex] = (Timeline[])Arrays.copyOf(this.adGroupTimelines[adGroupIndex], adCount);
+                    this.adGroupMediaSources[adGroupIndex] = Arrays.copyOf(this.adGroupMediaSources[adGroupIndex], adCount);
+                    this.adGroupTimelines[adGroupIndex] = Arrays.copyOf(this.adGroupTimelines[adGroupIndex], adCount);
                 }
 
                 this.adGroupMediaSources[adGroupIndex][adIndexInAdGroup] = adMediaSource;
@@ -125,7 +120,7 @@ public final class AdsMediaSource extends CompositeMediaSource<MediaPeriodId> {
             adMediaSource = this.adGroupMediaSources[adGroupIndex][adIndexInAdGroup];
             DeferredMediaPeriod deferredMediaPeriod = new DeferredMediaPeriod(adMediaSource, id, allocator);
             deferredMediaPeriod.setPrepareErrorListener(new AdPrepareErrorListener(adUri, adGroupIndex, adIndexInAdGroup));
-            List<DeferredMediaPeriod> mediaPeriods = (List)this.deferredMediaPeriodByAdMediaSource.get(adMediaSource);
+            List<DeferredMediaPeriod> mediaPeriods = this.deferredMediaPeriodByAdMediaSource.get(adMediaSource);
             if (mediaPeriods == null) {
                 Object periodUid = this.adGroupTimelines[adGroupIndex][adIndexInAdGroup].getUidOfPeriod(0);
                 MediaPeriodId adSourceMediaPeriodId = new MediaPeriodId(periodUid, id.windowSequenceNumber);
@@ -144,7 +139,7 @@ public final class AdsMediaSource extends CompositeMediaSource<MediaPeriodId> {
 
     public void releasePeriod(MediaPeriod mediaPeriod) {
         DeferredMediaPeriod deferredMediaPeriod = (DeferredMediaPeriod)mediaPeriod;
-        List<DeferredMediaPeriod> mediaPeriods = (List)this.deferredMediaPeriodByAdMediaSource.get(deferredMediaPeriod.mediaSource);
+        List<DeferredMediaPeriod> mediaPeriods = this.deferredMediaPeriodByAdMediaSource.get(deferredMediaPeriod.mediaSource);
         if (mediaPeriods != null) {
             mediaPeriods.remove(deferredMediaPeriod);
         }
@@ -203,12 +198,12 @@ public final class AdsMediaSource extends CompositeMediaSource<MediaPeriodId> {
     private void onAdSourceInfoRefreshed(MediaSource mediaSource, int adGroupIndex, int adIndexInAdGroup, Timeline timeline) {
         Assertions.checkArgument(timeline.getPeriodCount() == 1);
         this.adGroupTimelines[adGroupIndex][adIndexInAdGroup] = timeline;
-        List<DeferredMediaPeriod> mediaPeriods = (List)this.deferredMediaPeriodByAdMediaSource.remove(mediaSource);
+        List<DeferredMediaPeriod> mediaPeriods = this.deferredMediaPeriodByAdMediaSource.remove(mediaSource);
         if (mediaPeriods != null) {
             Object periodUid = timeline.getUidOfPeriod(0);
 
             for(int i = 0; i < mediaPeriods.size(); ++i) {
-                DeferredMediaPeriod mediaPeriod = (DeferredMediaPeriod)mediaPeriods.get(i);
+                DeferredMediaPeriod mediaPeriod = mediaPeriods.get(i);
                 MediaPeriodId adSourceMediaPeriodId = new MediaPeriodId(periodUid, mediaPeriod.id.windowSequenceNumber);
                 mediaPeriod.createPeriod(adSourceMediaPeriodId);
             }
@@ -221,7 +216,7 @@ public final class AdsMediaSource extends CompositeMediaSource<MediaPeriodId> {
         if (this.adPlaybackState != null && this.contentTimeline != null) {
             this.adPlaybackState = this.adPlaybackState.withAdDurationsUs(getAdDurations(this.adGroupTimelines, this.period));
             Timeline timeline = this.adPlaybackState.adGroupCount == 0 ? this.contentTimeline : new SinglePeriodAdTimeline(this.contentTimeline, this.adPlaybackState);
-            this.refreshSourceInfo((Timeline)timeline, this.contentManifest);
+            this.refreshSourceInfo(timeline, this.contentManifest);
         }
 
     }
@@ -233,7 +228,7 @@ public final class AdsMediaSource extends CompositeMediaSource<MediaPeriodId> {
             adDurations[i] = new long[adTimelines[i].length];
 
             for(int j = 0; j < adTimelines[i].length; ++j) {
-                adDurations[i][j] = adTimelines[i][j] == null ? -9223372036854775807L : adTimelines[i][j].getPeriod(0, period).getDurationUs();
+                adDurations[i][j] = adTimelines[i][j] == null ? -Long.MAX_VALUE : adTimelines[i][j].getPeriod(0, period).getDurationUs();
             }
         }
 
@@ -268,7 +263,7 @@ public final class AdsMediaSource extends CompositeMediaSource<MediaPeriodId> {
 
         public void release() {
             this.released = true;
-            this.playerHandler.removeCallbacksAndMessages((Object)null);
+            this.playerHandler.removeCallbacksAndMessages(null);
         }
 
         public void onAdPlaybackState(AdPlaybackState adPlaybackState) {
@@ -311,7 +306,7 @@ public final class AdsMediaSource extends CompositeMediaSource<MediaPeriodId> {
 
         public void onAdLoadError(AdLoadException error, DataSpec dataSpec) {
             if (!this.released) {
-                AdsMediaSource.this.createEventDispatcher((MediaPeriodId)null).loadError(dataSpec, dataSpec.uri, Collections.emptyMap(), 6, -1L, 0L, 0L, error, true);
+                AdsMediaSource.this.createEventDispatcher(null).loadError(dataSpec, dataSpec.uri, Collections.emptyMap(), 6, -1L, 0L, 0L, error, true);
                 if (AdsMediaSource.this.eventHandler != null && AdsMediaSource.this.eventListener != null) {
                     AdsMediaSource.this.eventHandler.post(() -> {
                         if (!this.released) {

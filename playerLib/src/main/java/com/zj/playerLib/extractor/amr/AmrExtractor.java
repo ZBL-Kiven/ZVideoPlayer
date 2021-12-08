@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.extractor.amr;
 
 import androidx.annotation.Nullable;
@@ -149,7 +144,7 @@ public final class AmrExtractor implements Extractor {
             this.hasOutputFormat = true;
             String mimeType = this.isWideBand ? "audio/amr-wb" : "audio/3gpp";
             int sampleRate = this.isWideBand ? 16000 : 8000;
-            this.trackOutput.format(Format.createAudioSampleFormat((String)null, mimeType, (String)null, -1, MAX_FRAME_SIZE_BYTES, 1, sampleRate, -1, (List)null, (DrmInitData)null, 0, (String)null));
+            this.trackOutput.format(Format.createAudioSampleFormat(null, mimeType, null, -1, MAX_FRAME_SIZE_BYTES, 1, sampleRate, -1, null, null, 0, null));
         }
 
     }
@@ -181,7 +176,7 @@ public final class AmrExtractor implements Extractor {
             if (this.currentSampleBytesRemaining > 0) {
                 return 0;
             } else {
-                this.trackOutput.sampleMetadata(this.timeOffsetUs + this.currentSampleTimeUs, 1, this.currentSampleSize, 0, (CryptoData)null);
+                this.trackOutput.sampleMetadata(this.timeOffsetUs + this.currentSampleTimeUs, 1, this.currentSampleSize, 0, null);
                 this.currentSampleTimeUs += 20000L;
                 return 0;
             }
@@ -223,7 +218,7 @@ public final class AmrExtractor implements Extractor {
     private void maybeOutputSeekMap(long inputLength, int sampleReadResult) {
         if (!this.hasOutputSeekMap) {
             if ((this.flags & 1) == 0 || inputLength == -1L || this.firstSampleSize != -1 && this.firstSampleSize != this.currentSampleSize) {
-                this.seekMap = new Unseekable(-9223372036854775807L);
+                this.seekMap = new Unseekable(-Long.MAX_VALUE);
                 this.extractorOutput.seekMap(this.seekMap);
                 this.hasOutputSeekMap = true;
             } else if (this.numSamplesWithSameSize >= 20 || sampleReadResult == -1) {

@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.upstream;
 
 import android.net.Uri;
@@ -33,7 +28,7 @@ public final class DataSchemeDataSource extends BaseDataSource {
         this.dataSpec = dataSpec;
         Uri uri = dataSpec.uri;
         String scheme = uri.getScheme();
-        if (!"data".equals(scheme)) {
+        if (!SCHEME_DATA.equals(scheme)) {
             throw new ParserException("Unsupported scheme: " + scheme);
         } else {
             String[] uriParts = Util.split(uri.getSchemeSpecificPart(), ",");
@@ -50,15 +45,15 @@ public final class DataSchemeDataSource extends BaseDataSource {
                 } else {
                     this.data = Util.getUtf8Bytes(URLDecoder.decode(dataString, "US-ASCII"));
                 }
-
                 this.transferStarted(dataSpec);
-                return (long)this.data.length;
+                if (this.data == null) return 0;
+                return this.data.length;
             }
         }
     }
 
     public int read(byte[] buffer, int offset, int readLength) {
-        if (readLength == 0) {
+        if (readLength == 0 || this.data == null) {
             return 0;
         } else {
             int remainingBytes = this.data.length - this.bytesRead;
@@ -79,7 +74,7 @@ public final class DataSchemeDataSource extends BaseDataSource {
         return this.dataSpec != null ? this.dataSpec.uri : null;
     }
 
-    public void close() throws IOException {
+    public void close() {
         if (this.data != null) {
             this.data = null;
             this.transferEnded();

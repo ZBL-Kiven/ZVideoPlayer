@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.extractor.mp4;
 
 import androidx.annotation.Nullable;
@@ -20,7 +15,7 @@ public final class PsshAtomUtil {
     }
 
     public static byte[] buildPsshAtom(UUID systemId, @Nullable byte[] data) {
-        return buildPsshAtom(systemId, (UUID[])null, data);
+        return buildPsshAtom(systemId, null, data);
     }
 
     public static byte[] buildPsshAtom(UUID systemId, @Nullable UUID[] keyIds, @Nullable byte[] data) {

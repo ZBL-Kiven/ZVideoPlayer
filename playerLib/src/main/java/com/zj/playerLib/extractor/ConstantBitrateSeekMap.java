@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.extractor;
 
 import com.zj.playerLib.util.Util;
@@ -22,7 +17,7 @@ public class ConstantBitrateSeekMap implements SeekMap {
         this.bitrate = bitrate;
         if (inputLength == -1L) {
             this.dataSize = -1L;
-            this.durationUs = -9223372036854775807L;
+            this.durationUs = -Long.MAX_VALUE;
         } else {
             this.dataSize = inputLength - firstFrameBytePosition;
             this.durationUs = getTimeUsAtPosition(inputLength, firstFrameBytePosition, bitrate);

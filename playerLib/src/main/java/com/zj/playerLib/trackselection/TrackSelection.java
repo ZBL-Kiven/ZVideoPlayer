@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.trackselection;
 
 import androidx.annotation.Nullable;
@@ -57,7 +52,7 @@ public interface TrackSelection {
 
     boolean blacklist(int var1, long var2);
 
-    public interface Factory {
+    interface Factory {
         TrackSelection createTrackSelection(TrackGroup var1, BandwidthMeter var2, int... var3);
     }
 }

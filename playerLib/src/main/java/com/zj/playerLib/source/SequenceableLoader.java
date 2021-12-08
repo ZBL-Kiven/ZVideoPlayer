@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.source;
 
 public interface SequenceableLoader {
@@ -14,7 +9,7 @@ public interface SequenceableLoader {
 
     void reevaluateBuffer(long var1);
 
-    public interface Callback<T extends SequenceableLoader> {
+    interface Callback<T extends SequenceableLoader> {
         void onContinueLoadingRequested(T var1);
     }
 }

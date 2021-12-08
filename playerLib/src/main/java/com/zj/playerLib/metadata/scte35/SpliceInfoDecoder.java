@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.metadata.scte35;
 
 import com.zj.playerLib.metadata.Metadata;
@@ -40,7 +35,7 @@ public final class SpliceInfoDecoder implements MetadataDecoder {
         this.sectionData.reset(data, size);
         this.sectionHeader.reset(data, size);
         this.sectionHeader.skipBits(39);
-        long ptsAdjustment = (long)this.sectionHeader.readBits(1);
+        long ptsAdjustment = this.sectionHeader.readBits(1);
         ptsAdjustment = ptsAdjustment << 32 | (long)this.sectionHeader.readBits(32);
         this.sectionHeader.skipBits(20);
         int spliceCommandLength = this.sectionHeader.readBits(12);
@@ -64,6 +59,6 @@ public final class SpliceInfoDecoder implements MetadataDecoder {
             command = PrivateCommand.parseFromSection(this.sectionData, spliceCommandLength, ptsAdjustment);
         }
 
-        return command == null ? new Metadata(new Entry[0]) : new Metadata(new Entry[]{(Entry)command});
+        return command == null ? new Metadata() : new Metadata(command);
     }
 }

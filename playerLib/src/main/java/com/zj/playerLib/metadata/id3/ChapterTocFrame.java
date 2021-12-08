@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.metadata.id3;
 
 import android.os.Parcel;
@@ -41,7 +36,7 @@ public final class ChapterTocFrame extends Id3Frame {
 
     ChapterTocFrame(Parcel in) {
         super("CTOC");
-        this.elementId = (String)Util.castNonNull(in.readString());
+        this.elementId = Util.castNonNull(in.readString());
         this.isRoot = in.readByte() != 0;
         this.isOrdered = in.readByte() != 0;
         this.children = in.createStringArray();
@@ -49,7 +44,7 @@ public final class ChapterTocFrame extends Id3Frame {
         this.subFrames = new Id3Frame[subFrameCount];
 
         for(int i = 0; i < subFrameCount; ++i) {
-            this.subFrames[i] = (Id3Frame)in.readParcelable(Id3Frame.class.getClassLoader());
+            this.subFrames[i] = in.readParcelable(Id3Frame.class.getClassLoader());
         }
 
     }

@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.extractor;
 
 import androidx.annotation.Nullable;
@@ -22,7 +17,7 @@ public interface TrackOutput {
 
     void sampleMetadata(long var1, int var3, int var4, int var5, @Nullable TrackOutput.CryptoData var6);
 
-    public static final class CryptoData {
+    final class CryptoData {
         public final int cryptoMode;
         public final byte[] encryptionKey;
         public final int encryptedBlocks;

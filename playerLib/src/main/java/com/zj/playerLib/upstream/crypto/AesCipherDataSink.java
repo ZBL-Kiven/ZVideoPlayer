@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.upstream.crypto;
 
 import com.zj.playerLib.upstream.DataSink;
@@ -17,7 +12,7 @@ public final class AesCipherDataSink implements DataSink {
     private AesFlushingCipher cipher;
 
     public AesCipherDataSink(byte[] secretKey, DataSink wrappedDataSink) {
-        this(secretKey, wrappedDataSink, (byte[])null);
+        this(secretKey, wrappedDataSink, null);
     }
 
     public AesCipherDataSink(byte[] secretKey, DataSink wrappedDataSink, byte[] scratch) {

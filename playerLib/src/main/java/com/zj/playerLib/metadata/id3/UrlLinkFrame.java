@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.metadata.id3;
 
 import android.os.Parcel;
@@ -31,9 +26,9 @@ public final class UrlLinkFrame extends Id3Frame {
     }
 
     UrlLinkFrame(Parcel in) {
-        super((String)Util.castNonNull(in.readString()));
+        super(Util.castNonNull(in.readString()));
         this.description = in.readString();
-        this.url = (String)Util.castNonNull(in.readString());
+        this.url = Util.castNonNull(in.readString());
     }
 
     public boolean equals(@Nullable Object obj) {

@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.audio;
 
 import com.zj.playerLib.util.Util;
@@ -53,7 +48,7 @@ final class TrimmingAudioProcessor implements AudioProcessor {
             throw new UnhandledFormatException(sampleRateHz, channelCount, encoding);
         } else {
             if (this.endBufferSize > 0) {
-                this.trimmedFrameCount += (long)(this.endBufferSize / this.bytesPerFrame);
+                this.trimmedFrameCount += this.endBufferSize / this.bytesPerFrame;
             }
 
             this.channelCount = channelCount;
@@ -92,7 +87,7 @@ final class TrimmingAudioProcessor implements AudioProcessor {
         if (remaining != 0) {
             this.receivedInputSinceConfigure = true;
             int trimBytes = Math.min(remaining, this.pendingTrimStartBytes);
-            this.trimmedFrameCount += (long)(trimBytes / this.bytesPerFrame);
+            this.trimmedFrameCount += trimBytes / this.bytesPerFrame;
             this.pendingTrimStartBytes -= trimBytes;
             inputBuffer.position(position + trimBytes);
             if (this.pendingTrimStartBytes <= 0) {

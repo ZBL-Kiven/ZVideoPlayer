@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.text.dvb;
 
 import com.zj.playerLib.text.SimpleSubtitleDecoder;
@@ -15,7 +10,7 @@ public final class DvbDecoder extends SimpleSubtitleDecoder {
 
     public DvbDecoder(List<byte[]> initializationData) {
         super("DvbDecoder");
-        ParsableByteArray data = new ParsableByteArray((byte[])initializationData.get(0));
+        ParsableByteArray data = new ParsableByteArray(initializationData.get(0));
         int subtitleCompositionPage = data.readUnsignedShort();
         int subtitleAncillaryPage = data.readUnsignedShort();
         this.parser = new DvbParser(subtitleCompositionPage, subtitleAncillaryPage);

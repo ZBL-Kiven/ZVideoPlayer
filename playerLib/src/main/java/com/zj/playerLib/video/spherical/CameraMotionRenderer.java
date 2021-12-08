@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.video.spherical;
 
 import androidx.annotation.Nullable;
@@ -70,7 +65,7 @@ public class CameraMotionRenderer extends BaseRenderer {
 
                     float[] rotation = this.parseMetadata(this.buffer.data);
                     if (rotation != null) {
-                        ((CameraMotionListener)Util.castNonNull(this.listener)).onCameraMotion(this.lastTimestampUs - this.offsetUs, rotation);
+                        Util.castNonNull(this.listener).onCameraMotion(this.lastTimestampUs - this.offsetUs, rotation);
                     }
                     continue;
                 }

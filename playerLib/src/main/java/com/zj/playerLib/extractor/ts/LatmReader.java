@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.extractor.ts;
 
 import android.util.Pair;
@@ -165,7 +160,7 @@ public final class LatmReader implements ElementaryStreamReader {
                         data.setPosition(startPosition);
                         byte[] initData = new byte[(readBits + 7) / 8];
                         data.readBits(initData, 0, readBits);
-                        Format format = Format.createAudioSampleFormat(this.formatId, "audio/mp4a-latm", (String)null, -1, -1, this.channelCount, this.sampleRateHz, Collections.singletonList(initData), (DrmInitData)null, 0, this.language);
+                        Format format = Format.createAudioSampleFormat(this.formatId, "audio/mp4a-latm", null, -1, -1, this.channelCount, this.sampleRateHz, Collections.singletonList(initData), null, 0, this.language);
                         if (!format.equals(this.format)) {
                             this.format = format;
                             this.sampleDurationUs = 1024000000L / (long)format.sampleRate;
@@ -231,8 +226,8 @@ public final class LatmReader implements ElementaryStreamReader {
     private int parseAudioSpecificConfig(ParsableBitArray data) throws ParserException {
         int bitsLeft = data.bitsLeft();
         Pair<Integer, Integer> config = CodecSpecificDataUtil.parseAacAudioSpecificConfig(data, true);
-        this.sampleRateHz = (Integer)config.first;
-        this.channelCount = (Integer)config.second;
+        this.sampleRateHz = config.first;
+        this.channelCount = config.second;
         return bitsLeft - data.bitsLeft();
     }
 
@@ -261,7 +256,7 @@ public final class LatmReader implements ElementaryStreamReader {
         }
 
         this.output.sampleData(this.sampleDataBuffer, muxLengthBytes);
-        this.output.sampleMetadata(this.timeUs, 1, muxLengthBytes, 0, (CryptoData)null);
+        this.output.sampleMetadata(this.timeUs, 1, muxLengthBytes, 0, null);
         this.timeUs += this.sampleDurationUs;
     }
 
@@ -272,6 +267,6 @@ public final class LatmReader implements ElementaryStreamReader {
 
     private static long latmGetValue(ParsableBitArray data) {
         int bytesForValue = data.readBits(2);
-        return (long)data.readBits((bytesForValue + 1) * 8);
+        return data.readBits((bytesForValue + 1) * 8);
     }
 }

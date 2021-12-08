@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib;
 
 import android.util.Pair;
@@ -67,7 +62,7 @@ final class MediaPeriodQueue {
     }
 
     public boolean shouldLoadNextMediaPeriod() {
-        return this.loading == null || !this.loading.info.isFinal && this.loading.isFullyBuffered() && this.loading.info.durationUs != -9223372036854775807L && this.length < 100;
+        return this.loading == null || !this.loading.info.isFinal && this.loading.isFullyBuffered() && this.loading.info.durationUs != -Long.MAX_VALUE && this.length < 100;
     }
 
     @Nullable
@@ -263,7 +258,7 @@ final class MediaPeriodQueue {
             }
         }
 
-        return (long)(this.nextWindowSequenceNumber++);
+        return this.nextWindowSequenceNumber++;
     }
 
     private boolean canKeepMediaPeriodHolder(MediaPeriodHolder periodHolder, MediaPeriodInfo info) {
@@ -322,17 +317,17 @@ final class MediaPeriodQueue {
                 long windowSequenceNumber = mediaPeriodInfo.id.windowSequenceNumber;
                 long startPositionUs;
                 if (this.timeline.getWindow(nextWindowIndex, this.window).firstPeriodIndex == adGroupCount) {
-                    Pair<Object, Long> defaultPosition = this.timeline.getPeriodPosition(this.window, this.period, nextWindowIndex, -9223372036854775807L, Math.max(0L, bufferedDurationUs));
+                    Pair<Object, Long> defaultPosition = this.timeline.getPeriodPosition(this.window, this.period, nextWindowIndex, -Long.MAX_VALUE, Math.max(0L, bufferedDurationUs));
                     if (defaultPosition == null) {
                         return null;
                     }
 
                     nextPeriodUid = defaultPosition.first;
-                    startPositionUs = (Long)defaultPosition.second;
+                    startPositionUs = defaultPosition.second;
                     if (mediaPeriodHolder.next != null && mediaPeriodHolder.next.uid.equals(nextPeriodUid)) {
                         windowSequenceNumber = mediaPeriodHolder.next.info.id.windowSequenceNumber;
                     } else {
-                        windowSequenceNumber = (long)(this.nextWindowSequenceNumber++);
+                        windowSequenceNumber = this.nextWindowSequenceNumber++;
                     }
                 } else {
                     startPositionUs = 0L;
@@ -359,12 +354,12 @@ final class MediaPeriodQueue {
                     } else {
                         contentDurationUs = mediaPeriodInfo.contentPositionUs;
                         if (this.period.getAdGroupCount() == 1 && this.period.getAdGroupTimeUs(0) == 0L) {
-                            Pair<Object, Long> defaultPosition = this.timeline.getPeriodPosition(this.window, this.period, this.period.windowIndex, -9223372036854775807L, Math.max(0L, bufferedDurationUs));
+                            Pair<Object, Long> defaultPosition = this.timeline.getPeriodPosition(this.window, this.period, this.period.windowIndex, -Long.MAX_VALUE, Math.max(0L, bufferedDurationUs));
                             if (defaultPosition == null) {
                                 return null;
                             }
 
-                            contentDurationUs = (Long)defaultPosition.second;
+                            contentDurationUs = defaultPosition.second;
                         }
 
                         return this.getMediaPeriodInfoForContent(currentPeriodId.periodUid, contentDurationUs, currentPeriodId.windowSequenceNumber);
@@ -426,7 +421,7 @@ final class MediaPeriodQueue {
         boolean isLastInPeriod = this.isLastInPeriod(id);
         boolean isLastInTimeline = this.isLastInTimeline(id, isLastInPeriod);
         long durationUs = endPositionUs == -9223372036854775808L ? this.period.getDurationUs() : endPositionUs;
-        return new MediaPeriodInfo(id, startPositionUs, -9223372036854775807L, durationUs, isLastInPeriod, isLastInTimeline);
+        return new MediaPeriodInfo(id, startPositionUs, -Long.MAX_VALUE, durationUs, isLastInPeriod, isLastInTimeline);
     }
 
     private boolean isLastInPeriod(MediaPeriodId id) {

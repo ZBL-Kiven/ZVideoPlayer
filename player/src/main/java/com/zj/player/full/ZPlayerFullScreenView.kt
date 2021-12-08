@@ -75,7 +75,6 @@ internal class ZPlayerFullScreenView constructor(context: Context) : FrameLayout
             } else {
                 val dm = Resources.getSystem().displayMetrics
                 realWindowSize.set(dm.widthPixels, dm.heightPixels)
-                Log.e("----- ", "22222 ${realWindowSize.x} , ${realWindowSize.y}")
             }
             if (realWindowSize.x <= 0 || realWindowSize.y <= 0) {
                 @Suppress("DEPRECATION") wm?.defaultDisplay?.getRealSize(realWindowSize)

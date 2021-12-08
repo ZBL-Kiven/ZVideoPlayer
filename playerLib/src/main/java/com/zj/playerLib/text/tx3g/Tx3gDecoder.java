@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.text.tx3g;
 
 import android.text.Layout.Alignment;
@@ -20,6 +15,7 @@ import com.zj.playerLib.util.ParsableByteArray;
 import com.zj.playerLib.util.Util;
 
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 public final class Tx3gDecoder extends SimpleSubtitleDecoder {
@@ -55,14 +51,14 @@ public final class Tx3gDecoder extends SimpleSubtitleDecoder {
     }
 
     private void decodeInitializationData(List<byte[]> initializationData) {
-        if (initializationData == null || initializationData.size() != 1 || ((byte[])initializationData.get(0)).length != 48 && ((byte[])initializationData.get(0)).length != 53) {
+        if (initializationData == null || initializationData.size() != 1 || initializationData.get(0).length != 48 && initializationData.get(0).length != 53) {
             this.defaultFontFace = 0;
             this.defaultColorRgba = -1;
             this.defaultFontFamily = "sans-serif";
             this.customVerticalPlacement = false;
             this.defaultVerticalPlacement = 0.85F;
         } else {
-            byte[] initializationBytes = (byte[])initializationData.get(0);
+            byte[] initializationBytes = initializationData.get(0);
             this.defaultFontFace = initializationBytes[24];
             this.defaultColorRgba = (initializationBytes[26] & 255) << 24 | (initializationBytes[27] & 255) << 16 | (initializationBytes[28] & 255) << 8 | initializationBytes[29] & 255;
             String fontFamily = Util.fromUtf8Bytes(initializationBytes, 43, initializationBytes.length - 43);
@@ -114,7 +110,7 @@ public final class Tx3gDecoder extends SimpleSubtitleDecoder {
                 }
             }
 
-            return new Tx3gSubtitle(new Cue(cueText, (Alignment)null, verticalPlacement, 0, 0, 1.4E-45F, -2147483648, 1.4E-45F));
+            return new Tx3gSubtitle(new Cue(cueText, null, verticalPlacement, 0, 0, 1.4E-45F, -2147483648, 1.4E-45F));
         }
     }
 
@@ -127,11 +123,11 @@ public final class Tx3gDecoder extends SimpleSubtitleDecoder {
             if (parsableByteArray.bytesLeft() >= 2) {
                 char firstChar = parsableByteArray.peekChar();
                 if (firstChar == '\ufeff' || firstChar == '\ufffe') {
-                    return parsableByteArray.readString(textLength, Charset.forName("UTF-16"));
+                    return parsableByteArray.readString(textLength, StandardCharsets.UTF_16);
                 }
             }
 
-            return parsableByteArray.readString(textLength, Charset.forName("UTF-8"));
+            return parsableByteArray.readString(textLength, StandardCharsets.UTF_8);
         }
     }
 

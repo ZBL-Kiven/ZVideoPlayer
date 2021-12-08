@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.source.chunk;
 
 import com.zj.playerLib.Format;
@@ -52,7 +47,7 @@ public class ContainerMediaChunk extends BaseMediaChunk {
             if (this.nextLoadPosition == 0L) {
                 BaseMediaChunkOutput output = this.getOutput();
                 output.setSampleOffsetUs(this.sampleOffsetUs);
-                this.extractorWrapper.init(output, this.clippedStartTimeUs == -9223372036854775807L ? -9223372036854775807L : this.clippedStartTimeUs - this.sampleOffsetUs, this.clippedEndTimeUs == -9223372036854775807L ? -9223372036854775807L : this.clippedEndTimeUs - this.sampleOffsetUs);
+                this.extractorWrapper.init(output, this.clippedStartTimeUs == -Long.MAX_VALUE ? -Long.MAX_VALUE : this.clippedStartTimeUs - this.sampleOffsetUs, this.clippedEndTimeUs == -Long.MAX_VALUE ? -Long.MAX_VALUE : this.clippedEndTimeUs - this.sampleOffsetUs);
             }
 
             try {

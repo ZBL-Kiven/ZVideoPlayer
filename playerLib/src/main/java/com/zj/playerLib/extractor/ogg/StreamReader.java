@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.extractor.ogg;
 
 import com.zj.playerLib.Format;
@@ -113,7 +108,7 @@ abstract class StreamReader {
         } else {
             OggPageHeader firstPayloadPageHeader = this.oggPacket.getPageHeader();
             boolean isLastPage = (firstPayloadPageHeader.type & 4) != 0;
-            this.oggSeeker = new DefaultOggSeeker(this.payloadStartPosition, input.getLength(), this, (long)(firstPayloadPageHeader.headerSize + firstPayloadPageHeader.bodySize), firstPayloadPageHeader.granulePosition, isLastPage);
+            this.oggSeeker = new DefaultOggSeeker(this.payloadStartPosition, input.getLength(), this, firstPayloadPageHeader.headerSize + firstPayloadPageHeader.bodySize, firstPayloadPageHeader.granulePosition, isLastPage);
         }
 
         this.setupData = null;
@@ -148,7 +143,7 @@ abstract class StreamReader {
                 if (granulesInPacket >= 0L && this.currentGranule + granulesInPacket >= this.targetGranule) {
                     long timeUs = this.convertGranuleToTime(this.currentGranule);
                     this.trackOutput.sampleData(payload, payload.limit());
-                    this.trackOutput.sampleMetadata(timeUs, 1, payload.limit(), 0, (CryptoData)null);
+                    this.trackOutput.sampleMetadata(timeUs, 1, payload.limit(), 0, null);
                     this.targetGranule = -1L;
                 }
 
@@ -187,7 +182,7 @@ abstract class StreamReader {
         }
 
         public SeekMap createSeekMap() {
-            return new Unseekable(-9223372036854775807L);
+            return new Unseekable(-Long.MAX_VALUE);
         }
     }
 

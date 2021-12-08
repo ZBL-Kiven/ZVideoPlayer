@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.drm;
 
 import android.annotation.TargetApi;
@@ -70,7 +65,7 @@ public final class HttpMediaDrmCallback implements MediaDrmCallback {
 
     public byte[] executeProvisionRequest(UUID uuid, ProvisionRequest request) throws IOException {
         String url = request.getDefaultUrl() + "&signedRequest=" + Util.fromUtf8Bytes(request.getData());
-        return executePost(this.dataSourceFactory, url, Util.EMPTY_BYTE_ARRAY, (Map)null);
+        return executePost(this.dataSourceFactory, url, Util.EMPTY_BYTE_ARRAY, null);
     }
 
     public byte[] executeKeyRequest(UUID uuid, KeyRequest request) throws Exception {
@@ -100,14 +95,14 @@ public final class HttpMediaDrmCallback implements MediaDrmCallback {
 
             while(var5.hasNext()) {
                 Entry<String, String> requestProperty = (Entry)var5.next();
-                dataSource.setRequestProperty((String)requestProperty.getKey(), (String)requestProperty.getValue());
+                dataSource.setRequestProperty(requestProperty.getKey(), requestProperty.getValue());
             }
         }
 
         int var15 = 0;
 
         while(true) {
-            DataSpec dataSpec = new DataSpec(Uri.parse(url), data, 0L, 0L, -1L, (String)null, 1);
+            DataSpec dataSpec = new DataSpec(Uri.parse(url), data, 0L, 0L, -1L, null, 1);
             DataSourceInputStream inputStream = new DataSourceInputStream(dataSource, dataSpec);
 
             try {
@@ -128,9 +123,9 @@ public final class HttpMediaDrmCallback implements MediaDrmCallback {
     private static String getRedirectUrl(InvalidResponseCodeException exception) {
         Map<String, List<String>> headerFields = exception.headerFields;
         if (headerFields != null) {
-            List<String> locationHeaders = (List)headerFields.get("Location");
+            List<String> locationHeaders = headerFields.get("Location");
             if (locationHeaders != null && !locationHeaders.isEmpty()) {
-                return (String)locationHeaders.get(0);
+                return locationHeaders.get(0);
             }
         }
 

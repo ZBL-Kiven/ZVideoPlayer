@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.upstream;
 
 import android.os.Handler;
@@ -19,7 +14,7 @@ public interface BandwidthMeter {
 
     void removeEventListener(EventListener var1);
 
-    public interface EventListener {
+    interface EventListener {
         void onBandwidthSample(int var1, long var2, long var4);
     }
 }

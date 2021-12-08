@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.metadata.emsg;
 
 import com.zj.playerLib.metadata.Metadata;
@@ -24,13 +19,13 @@ public final class EventMessageDecoder implements MetadataDecoder {
         byte[] data = buffer.array();
         int size = buffer.limit();
         ParsableByteArray emsgData = new ParsableByteArray(data, size);
-        String schemeIdUri = (String)Assertions.checkNotNull(emsgData.readNullTerminatedString());
-        String value = (String)Assertions.checkNotNull(emsgData.readNullTerminatedString());
+        String schemeIdUri = Assertions.checkNotNull(emsgData.readNullTerminatedString());
+        String value = Assertions.checkNotNull(emsgData.readNullTerminatedString());
         long timescale = emsgData.readUnsignedInt();
         long presentationTimeUs = Util.scaleLargeTimestamp(emsgData.readUnsignedInt(), 1000000L, timescale);
         long durationMs = Util.scaleLargeTimestamp(emsgData.readUnsignedInt(), 1000L, timescale);
         long id = emsgData.readUnsignedInt();
         byte[] messageData = Arrays.copyOfRange(data, emsgData.getPosition(), size);
-        return new Metadata(new Entry[]{new EventMessage(schemeIdUri, value, durationMs, id, messageData, presentationTimeUs)});
+        return new Metadata(new EventMessage(schemeIdUri, value, durationMs, id, messageData, presentationTimeUs));
     }
 }

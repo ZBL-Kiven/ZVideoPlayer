@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.upstream;
 
 import android.net.Uri;
@@ -70,7 +65,7 @@ public class DefaultHttpDataSource extends BaseDataSource implements HttpDataSou
     }
 
     public DefaultHttpDataSource(String userAgent, @Nullable Predicate<String> contentTypePredicate, int connectTimeoutMillis, int readTimeoutMillis) {
-        this(userAgent, contentTypePredicate, connectTimeoutMillis, readTimeoutMillis, false, (RequestProperties)null);
+        this(userAgent, contentTypePredicate, connectTimeoutMillis, readTimeoutMillis, false, null);
     }
 
     public DefaultHttpDataSource(String userAgent, @Nullable Predicate<String> contentTypePredicate, int connectTimeoutMillis, int readTimeoutMillis, boolean allowCrossProtocolRedirects, @Nullable RequestProperties defaultRequestProperties) {
@@ -93,7 +88,7 @@ public class DefaultHttpDataSource extends BaseDataSource implements HttpDataSou
     /** @deprecated */
     @Deprecated
     public DefaultHttpDataSource(String userAgent, @Nullable Predicate<String> contentTypePredicate, @Nullable TransferListener listener, int connectTimeoutMillis, int readTimeoutMillis) {
-        this(userAgent, contentTypePredicate, listener, connectTimeoutMillis, readTimeoutMillis, false, (RequestProperties)null);
+        this(userAgent, contentTypePredicate, listener, connectTimeoutMillis, readTimeoutMillis, false, null);
     }
 
     /** @deprecated */
@@ -385,7 +380,7 @@ public class DefaultHttpDataSource extends BaseDataSource implements HttpDataSou
             }
 
             while(this.bytesSkipped != this.bytesToSkip) {
-                int readLength = (int)Math.min(this.bytesToSkip - this.bytesSkipped, (long)skipBuffer.length);
+                int readLength = (int)Math.min(this.bytesToSkip - this.bytesSkipped, skipBuffer.length);
                 int read = this.inputStream.read(skipBuffer, 0, readLength);
                 if (Thread.currentThread().isInterrupted()) {
                     throw new InterruptedIOException();
@@ -395,7 +390,7 @@ public class DefaultHttpDataSource extends BaseDataSource implements HttpDataSou
                     throw new EOFException();
                 }
 
-                this.bytesSkipped += (long)read;
+                this.bytesSkipped += read;
                 this.bytesTransferred(read);
             }
 
@@ -413,7 +408,7 @@ public class DefaultHttpDataSource extends BaseDataSource implements HttpDataSou
                     return -1;
                 }
 
-                readLength = (int)Math.min((long)readLength, bytesRemaining);
+                readLength = (int)Math.min(readLength, bytesRemaining);
             }
 
             int read = this.inputStream.read(buffer, offset, readLength);
@@ -424,7 +419,7 @@ public class DefaultHttpDataSource extends BaseDataSource implements HttpDataSou
                     return -1;
                 }
             } else {
-                this.bytesRead += (long)read;
+                this.bytesRead += read;
                 this.bytesTransferred(read);
                 return read;
             }

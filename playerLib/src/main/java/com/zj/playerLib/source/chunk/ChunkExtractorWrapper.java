@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.source.chunk;
 
 import android.util.SparseArray;
@@ -49,23 +44,23 @@ public final class ChunkExtractorWrapper implements ExtractorOutput {
         this.endTimeUs = endTimeUs;
         if (!this.extractorInitialized) {
             this.extractor.init(this);
-            if (startTimeUs != -9223372036854775807L) {
+            if (startTimeUs != -Long.MAX_VALUE) {
                 this.extractor.seek(0L, startTimeUs);
             }
 
             this.extractorInitialized = true;
         } else {
-            this.extractor.seek(0L, startTimeUs == -9223372036854775807L ? 0L : startTimeUs);
+            this.extractor.seek(0L, startTimeUs == -Long.MAX_VALUE ? 0L : startTimeUs);
 
             for(int i = 0; i < this.bindingTrackOutputs.size(); ++i) {
-                ((BindingTrackOutput)this.bindingTrackOutputs.valueAt(i)).bind(trackOutputProvider, endTimeUs);
+                this.bindingTrackOutputs.valueAt(i).bind(trackOutputProvider, endTimeUs);
             }
         }
 
     }
 
     public TrackOutput track(int id, int type) {
-        BindingTrackOutput bindingTrackOutput = (BindingTrackOutput)this.bindingTrackOutputs.get(id);
+        BindingTrackOutput bindingTrackOutput = this.bindingTrackOutputs.get(id);
         if (bindingTrackOutput == null) {
             Assertions.checkState(this.sampleFormats == null);
             bindingTrackOutput = new BindingTrackOutput(id, type, type == this.primaryTrackType ? this.primaryTrackManifestFormat : null);
@@ -80,7 +75,7 @@ public final class ChunkExtractorWrapper implements ExtractorOutput {
         Format[] sampleFormats = new Format[this.bindingTrackOutputs.size()];
 
         for(int i = 0; i < this.bindingTrackOutputs.size(); ++i) {
-            sampleFormats[i] = ((BindingTrackOutput)this.bindingTrackOutputs.valueAt(i)).sampleFormat;
+            sampleFormats[i] = this.bindingTrackOutputs.valueAt(i).sampleFormat;
         }
 
         this.sampleFormats = sampleFormats;
@@ -133,7 +128,7 @@ public final class ChunkExtractorWrapper implements ExtractorOutput {
         }
 
         public void sampleMetadata(long timeUs, int flags, int size, int offset, CryptoData cryptoData) {
-            if (this.endTimeUs != -9223372036854775807L && timeUs >= this.endTimeUs) {
+            if (this.endTimeUs != -Long.MAX_VALUE && timeUs >= this.endTimeUs) {
                 this.trackOutput = this.dummyTrackOutput;
             }
 

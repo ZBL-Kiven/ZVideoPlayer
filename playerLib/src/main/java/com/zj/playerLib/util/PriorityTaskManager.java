@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.util;
 
 import java.io.IOException;
@@ -50,7 +45,7 @@ public final class PriorityTaskManager {
     public void remove(int priority) {
         synchronized(this.lock) {
             this.queue.remove(priority);
-            this.highestPriority = this.queue.isEmpty() ? -2147483648 : (Integer)Util.castNonNull(this.queue.peek());
+            this.highestPriority = this.queue.isEmpty() ? -2147483648 : Util.castNonNull(this.queue.peek());
             this.lock.notifyAll();
         }
     }

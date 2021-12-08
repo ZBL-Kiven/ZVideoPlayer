@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.audio;
 
 import com.zj.playerLib.Format;
@@ -41,7 +36,7 @@ public final class DtsUtil {
         int bitrate = rate >= TWICE_BITRATE_KBPS_BY_RATE.length ? -1 : TWICE_BITRATE_KBPS_BY_RATE[rate] * 1000 / 2;
         frameBits.skipBits(10);
         channelCount += frameBits.readBits(2) > 0 ? 1 : 0;
-        return Format.createAudioSampleFormat(trackId, "audio/vnd.dts", (String)null, bitrate, -1, channelCount, sampleRate, (List)null, drmInitData, 0, language);
+        return Format.createAudioSampleFormat(trackId, "audio/vnd.dts", null, bitrate, -1, channelCount, sampleRate, null, drmInitData, 0, language);
     }
 
     public static int parseDtsAudioSampleCount(byte[] data) {

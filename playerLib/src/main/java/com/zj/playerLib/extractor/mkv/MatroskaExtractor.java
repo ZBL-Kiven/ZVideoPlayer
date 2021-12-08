@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.extractor.mkv;
 
 import android.util.Pair;
@@ -258,12 +253,12 @@ public final class MatroskaExtractor implements Extractor {
 
     MatroskaExtractor(EbmlReader reader, int flags) {
         this.segmentContentPosition = -1L;
-        this.timecodeScale = -9223372036854775807L;
-        this.durationTimecode = -9223372036854775807L;
-        this.durationUs = -9223372036854775807L;
+        this.timecodeScale = -Long.MAX_VALUE;
+        this.durationTimecode = -Long.MAX_VALUE;
+        this.durationUs = -Long.MAX_VALUE;
         this.cuesContentPosition = -1L;
         this.seekPositionAfterBuildingCues = -1L;
-        this.clusterTimecodeUs = -9223372036854775807L;
+        this.clusterTimecodeUs = -Long.MAX_VALUE;
         this.reader = reader;
         this.reader.init(new InnerEbmlReaderOutput());
         this.seekForCuesEnabled = (flags & 1) == 0;
@@ -289,14 +284,14 @@ public final class MatroskaExtractor implements Extractor {
     }
 
     public void seek(long position, long timeUs) {
-        this.clusterTimecodeUs = -9223372036854775807L;
+        this.clusterTimecodeUs = -Long.MAX_VALUE;
         this.blockState = 0;
         this.reader.reset();
         this.varintReader.reset();
         this.resetSample();
 
         for (int i = 0; i < this.tracks.size(); ++i) {
-            ((Track) this.tracks.valueAt(i)).reset();
+            this.tracks.valueAt(i).reset();
         }
 
     }
@@ -319,7 +314,7 @@ public final class MatroskaExtractor implements Extractor {
             return 0;
         } else {
             for (int i = 0; i < this.tracks.size(); ++i) {
-                ((Track) this.tracks.valueAt(i)).outputPendingSampleMetadata();
+                this.tracks.valueAt(i).outputPendingSampleMetadata();
             }
 
             return -1;
@@ -385,7 +380,7 @@ public final class MatroskaExtractor implements Extractor {
                     this.blockFlags |= 1;
                 }
 
-                this.commitSampleToOutput((Track) this.tracks.get(this.blockTrackNumber), this.blockTimeUs);
+                this.commitSampleToOutput(this.tracks.get(this.blockTrackNumber), this.blockTimeUs);
                 this.blockState = 0;
                 break;
             case 174:
@@ -411,7 +406,7 @@ public final class MatroskaExtractor implements Extractor {
                         throw new ParserException("Encrypted Track found but ContentEncKeyID was not found");
                     }
 
-                    this.currentTrack.drmInitData = new DrmInitData(new SchemeData[]{new SchemeData(C.UUID_NIL, "video/webm", this.currentTrack.cryptoData.encryptionKey)});
+                    this.currentTrack.drmInitData = new DrmInitData(new SchemeData(C.UUID_NIL, "video/webm", this.currentTrack.cryptoData.encryptionKey));
                 }
                 break;
             case 28032:
@@ -420,11 +415,11 @@ public final class MatroskaExtractor implements Extractor {
                 }
                 break;
             case 357149030:
-                if (this.timecodeScale == -9223372036854775807L) {
+                if (this.timecodeScale == -Long.MAX_VALUE) {
                     this.timecodeScale = 1000000L;
                 }
 
-                if (this.durationTimecode != -9223372036854775807L) {
+                if (this.durationTimecode != -Long.MAX_VALUE) {
                     this.durationUs = this.scaleTimecodeToUs(this.durationTimecode);
                 }
                 break;
@@ -690,12 +685,12 @@ public final class MatroskaExtractor implements Extractor {
                 if (this.blockState == 0) {
                     this.blockTrackNumber = (int) this.varintReader.readUnsignedVarint(input, false, true, 8);
                     this.blockTrackNumberLength = this.varintReader.getLastLength();
-                    this.blockDurationUs = -9223372036854775807L;
+                    this.blockDurationUs = -Long.MAX_VALUE;
                     this.blockState = 1;
                     this.scratch.reset();
                 }
 
-                Track track = (Track) this.tracks.get(this.blockTrackNumber);
+                Track track = this.tracks.get(this.blockTrackNumber);
                 if (track == null) {
                     input.skipFully(contentSize - this.blockTrackNumberLength);
                     this.blockState = 0;
@@ -781,7 +776,7 @@ public final class MatroskaExtractor implements Extractor {
                                             headerSize += i;
                                             this.readScratch(input, headerSize);
 
-                                            for (readValue = (long) (this.scratch.data[readPosition++] & 255 & ~lengthMask); readPosition < headerSize; readValue |= (long) (this.scratch.data[readPosition++] & 255)) {
+                                            for (readValue = this.scratch.data[readPosition++] & 255 & ~lengthMask; readPosition < headerSize; readValue |= this.scratch.data[readPosition++] & 255) {
                                                 readValue <<= 8;
                                             }
 
@@ -806,7 +801,7 @@ public final class MatroskaExtractor implements Extractor {
                     }
 
                     totalSamplesSize = this.scratch.data[0] << 8 | this.scratch.data[1] & 255;
-                    this.blockTimeUs = this.clusterTimecodeUs + this.scaleTimecodeToUs((long) totalSamplesSize);
+                    this.blockTimeUs = this.clusterTimecodeUs + this.scaleTimecodeToUs(totalSamplesSize);
                     boolean isInvisible = (this.scratch.data[2] & 8) == 8;
                     boolean isKeyframe = track.type == 2 || id == 163 && (this.scratch.data[2] & 128) == 128;
                     this.blockFlags = (isKeyframe ? 1 : 0) | (isInvisible ? -2147483648 : 0);
@@ -1054,7 +1049,7 @@ public final class MatroskaExtractor implements Extractor {
 
     private static void setSampleDuration(byte[] subripSampleData, long durationUs, String timecodeFormat, int endTimecodeOffset, long lastTimecodeValueScalingFactor, byte[] emptyTimecode) {
         byte[] timeCodeData;
-        if (durationUs == -9223372036854775807L) {
+        if (durationUs == -Long.MAX_VALUE) {
             timeCodeData = emptyTimecode;
         } else {
             int hours = (int) (durationUs / 3600000000L);
@@ -1096,7 +1091,7 @@ public final class MatroskaExtractor implements Extractor {
     }
 
     private SeekMap buildSeekMap() {
-        if (this.segmentContentPosition != -1L && this.durationUs != -9223372036854775807L && this.cueTimesUs != null && this.cueTimesUs.size() != 0 && this.cueClusterPositions != null && this.cueClusterPositions.size() == this.cueTimesUs.size()) {
+        if (this.segmentContentPosition != -1L && this.durationUs != -Long.MAX_VALUE && this.cueTimesUs != null && this.cueTimesUs.size() != 0 && this.cueClusterPositions != null && this.cueClusterPositions.size() == this.cueTimesUs.size()) {
             int cuePointsSize = this.cueTimesUs.size();
             int[] sizes = new int[cuePointsSize];
             long[] offsets = new long[cuePointsSize];
@@ -1142,7 +1137,7 @@ public final class MatroskaExtractor implements Extractor {
     }
 
     private long scaleTimecodeToUs(long unscaledTimecode) throws ParserException {
-        if (this.timecodeScale == -9223372036854775807L) {
+        if (this.timecodeScale == -Long.MAX_VALUE) {
             throw new ParserException("Can't scale timecode prior to timecodeScale being set.");
         } else {
             return Util.scaleLargeTimestamp(unscaledTimecode, this.timecodeScale, 1000L);
@@ -1560,7 +1555,7 @@ public final class MatroskaExtractor implements Extractor {
                     rotationDegrees = 270;
                 }
 
-                format = Format.createVideoSampleFormat(Integer.toString(trackId), mimeType, (String) null, -1, maxInputSize, this.width, this.height, -1.0F, (List) initializationData, rotationDegrees, pixelWidthHeightRatio, this.projectionData, this.stereoMode, colorInfo, this.drmInitData);
+                format = Format.createVideoSampleFormat(Integer.toString(trackId), mimeType, null, -1, maxInputSize, this.width, this.height, -1.0F, initializationData, rotationDegrees, pixelWidthHeightRatio, this.projectionData, this.stereoMode, colorInfo, this.drmInitData);
             } else if ("application/x-subrip".equals(mimeType)) {
                 type = 3;
                 format = Format.createTextSampleFormat(Integer.toString(trackId), mimeType, selectionFlags, this.language, this.drmInitData);
@@ -1569,13 +1564,13 @@ public final class MatroskaExtractor implements Extractor {
                 initializationData = new ArrayList<>(2);
                 initializationData.add(MatroskaExtractor.SSA_DIALOGUE_FORMAT);
                 initializationData.add(this.codecPrivate);
-                format = Format.createTextSampleFormat(Integer.toString(trackId), mimeType, (String) null, -1, selectionFlags, this.language, -1, this.drmInitData, 9223372036854775807L, initializationData);
+                format = Format.createTextSampleFormat(Integer.toString(trackId), mimeType, null, -1, selectionFlags, this.language, -1, this.drmInitData, Long.MAX_VALUE, initializationData);
             } else {
                 if (!"application/vobsub".equals(mimeType) && !"application/pgs".equals(mimeType) && !"application/dvbsubs".equals(mimeType)) {
                     throw new ParserException("Unexpected MIME type.");
                 }
                 type = 3;
-                format = Format.createImageSampleFormat(Integer.toString(trackId), mimeType, (String) null, -1, selectionFlags, (List) initializationData, this.language, this.drmInitData);
+                format = Format.createImageSampleFormat(Integer.toString(trackId), mimeType, null, -1, selectionFlags, initializationData, this.language, this.drmInitData);
             }
 
             this.output = output.track(this.number, type);
@@ -1624,7 +1619,7 @@ public final class MatroskaExtractor implements Extractor {
                 buffer.skipBytes(16);
                 long compression = buffer.readLittleEndianUnsignedInt();
                 if (compression == 1482049860L) {
-                    return new Pair("video/3gpp", (Object) null);
+                    return new Pair("video/3gpp", null);
                 }
 
                 if (compression == 826496599L) {
@@ -1645,7 +1640,7 @@ public final class MatroskaExtractor implements Extractor {
             }
 
             Log.w("MatroskaExtractor", "Unknown FourCC. Setting mimeType to video/x-unknown");
-            return new Pair("video/x-unknown", (Object) null);
+            return new Pair("video/x-unknown", null);
         }
 
         private static List<byte[]> parseVorbisCodecPrivate(byte[] codecPrivate) throws ParserException {

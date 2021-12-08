@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.scheduler;
 
 import android.annotation.TargetApi;
@@ -66,7 +61,7 @@ public final class RequirementsWatcher {
         }
 
         this.receiver = new DeviceStatusChangeReceiver();
-        this.context.registerReceiver(this.receiver, filter, (String)null, new Handler());
+        this.context.registerReceiver(this.receiver, filter, null, new Handler());
         logd(this + " started");
     }
 

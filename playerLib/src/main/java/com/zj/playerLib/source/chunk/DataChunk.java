@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.source.chunk;
 
 import com.zj.playerLib.Format;
@@ -19,7 +14,7 @@ public abstract class DataChunk extends Chunk {
     private volatile boolean loadCanceled;
 
     public DataChunk(DataSource dataSource, DataSpec dataSpec, int type, Format trackFormat, int trackSelectionReason, Object trackSelectionData, byte[] data) {
-        super(dataSource, dataSpec, type, trackFormat, trackSelectionReason, trackSelectionData, -9223372036854775807L, -9223372036854775807L);
+        super(dataSource, dataSpec, type, trackFormat, trackSelectionReason, trackSelectionData, -Long.MAX_VALUE, -Long.MAX_VALUE);
         this.data = data;
     }
 

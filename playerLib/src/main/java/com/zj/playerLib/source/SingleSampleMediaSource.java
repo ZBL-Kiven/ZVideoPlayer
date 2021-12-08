@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.source;
 
 import android.net.Uri;
@@ -44,13 +39,13 @@ public final class SingleSampleMediaSource extends BaseMediaSource {
     /** @deprecated */
     @Deprecated
     public SingleSampleMediaSource(Uri uri, com.zj.playerLib.upstream.DataSource.Factory dataSourceFactory, Format format, long durationUs, int minLoadableRetryCount) {
-        this(uri, dataSourceFactory, format, durationUs, new DefaultLoadErrorHandlingPolicy(minLoadableRetryCount), false, (Object)null);
+        this(uri, dataSourceFactory, format, durationUs, new DefaultLoadErrorHandlingPolicy(minLoadableRetryCount), false, null);
     }
 
     /** @deprecated */
     @Deprecated
     public SingleSampleMediaSource(Uri uri, com.zj.playerLib.upstream.DataSource.Factory dataSourceFactory, Format format, long durationUs, int minLoadableRetryCount, Handler eventHandler, EventListener eventListener, int eventSourceId, boolean treatLoadErrorsAsEndOfStream) {
-        this(uri, dataSourceFactory, format, durationUs, new DefaultLoadErrorHandlingPolicy(minLoadableRetryCount), treatLoadErrorsAsEndOfStream, (Object)null);
+        this(uri, dataSourceFactory, format, durationUs, new DefaultLoadErrorHandlingPolicy(minLoadableRetryCount), treatLoadErrorsAsEndOfStream, null);
         if (eventHandler != null && eventListener != null) {
             this.addEventListener(eventHandler, new EventListenerWrapper(eventListener, eventSourceId));
         }
@@ -75,7 +70,7 @@ public final class SingleSampleMediaSource extends BaseMediaSource {
 
     public void prepareSourceInternal(InlinePlayer player, boolean isTopLevelSource, @Nullable TransferListener mediaTransferListener) {
         this.transferListener = mediaTransferListener;
-        this.refreshSourceInfo(this.timeline, (Object)null);
+        this.refreshSourceInfo(this.timeline, null);
     }
 
     public void maybeThrowSourceInfoRefreshError() throws IOException {
@@ -99,7 +94,7 @@ public final class SingleSampleMediaSource extends BaseMediaSource {
         private final int eventSourceId;
 
         public EventListenerWrapper(EventListener eventListener, int eventSourceId) {
-            this.eventListener = (EventListener)Assertions.checkNotNull(eventListener);
+            this.eventListener = Assertions.checkNotNull(eventListener);
             this.eventSourceId = eventSourceId;
         }
 
@@ -117,7 +112,7 @@ public final class SingleSampleMediaSource extends BaseMediaSource {
         private Object tag;
 
         public Factory(com.zj.playerLib.upstream.DataSource.Factory dataSourceFactory) {
-            this.dataSourceFactory = (com.zj.playerLib.upstream.DataSource.Factory)Assertions.checkNotNull(dataSourceFactory);
+            this.dataSourceFactory = Assertions.checkNotNull(dataSourceFactory);
             this.loadErrorHandlingPolicy = new DefaultLoadErrorHandlingPolicy();
         }
 

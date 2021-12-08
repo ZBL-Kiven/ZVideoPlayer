@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.drm;
 
 import android.annotation.SuppressLint;
@@ -24,9 +19,6 @@ import com.zj.playerLib.util.EventDispatcher;
 import com.zj.playerLib.util.Log;
 import com.zj.playerLib.util.Util;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -35,13 +27,6 @@ import java.util.UUID;
 
 @TargetApi(18)
 public class DefaultDrmSessionManager<T extends MediaCrypto> implements DrmSessionManager<T>, ProvisioningManager<T> {
-    public static final String PLAYREADY_CUSTOM_DATA_KEY = "PRCustomData";
-    public static final int MODE_PLAYBACK = 0;
-    public static final int MODE_QUERY = 1;
-    public static final int MODE_DOWNLOAD = 2;
-    public static final int MODE_RELEASE = 3;
-    public static final int INITIAL_DRM_REQUEST_RETRY_COUNT = 3;
-    private static final String TAG = "DefaultDrmSessionMgr";
     private final UUID uuid;
     private final MediaDrm<T> mediaDrm;
     private final MediaDrmCallback callback;
@@ -56,36 +41,16 @@ public class DefaultDrmSessionManager<T extends MediaCrypto> implements DrmSessi
     private byte[] offlineLicenseKeySetId;
     volatile MediaDrmHandler mediaDrmHandler;
 
-    /** @deprecated */
-    @Deprecated
-    public static DefaultDrmSessionManager<FrameworkMediaCrypto> newWidevineInstance(MediaDrmCallback callback, HashMap<String, String> optionalKeyRequestParameters, Handler eventHandler, DefaultDrmSessionEventListener eventListener) throws UnsupportedDrmException {
-        DefaultDrmSessionManager<FrameworkMediaCrypto> drmSessionManager = newWidevineInstance(callback, optionalKeyRequestParameters);
-        if (eventHandler != null && eventListener != null) {
-            drmSessionManager.addListener(eventHandler, eventListener);
-        }
-
-        return drmSessionManager;
-    }
 
     public static DefaultDrmSessionManager<FrameworkMediaCrypto> newWidevineInstance(MediaDrmCallback callback, HashMap<String, String> optionalKeyRequestParameters) throws UnsupportedDrmException {
         return newFrameworkInstance(C.WIDEVINE_UUID, callback, optionalKeyRequestParameters);
     }
 
-    /** @deprecated */
-    @Deprecated
-    public static DefaultDrmSessionManager<FrameworkMediaCrypto> newPlayReadyInstance(MediaDrmCallback callback, String customData, Handler eventHandler, DefaultDrmSessionEventListener eventListener) throws UnsupportedDrmException {
-        DefaultDrmSessionManager<FrameworkMediaCrypto> drmSessionManager = newPlayReadyInstance(callback, customData);
-        if (eventHandler != null && eventListener != null) {
-            drmSessionManager.addListener(eventHandler, eventListener);
-        }
-
-        return drmSessionManager;
-    }
 
     public static DefaultDrmSessionManager<FrameworkMediaCrypto> newPlayReadyInstance(MediaDrmCallback callback, String customData) throws UnsupportedDrmException {
-        HashMap optionalKeyRequestParameters;
+        HashMap<String, String> optionalKeyRequestParameters;
         if (!TextUtils.isEmpty(customData)) {
-            optionalKeyRequestParameters = new HashMap();
+            optionalKeyRequestParameters = new HashMap<>();
             optionalKeyRequestParameters.put("PRCustomData", customData);
         } else {
             optionalKeyRequestParameters = null;
@@ -94,74 +59,30 @@ public class DefaultDrmSessionManager<T extends MediaCrypto> implements DrmSessi
         return newFrameworkInstance(C.PLAYREADY_UUID, callback, optionalKeyRequestParameters);
     }
 
-    /** @deprecated */
-    @Deprecated
-    public static DefaultDrmSessionManager<FrameworkMediaCrypto> newFrameworkInstance(UUID uuid, MediaDrmCallback callback, HashMap<String, String> optionalKeyRequestParameters, Handler eventHandler, DefaultDrmSessionEventListener eventListener) throws UnsupportedDrmException {
-        DefaultDrmSessionManager<FrameworkMediaCrypto> drmSessionManager = newFrameworkInstance(uuid, callback, optionalKeyRequestParameters);
-        if (eventHandler != null && eventListener != null) {
-            drmSessionManager.addListener(eventHandler, eventListener);
-        }
-
-        return drmSessionManager;
-    }
 
     public static DefaultDrmSessionManager<FrameworkMediaCrypto> newFrameworkInstance(UUID uuid, MediaDrmCallback callback, HashMap<String, String> optionalKeyRequestParameters) throws UnsupportedDrmException {
-        return new DefaultDrmSessionManager(uuid, FrameworkMediaDrm.newInstance(uuid), callback, optionalKeyRequestParameters, false, 3);
-    }
-
-    /** @deprecated */
-    @Deprecated
-    public DefaultDrmSessionManager(UUID uuid, MediaDrm<T> mediaDrm, MediaDrmCallback callback, HashMap<String, String> optionalKeyRequestParameters, Handler eventHandler, DefaultDrmSessionEventListener eventListener) {
-        this(uuid, mediaDrm, callback, optionalKeyRequestParameters);
-        if (eventHandler != null && eventListener != null) {
-            this.addListener(eventHandler, eventListener);
-        }
-
+        return new DefaultDrmSessionManager<>(uuid, FrameworkMediaDrm.newInstance(uuid), callback, optionalKeyRequestParameters, false, 3);
     }
 
     public DefaultDrmSessionManager(UUID uuid, MediaDrm<T> mediaDrm, MediaDrmCallback callback, HashMap<String, String> optionalKeyRequestParameters) {
         this(uuid, mediaDrm, callback, optionalKeyRequestParameters, false, 3);
     }
 
-    /** @deprecated */
-    @Deprecated
-    public DefaultDrmSessionManager(UUID uuid, MediaDrm<T> mediaDrm, MediaDrmCallback callback, HashMap<String, String> optionalKeyRequestParameters, Handler eventHandler, DefaultDrmSessionEventListener eventListener, boolean multiSession) {
-        this(uuid, mediaDrm, callback, optionalKeyRequestParameters, multiSession);
-        if (eventHandler != null && eventListener != null) {
-            this.addListener(eventHandler, eventListener);
-        }
-
-    }
-
-    public DefaultDrmSessionManager(UUID uuid, MediaDrm<T> mediaDrm, MediaDrmCallback callback, HashMap<String, String> optionalKeyRequestParameters, boolean multiSession) {
-        this(uuid, mediaDrm, callback, optionalKeyRequestParameters, multiSession, 3);
-    }
-
-    /** @deprecated */
-    @Deprecated
-    public DefaultDrmSessionManager(UUID uuid, MediaDrm<T> mediaDrm, MediaDrmCallback callback, HashMap<String, String> optionalKeyRequestParameters, Handler eventHandler, DefaultDrmSessionEventListener eventListener, boolean multiSession, int initialDrmRequestRetryCount) {
-        this(uuid, mediaDrm, callback, optionalKeyRequestParameters, multiSession, initialDrmRequestRetryCount);
-        if (eventHandler != null && eventListener != null) {
-            this.addListener(eventHandler, eventListener);
-        }
-
-    }
-
     public DefaultDrmSessionManager(UUID uuid, MediaDrm<T> mediaDrm, MediaDrmCallback callback, HashMap<String, String> optionalKeyRequestParameters, boolean multiSession, int initialDrmRequestRetryCount) {
         Assertions.checkNotNull(uuid);
         Assertions.checkNotNull(mediaDrm);
-        Assertions.checkArgument(!C.COMMON_PSSH_UUID.equals(uuid), "Use C.CLEARKEY_UUID instead");
+        Assertions.checkArgument(!C.COMMON_PSSH_UUID.equals(uuid), "Use C.CLEAR_KEY_UUID instead");
         this.uuid = uuid;
         this.mediaDrm = mediaDrm;
         this.callback = callback;
         this.optionalKeyRequestParameters = optionalKeyRequestParameters;
-        this.eventDispatcher = new EventDispatcher();
+        this.eventDispatcher = new EventDispatcher<>();
         this.multiSession = multiSession;
         this.initialDrmRequestRetryCount = initialDrmRequestRetryCount;
         this.mode = 0;
-        this.sessions = new ArrayList();
-        this.provisioningSessions = new ArrayList();
-        if (multiSession && C.WIDEVINE_UUID.equals(uuid) && Util.SDK_INT >= 19) {
+        this.sessions = new ArrayList<>();
+        this.provisioningSessions = new ArrayList<>();
+        if (multiSession && C.WIDEVINE_UUID.equals(uuid)) {
             mediaDrm.setPropertyString("sessionSharing", "enable");
         }
 
@@ -206,8 +127,8 @@ public class DefaultDrmSessionManager<T extends MediaCrypto> implements DrmSessi
         if (this.offlineLicenseKeySetId != null) {
             return true;
         } else {
-            List<SchemeData> schemeDatas = getSchemeDatas(drmInitData, this.uuid, true);
-            if (schemeDatas.isEmpty()) {
+            List<SchemeData> schemeData = getSchemeData(drmInitData, this.uuid, true);
+            if (schemeData.isEmpty()) {
                 if (drmInitData.schemeDataCount != 1 || !drmInitData.get(0).matches(C.COMMON_PSSH_UUID)) {
                     return false;
                 }
@@ -237,36 +158,30 @@ public class DefaultDrmSessionManager<T extends MediaCrypto> implements DrmSessi
             }
         }
 
-        List<SchemeData> schemeDatas = null;
+        List<SchemeData> schemeData = null;
         if (this.offlineLicenseKeySetId == null) {
-            schemeDatas = getSchemeDatas(drmInitData, this.uuid, false);
-            if (schemeDatas.isEmpty()) {
+            schemeData = getSchemeData(drmInitData, this.uuid, false);
+            if (schemeData.isEmpty()) {
                 MissingSchemeDataException error = new MissingSchemeDataException(this.uuid);
-                this.eventDispatcher.dispatch((listener) -> {
-                    listener.onDrmSessionManagerError(error);
-                });
-                return new ErrorStateDrmSession(new DrmSessionException(error));
+                this.eventDispatcher.dispatch((listener) -> listener.onDrmSessionManagerError(error));
+                return new ErrorStateDrmSession<>(new DrmSessionException(error));
             }
         }
-
-        DefaultDrmSession session;
+        DefaultDrmSession<T> session;
         if (!this.multiSession) {
-            session = this.sessions.isEmpty() ? null : (DefaultDrmSession)this.sessions.get(0);
+            session = this.sessions.isEmpty() ? null : this.sessions.get(0);
         } else {
             session = null;
-            Iterator var5 = this.sessions.iterator();
-
-            while(var5.hasNext()) {
-                DefaultDrmSession<T> existingSession = (DefaultDrmSession)var5.next();
-                if (Util.areEqual(existingSession.schemeDatas, schemeDatas)) {
-                    session = existingSession;
+            for (DefaultDrmSession<T> tDefaultDrmSession : this.sessions) {
+                if (Util.areEqual(tDefaultDrmSession.schemeDatas, schemeData)) {
+                    session = tDefaultDrmSession;
                     break;
                 }
             }
         }
 
         if (session == null) {
-            session = new DefaultDrmSession(this.uuid, this.mediaDrm, this, schemeDatas, this.mode, this.offlineLicenseKeySetId, this.optionalKeyRequestParameters, this.callback, playbackLooper, this.eventDispatcher, this.initialDrmRequestRetryCount);
+            session = new DefaultDrmSession<>(this.uuid, this.mediaDrm, this, schemeData, this.mode, this.offlineLicenseKeySetId, this.optionalKeyRequestParameters, this.callback, playbackLooper, this.eventDispatcher, this.initialDrmRequestRetryCount);
             this.sessions.add(session);
         }
 
@@ -276,11 +191,11 @@ public class DefaultDrmSessionManager<T extends MediaCrypto> implements DrmSessi
 
     public void releaseSession(DrmSession<T> session) {
         if (!(session instanceof ErrorStateDrmSession)) {
-            DefaultDrmSession<T> drmSession = (DefaultDrmSession)session;
+            DefaultDrmSession<T> drmSession = (DefaultDrmSession<T>) session;
             if (drmSession.release()) {
                 this.sessions.remove(drmSession);
                 if (this.provisioningSessions.size() > 1 && this.provisioningSessions.get(0) == drmSession) {
-                    ((DefaultDrmSession)this.provisioningSessions.get(1)).provision();
+                    this.provisioningSessions.get(1).provision();
                 }
 
                 this.provisioningSessions.remove(drmSession);
@@ -298,39 +213,30 @@ public class DefaultDrmSessionManager<T extends MediaCrypto> implements DrmSessi
     }
 
     public void onProvisionCompleted() {
-        Iterator var1 = this.provisioningSessions.iterator();
-
-        while(var1.hasNext()) {
-            DefaultDrmSession<T> session = (DefaultDrmSession)var1.next();
-            session.onProvisionCompleted();
+        for (DefaultDrmSession<T> provisioningSession : this.provisioningSessions) {
+            provisioningSession.onProvisionCompleted();
         }
-
         this.provisioningSessions.clear();
     }
 
     public void onProvisionError(Exception error) {
-        Iterator var2 = this.provisioningSessions.iterator();
-
-        while(var2.hasNext()) {
-            DefaultDrmSession<T> session = (DefaultDrmSession)var2.next();
-            session.onProvisionError(error);
+        for (DefaultDrmSession<T> provisioningSession : this.provisioningSessions) {
+            provisioningSession.onProvisionError(error);
         }
-
         this.provisioningSessions.clear();
     }
 
-    private static List<SchemeData> getSchemeDatas(DrmInitData drmInitData, UUID uuid, boolean allowMissingData) {
-        List<SchemeData> matchingSchemeDatas = new ArrayList(drmInitData.schemeDataCount);
-
-        for(int i = 0; i < drmInitData.schemeDataCount; ++i) {
+    private static List<SchemeData> getSchemeData(DrmInitData drmInitData, UUID uuid, boolean allowMissingData) {
+        List<SchemeData> matchingSchemeData = new ArrayList<>(drmInitData.schemeDataCount);
+        for (int i = 0; i < drmInitData.schemeDataCount; ++i) {
             SchemeData schemeData = drmInitData.get(i);
             boolean uuidMatches = schemeData.matches(uuid) || C.CLEARKEY_UUID.equals(uuid) && schemeData.matches(C.COMMON_PSSH_UUID);
             if (uuidMatches && (schemeData.data != null || allowMissingData)) {
-                matchingSchemeDatas.add(schemeData);
+                matchingSchemeData.add(schemeData);
             }
         }
 
-        return matchingSchemeDatas;
+        return matchingSchemeData;
     }
 
     private class MediaDrmEventListener implements OnEventListener<T> {
@@ -352,25 +258,18 @@ public class DefaultDrmSessionManager<T extends MediaCrypto> implements DrmSessi
         }
 
         public void handleMessage(Message msg) {
-            byte[] sessionId = (byte[])((byte[])msg.obj);
-            Iterator var3 = DefaultDrmSessionManager.this.sessions.iterator();
-
-            DefaultDrmSession session;
+            byte[] sessionId = (byte[]) msg.obj;
+            Iterator<DefaultDrmSession<T>> var3 = DefaultDrmSessionManager.this.sessions.iterator();
+            DefaultDrmSession<T> session;
             do {
                 if (!var3.hasNext()) {
                     return;
                 }
-
-                session = (DefaultDrmSession)var3.next();
-            } while(!session.hasSessionId(sessionId));
+                session = var3.next();
+            } while (!session.hasSessionId(sessionId));
 
             session.onMediaDrmEvent(msg.what);
         }
-    }
-
-    @Documented
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface Mode {
     }
 
     public static final class MissingSchemeDataException extends Exception {
@@ -379,8 +278,9 @@ public class DefaultDrmSessionManager<T extends MediaCrypto> implements DrmSessi
         }
     }
 
-    /** @deprecated */
+    /**
+     * @deprecated
+     */
     @Deprecated
-    public interface EventListener extends DefaultDrmSessionEventListener {
-    }
+    public interface EventListener extends DefaultDrmSessionEventListener {}
 }

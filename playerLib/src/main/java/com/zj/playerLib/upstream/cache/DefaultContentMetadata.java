@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.upstream.cache;
 
 import androidx.annotation.Nullable;
@@ -12,6 +7,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -60,8 +56,8 @@ public final class DefaultContentMetadata implements ContentMetadata {
 
         while(var2.hasNext()) {
             Entry<String, byte[]> entry = (Entry)var2.next();
-            output.writeUTF((String)entry.getKey());
-            byte[] value = (byte[])entry.getValue();
+            output.writeUTF(entry.getKey());
+            byte[] value = entry.getValue();
             output.writeInt(value.length);
             output.write(value);
         }
@@ -70,7 +66,7 @@ public final class DefaultContentMetadata implements ContentMetadata {
 
     public final byte[] get(String name, byte[] defaultValue) {
         if (this.metadata.containsKey(name)) {
-            byte[] bytes = (byte[])this.metadata.get(name);
+            byte[] bytes = this.metadata.get(name);
             return Arrays.copyOf(bytes, bytes.length);
         } else {
             return defaultValue;
@@ -79,8 +75,8 @@ public final class DefaultContentMetadata implements ContentMetadata {
 
     public final String get(String name, String defaultValue) {
         if (this.metadata.containsKey(name)) {
-            byte[] bytes = (byte[])this.metadata.get(name);
-            return new String(bytes, Charset.forName("UTF-8"));
+            byte[] bytes = this.metadata.get(name);
+            return new String(bytes, StandardCharsets.UTF_8);
         } else {
             return defaultValue;
         }
@@ -88,7 +84,7 @@ public final class DefaultContentMetadata implements ContentMetadata {
 
     public final long get(String name, long defaultValue) {
         if (this.metadata.containsKey(name)) {
-            byte[] bytes = (byte[])this.metadata.get(name);
+            byte[] bytes = this.metadata.get(name);
             return ByteBuffer.wrap(bytes).getLong();
         } else {
             return defaultValue;
@@ -103,7 +99,7 @@ public final class DefaultContentMetadata implements ContentMetadata {
         if (this == o) {
             return true;
         } else {
-            return o != null && this.getClass() == o.getClass() ? this.isMetadataEqual(((DefaultContentMetadata)o).metadata) : false;
+            return o != null && this.getClass() == o.getClass() && this.isMetadataEqual(((DefaultContentMetadata) o).metadata);
         }
     }
 
@@ -121,8 +117,8 @@ public final class DefaultContentMetadata implements ContentMetadata {
                 }
 
                 Entry<String, byte[]> entry = (Entry)var2.next();
-                value = (byte[])entry.getValue();
-                otherValue = (byte[])otherMetadata.get(entry.getKey());
+                value = entry.getValue();
+                otherValue = otherMetadata.get(entry.getKey());
             } while(Arrays.equals(value, otherValue));
 
             return false;
@@ -134,7 +130,7 @@ public final class DefaultContentMetadata implements ContentMetadata {
             int result = 0;
 
             Entry entry;
-            for(Iterator var2 = this.metadata.entrySet().iterator(); var2.hasNext(); result += ((String)entry.getKey()).hashCode() ^ Arrays.hashCode((byte[])entry.getValue())) {
+            for(Iterator var2 = this.metadata.entrySet().iterator(); var2.hasNext(); result += entry.getKey().hashCode() ^ Arrays.hashCode((byte[])entry.getValue())) {
                 entry = (Entry)var2.next();
             }
 
@@ -178,9 +174,9 @@ public final class DefaultContentMetadata implements ContentMetadata {
         if (value instanceof Long) {
             return ByteBuffer.allocate(8).putLong((Long)value).array();
         } else if (value instanceof String) {
-            return ((String)value).getBytes(Charset.forName("UTF-8"));
+            return ((String)value).getBytes(StandardCharsets.UTF_8);
         } else if (value instanceof byte[]) {
-            return (byte[])((byte[])value);
+            return (byte[]) value;
         } else {
             throw new IllegalArgumentException();
         }

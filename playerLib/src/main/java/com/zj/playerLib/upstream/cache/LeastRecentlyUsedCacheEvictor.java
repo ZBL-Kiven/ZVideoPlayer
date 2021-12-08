@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.upstream.cache;
 
 import com.zj.playerLib.upstream.cache.Cache.CacheException;
@@ -55,7 +50,7 @@ public final class LeastRecentlyUsedCacheEvictor implements CacheEvictor, Compar
     private void evictCache(Cache cache, long requiredSpace) {
         while(this.currentSize + requiredSpace > this.maxBytes && !this.leastRecentlyUsed.isEmpty()) {
             try {
-                cache.removeSpan((CacheSpan)this.leastRecentlyUsed.first());
+                cache.removeSpan(this.leastRecentlyUsed.first());
             } catch (CacheException var5) {
             }
         }

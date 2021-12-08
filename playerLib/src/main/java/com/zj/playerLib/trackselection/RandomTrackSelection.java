@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.trackselection;
 
 import android.os.SystemClock;
@@ -83,7 +78,7 @@ public final class RandomTrackSelection extends BaseTrackSelection {
         }
 
         public Factory(int seed) {
-            this.random = new Random((long)seed);
+            this.random = new Random(seed);
         }
 
         public RandomTrackSelection createTrackSelection(TrackGroup group, BandwidthMeter bandwidthMeter, int... tracks) {

@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.extractor.mp3;
 
 import android.util.Pair;
@@ -28,8 +23,8 @@ final class MlltSeeker implements Seeker {
         long timeMs = 0L;
 
         for(int i = 1; i <= referenceCount; ++i) {
-            position += (long)(mlltFrame.bytesBetweenReference + mlltFrame.bytesDeviations[i - 1]);
-            timeMs += (long)(mlltFrame.millisecondsBetweenReference + mlltFrame.millisecondsDeviations[i - 1]);
+            position += mlltFrame.bytesBetweenReference + mlltFrame.bytesDeviations[i - 1];
+            timeMs += mlltFrame.millisecondsBetweenReference + mlltFrame.millisecondsDeviations[i - 1];
             referencePositions[i] = position;
             referenceTimesMs[i] = timeMs;
         }
@@ -50,14 +45,14 @@ final class MlltSeeker implements Seeker {
     public SeekPoints getSeekPoints(long timeUs) {
         timeUs = Util.constrainValue(timeUs, 0L, this.durationUs);
         Pair<Long, Long> timeMsAndPosition = linearlyInterpolate(C.usToMs(timeUs), this.referenceTimesMs, this.referencePositions);
-        timeUs = C.msToUs((Long)timeMsAndPosition.first);
-        long position = (Long)timeMsAndPosition.second;
+        timeUs = C.msToUs(timeMsAndPosition.first);
+        long position = timeMsAndPosition.second;
         return new SeekPoints(new SeekPoint(timeUs, position));
     }
 
     public long getTimeUs(long position) {
         Pair<Long, Long> positionAndTimeMs = linearlyInterpolate(position, this.referencePositions, this.referenceTimesMs);
-        return C.msToUs((Long)positionAndTimeMs.second);
+        return C.msToUs(positionAndTimeMs.second);
     }
 
     public long getDurationUs() {

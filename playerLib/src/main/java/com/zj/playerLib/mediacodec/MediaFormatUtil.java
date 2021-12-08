@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.mediacodec;
 
 import android.annotation.TargetApi;
@@ -23,7 +18,7 @@ public final class MediaFormatUtil {
 
     public static void setCsdBuffers(MediaFormat format, List<byte[]> csdBuffers) {
         for(int i = 0; i < csdBuffers.size(); ++i) {
-            format.setByteBuffer("csd-" + i, ByteBuffer.wrap((byte[])csdBuffers.get(i)));
+            format.setByteBuffer("csd-" + i, ByteBuffer.wrap(csdBuffers.get(i)));
         }
 
     }

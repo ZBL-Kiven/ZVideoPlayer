@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.extractor.ts;
 
 import android.util.SparseArray;
@@ -31,10 +26,10 @@ public interface TsPayloadReader {
 
     @Documented
     @Retention(RetentionPolicy.SOURCE)
-    public @interface Flags {
+    @interface Flags {
     }
 
-    public static final class TrackIdGenerator {
+    final class TrackIdGenerator {
         private static final int ID_UNSET = -2147483648;
         private final String formatIdPrefix;
         private final int firstTrackId;
@@ -75,7 +70,7 @@ public interface TsPayloadReader {
         }
     }
 
-    public static final class DvbSubtitleInfo {
+    final class DvbSubtitleInfo {
         public final String language;
         public final int type;
         public final byte[] initializationData;
@@ -87,7 +82,7 @@ public interface TsPayloadReader {
         }
     }
 
-    public static final class EsInfo {
+    final class EsInfo {
         public final int streamType;
         public final String language;
         public final List<DvbSubtitleInfo> dvbSubtitleInfos;
@@ -101,7 +96,7 @@ public interface TsPayloadReader {
         }
     }
 
-    public interface Factory {
+    interface Factory {
         SparseArray<TsPayloadReader> createInitialPayloadReaders();
 
         TsPayloadReader createPayloadReader(int var1, EsInfo var2);

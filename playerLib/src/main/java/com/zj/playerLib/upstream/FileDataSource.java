@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.upstream;
 
 import android.net.Uri;
@@ -21,16 +16,6 @@ public final class FileDataSource extends BaseDataSource {
 
     public FileDataSource() {
         super(false);
-    }
-
-    /** @deprecated */
-    @Deprecated
-    public FileDataSource(@Nullable TransferListener listener) {
-        this();
-        if (listener != null) {
-            this.addTransferListener(listener);
-        }
-
     }
 
     public long open(DataSpec dataSpec) throws FileDataSourceException {
@@ -60,13 +45,13 @@ public final class FileDataSource extends BaseDataSource {
         } else {
             int bytesRead;
             try {
-                bytesRead = this.file.read(buffer, offset, (int)Math.min(this.bytesRemaining, (long)readLength));
+                bytesRead = this.file.read(buffer, offset, (int)Math.min(this.bytesRemaining, readLength));
             } catch (IOException var6) {
                 throw new FileDataSourceException(var6);
             }
 
             if (bytesRead > 0) {
-                this.bytesRemaining -= (long)bytesRead;
+                this.bytesRemaining -= bytesRead;
                 this.bytesTransferred(bytesRead);
             }
 

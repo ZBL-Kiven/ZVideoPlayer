@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.metadata;
 
 import android.os.Parcel;
@@ -42,7 +37,7 @@ public final class Metadata implements Parcelable {
         this.entries = new Entry[in.readInt()];
 
         for(int i = 0; i < this.entries.length; ++i) {
-            this.entries[i] = (Entry)in.readParcelable(Entry.class.getClassLoader());
+            this.entries[i] = in.readParcelable(Entry.class.getClassLoader());
         }
 
     }

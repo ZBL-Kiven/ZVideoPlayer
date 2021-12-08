@@ -1,13 +1,9 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.util;
 
 import androidx.annotation.Nullable;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 public final class ParsableByteArray {
     public byte[] data;
@@ -215,7 +211,7 @@ public final class ParsableByteArray {
     }
 
     public String readString(int length) {
-        return this.readString(length, Charset.forName("UTF-8"));
+        return this.readString(length, StandardCharsets.UTF_8);
     }
 
     public String readString(int length, Charset charset) {
@@ -295,13 +291,13 @@ public final class ParsableByteArray {
 
     public long readUtf8EncodedLong() {
         int length = 0;
-        long value = (long)this.data[this.position];
+        long value = this.data[this.position];
 
         int j;
         for(j = 7; j >= 0; --j) {
             if ((value & (long)(1 << j)) == 0L) {
                 if (j < 6) {
-                    value &= (long)((1 << j) - 1);
+                    value &= (1 << j) - 1;
                     length = 7 - j;
                 } else if (j == 7) {
                     length = 1;

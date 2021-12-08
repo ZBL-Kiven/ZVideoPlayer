@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.source;
 
 import android.net.Uri;
@@ -41,7 +36,7 @@ public interface MediaSourceEventListener {
 
     void onDownstreamFormatChanged(int var1, @Nullable MediaPeriodId var2, MediaLoadData var3);
 
-    public static final class EventDispatcher {
+    final class EventDispatcher {
         public final int windowIndex;
         @Nullable
         public final MediaPeriodId mediaPeriodId;
@@ -49,7 +44,7 @@ public interface MediaSourceEventListener {
         private final long mediaTimeOffsetMs;
 
         public EventDispatcher() {
-            this(new CopyOnWriteArrayList(), 0, (MediaPeriodId)null, 0L);
+            this(new CopyOnWriteArrayList(), 0, null, 0L);
         }
 
         private EventDispatcher(CopyOnWriteArrayList<ListenerAndHandler> listenerAndHandlers, int windowIndex, @Nullable MediaPeriodId mediaPeriodId, long mediaTimeOffsetMs) {
@@ -82,7 +77,7 @@ public interface MediaSourceEventListener {
         }
 
         public void mediaPeriodCreated() {
-            MediaPeriodId mediaPeriodId = (MediaPeriodId)Assertions.checkNotNull(this.mediaPeriodId);
+            MediaPeriodId mediaPeriodId = Assertions.checkNotNull(this.mediaPeriodId);
             Iterator var2 = this.listenerAndHandlers.iterator();
 
             while(var2.hasNext()) {
@@ -96,7 +91,7 @@ public interface MediaSourceEventListener {
         }
 
         public void mediaPeriodReleased() {
-            MediaPeriodId mediaPeriodId = (MediaPeriodId)Assertions.checkNotNull(this.mediaPeriodId);
+            MediaPeriodId mediaPeriodId = Assertions.checkNotNull(this.mediaPeriodId);
             Iterator var2 = this.listenerAndHandlers.iterator();
 
             while(var2.hasNext()) {
@@ -110,7 +105,7 @@ public interface MediaSourceEventListener {
         }
 
         public void loadStarted(DataSpec dataSpec, int dataType, long elapsedRealtimeMs) {
-            this.loadStarted(dataSpec, dataType, -1, (Format)null, 0, (Object)null, -9223372036854775807L, -9223372036854775807L, elapsedRealtimeMs);
+            this.loadStarted(dataSpec, dataType, -1, null, 0, null, -Long.MAX_VALUE, -Long.MAX_VALUE, elapsedRealtimeMs);
         }
 
         public void loadStarted(DataSpec dataSpec, int dataType, int trackType, @Nullable Format trackFormat, int trackSelectionReason, @Nullable Object trackSelectionData, long mediaStartTimeUs, long mediaEndTimeUs, long elapsedRealtimeMs) {
@@ -131,7 +126,7 @@ public interface MediaSourceEventListener {
         }
 
         public void loadCompleted(DataSpec dataSpec, Uri uri, Map<String, List<String>> responseHeaders, int dataType, long elapsedRealtimeMs, long loadDurationMs, long bytesLoaded) {
-            this.loadCompleted(dataSpec, uri, responseHeaders, dataType, -1, (Format)null, 0, (Object)null, -9223372036854775807L, -9223372036854775807L, elapsedRealtimeMs, loadDurationMs, bytesLoaded);
+            this.loadCompleted(dataSpec, uri, responseHeaders, dataType, -1, null, 0, null, -Long.MAX_VALUE, -Long.MAX_VALUE, elapsedRealtimeMs, loadDurationMs, bytesLoaded);
         }
 
         public void loadCompleted(DataSpec dataSpec, Uri uri, Map<String, List<String>> responseHeaders, int dataType, int trackType, @Nullable Format trackFormat, int trackSelectionReason, @Nullable Object trackSelectionData, long mediaStartTimeUs, long mediaEndTimeUs, long elapsedRealtimeMs, long loadDurationMs, long bytesLoaded) {
@@ -152,7 +147,7 @@ public interface MediaSourceEventListener {
         }
 
         public void loadCanceled(DataSpec dataSpec, Uri uri, Map<String, List<String>> responseHeaders, int dataType, long elapsedRealtimeMs, long loadDurationMs, long bytesLoaded) {
-            this.loadCanceled(dataSpec, uri, responseHeaders, dataType, -1, (Format)null, 0, (Object)null, -9223372036854775807L, -9223372036854775807L, elapsedRealtimeMs, loadDurationMs, bytesLoaded);
+            this.loadCanceled(dataSpec, uri, responseHeaders, dataType, -1, null, 0, null, -Long.MAX_VALUE, -Long.MAX_VALUE, elapsedRealtimeMs, loadDurationMs, bytesLoaded);
         }
 
         public void loadCanceled(DataSpec dataSpec, Uri uri, Map<String, List<String>> responseHeaders, int dataType, int trackType, @Nullable Format trackFormat, int trackSelectionReason, @Nullable Object trackSelectionData, long mediaStartTimeUs, long mediaEndTimeUs, long elapsedRealtimeMs, long loadDurationMs, long bytesLoaded) {
@@ -173,7 +168,7 @@ public interface MediaSourceEventListener {
         }
 
         public void loadError(DataSpec dataSpec, Uri uri, Map<String, List<String>> responseHeaders, int dataType, long elapsedRealtimeMs, long loadDurationMs, long bytesLoaded, IOException error, boolean wasCanceled) {
-            this.loadError(dataSpec, uri, responseHeaders, dataType, -1, (Format)null, 0, (Object)null, -9223372036854775807L, -9223372036854775807L, elapsedRealtimeMs, loadDurationMs, bytesLoaded, error, wasCanceled);
+            this.loadError(dataSpec, uri, responseHeaders, dataType, -1, null, 0, null, -Long.MAX_VALUE, -Long.MAX_VALUE, elapsedRealtimeMs, loadDurationMs, bytesLoaded, error, wasCanceled);
         }
 
         public void loadError(DataSpec dataSpec, Uri uri, Map<String, List<String>> responseHeaders, int dataType, int trackType, @Nullable Format trackFormat, int trackSelectionReason, @Nullable Object trackSelectionData, long mediaStartTimeUs, long mediaEndTimeUs, long elapsedRealtimeMs, long loadDurationMs, long bytesLoaded, IOException error, boolean wasCanceled) {
@@ -194,7 +189,7 @@ public interface MediaSourceEventListener {
         }
 
         public void readingStarted() {
-            MediaPeriodId mediaPeriodId = (MediaPeriodId)Assertions.checkNotNull(this.mediaPeriodId);
+            MediaPeriodId mediaPeriodId = Assertions.checkNotNull(this.mediaPeriodId);
             Iterator var2 = this.listenerAndHandlers.iterator();
 
             while(var2.hasNext()) {
@@ -208,11 +203,11 @@ public interface MediaSourceEventListener {
         }
 
         public void upstreamDiscarded(int trackType, long mediaStartTimeUs, long mediaEndTimeUs) {
-            this.upstreamDiscarded(new MediaLoadData(1, trackType, (Format)null, 3, (Object)null, this.adjustMediaTime(mediaStartTimeUs), this.adjustMediaTime(mediaEndTimeUs)));
+            this.upstreamDiscarded(new MediaLoadData(1, trackType, null, 3, null, this.adjustMediaTime(mediaStartTimeUs), this.adjustMediaTime(mediaEndTimeUs)));
         }
 
         public void upstreamDiscarded(MediaLoadData mediaLoadData) {
-            MediaPeriodId mediaPeriodId = (MediaPeriodId)Assertions.checkNotNull(this.mediaPeriodId);
+            MediaPeriodId mediaPeriodId = Assertions.checkNotNull(this.mediaPeriodId);
             Iterator var3 = this.listenerAndHandlers.iterator();
 
             while(var3.hasNext()) {
@@ -226,7 +221,7 @@ public interface MediaSourceEventListener {
         }
 
         public void downstreamFormatChanged(int trackType, @Nullable Format trackFormat, int trackSelectionReason, @Nullable Object trackSelectionData, long mediaTimeUs) {
-            this.downstreamFormatChanged(new MediaLoadData(1, trackType, trackFormat, trackSelectionReason, trackSelectionData, this.adjustMediaTime(mediaTimeUs), -9223372036854775807L));
+            this.downstreamFormatChanged(new MediaLoadData(1, trackType, trackFormat, trackSelectionReason, trackSelectionData, this.adjustMediaTime(mediaTimeUs), -Long.MAX_VALUE));
         }
 
         public void downstreamFormatChanged(MediaLoadData mediaLoadData) {
@@ -244,7 +239,7 @@ public interface MediaSourceEventListener {
 
         private long adjustMediaTime(long mediaTimeUs) {
             long mediaTimeMs = C.usToMs(mediaTimeUs);
-            return mediaTimeMs == -9223372036854775807L ? -9223372036854775807L : this.mediaTimeOffsetMs + mediaTimeMs;
+            return mediaTimeMs == -Long.MAX_VALUE ? -Long.MAX_VALUE : this.mediaTimeOffsetMs + mediaTimeMs;
         }
 
         private void postOrRun(Handler handler, Runnable runnable) {
@@ -267,7 +262,7 @@ public interface MediaSourceEventListener {
         }
     }
 
-    public static final class MediaLoadData {
+    final class MediaLoadData {
         public final int dataType;
         public final int trackType;
         @Nullable
@@ -289,7 +284,7 @@ public interface MediaSourceEventListener {
         }
     }
 
-    public static final class LoadEventInfo {
+    final class LoadEventInfo {
         public final DataSpec dataSpec;
         public final Uri uri;
         public final Map<String, List<String>> responseHeaders;

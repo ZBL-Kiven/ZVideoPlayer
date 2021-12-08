@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.drm;
 
 import android.util.Pair;
@@ -24,7 +19,7 @@ public final class WidevineUtil {
     private static long getDurationRemainingSec(Map<String, String> keyStatus, String property) {
         if (keyStatus != null) {
             try {
-                String value = (String)keyStatus.get(property);
+                String value = keyStatus.get(property);
                 if (value != null) {
                     return Long.parseLong(value);
                 }
@@ -32,6 +27,6 @@ public final class WidevineUtil {
             }
         }
 
-        return -9223372036854775807L;
+        return -Long.MAX_VALUE;
     }
 }

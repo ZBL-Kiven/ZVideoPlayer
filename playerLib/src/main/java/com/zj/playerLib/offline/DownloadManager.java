@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.offline;
 
 import android.os.ConditionVariable;
@@ -312,7 +307,7 @@ public final class DownloadManager {
                     }
                     this.maybeStartTasks();
                     for(int i = 0; i < this.tasks.size(); ++i) {
-                        Task task = (Task)this.tasks.get(i);
+                        Task task = this.tasks.get(i);
                         if (task.currentState == 0) {
                             this.notifyListenersTaskStateChange(task);
                         }
@@ -433,7 +428,7 @@ public final class DownloadManager {
         }
 
         private boolean changeStateAndNotify(int oldState, int newState) {
-            return this.changeStateAndNotify(oldState, newState, (Throwable)null);
+            return this.changeStateAndNotify(oldState, newState, null);
         }
 
         private boolean changeStateAndNotify(int oldState, int newState, Throwable error) {

@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.audio;
 
 import android.annotation.SuppressLint;
@@ -65,15 +60,15 @@ public class MediaCodecAudioRenderer extends MediaCodecRenderer implements Media
     private int pendingStreamChangeCount;
 
     public MediaCodecAudioRenderer(Context context, MediaCodecSelector mediaCodecSelector) {
-        this(context, mediaCodecSelector, (DrmSessionManager)null, false);
+        this(context, mediaCodecSelector, null, false);
     }
 
     public MediaCodecAudioRenderer(Context context, MediaCodecSelector mediaCodecSelector, @Nullable DrmSessionManager<FrameworkMediaCrypto> drmSessionManager, boolean playClearSamplesWithoutKeys) {
-        this(context, mediaCodecSelector, drmSessionManager, playClearSamplesWithoutKeys, (Handler)null, (AudioRendererEventListener)null);
+        this(context, mediaCodecSelector, drmSessionManager, playClearSamplesWithoutKeys, null, null);
     }
 
     public MediaCodecAudioRenderer(Context context, MediaCodecSelector mediaCodecSelector, @Nullable Handler eventHandler, @Nullable AudioRendererEventListener eventListener) {
-        this(context, mediaCodecSelector, (DrmSessionManager)null, false, eventHandler, eventListener);
+        this(context, mediaCodecSelector, null, false, eventHandler, eventListener);
     }
 
     public MediaCodecAudioRenderer(Context context, MediaCodecSelector mediaCodecSelector, @Nullable DrmSessionManager<FrameworkMediaCrypto> drmSessionManager, boolean playClearSamplesWithoutKeys, @Nullable Handler eventHandler, @Nullable AudioRendererEventListener eventListener) {
@@ -88,7 +83,7 @@ public class MediaCodecAudioRenderer extends MediaCodecRenderer implements Media
         super(1, mediaCodecSelector, drmSessionManager, playClearSamplesWithoutKeys, 44100.0F);
         this.context = context.getApplicationContext();
         this.audioSink = audioSink;
-        this.lastInputTimeUs = -9223372036854775807L;
+        this.lastInputTimeUs = -Long.MAX_VALUE;
         this.pendingStreamChangeTimesUs = new long[10];
         this.eventDispatcher = new EventDispatcher(eventHandler, eventListener);
         audioSink.setListener(new AudioSinkListener());
@@ -118,7 +113,7 @@ public class MediaCodecAudioRenderer extends MediaCodecRenderer implements Media
                 } else if (!supportsFormatDrm) {
                     return 2;
                 } else {
-                    MediaCodecInfo decoderInfo = (MediaCodecInfo)decoderInfos.get(0);
+                    MediaCodecInfo decoderInfo = decoderInfos.get(0);
                     boolean isFormatSupported = decoderInfo.isFormatSupported(format);
                     int adaptiveSupport = isFormatSupported && decoderInfo.isSeamlessAdaptationSupported(format) ? 16 : 8;
                     int formatSupport = isFormatSupported ? 4 : 3;
@@ -152,7 +147,7 @@ public class MediaCodecAudioRenderer extends MediaCodecRenderer implements Media
         this.passthroughEnabled = codecInfo.passThrough;
         String codecMimeType = codecInfo.mimeType == null ? "audio/raw" : codecInfo.mimeType;
         MediaFormat mediaFormat = this.getMediaFormat(format, codecMimeType, this.codecMaxInputSize, codecOperatingRate);
-        codec.configure(mediaFormat, (Surface)null, crypto, 0);
+        codec.configure(mediaFormat, null, crypto, 0);
         if (this.passthroughEnabled) {
             this.passthroughMediaFormat = mediaFormat;
             this.passthroughMediaFormat.setString("mime", format.sampleMimeType);
@@ -252,7 +247,7 @@ public class MediaCodecAudioRenderer extends MediaCodecRenderer implements Media
 
     protected void onStreamChanged(Format[] formats, long offsetUs) throws PlaybackException {
         super.onStreamChanged(formats, offsetUs);
-        if (this.lastInputTimeUs != -9223372036854775807L) {
+        if (this.lastInputTimeUs != -Long.MAX_VALUE) {
             if (this.pendingStreamChangeCount == this.pendingStreamChangeTimesUs.length) {
                 Log.w("MediaCodecAudioRenderer", "Too many stream changes, so dropping change at " + this.pendingStreamChangeTimesUs[this.pendingStreamChangeCount - 1]);
             } else {
@@ -270,7 +265,7 @@ public class MediaCodecAudioRenderer extends MediaCodecRenderer implements Media
         this.currentPositionUs = positionUs;
         this.allowFirstBufferPositionDiscontinuity = true;
         this.allowPositionDiscontinuity = true;
-        this.lastInputTimeUs = -9223372036854775807L;
+        this.lastInputTimeUs = -Long.MAX_VALUE;
         this.pendingStreamChangeCount = 0;
     }
 
@@ -287,7 +282,7 @@ public class MediaCodecAudioRenderer extends MediaCodecRenderer implements Media
 
     protected void onDisabled() {
         try {
-            this.lastInputTimeUs = -9223372036854775807L;
+            this.lastInputTimeUs = -Long.MAX_VALUE;
             this.pendingStreamChangeCount = 0;
             this.audioSink.release();
         } finally {
@@ -348,7 +343,7 @@ public class MediaCodecAudioRenderer extends MediaCodecRenderer implements Media
     }
 
     protected boolean processOutputBuffer(long positionUs, long elapsedRealtimeUs, MediaCodec codec, ByteBuffer buffer, int bufferIndex, int bufferFlags, long bufferPresentationTimeUs, boolean shouldSkip, Format format) throws PlaybackException {
-        if (this.codecNeedsEosBufferTimestampWorkaround && bufferPresentationTimeUs == 0L && (bufferFlags & 4) != 0 && this.lastInputTimeUs != -9223372036854775807L) {
+        if (this.codecNeedsEosBufferTimestampWorkaround && bufferPresentationTimeUs == 0L && (bufferFlags & 4) != 0 && this.lastInputTimeUs != -Long.MAX_VALUE) {
             bufferPresentationTimeUs = this.lastInputTimeUs;
         }
 

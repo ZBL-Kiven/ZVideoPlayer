@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.drm;
 
 import com.zj.playerLib.drm.MediaDrm.KeyRequest;
@@ -15,7 +10,7 @@ public final class LocalMediaDrmCallback implements MediaDrmCallback {
     private final byte[] keyResponse;
 
     public LocalMediaDrmCallback(byte[] keyResponse) {
-        this.keyResponse = (byte[])Assertions.checkNotNull(keyResponse);
+        this.keyResponse = Assertions.checkNotNull(keyResponse);
     }
 
     public byte[] executeProvisionRequest(UUID uuid, ProvisionRequest request) throws IOException {

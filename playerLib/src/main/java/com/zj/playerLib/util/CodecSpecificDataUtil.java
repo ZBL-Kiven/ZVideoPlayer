@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.util;
 
 import android.util.Pair;
@@ -138,7 +133,7 @@ public final class CodecSpecificDataUtil {
     @Nullable
     public static byte[][] splitNalUnits(byte[] data) {
         if (!isNalStartCode(data, 0)) {
-            return (byte[][])null;
+            return null;
         } else {
             List<Integer> starts = new ArrayList();
             int nalUnitIndex = 0;
@@ -151,8 +146,8 @@ public final class CodecSpecificDataUtil {
             byte[][] split = new byte[starts.size()][];
 
             for(int i = 0; i < starts.size(); ++i) {
-                int startIndex = (Integer)starts.get(i);
-                int endIndex = i < starts.size() - 1 ? (Integer)starts.get(i + 1) : data.length;
+                int startIndex = starts.get(i);
+                int endIndex = i < starts.size() - 1 ? starts.get(i + 1) : data.length;
                 byte[] nal = new byte[endIndex - startIndex];
                 System.arraycopy(data, startIndex, nal, 0, nal.length);
                 split[i] = nal;

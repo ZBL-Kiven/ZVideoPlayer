@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.text.cea;
 
 import android.text.Layout.Alignment;
@@ -287,7 +282,7 @@ public final class Cea608Decoder extends CeaDecoder {
         List<Cue> displayCues = new ArrayList();
 
         for(int i = 0; i < this.cueBuilders.size(); ++i) {
-            Cue cue = ((CueBuilder)this.cueBuilders.get(i)).build();
+            Cue cue = this.cueBuilders.get(i).build();
             if (cue != null) {
                 displayCues.add(cue);
             }
@@ -400,7 +395,7 @@ public final class Cea608Decoder extends CeaDecoder {
                 this.captionStringBuilder.delete(length - 1, length);
 
                 for(int i = this.cueStyles.size() - 1; i >= 0; --i) {
-                    CueStyle style = (CueStyle)this.cueStyles.get(i);
+                    CueStyle style = this.cueStyles.get(i);
                     if (style.start != length) {
                         break;
                     }
@@ -458,7 +453,7 @@ public final class Cea608Decoder extends CeaDecoder {
             int nextColor = -1;
 
             for(int i = 0; i < this.cueStyles.size(); ++i) {
-                CueStyle cueStyle = (CueStyle)this.cueStyles.get(i);
+                CueStyle cueStyle = this.cueStyles.get(i);
                 boolean underline = cueStyle.underline;
                 int style = cueStyle.style;
                 if (style != 8) {
@@ -467,7 +462,7 @@ public final class Cea608Decoder extends CeaDecoder {
                 }
 
                 int position = cueStyle.start;
-                int nextPosition = i + 1 < this.cueStyles.size() ? ((CueStyle)this.cueStyles.get(i + 1)).start : length;
+                int nextPosition = i + 1 < this.cueStyles.size() ? this.cueStyles.get(i + 1).start : length;
                 if (position != nextPosition) {
                     if (underlineStartPosition != -1 && !underline) {
                         setUnderlineSpan(builder, underlineStartPosition, position);
@@ -510,7 +505,7 @@ public final class Cea608Decoder extends CeaDecoder {
             SpannableStringBuilder cueString = new SpannableStringBuilder();
 
             for(int i = 0; i < this.rolledUpCaptions.size(); ++i) {
-                cueString.append((CharSequence)this.rolledUpCaptions.get(i));
+                cueString.append(this.rolledUpCaptions.get(i));
                 cueString.append('\n');
             }
 

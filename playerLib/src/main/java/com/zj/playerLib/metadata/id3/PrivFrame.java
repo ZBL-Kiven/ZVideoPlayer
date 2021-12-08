@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.metadata.id3;
 
 import android.os.Parcel;
@@ -35,8 +30,8 @@ public final class PrivFrame extends Id3Frame {
 
     PrivFrame(Parcel in) {
         super("PRIV");
-        this.owner = (String)Util.castNonNull(in.readString());
-        this.privateData = (byte[])Util.castNonNull(in.createByteArray());
+        this.owner = Util.castNonNull(in.readString());
+        this.privateData = Util.castNonNull(in.createByteArray());
     }
 
     public boolean equals(@Nullable Object obj) {

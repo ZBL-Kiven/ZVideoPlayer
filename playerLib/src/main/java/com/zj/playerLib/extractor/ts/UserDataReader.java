@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.extractor.ts;
 
 import com.zj.playerLib.Format;
@@ -30,10 +25,10 @@ final class UserDataReader {
         for(int i = 0; i < this.outputs.length; ++i) {
             idGenerator.generateNewId();
             TrackOutput output = extractorOutput.track(idGenerator.getTrackId(), 3);
-            Format channelFormat = (Format)this.closedCaptionFormats.get(i);
+            Format channelFormat = this.closedCaptionFormats.get(i);
             String channelMimeType = channelFormat.sampleMimeType;
             Assertions.checkArgument("application/cea-608".equals(channelMimeType) || "application/cea-708".equals(channelMimeType), "Invalid closed caption mime type provided: " + channelMimeType);
-            output.format(Format.createTextSampleFormat(idGenerator.getFormatId(), channelMimeType, (String)null, -1, channelFormat.selectionFlags, channelFormat.language, channelFormat.accessibilityChannel, (DrmInitData)null, 9223372036854775807L, channelFormat.initializationData));
+            output.format(Format.createTextSampleFormat(idGenerator.getFormatId(), channelMimeType, null, -1, channelFormat.selectionFlags, channelFormat.language, channelFormat.accessibilityChannel, null, Long.MAX_VALUE, channelFormat.initializationData));
             this.outputs[i] = output;
         }
 

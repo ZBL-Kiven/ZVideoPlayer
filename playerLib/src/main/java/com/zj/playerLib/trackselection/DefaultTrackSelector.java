@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.trackselection;
 
 import android.content.Context;
@@ -42,13 +37,13 @@ public class DefaultTrackSelector extends MappingTrackSelector {
     private final AtomicReference<Parameters> parametersReference;
 
     public DefaultTrackSelector() {
-        this((Factory)(new AdaptiveTrackSelection.Factory()));
+        this(new AdaptiveTrackSelection.Factory());
     }
 
     /** @deprecated */
     @Deprecated
     public DefaultTrackSelector(BandwidthMeter bandwidthMeter) {
-        this((Factory)(new AdaptiveTrackSelection.Factory(bandwidthMeter)));
+        this(new AdaptiveTrackSelection.Factory(bandwidthMeter));
     }
 
     public DefaultTrackSelector(Factory adaptiveTrackSelectionFactory) {
@@ -58,7 +53,7 @@ public class DefaultTrackSelector extends MappingTrackSelector {
 
     public void setParameters(Parameters parameters) {
         Assertions.checkNotNull(parameters);
-        if (!((Parameters)this.parametersReference.getAndSet(parameters)).equals(parameters)) {
+        if (!this.parametersReference.getAndSet(parameters).equals(parameters)) {
             this.invalidate();
         }
 
@@ -69,7 +64,7 @@ public class DefaultTrackSelector extends MappingTrackSelector {
     }
 
     public Parameters getParameters() {
-        return (Parameters)this.parametersReference.get();
+        return this.parametersReference.get();
     }
 
     public ParametersBuilder buildUponParameters() {
@@ -132,7 +127,7 @@ public class DefaultTrackSelector extends MappingTrackSelector {
     }
 
     protected final Pair<RendererConfiguration[], TrackSelection[]> selectTracks(MappedTrackInfo mappedTrackInfo, int[][][] rendererFormatSupports, int[] rendererMixedMimeTypeAdaptationSupports) throws PlaybackException {
-        Parameters params = (Parameters)this.parametersReference.get();
+        Parameters params = this.parametersReference.get();
         int rendererCount = mappedTrackInfo.getRendererCount();
         TrackSelection[] rendererTrackSelections = this.selectAllTracks(mappedTrackInfo, rendererFormatSupports, rendererMixedMimeTypeAdaptationSupports, params);
 
@@ -148,7 +143,7 @@ public class DefaultTrackSelector extends MappingTrackSelector {
                     } else if (override.length == 1) {
                         rendererTrackSelections[i] = new FixedTrackSelection(rendererTrackGroups.get(override.groupIndex), override.tracks[0]);
                     } else {
-                        rendererTrackSelections[i] = ((Factory)Assertions.checkNotNull(this.adaptiveTrackSelectionFactory)).createTrackSelection(rendererTrackGroups.get(override.groupIndex), this.getBandwidthMeter(), override.tracks);
+                        rendererTrackSelections[i] = Assertions.checkNotNull(this.adaptiveTrackSelectionFactory).createTrackSelection(rendererTrackGroups.get(override.groupIndex), this.getBandwidthMeter(), override.tracks);
                     }
                 }
             }
@@ -193,26 +188,26 @@ public class DefaultTrackSelector extends MappingTrackSelector {
             switch(trackType) {
             case 1:
                 Pair<TrackSelection, AudioTrackScore> audioSelection = this.selectAudioTrack(mappedTrackInfo.getTrackGroups(i), rendererFormatSupports[i], rendererMixedMimeTypeAdaptationSupports[i], params, seenVideoRendererWithMappedTracks ? null : this.adaptiveTrackSelectionFactory);
-                if (audioSelection != null && (selectedAudioTrackScore == null || ((AudioTrackScore)audioSelection.second).compareTo(selectedAudioTrackScore) > 0)) {
+                if (audioSelection != null && (selectedAudioTrackScore == null || audioSelection.second.compareTo(selectedAudioTrackScore) > 0)) {
                     if (selectedAudioRendererIndex != -1) {
                         rendererTrackSelections[selectedAudioRendererIndex] = null;
                     }
 
-                    rendererTrackSelections[i] = (TrackSelection)audioSelection.first;
-                    selectedAudioTrackScore = (AudioTrackScore)audioSelection.second;
+                    rendererTrackSelections[i] = audioSelection.first;
+                    selectedAudioTrackScore = audioSelection.second;
                     selectedAudioRendererIndex = i;
                 }
             case 2:
                 break;
             case 3:
                 Pair<TrackSelection, Integer> textSelection = this.selectTextTrack(mappedTrackInfo.getTrackGroups(i), rendererFormatSupports[i], params);
-                if (textSelection != null && (Integer)textSelection.second > selectedTextTrackScore) {
+                if (textSelection != null && textSelection.second > selectedTextTrackScore) {
                     if (selectedTextRendererIndex != -1) {
                         rendererTrackSelections[selectedTextRendererIndex] = null;
                     }
 
-                    rendererTrackSelections[i] = (TrackSelection)textSelection.first;
-                    selectedTextTrackScore = (Integer)textSelection.second;
+                    rendererTrackSelections[i] = textSelection.first;
+                    selectedTextTrackScore = textSelection.second;
                     selectedTextRendererIndex = i;
                 }
                 break;
@@ -247,7 +242,7 @@ public class DefaultTrackSelector extends MappingTrackSelector {
             TrackGroup group = groups.get(i);
             int[] adaptiveTracks = getAdaptiveVideoTracksForGroup(group, formatSupport[i], allowMixedMimeTypes, requiredAdaptiveSupport, params.maxVideoWidth, params.maxVideoHeight, params.maxVideoFrameRate, params.maxVideoBitrate, params.viewportWidth, params.viewportHeight, params.viewportOrientationMayChange);
             if (adaptiveTracks.length > 0) {
-                return ((Factory)Assertions.checkNotNull(adaptiveTrackSelectionFactory)).createTrackSelection(group, bandwidthMeter, adaptiveTracks);
+                return Assertions.checkNotNull(adaptiveTrackSelectionFactory).createTrackSelection(group, bandwidthMeter, adaptiveTracks);
             }
         }
 
@@ -268,7 +263,7 @@ public class DefaultTrackSelector extends MappingTrackSelector {
                     int selectedMimeTypeTrackCount = 0;
 
                     for(int i = 0; i < selectedTrackIndices.size(); ++i) {
-                        int trackIndex = (Integer)selectedTrackIndices.get(i);
+                        int trackIndex = selectedTrackIndices.get(i);
                         String sampleMimeType = group.getFormat(trackIndex).sampleMimeType;
                         if (seenMimeTypes.add(sampleMimeType)) {
                             int countForMimeType = getAdaptiveVideoTrackCountForMimeType(group, formatSupport, requiredAdaptiveSupport, sampleMimeType, maxVideoWidth, maxVideoHeight, maxVideoFrameRate, maxVideoBitrate, selectedTrackIndices);
@@ -290,7 +285,7 @@ public class DefaultTrackSelector extends MappingTrackSelector {
         int adaptiveTrackCount = 0;
 
         for(int i = 0; i < selectedTrackIndices.size(); ++i) {
-            int trackIndex = (Integer)selectedTrackIndices.get(i);
+            int trackIndex = selectedTrackIndices.get(i);
             if (isSupportedAdaptiveVideoTrack(group.getFormat(trackIndex), mimeType, formatSupport[trackIndex], requiredAdaptiveSupport, maxVideoWidth, maxVideoHeight, maxVideoFrameRate, maxVideoBitrate)) {
                 ++adaptiveTrackCount;
             }
@@ -301,7 +296,7 @@ public class DefaultTrackSelector extends MappingTrackSelector {
 
     private static void filterAdaptiveVideoTrackCountForMimeType(TrackGroup group, int[] formatSupport, int requiredAdaptiveSupport, @Nullable String mimeType, int maxVideoWidth, int maxVideoHeight, int maxVideoFrameRate, int maxVideoBitrate, List<Integer> selectedTrackIndices) {
         for(int i = selectedTrackIndices.size() - 1; i >= 0; --i) {
-            int trackIndex = (Integer)selectedTrackIndices.get(i);
+            int trackIndex = selectedTrackIndices.get(i);
             if (!isSupportedAdaptiveVideoTrack(group.getFormat(trackIndex), mimeType, formatSupport[trackIndex], requiredAdaptiveSupport, maxVideoWidth, maxVideoHeight, maxVideoFrameRate, maxVideoBitrate)) {
                 selectedTrackIndices.remove(i);
             }
@@ -429,7 +424,7 @@ public class DefaultTrackSelector extends MappingTrackSelector {
             int index = 0;
 
             for(int i = 0; i < group.length; ++i) {
-                if (isSupportedAdaptiveAudioTrack(group.getFormat(i), formatSupport[i], (AudioConfigurationTuple)Assertions.checkNotNull(selectedConfiguration))) {
+                if (isSupportedAdaptiveAudioTrack(group.getFormat(i), formatSupport[i], Assertions.checkNotNull(selectedConfiguration))) {
                     adaptiveIndices[index++] = i;
                 }
             }
@@ -642,7 +637,7 @@ public class DefaultTrackSelector extends MappingTrackSelector {
 
             if (maxVideoPixelsToRetain != 2147483647) {
                 for(i = selectedTrackIndices.size() - 1; i >= 0; --i) {
-                    format = group.getFormat((Integer)selectedTrackIndices.get(i));
+                    format = group.getFormat(selectedTrackIndices.get(i));
                     int pixelCount = format.getPixelCount();
                     if (pixelCount == -1 || pixelCount > maxVideoPixelsToRetain) {
                         selectedTrackIndices.remove(i);
@@ -843,7 +838,7 @@ public class DefaultTrackSelector extends MappingTrackSelector {
         };
 
         private Parameters() {
-            this(new SparseArray(), new SparseBooleanArray(), (String)null, (String)null, false, 0, false, false, false, true, 2147483647, 2147483647, 2147483647, 2147483647, true, true, 2147483647, 2147483647, true, 0);
+            this(new SparseArray(), new SparseBooleanArray(), null, null, false, 0, false, false, false, true, 2147483647, 2147483647, 2147483647, 2147483647, true, true, 2147483647, 2147483647, true, 0);
         }
 
         Parameters(SparseArray<Map<TrackGroupArray, SelectionOverride>> selectionOverrides, SparseBooleanArray rendererDisabledFlags, @Nullable String preferredAudioLanguage, @Nullable String preferredTextLanguage, boolean selectUndeterminedTextLanguage, int disabledTextTrackSelectionFlags, boolean forceLowestBitrate, boolean forceHighestSupportedBitrate, boolean allowMixedMimeAdaptiveness, boolean allowNonSeamlessAdaptiveness, int maxVideoWidth, int maxVideoHeight, int maxVideoFrameRate, int maxVideoBitrate, boolean exceedVideoConstraintsIfNecessary, boolean exceedRendererCapabilitiesIfNecessary, int viewportWidth, int viewportHeight, boolean viewportOrientationMayChange, int tunnelingAudioSessionId) {
@@ -897,14 +892,14 @@ public class DefaultTrackSelector extends MappingTrackSelector {
         }
 
         public final boolean hasSelectionOverride(int rendererIndex, TrackGroupArray groups) {
-            Map<TrackGroupArray, SelectionOverride> overrides = (Map)this.selectionOverrides.get(rendererIndex);
+            Map<TrackGroupArray, SelectionOverride> overrides = this.selectionOverrides.get(rendererIndex);
             return overrides != null && overrides.containsKey(groups);
         }
 
         @Nullable
         public final DefaultTrackSelector.SelectionOverride getSelectionOverride(int rendererIndex, TrackGroupArray groups) {
-            Map<TrackGroupArray, SelectionOverride> overrides = (Map)this.selectionOverrides.get(rendererIndex);
-            return overrides != null ? (SelectionOverride)overrides.get(groups) : null;
+            Map<TrackGroupArray, SelectionOverride> overrides = this.selectionOverrides.get(rendererIndex);
+            return overrides != null ? overrides.get(groups) : null;
         }
 
         public ParametersBuilder buildUpon() {
@@ -981,8 +976,8 @@ public class DefaultTrackSelector extends MappingTrackSelector {
                 Map<TrackGroupArray, SelectionOverride> overrides = new HashMap(overrideCount);
 
                 for(int j = 0; j < overrideCount; ++j) {
-                    TrackGroupArray trackGroups = (TrackGroupArray)in.readParcelable(TrackGroupArray.class.getClassLoader());
-                    SelectionOverride override = (SelectionOverride)in.readParcelable(SelectionOverride.class.getClassLoader());
+                    TrackGroupArray trackGroups = in.readParcelable(TrackGroupArray.class.getClassLoader());
+                    SelectionOverride override = in.readParcelable(SelectionOverride.class.getClassLoader());
                     overrides.put(trackGroups, override);
                 }
 
@@ -998,7 +993,7 @@ public class DefaultTrackSelector extends MappingTrackSelector {
 
             for(int i = 0; i < renderersWithOverridesCount; ++i) {
                 int rendererIndex = selectionOverrides.keyAt(i);
-                Map<TrackGroupArray, SelectionOverride> overrides = (Map)selectionOverrides.valueAt(i);
+                Map<TrackGroupArray, SelectionOverride> overrides = selectionOverrides.valueAt(i);
                 int overrideCount = overrides.size();
                 dest.writeInt(rendererIndex);
                 dest.writeInt(overrideCount);
@@ -1006,8 +1001,8 @@ public class DefaultTrackSelector extends MappingTrackSelector {
 
                 while(var7.hasNext()) {
                     Entry<TrackGroupArray, SelectionOverride> override = (Entry)var7.next();
-                    dest.writeParcelable((Parcelable)override.getKey(), 0);
-                    dest.writeParcelable((Parcelable)override.getValue(), 0);
+                    dest.writeParcelable(override.getKey(), 0);
+                    dest.writeParcelable(override.getValue(), 0);
                 }
             }
 
@@ -1035,7 +1030,7 @@ public class DefaultTrackSelector extends MappingTrackSelector {
             } else {
                 for(int indexInFirst = 0; indexInFirst < firstSize; ++indexInFirst) {
                     int indexInSecond = second.indexOfKey(first.keyAt(indexInFirst));
-                    if (indexInSecond < 0 || !areSelectionOverridesEqual((Map)first.valueAt(indexInFirst), (Map)second.valueAt(indexInSecond))) {
+                    if (indexInSecond < 0 || !areSelectionOverridesEqual(first.valueAt(indexInFirst), second.valueAt(indexInSecond))) {
                         return false;
                     }
                 }
@@ -1223,13 +1218,13 @@ public class DefaultTrackSelector extends MappingTrackSelector {
         }
 
         public final ParametersBuilder setSelectionOverride(int rendererIndex, TrackGroupArray groups, SelectionOverride override) {
-            Map<TrackGroupArray, SelectionOverride> overrides = (Map)this.selectionOverrides.get(rendererIndex);
+            Map<TrackGroupArray, SelectionOverride> overrides = this.selectionOverrides.get(rendererIndex);
             if (overrides == null) {
                 overrides = new HashMap();
                 this.selectionOverrides.put(rendererIndex, overrides);
             }
 
-            if (((Map)overrides).containsKey(groups) && Util.areEqual(((Map)overrides).get(groups), override)) {
+            if (overrides.containsKey(groups) && Util.areEqual(((Map)overrides).get(groups), override)) {
                 return this;
             } else {
                 ((Map)overrides).put(groups, override);
@@ -1238,7 +1233,7 @@ public class DefaultTrackSelector extends MappingTrackSelector {
         }
 
         public final ParametersBuilder clearSelectionOverride(int rendererIndex, TrackGroupArray groups) {
-            Map<TrackGroupArray, SelectionOverride> overrides = (Map)this.selectionOverrides.get(rendererIndex);
+            Map<TrackGroupArray, SelectionOverride> overrides = this.selectionOverrides.get(rendererIndex);
             if (overrides != null && overrides.containsKey(groups)) {
                 overrides.remove(groups);
                 if (overrides.isEmpty()) {
@@ -1252,7 +1247,7 @@ public class DefaultTrackSelector extends MappingTrackSelector {
         }
 
         public final ParametersBuilder clearSelectionOverrides(int rendererIndex) {
-            Map<TrackGroupArray, SelectionOverride> overrides = (Map)this.selectionOverrides.get(rendererIndex);
+            Map<TrackGroupArray, SelectionOverride> overrides = this.selectionOverrides.get(rendererIndex);
             if (overrides != null && !overrides.isEmpty()) {
                 this.selectionOverrides.remove(rendererIndex);
                 return this;
@@ -1287,7 +1282,7 @@ public class DefaultTrackSelector extends MappingTrackSelector {
             SparseArray<Map<TrackGroupArray, SelectionOverride>> clone = new SparseArray();
 
             for(int i = 0; i < selectionOverrides.size(); ++i) {
-                clone.put(selectionOverrides.keyAt(i), new HashMap((Map)selectionOverrides.valueAt(i)));
+                clone.put(selectionOverrides.keyAt(i), new HashMap(selectionOverrides.valueAt(i)));
             }
 
             return clone;

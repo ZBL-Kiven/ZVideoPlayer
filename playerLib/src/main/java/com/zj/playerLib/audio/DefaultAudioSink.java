@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.audio;
 
 import android.annotation.SuppressLint;
@@ -111,21 +106,21 @@ public final class DefaultAudioSink implements AudioSink {
     }
 
     public DefaultAudioSink(@Nullable AudioCapabilities audioCapabilities, AudioProcessor[] audioProcessors, boolean enableConvertHighResIntPcmToFloat) {
-        this(audioCapabilities, (AudioProcessorChain) (new DefaultAudioProcessorChain(audioProcessors)), enableConvertHighResIntPcmToFloat);
+        this(audioCapabilities, new DefaultAudioProcessorChain(audioProcessors), enableConvertHighResIntPcmToFloat);
     }
 
     public DefaultAudioSink(@Nullable AudioCapabilities audioCapabilities, AudioProcessorChain audioProcessorChain, boolean enableConvertHighResIntPcmToFloat) {
         this.audioCapabilities = audioCapabilities;
-        this.audioProcessorChain = (AudioProcessorChain) Assertions.checkNotNull(audioProcessorChain);
+        this.audioProcessorChain = Assertions.checkNotNull(audioProcessorChain);
         this.enableConvertHighResIntPcmToFloat = enableConvertHighResIntPcmToFloat;
         this.releasingConditionVariable = new ConditionVariable(true);
         this.audioTrackPositionTracker = new AudioTrackPositionTracker(new PositionTrackerListener());
         this.channelMappingAudioProcessor = new ChannelMappingAudioProcessor();
         this.trimmingAudioProcessor = new TrimmingAudioProcessor();
         ArrayList<AudioProcessor> toIntPcmAudioProcessors = new ArrayList();
-        Collections.addAll(toIntPcmAudioProcessors, new AudioProcessor[]{new ResamplingAudioProcessor(), this.channelMappingAudioProcessor, this.trimmingAudioProcessor});
+        Collections.addAll(toIntPcmAudioProcessors, new ResamplingAudioProcessor(), this.channelMappingAudioProcessor, this.trimmingAudioProcessor);
         Collections.addAll(toIntPcmAudioProcessors, audioProcessorChain.getAudioProcessors());
-        this.toIntPcmAvailableAudioProcessors = (AudioProcessor[]) toIntPcmAudioProcessors.toArray(new AudioProcessor[toIntPcmAudioProcessors.size()]);
+        this.toIntPcmAvailableAudioProcessors = toIntPcmAudioProcessors.toArray(new AudioProcessor[toIntPcmAudioProcessors.size()]);
         this.toFloatPcmAvailableAudioProcessors = new AudioProcessor[]{new FloatResamplingAudioProcessor()};
         this.volume = 1.0F;
         this.startMediaTimeState = 0;
@@ -227,7 +222,7 @@ public final class DefaultAudioSink implements AudioSink {
             Assertions.checkState(rate != -2);
             int multipliedBufferSize = rate * 4;
             int minAppBufferSize = (int) this.durationUsToFrames(250000L) * this.outputPcmFrameSize;
-            int maxAppBufferSize = (int) Math.max((long) rate, this.durationUsToFrames(750000L) * (long) this.outputPcmFrameSize);
+            int maxAppBufferSize = (int) Math.max(rate, this.durationUsToFrames(750000L) * (long) this.outputPcmFrameSize);
             return Util.constrainValue(multipliedBufferSize, minAppBufferSize, maxAppBufferSize);
         } else {
             rate = getMaximumEncodedRateBytesPerSecond(this.outputEncoding);
@@ -254,7 +249,7 @@ public final class DefaultAudioSink implements AudioSink {
         }
 
         int count = newAudioProcessors.size();
-        this.activeAudioProcessors = (AudioProcessor[]) newAudioProcessors.toArray(new AudioProcessor[count]);
+        this.activeAudioProcessors = newAudioProcessors.toArray(new AudioProcessor[count]);
         this.outputBuffers = new ByteBuffer[count];
         this.flushAudioProcessors();
     }
@@ -373,9 +368,9 @@ public final class DefaultAudioSink implements AudioSink {
                 }
 
                 if (this.isInputPcm) {
-                    this.submittedPcmBytes += (long) buffer.remaining();
+                    this.submittedPcmBytes += buffer.remaining();
                 } else {
-                    this.submittedEncodedFrames += (long) this.framesPerEncodedSample;
+                    this.submittedEncodedFrames += this.framesPerEncodedSample;
                 }
 
                 this.inputBuffer = buffer;
@@ -465,7 +460,7 @@ public final class DefaultAudioSink implements AudioSink {
                     }
                 }
             } else if (this.tunneling) {
-                Assertions.checkState(avSyncPresentationTimeUs != -9223372036854775807L);
+                Assertions.checkState(avSyncPresentationTimeUs != -Long.MAX_VALUE);
                 bytesWritten = this.writeNonBlockingWithAvSyncV21(this.audioTrack, buffer, bytesRemaining, avSyncPresentationTimeUs);
             } else {
                 bytesWritten = writeNonBlockingV21(this.audioTrack, buffer, bytesRemaining);
@@ -476,12 +471,12 @@ public final class DefaultAudioSink implements AudioSink {
                 throw new WriteException(bytesWritten);
             } else {
                 if (this.isInputPcm) {
-                    this.writtenPcmBytes += (long) bytesWritten;
+                    this.writtenPcmBytes += bytesWritten;
                 }
 
                 if (bytesWritten == bytesRemaining) {
                     if (!this.isInputPcm) {
-                        this.writtenEncodedFrames += (long) this.framesPerEncodedSample;
+                        this.writtenEncodedFrames += this.framesPerEncodedSample;
                     }
 
                     this.outputBuffer = null;
@@ -516,7 +511,7 @@ public final class DefaultAudioSink implements AudioSink {
                 audioProcessor.queueEndOfStream();
             }
 
-            this.processBuffers(-9223372036854775807L);
+            this.processBuffers(-Long.MAX_VALUE);
             if (!audioProcessor.isEnded()) {
                 return false;
             }
@@ -526,7 +521,7 @@ public final class DefaultAudioSink implements AudioSink {
         }
 
         if (this.outputBuffer != null) {
-            this.writeBuffer(this.outputBuffer, -9223372036854775807L);
+            this.writeBuffer(this.outputBuffer, -Long.MAX_VALUE);
             if (this.outputBuffer != null) {
                 return false;
             }
@@ -549,7 +544,7 @@ public final class DefaultAudioSink implements AudioSink {
             this.playbackParameters = PlaybackParameters.DEFAULT;
             return this.playbackParameters;
         } else {
-            PlaybackParameters lastSetPlaybackParameters = this.afterDrainPlaybackParameters != null ? this.afterDrainPlaybackParameters : (!this.playbackParametersCheckpoints.isEmpty() ? ((PlaybackParametersCheckpoint) this.playbackParametersCheckpoints.getLast()).playbackParameters : this.playbackParameters);
+            PlaybackParameters lastSetPlaybackParameters = this.afterDrainPlaybackParameters != null ? this.afterDrainPlaybackParameters : (!this.playbackParametersCheckpoints.isEmpty() ? this.playbackParametersCheckpoints.getLast().playbackParameters : this.playbackParameters);
             if (!playbackParameters.equals(lastSetPlaybackParameters)) {
                 if (this.isInitialized()) {
                     this.afterDrainPlaybackParameters = playbackParameters;
@@ -659,7 +654,7 @@ public final class DefaultAudioSink implements AudioSink {
                 this.playbackParameters = this.afterDrainPlaybackParameters;
                 this.afterDrainPlaybackParameters = null;
             } else if (!this.playbackParametersCheckpoints.isEmpty()) {
-                this.playbackParameters = ((PlaybackParametersCheckpoint) this.playbackParametersCheckpoints.getLast()).playbackParameters;
+                this.playbackParameters = this.playbackParametersCheckpoints.getLast().playbackParameters;
             }
 
             this.playbackParametersCheckpoints.clear();
@@ -736,7 +731,7 @@ public final class DefaultAudioSink implements AudioSink {
 
     private long applySpeedup(long positionUs) {
         PlaybackParametersCheckpoint checkpoint;
-        for (checkpoint = null; !this.playbackParametersCheckpoints.isEmpty() && positionUs >= ((PlaybackParametersCheckpoint) this.playbackParametersCheckpoints.getFirst()).positionUs; checkpoint = (PlaybackParametersCheckpoint) this.playbackParametersCheckpoints.remove()) {
+        for (checkpoint = null; !this.playbackParametersCheckpoints.isEmpty() && positionUs >= this.playbackParametersCheckpoints.getFirst().positionUs; checkpoint = this.playbackParametersCheckpoints.remove()) {
         }
 
         if (checkpoint != null) {
@@ -998,7 +993,7 @@ public final class DefaultAudioSink implements AudioSink {
         private final SonicAudioProcessor sonicAudioProcessor;
 
         public DefaultAudioProcessorChain(AudioProcessor... audioProcessors) {
-            this.audioProcessors = (AudioProcessor[]) Arrays.copyOf(audioProcessors, audioProcessors.length + 2);
+            this.audioProcessors = Arrays.copyOf(audioProcessors, audioProcessors.length + 2);
             this.silenceSkippingAudioProcessor = new SilenceSkippingAudioProcessor();
             this.sonicAudioProcessor = new SonicAudioProcessor();
             this.audioProcessors[audioProcessors.length] = this.silenceSkippingAudioProcessor;

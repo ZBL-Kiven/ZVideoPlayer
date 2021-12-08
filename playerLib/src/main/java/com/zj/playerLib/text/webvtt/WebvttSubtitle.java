@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.text.webvtt;
 
 import android.text.SpannableStringBuilder;
@@ -27,7 +22,7 @@ final class WebvttSubtitle implements Subtitle {
         this.cueTimesUs = new long[2 * this.numCues];
 
         for(int cueIndex = 0; cueIndex < this.numCues; ++cueIndex) {
-            WebvttCue cue = (WebvttCue)cues.get(cueIndex);
+            WebvttCue cue = cues.get(cueIndex);
             int arrayIndex = cueIndex * 2;
             this.cueTimesUs[arrayIndex] = cue.startTime;
             this.cueTimesUs[arrayIndex + 1] = cue.endTime;
@@ -63,7 +58,7 @@ final class WebvttSubtitle implements Subtitle {
                     list = new ArrayList();
                 }
 
-                WebvttCue cue = (WebvttCue)this.cues.get(i);
+                WebvttCue cue = this.cues.get(i);
                 if (cue.isNormalCue()) {
                     if (firstNormalCue == null) {
                         firstNormalCue = cue;

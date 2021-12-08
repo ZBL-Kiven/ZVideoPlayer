@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib;
 
 import android.content.Context;
@@ -94,7 +89,7 @@ public class DefaultRenderersFactory implements RenderersFactory {
         this.buildMetadataRenderers(this.context, metadataRendererOutput, eventHandler.getLooper(), this.extensionRendererMode, renderersList);
         this.buildCameraMotionRenderers(this.context, this.extensionRendererMode, renderersList);
         this.buildMiscellaneousRenderers(this.context, eventHandler, this.extensionRendererMode, renderersList);
-        return (Renderer[])renderersList.toArray(new Renderer[renderersList.size()]);
+        return renderersList.toArray(new Renderer[renderersList.size()]);
     }
 
     protected void buildVideoRenderers(Context context, @Nullable DrmSessionManager<FrameworkMediaCrypto> drmSessionManager, long allowedVideoJoiningTimeMs, Handler eventHandler, VideoRendererEventListener eventListener, int extensionRendererMode, ArrayList<Renderer> out) {

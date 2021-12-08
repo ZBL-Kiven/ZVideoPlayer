@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.extractor.ogg;
 
 import com.zj.playerLib.Format;
@@ -57,7 +52,7 @@ final class OpusReader extends StreamReader {
             initializationData.add(metadata);
             this.putNativeOrderLong(initializationData, preskip);
             this.putNativeOrderLong(initializationData, 3840);
-            setupData.format = Format.createAudioSampleFormat((String)null, "audio/opus", (String)null, -1, -1, channelCount, 48000, initializationData, (DrmInitData)null, 0, (String)null);
+            setupData.format = Format.createAudioSampleFormat(null, "audio/opus", null, -1, -1, channelCount, 48000, initializationData, null, 0, null);
             this.headerRead = true;
             return true;
         } else {

@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.upstream;
 
 import android.net.Uri;
@@ -66,7 +61,7 @@ public final class ParsingLoadable<T> implements Loadable {
 
         try {
             inputStream.open();
-            Uri dataSourceUri = (Uri)Assertions.checkNotNull(this.dataSource.getUri());
+            Uri dataSourceUri = Assertions.checkNotNull(this.dataSource.getUri());
             this.result = this.parser.parse(dataSourceUri, inputStream);
         } finally {
             Util.closeQuietly(inputStream);

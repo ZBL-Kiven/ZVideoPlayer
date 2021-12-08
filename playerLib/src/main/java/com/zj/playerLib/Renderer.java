@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib;
 
 import com.zj.playerLib.PlayerMessage.Target;
@@ -62,6 +57,6 @@ public interface Renderer extends Target {
 
     @Documented
     @Retention(RetentionPolicy.SOURCE)
-    public @interface State {
+    @interface State {
     }
 }

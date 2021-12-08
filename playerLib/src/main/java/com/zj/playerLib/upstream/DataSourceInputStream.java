@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.upstream;
 
 import androidx.annotation.NonNull;
@@ -48,7 +43,7 @@ public final class DataSourceInputStream extends InputStream {
         if (bytesRead == -1) {
             return -1;
         } else {
-            this.totalBytesRead += (long)bytesRead;
+            this.totalBytesRead += bytesRead;
             return bytesRead;
         }
     }

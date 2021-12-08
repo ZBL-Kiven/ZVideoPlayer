@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.metadata.id3;
 
 import androidx.annotation.Nullable;
@@ -15,6 +10,7 @@ import com.zj.playerLib.util.ParsableByteArray;
 import com.zj.playerLib.util.Util;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -43,7 +39,7 @@ public final class Id3Decoder implements MetadataDecoder {
     private final Id3Decoder.FramePredicate framePredicate;
 
     public Id3Decoder() {
-        this((FramePredicate)null);
+        this(null);
     }
 
     public Id3Decoder(@Nullable Id3Decoder.FramePredicate framePredicate) {
@@ -170,7 +166,7 @@ public final class Id3Decoder implements MetadataDecoder {
                     flags = id3Data.readUnsignedShort();
                 } else {
                     id = id3Data.readUnsignedInt24();
-                    frameSize = (long)id3Data.readUnsignedInt24();
+                    frameSize = id3Data.readUnsignedInt24();
                     flags = 0;
                 }
 
@@ -390,7 +386,7 @@ public final class Id3Decoder implements MetadataDecoder {
             id3Data.readBytes(data, 0, frameSize - 1);
             int valueEndIndex = indexOfEos(data, 0, encoding);
             String value = new String(data, 0, valueEndIndex, charset);
-            return new TextInformationFrame(id, (String)null, value);
+            return new TextInformationFrame(id, null, value);
         }
     }
 
@@ -416,15 +412,15 @@ public final class Id3Decoder implements MetadataDecoder {
         byte[] data = new byte[frameSize];
         id3Data.readBytes(data, 0, frameSize);
         int urlEndIndex = indexOfZeroByte(data, 0);
-        String url = new String(data, 0, urlEndIndex, "ISO-8859-1");
-        return new UrlLinkFrame(id, (String)null, url);
+        String url = new String(data, 0, urlEndIndex, StandardCharsets.ISO_8859_1);
+        return new UrlLinkFrame(id, null, url);
     }
 
     private static PrivFrame decodePrivFrame(ParsableByteArray id3Data, int frameSize) throws UnsupportedEncodingException {
         byte[] data = new byte[frameSize];
         id3Data.readBytes(data, 0, frameSize);
         int ownerEndIndex = indexOfZeroByte(data, 0);
-        String owner = new String(data, 0, ownerEndIndex, "ISO-8859-1");
+        String owner = new String(data, 0, ownerEndIndex, StandardCharsets.ISO_8859_1);
         int privateDataStartIndex = ownerEndIndex + 1;
         byte[] privateData = copyOfRangeIfValid(data, privateDataStartIndex, data.length);
         return new PrivFrame(owner, privateData);
@@ -436,7 +432,7 @@ public final class Id3Decoder implements MetadataDecoder {
         byte[] data = new byte[frameSize - 1];
         id3Data.readBytes(data, 0, frameSize - 1);
         int mimeTypeEndIndex = indexOfZeroByte(data, 0);
-        String mimeType = new String(data, 0, mimeTypeEndIndex, "ISO-8859-1");
+        String mimeType = new String(data, 0, mimeTypeEndIndex, StandardCharsets.ISO_8859_1);
         int filenameStartIndex = mimeTypeEndIndex + 1;
         int filenameEndIndex = indexOfEos(data, filenameStartIndex, encoding);
         String filename = decodeStringIfValid(data, filenameStartIndex, filenameEndIndex, charset);
@@ -457,13 +453,13 @@ public final class Id3Decoder implements MetadataDecoder {
         int mimeTypeEndIndex;
         if (majorVersion == 2) {
             mimeTypeEndIndex = 2;
-            mimeType = "image/" + Util.toLowerInvariant(new String(data, 0, 3, "ISO-8859-1"));
+            mimeType = "image/" + Util.toLowerInvariant(new String(data, 0, 3, StandardCharsets.ISO_8859_1));
             if ("image/jpg".equals(mimeType)) {
                 mimeType = "image/jpeg";
             }
         } else {
             mimeTypeEndIndex = indexOfZeroByte(data, 0);
-            mimeType = Util.toLowerInvariant(new String(data, 0, mimeTypeEndIndex, "ISO-8859-1"));
+            mimeType = Util.toLowerInvariant(new String(data, 0, mimeTypeEndIndex, StandardCharsets.ISO_8859_1));
             if (mimeType.indexOf(47) == -1) {
                 mimeType = "image/" + mimeType;
             }
@@ -502,7 +498,7 @@ public final class Id3Decoder implements MetadataDecoder {
     private static ChapterFrame decodeChapterFrame(ParsableByteArray id3Data, int frameSize, int majorVersion, boolean unsignedIntFrameSizeHack, int frameHeaderSize, @Nullable Id3Decoder.FramePredicate framePredicate) throws UnsupportedEncodingException {
         int framePosition = id3Data.getPosition();
         int chapterIdEndIndex = indexOfZeroByte(id3Data.data, framePosition);
-        String chapterId = new String(id3Data.data, framePosition, chapterIdEndIndex - framePosition, "ISO-8859-1");
+        String chapterId = new String(id3Data.data, framePosition, chapterIdEndIndex - framePosition, StandardCharsets.ISO_8859_1);
         id3Data.setPosition(chapterIdEndIndex + 1);
         int startTime = id3Data.readInt();
         int endTime = id3Data.readInt();
@@ -534,7 +530,7 @@ public final class Id3Decoder implements MetadataDecoder {
     private static ChapterTocFrame decodeChapterTOCFrame(ParsableByteArray id3Data, int frameSize, int majorVersion, boolean unsignedIntFrameSizeHack, int frameHeaderSize, @Nullable Id3Decoder.FramePredicate framePredicate) throws UnsupportedEncodingException {
         int framePosition = id3Data.getPosition();
         int elementIdEndIndex = indexOfZeroByte(id3Data.data, framePosition);
-        String elementId = new String(id3Data.data, framePosition, elementIdEndIndex - framePosition, "ISO-8859-1");
+        String elementId = new String(id3Data.data, framePosition, elementIdEndIndex - framePosition, StandardCharsets.ISO_8859_1);
         id3Data.setPosition(elementIdEndIndex + 1);
         int ctocFlags = id3Data.readUnsignedByte();
         boolean isRoot = (ctocFlags & 2) != 0;
@@ -546,7 +542,7 @@ public final class Id3Decoder implements MetadataDecoder {
         for(int i = 0; i < childCount; ++i) {
             limit = id3Data.getPosition();
             int endIndex = indexOfZeroByte(id3Data.data, limit);
-            children[i] = new String(id3Data.data, limit, endIndex - limit, "ISO-8859-1");
+            children[i] = new String(id3Data.data, limit, endIndex - limit, StandardCharsets.ISO_8859_1);
             id3Data.setPosition(endIndex + 1);
         }
 

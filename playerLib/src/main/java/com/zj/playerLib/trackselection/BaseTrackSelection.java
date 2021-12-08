@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.trackselection;
 
 import android.os.SystemClock;
@@ -29,7 +24,7 @@ public abstract class BaseTrackSelection implements TrackSelection {
 
     public BaseTrackSelection(TrackGroup group, int... tracks) {
         Assertions.checkState(tracks.length > 0);
-        this.group = (TrackGroup)Assertions.checkNotNull(group);
+        this.group = Assertions.checkNotNull(group);
         this.length = tracks.length;
         this.formats = new Format[this.length];
 
@@ -116,7 +111,7 @@ public abstract class BaseTrackSelection implements TrackSelection {
         if (!canBlacklist) {
             return false;
         } else {
-            this.blacklistUntilTimes[index] = Math.max(this.blacklistUntilTimes[index], Util.addWithOverflowDefault(nowMs, blacklistDurationMs, 9223372036854775807L));
+            this.blacklistUntilTimes[index] = Math.max(this.blacklistUntilTimes[index], Util.addWithOverflowDefault(nowMs, blacklistDurationMs, Long.MAX_VALUE));
             return true;
         }
     }

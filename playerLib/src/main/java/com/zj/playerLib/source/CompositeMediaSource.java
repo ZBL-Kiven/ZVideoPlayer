@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.source;
 
 import android.os.Handler;
@@ -73,12 +68,12 @@ public abstract class CompositeMediaSource<T> extends BaseMediaSource {
         };
         MediaSourceEventListener eventListener = new ForwardingEventListener(id);
         this.childSources.put(id, new MediaSourceAndListener(mediaSource, sourceListener, eventListener));
-        mediaSource.addEventListener((Handler)Assertions.checkNotNull(this.eventHandler), eventListener);
-        mediaSource.prepareSource((InlinePlayer)Assertions.checkNotNull(this.player), false, sourceListener, this.mediaTransferListener);
+        mediaSource.addEventListener(Assertions.checkNotNull(this.eventHandler), eventListener);
+        mediaSource.prepareSource(Assertions.checkNotNull(this.player), false, sourceListener, this.mediaTransferListener);
     }
 
     protected final void releaseChildSource(T id) {
-        MediaSourceAndListener removedChild = (MediaSourceAndListener)Assertions.checkNotNull(this.childSources.remove(id));
+        MediaSourceAndListener removedChild = Assertions.checkNotNull(this.childSources.remove(id));
         removedChild.mediaSource.releaseSource(removedChild.listener);
         removedChild.mediaSource.removeEventListener(removedChild.eventListener);
     }
@@ -98,7 +93,7 @@ public abstract class CompositeMediaSource<T> extends BaseMediaSource {
 
     private final class ForwardingEventListener implements MediaSourceEventListener {
         private final T id;
-        private EventDispatcher eventDispatcher = CompositeMediaSource.this.createEventDispatcher((MediaPeriodId)null);
+        private EventDispatcher eventDispatcher = CompositeMediaSource.this.createEventDispatcher(null);
 
         public ForwardingEventListener(T id) {
             this.id = id;

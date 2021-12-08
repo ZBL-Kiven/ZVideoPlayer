@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib;
 
 import androidx.annotation.Nullable;
@@ -10,9 +5,9 @@ import com.zj.playerLib.util.Assertions;
 
 public final class SeekParameters {
     public static final SeekParameters EXACT = new SeekParameters(0L, 0L);
-    public static final SeekParameters CLOSEST_SYNC = new SeekParameters(9223372036854775807L, 9223372036854775807L);
-    public static final SeekParameters PREVIOUS_SYNC = new SeekParameters(9223372036854775807L, 0L);
-    public static final SeekParameters NEXT_SYNC = new SeekParameters(0L, 9223372036854775807L);
+    public static final SeekParameters CLOSEST_SYNC = new SeekParameters(Long.MAX_VALUE, Long.MAX_VALUE);
+    public static final SeekParameters PREVIOUS_SYNC = new SeekParameters(Long.MAX_VALUE, 0L);
+    public static final SeekParameters NEXT_SYNC = new SeekParameters(0L, Long.MAX_VALUE);
     public static final SeekParameters DEFAULT;
     public final long toleranceBeforeUs;
     public final long toleranceAfterUs;

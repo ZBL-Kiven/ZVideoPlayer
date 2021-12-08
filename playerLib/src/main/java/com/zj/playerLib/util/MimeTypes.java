@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.util;
 
 import android.text.TextUtils;
@@ -82,7 +77,7 @@ public final class MimeTypes {
         int customMimeTypeCount = customMimeTypes.size();
 
         for(int i = 0; i < customMimeTypeCount; ++i) {
-            if (mimeType.equals(((CustomMimeType)customMimeTypes.get(i)).mimeType)) {
+            if (mimeType.equals(customMimeTypes.get(i).mimeType)) {
                 customMimeTypes.remove(i);
                 break;
             }
@@ -353,7 +348,7 @@ public final class MimeTypes {
         int customMimeTypeCount = customMimeTypes.size();
 
         for(int i = 0; i < customMimeTypeCount; ++i) {
-            CustomMimeType customMimeType = (CustomMimeType)customMimeTypes.get(i);
+            CustomMimeType customMimeType = customMimeTypes.get(i);
             if (codec.startsWith(customMimeType.codecPrefix)) {
                 return customMimeType.mimeType;
             }
@@ -366,7 +361,7 @@ public final class MimeTypes {
         int customMimeTypeCount = customMimeTypes.size();
 
         for(int i = 0; i < customMimeTypeCount; ++i) {
-            CustomMimeType customMimeType = (CustomMimeType)customMimeTypes.get(i);
+            CustomMimeType customMimeType = customMimeTypes.get(i);
             if (mimeType.equals(customMimeType.mimeType)) {
                 return customMimeType.trackType;
             }

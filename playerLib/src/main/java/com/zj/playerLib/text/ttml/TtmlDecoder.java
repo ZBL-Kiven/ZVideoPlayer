@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.text.ttml;
 
 import android.text.Layout.Alignment;
@@ -63,9 +58,9 @@ public final class TtmlDecoder extends SimpleSubtitleDecoder {
             Map<String, TtmlStyle> globalStyles = new HashMap();
             Map<String, TtmlRegion> regionMap = new HashMap();
             Map<String, String> imageMap = new HashMap();
-            regionMap.put("", new TtmlRegion((String)null));
+            regionMap.put("", new TtmlRegion(null));
             ByteArrayInputStream inputStream = new ByteArrayInputStream(bytes, 0, length);
-            xmlParser.setInput(inputStream, (String)null);
+            xmlParser.setInput(inputStream, null);
             TtmlSubtitle ttmlSubtitle = null;
             ArrayDeque<TtmlNode> nodeStack = new ArrayDeque();
             int unsupportedNodeDepth = 0;
@@ -74,7 +69,7 @@ public final class TtmlDecoder extends SimpleSubtitleDecoder {
             CellResolution cellResolution = DEFAULT_CELL_RESOLUTION;
 
             for(TtsExtent ttsExtent = null; eventType != 1; eventType = xmlParser.getEventType()) {
-                TtmlNode parent = (TtmlNode)nodeStack.peek();
+                TtmlNode parent = nodeStack.peek();
                 if (unsupportedNodeDepth == 0) {
                     String name = xmlParser.getName();
                     if (eventType == 2) {
@@ -105,7 +100,7 @@ public final class TtmlDecoder extends SimpleSubtitleDecoder {
                         parent.addChild(TtmlNode.buildTextNode(xmlParser.getText()));
                     } else if (eventType == 3) {
                         if (xmlParser.getName().equals("tt")) {
-                            ttmlSubtitle = new TtmlSubtitle((TtmlNode)nodeStack.peek(), globalStyles, regionMap, imageMap);
+                            ttmlSubtitle = new TtmlSubtitle(nodeStack.peek(), globalStyles, regionMap, imageMap);
                         }
 
                         nodeStack.pop();
@@ -222,7 +217,7 @@ public final class TtmlDecoder extends SimpleSubtitleDecoder {
 
                     for(int var11 = 0; var11 < var10; ++var11) {
                         String id = var9[var11];
-                        style.chain((TtmlStyle)globalStyles.get(id));
+                        style.chain(globalStyles.get(id));
                     }
                 }
 
@@ -573,14 +568,14 @@ public final class TtmlDecoder extends SimpleSubtitleDecoder {
     }
 
     private TtmlNode parseNode(XmlPullParser parser, TtmlNode parent, Map<String, TtmlRegion> regionMap, FrameAndTickRate frameAndTickRate) throws SubtitleDecoderException {
-        long duration = -9223372036854775807L;
-        long startTime = -9223372036854775807L;
-        long endTime = -9223372036854775807L;
+        long duration = -Long.MAX_VALUE;
+        long startTime = -Long.MAX_VALUE;
+        long endTime = -Long.MAX_VALUE;
         String regionId = "";
         String imageId = null;
         String[] styleIds = null;
         int attributeCount = parser.getAttributeCount();
-        TtmlStyle style = this.parseStyleAttributes(parser, (TtmlStyle)null);
+        TtmlStyle style = this.parseStyleAttributes(parser, null);
 
         for(int i = 0; i < attributeCount; ++i) {
             String attr = parser.getAttributeName(i);
@@ -646,20 +641,20 @@ public final class TtmlDecoder extends SimpleSubtitleDecoder {
             }
         }
 
-        if (parent != null && parent.startTimeUs != -9223372036854775807L) {
-            if (startTime != -9223372036854775807L) {
+        if (parent != null && parent.startTimeUs != -Long.MAX_VALUE) {
+            if (startTime != -Long.MAX_VALUE) {
                 startTime += parent.startTimeUs;
             }
 
-            if (endTime != -9223372036854775807L) {
+            if (endTime != -Long.MAX_VALUE) {
                 endTime += parent.startTimeUs;
             }
         }
 
-        if (endTime == -9223372036854775807L) {
-            if (duration != -9223372036854775807L) {
+        if (endTime == -Long.MAX_VALUE) {
+            if (duration != -Long.MAX_VALUE) {
                 endTime = startTime + duration;
-            } else if (parent != null && parent.endTimeUs != -9223372036854775807L) {
+            } else if (parent != null && parent.endTimeUs != -Long.MAX_VALUE) {
                 endTime = parent.endTimeUs;
             }
         }
@@ -796,10 +791,10 @@ public final class TtmlDecoder extends SimpleSubtitleDecoder {
                     offsetSeconds /= 1000.0D;
                     break;
                 case 4:
-                    offsetSeconds /= (double)frameAndTickRate.effectiveFrameRate;
+                    offsetSeconds /= frameAndTickRate.effectiveFrameRate;
                     break;
                 case 5:
-                    offsetSeconds /= (double)frameAndTickRate.tickRate;
+                    offsetSeconds /= frameAndTickRate.tickRate;
                 }
 
                 return (long)(offsetSeconds * 1000000.0D);

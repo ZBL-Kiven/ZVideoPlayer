@@ -1,8 +1,12 @@
 package com.zj.videotest
 
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import com.zj.player.z.ZController
 import com.zj.player.z.ZVideoView
 import com.zj.videotest.delegate.VideoControllerPlayers
@@ -37,12 +41,17 @@ class TestActivity2 : AppCompatActivity() {
         VideoControllerPlayers.stopVideo()
     }
 
-    fun clickFull(view: View) {
+    fun clickFull(v: View) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && ContextCompat.checkSelfPermission(v.context, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE), 20)
+            return
+        }
         val isFull = videoView.isFullScreen
         if (isFull) {
             controller?.stopNow(true, isRegulate = false)
         } else {
-            controller?.playOrResume("http://vjs.zencdn.net/v/oceans.mp4")
+            val path = "/storage/emulated/0/DCIM/Camera/VID_20211207_184234.mp4"
+            controller?.playOrResume(path)
         }
         videoView.fullScreen(!isFull, fromUser = true, payloads = null)
     }

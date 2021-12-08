@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.source.ads;
 
 import android.net.Uri;
@@ -22,7 +17,7 @@ public final class AdPlaybackState {
     public static final int AD_STATE_SKIPPED = 2;
     public static final int AD_STATE_PLAYED = 3;
     public static final int AD_STATE_ERROR = 4;
-    public static final AdPlaybackState NONE = new AdPlaybackState(new long[0]);
+    public static final AdPlaybackState NONE = new AdPlaybackState();
     public final int adGroupCount;
     public final long[] adGroupTimesUs;
     public final AdGroup[] adGroups;
@@ -40,7 +35,7 @@ public final class AdPlaybackState {
         }
 
         this.adResumePositionUs = 0L;
-        this.contentDurationUs = -9223372036854775807L;
+        this.contentDurationUs = -Long.MAX_VALUE;
     }
 
     private AdPlaybackState(long[] adGroupTimesUs, AdGroup[] adGroups, long adResumePositionUs, long contentDurationUs) {
@@ -73,7 +68,7 @@ public final class AdPlaybackState {
         if (this.adGroups[adGroupIndex].count == adCount) {
             return this;
         } else {
-            AdGroup[] adGroups = (AdGroup[])Arrays.copyOf(this.adGroups, this.adGroups.length);
+            AdGroup[] adGroups = Arrays.copyOf(this.adGroups, this.adGroups.length);
             adGroups[adGroupIndex] = this.adGroups[adGroupIndex].withAdCount(adCount);
             return new AdPlaybackState(this.adGroupTimesUs, adGroups, this.adResumePositionUs, this.contentDurationUs);
         }
@@ -81,42 +76,42 @@ public final class AdPlaybackState {
 
     @CheckResult
     public AdPlaybackState withAdUri(int adGroupIndex, int adIndexInAdGroup, Uri uri) {
-        AdGroup[] adGroups = (AdGroup[])Arrays.copyOf(this.adGroups, this.adGroups.length);
+        AdGroup[] adGroups = Arrays.copyOf(this.adGroups, this.adGroups.length);
         adGroups[adGroupIndex] = adGroups[adGroupIndex].withAdUri(uri, adIndexInAdGroup);
         return new AdPlaybackState(this.adGroupTimesUs, adGroups, this.adResumePositionUs, this.contentDurationUs);
     }
 
     @CheckResult
     public AdPlaybackState withPlayedAd(int adGroupIndex, int adIndexInAdGroup) {
-        AdGroup[] adGroups = (AdGroup[])Arrays.copyOf(this.adGroups, this.adGroups.length);
+        AdGroup[] adGroups = Arrays.copyOf(this.adGroups, this.adGroups.length);
         adGroups[adGroupIndex] = adGroups[adGroupIndex].withAdState(3, adIndexInAdGroup);
         return new AdPlaybackState(this.adGroupTimesUs, adGroups, this.adResumePositionUs, this.contentDurationUs);
     }
 
     @CheckResult
     public AdPlaybackState withSkippedAd(int adGroupIndex, int adIndexInAdGroup) {
-        AdGroup[] adGroups = (AdGroup[])Arrays.copyOf(this.adGroups, this.adGroups.length);
+        AdGroup[] adGroups = Arrays.copyOf(this.adGroups, this.adGroups.length);
         adGroups[adGroupIndex] = adGroups[adGroupIndex].withAdState(2, adIndexInAdGroup);
         return new AdPlaybackState(this.adGroupTimesUs, adGroups, this.adResumePositionUs, this.contentDurationUs);
     }
 
     @CheckResult
     public AdPlaybackState withAdLoadError(int adGroupIndex, int adIndexInAdGroup) {
-        AdGroup[] adGroups = (AdGroup[])Arrays.copyOf(this.adGroups, this.adGroups.length);
+        AdGroup[] adGroups = Arrays.copyOf(this.adGroups, this.adGroups.length);
         adGroups[adGroupIndex] = adGroups[adGroupIndex].withAdState(4, adIndexInAdGroup);
         return new AdPlaybackState(this.adGroupTimesUs, adGroups, this.adResumePositionUs, this.contentDurationUs);
     }
 
     @CheckResult
     public AdPlaybackState withSkippedAdGroup(int adGroupIndex) {
-        AdGroup[] adGroups = (AdGroup[])Arrays.copyOf(this.adGroups, this.adGroups.length);
+        AdGroup[] adGroups = Arrays.copyOf(this.adGroups, this.adGroups.length);
         adGroups[adGroupIndex] = adGroups[adGroupIndex].withAllAdsSkipped();
         return new AdPlaybackState(this.adGroupTimesUs, adGroups, this.adResumePositionUs, this.contentDurationUs);
     }
 
     @CheckResult
     public AdPlaybackState withAdDurationsUs(long[][] adDurationUs) {
-        AdGroup[] adGroups = (AdGroup[])Arrays.copyOf(this.adGroups, this.adGroups.length);
+        AdGroup[] adGroups = Arrays.copyOf(this.adGroups, this.adGroups.length);
 
         for(int adGroupIndex = 0; adGroupIndex < this.adGroupCount; ++adGroupIndex) {
             adGroups[adGroupIndex] = adGroups[adGroupIndex].withAdDurationsUs(adDurationUs[adGroupIndex]);
@@ -160,7 +155,7 @@ public final class AdPlaybackState {
         if (adGroupPositionUs != -9223372036854775808L) {
             return positionUs < adGroupPositionUs;
         } else {
-            return this.contentDurationUs == -9223372036854775807L || positionUs < this.contentDurationUs;
+            return this.contentDurationUs == -Long.MAX_VALUE || positionUs < this.contentDurationUs;
         }
     }
 
@@ -227,7 +222,7 @@ public final class AdPlaybackState {
             Assertions.checkArgument(this.count == -1 && this.states.length <= count);
             int[] states = copyStatesWithSpaceForAdCount(this.states, count);
             long[] durationsUs = copyDurationsUsWithSpaceForAdCount(this.durationsUs, count);
-            Uri[] uris = (Uri[])Arrays.copyOf(this.uris, count);
+            Uri[] uris = Arrays.copyOf(this.uris, count);
             return new AdGroup(count, states, uris, durationsUs);
         }
 
@@ -237,7 +232,7 @@ public final class AdPlaybackState {
             int[] states = copyStatesWithSpaceForAdCount(this.states, index + 1);
             Assertions.checkArgument(states[index] == 0);
             long[] durationsUs = this.durationsUs.length == states.length ? this.durationsUs : copyDurationsUsWithSpaceForAdCount(this.durationsUs, states.length);
-            Uri[] uris = (Uri[])Arrays.copyOf(this.uris, states.length);
+            Uri[] uris = Arrays.copyOf(this.uris, states.length);
             uris[index] = uri;
             states[index] = 1;
             return new AdGroup(this.count, states, uris, durationsUs);
@@ -249,7 +244,7 @@ public final class AdPlaybackState {
             int[] states = copyStatesWithSpaceForAdCount(this.states, index + 1);
             Assertions.checkArgument(states[index] == 0 || states[index] == 1 || states[index] == state);
             long[] durationsUs = this.durationsUs.length == states.length ? this.durationsUs : copyDurationsUsWithSpaceForAdCount(this.durationsUs, states.length);
-            Uri[] uris = this.uris.length == states.length ? this.uris : (Uri[])Arrays.copyOf(this.uris, states.length);
+            Uri[] uris = this.uris.length == states.length ? this.uris : Arrays.copyOf(this.uris, states.length);
             states[index] = state;
             return new AdGroup(this.count, states, uris, durationsUs);
         }
@@ -296,7 +291,7 @@ public final class AdPlaybackState {
             int oldDurationsUsCount = durationsUs.length;
             int newDurationsUsCount = Math.max(count, oldDurationsUsCount);
             durationsUs = Arrays.copyOf(durationsUs, newDurationsUsCount);
-            Arrays.fill(durationsUs, oldDurationsUsCount, newDurationsUsCount, -9223372036854775807L);
+            Arrays.fill(durationsUs, oldDurationsUsCount, newDurationsUsCount, -Long.MAX_VALUE);
             return durationsUs;
         }
     }

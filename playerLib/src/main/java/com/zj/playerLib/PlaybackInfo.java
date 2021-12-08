@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib;
 
 import androidx.annotation.CheckResult;
@@ -31,7 +26,7 @@ final class PlaybackInfo {
     public volatile long positionUs;
 
     public static PlaybackInfo createDummy(long startPositionUs, TrackSelectorResult emptyTrackSelectorResult) {
-        return new PlaybackInfo(Timeline.EMPTY, (Object)null, DUMMY_MEDIA_PERIOD_ID, startPositionUs, -9223372036854775807L, 1, false, TrackGroupArray.EMPTY, emptyTrackSelectorResult, DUMMY_MEDIA_PERIOD_ID, startPositionUs, 0L, startPositionUs);
+        return new PlaybackInfo(Timeline.EMPTY, null, DUMMY_MEDIA_PERIOD_ID, startPositionUs, -Long.MAX_VALUE, 1, false, TrackGroupArray.EMPTY, emptyTrackSelectorResult, DUMMY_MEDIA_PERIOD_ID, startPositionUs, 0L, startPositionUs);
     }
 
     public PlaybackInfo(Timeline timeline, @Nullable Object manifest, MediaPeriodId periodId, long startPositionUs, long contentPositionUs, int playbackState, boolean isLoading, TrackGroupArray trackGroups, TrackSelectorResult trackSelectorResult, MediaPeriodId loadingMediaPeriodId, long bufferedPositionUs, long totalBufferedDurationUs, long positionUs) {
@@ -61,12 +56,12 @@ final class PlaybackInfo {
 
     @CheckResult
     public PlaybackInfo resetToNewPosition(MediaPeriodId periodId, long startPositionUs, long contentPositionUs) {
-        return new PlaybackInfo(this.timeline, this.manifest, periodId, startPositionUs, periodId.isAd() ? contentPositionUs : -9223372036854775807L, this.playbackState, this.isLoading, this.trackGroups, this.trackSelectorResult, periodId, startPositionUs, 0L, startPositionUs);
+        return new PlaybackInfo(this.timeline, this.manifest, periodId, startPositionUs, periodId.isAd() ? contentPositionUs : -Long.MAX_VALUE, this.playbackState, this.isLoading, this.trackGroups, this.trackSelectorResult, periodId, startPositionUs, 0L, startPositionUs);
     }
 
     @CheckResult
     public PlaybackInfo copyWithNewPosition(MediaPeriodId periodId, long positionUs, long contentPositionUs, long totalBufferedDurationUs) {
-        return new PlaybackInfo(this.timeline, this.manifest, periodId, positionUs, periodId.isAd() ? contentPositionUs : -9223372036854775807L, this.playbackState, this.isLoading, this.trackGroups, this.trackSelectorResult, this.loadingMediaPeriodId, this.bufferedPositionUs, totalBufferedDurationUs, positionUs);
+        return new PlaybackInfo(this.timeline, this.manifest, periodId, positionUs, periodId.isAd() ? contentPositionUs : -Long.MAX_VALUE, this.playbackState, this.isLoading, this.trackGroups, this.trackSelectorResult, this.loadingMediaPeriodId, this.bufferedPositionUs, totalBufferedDurationUs, positionUs);
     }
 
     @CheckResult

@@ -1,13 +1,5 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib;
 
-import android.annotation.TargetApi;
-import android.content.Context;
-import android.media.AudioManager;
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -15,7 +7,7 @@ import java.util.UUID;
 
 public final class C {
     public static final long TIME_END_OF_SOURCE = -9223372036854775808L;
-    public static final long TIME_UNSET = -9223372036854775807L;
+    public static final long TIME_UNSET = -Long.MAX_VALUE;
     public static final int INDEX_UNSET = -1;
     public static final int POSITION_UNSET = -1;
     public static final int LENGTH_UNSET = -1;
@@ -178,21 +170,11 @@ public final class C {
     }
 
     public static long usToMs(long timeUs) {
-        return timeUs != -9223372036854775807L && timeUs != -9223372036854775808L ? timeUs / 1000L : timeUs;
+        return timeUs != -Long.MAX_VALUE && timeUs != -9223372036854775808L ? timeUs / 1000L : timeUs;
     }
 
     public static long msToUs(long timeMs) {
-        return timeMs != -9223372036854775807L && timeMs != -9223372036854775808L ? timeMs * 1000L : timeMs;
-    }
-
-    @TargetApi(21)
-    public static int generateAudioSessionIdV21(Context context) {
-        return ((AudioManager)context.getSystemService("audio")).generateAudioSessionId();
-    }
-
-    @Documented
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface NetworkType {
+        return timeMs != -Long.MAX_VALUE && timeMs != -9223372036854775808L ? timeMs * 1000L : timeMs;
     }
 
     @Documented
@@ -212,32 +194,7 @@ public final class C {
 
     @Documented
     @Retention(RetentionPolicy.SOURCE)
-    public @interface StereoMode {
-    }
-
-    @Documented
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface ContentType {
-    }
-
-    @Documented
-    @Retention(RetentionPolicy.SOURCE)
     public @interface SelectionFlags {
-    }
-
-    @Documented
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface VideoScalingMode {
-    }
-
-    @Documented
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface BufferFlags {
-    }
-
-    @Documented
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface AudioFocusGain {
     }
 
     @Documented
@@ -248,26 +205,6 @@ public final class C {
     @Documented
     @Retention(RetentionPolicy.SOURCE)
     public @interface AudioFlags {
-    }
-
-    @Documented
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface AudioContentType {
-    }
-
-    @Documented
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface StreamType {
-    }
-
-    @Documented
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface PcmEncoding {
-    }
-
-    @Documented
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface Encoding {
     }
 
     @Documented

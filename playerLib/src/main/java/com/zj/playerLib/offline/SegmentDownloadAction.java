@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.offline;
 
 import android.net.Uri;
@@ -44,7 +39,7 @@ public abstract class SegmentDownloadAction extends DownloadAction {
         output.writeInt(this.keys.size());
 
         for(int i = 0; i < this.keys.size(); ++i) {
-            this.writeKey(output, (StreamKey)this.keys.get(i));
+            this.writeKey(output, this.keys.get(i));
         }
 
     }

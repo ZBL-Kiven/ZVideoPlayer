@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.metadata.id3;
 
 import android.os.Parcel;
@@ -40,10 +35,10 @@ public final class ApicFrame extends Id3Frame {
 
     ApicFrame(Parcel in) {
         super("APIC");
-        this.mimeType = (String)Util.castNonNull(in.readString());
-        this.description = (String)Util.castNonNull(in.readString());
+        this.mimeType = Util.castNonNull(in.readString());
+        this.description = Util.castNonNull(in.readString());
         this.pictureType = in.readInt();
-        this.pictureData = (byte[])Util.castNonNull(in.createByteArray());
+        this.pictureData = Util.castNonNull(in.createByteArray());
     }
 
     public boolean equals(@Nullable Object obj) {

@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.upstream.cache;
 
 import androidx.annotation.NonNull;
@@ -20,7 +15,7 @@ public class CacheSpan implements Comparable<CacheSpan> {
     public final long lastAccessTimestamp;
 
     public CacheSpan(String key, long position, long length) {
-        this(key, position, length, -9223372036854775807L, (File)null);
+        this(key, position, length, -Long.MAX_VALUE, null);
     }
 
     public CacheSpan(String key, long position, long length, long lastAccessTimestamp, @Nullable File file) {

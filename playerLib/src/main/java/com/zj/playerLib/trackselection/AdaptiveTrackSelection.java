@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.trackselection;
 
 import androidx.annotation.Nullable;
@@ -53,13 +48,13 @@ public class AdaptiveTrackSelection extends BaseTrackSelection {
         this.clock = clock;
         this.playbackSpeed = 1.0F;
         this.reason = 1;
-        this.lastBufferEvaluationMs = -9223372036854775807L;
+        this.lastBufferEvaluationMs = -Long.MAX_VALUE;
         int selectedIndex = this.determineIdealSelectedIndex(-9223372036854775808L);
         this.selectedIndex = selectedIndex;
     }
 
     public void enable() {
-        this.lastBufferEvaluationMs = -9223372036854775807L;
+        this.lastBufferEvaluationMs = -Long.MAX_VALUE;
     }
 
     public void onPlaybackSpeed(float playbackSpeed) {
@@ -103,7 +98,7 @@ public class AdaptiveTrackSelection extends BaseTrackSelection {
 
     public int evaluateQueueSize(long playbackPositionUs, List<? extends MediaChunk> queue) {
         long nowMs = this.clock.elapsedRealtime();
-        if (this.lastBufferEvaluationMs != -9223372036854775807L && nowMs - this.lastBufferEvaluationMs < this.minTimeBetweenBufferReevaluationMs) {
+        if (this.lastBufferEvaluationMs != -Long.MAX_VALUE && nowMs - this.lastBufferEvaluationMs < this.minTimeBetweenBufferReevaluationMs) {
             return queue.size();
         } else {
             this.lastBufferEvaluationMs = nowMs;
@@ -111,7 +106,7 @@ public class AdaptiveTrackSelection extends BaseTrackSelection {
                 return 0;
             } else {
                 int queueSize = queue.size();
-                MediaChunk lastChunk = (MediaChunk)queue.get(queueSize - 1);
+                MediaChunk lastChunk = queue.get(queueSize - 1);
                 long playoutBufferedDurationBeforeLastChunkUs = Util.getPlayoutDurationForMediaDuration(lastChunk.startTimeUs - playbackPositionUs, this.playbackSpeed);
                 if (playoutBufferedDurationBeforeLastChunkUs < this.minDurationToRetainAfterDiscardUs) {
                     return queueSize;
@@ -120,7 +115,7 @@ public class AdaptiveTrackSelection extends BaseTrackSelection {
                     Format idealFormat = this.getFormat(idealSelectedIndex);
 
                     for(int i = 0; i < queueSize; ++i) {
-                        MediaChunk chunk = (MediaChunk)queue.get(i);
+                        MediaChunk chunk = queue.get(i);
                         Format format = chunk.trackFormat;
                         long mediaDurationBeforeThisChunkUs = chunk.startTimeUs - playbackPositionUs;
                         long playoutDurationBeforeThisChunkUs = Util.getPlayoutDurationForMediaDuration(mediaDurationBeforeThisChunkUs, this.playbackSpeed);
@@ -154,7 +149,7 @@ public class AdaptiveTrackSelection extends BaseTrackSelection {
     }
 
     private long minDurationForQualityIncreaseUs(long availableDurationUs) {
-        boolean isAvailableDurationTooShort = availableDurationUs != -9223372036854775807L && availableDurationUs <= this.minDurationForQualityIncreaseUs;
+        boolean isAvailableDurationTooShort = availableDurationUs != -Long.MAX_VALUE && availableDurationUs <= this.minDurationForQualityIncreaseUs;
         return isAvailableDurationTooShort ? (long)((float)availableDurationUs * this.bufferedFractionToLiveEdgeForQualityIncrease) : this.minDurationForQualityIncreaseUs;
     }
 
@@ -190,7 +185,7 @@ public class AdaptiveTrackSelection extends BaseTrackSelection {
         }
 
         public Factory(int minDurationForQualityIncreaseMs, int maxDurationForQualityDecreaseMs, int minDurationToRetainAfterDiscardMs, float bandwidthFraction, float bufferedFractionToLiveEdgeForQualityIncrease, long minTimeBetweenBufferReevaluationMs, Clock clock) {
-            this((BandwidthMeter)null, minDurationForQualityIncreaseMs, maxDurationForQualityDecreaseMs, minDurationToRetainAfterDiscardMs, bandwidthFraction, bufferedFractionToLiveEdgeForQualityIncrease, minTimeBetweenBufferReevaluationMs, clock);
+            this(null, minDurationForQualityIncreaseMs, maxDurationForQualityDecreaseMs, minDurationToRetainAfterDiscardMs, bandwidthFraction, bufferedFractionToLiveEdgeForQualityIncrease, minTimeBetweenBufferReevaluationMs, clock);
         }
 
         /** @deprecated */
@@ -211,7 +206,7 @@ public class AdaptiveTrackSelection extends BaseTrackSelection {
                 bandwidthMeter = this.bandwidthMeter;
             }
 
-            return new AdaptiveTrackSelection(group, tracks, bandwidthMeter, (long)this.minDurationForQualityIncreaseMs, (long)this.maxDurationForQualityDecreaseMs, (long)this.minDurationToRetainAfterDiscardMs, this.bandwidthFraction, this.bufferedFractionToLiveEdgeForQualityIncrease, this.minTimeBetweenBufferReevaluationMs, this.clock);
+            return new AdaptiveTrackSelection(group, tracks, bandwidthMeter, this.minDurationForQualityIncreaseMs, this.maxDurationForQualityDecreaseMs, this.minDurationToRetainAfterDiscardMs, this.bandwidthFraction, this.bufferedFractionToLiveEdgeForQualityIncrease, this.minTimeBetweenBufferReevaluationMs, this.clock);
         }
     }
 }

@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.upstream.cache;
 
 import android.net.Uri;
@@ -41,12 +36,12 @@ public final class CacheUtil {
 
         long blockLength;
         for(counters.newlyCachedBytes = 0L; left != 0L; left -= left == -1L ? 0L : blockLength) {
-            blockLength = cache.getCachedLength(key, start, left != -1L ? left : 9223372036854775807L);
+            blockLength = cache.getCachedLength(key, start, left != -1L ? left : Long.MAX_VALUE);
             if (blockLength > 0L) {
                 counters.alreadyCachedBytes += blockLength;
             } else {
                 blockLength = -blockLength;
-                if (blockLength == 9223372036854775807L) {
+                if (blockLength == Long.MAX_VALUE) {
                     return;
                 }
             }
@@ -57,7 +52,7 @@ public final class CacheUtil {
     }
 
     public static void cache(DataSpec dataSpec, Cache cache, DataSource upstream, @Nullable CacheUtil.CachingCounters counters, @Nullable AtomicBoolean isCanceled) throws IOException, InterruptedException {
-        cache(dataSpec, cache, new CacheDataSource(cache, upstream), new byte[131072], (PriorityTaskManager)null, 0, counters, isCanceled, false);
+        cache(dataSpec, cache, new CacheDataSource(cache, upstream), new byte[131072], null, 0, counters, isCanceled, false);
     }
 
     public static void cache(DataSpec dataSpec, Cache cache, CacheDataSource dataSource, byte[] buffer, PriorityTaskManager priorityTaskManager, int priority, @Nullable CacheUtil.CachingCounters counters, @Nullable AtomicBoolean isCanceled, boolean enableEOFException) throws IOException, InterruptedException {
@@ -75,7 +70,7 @@ public final class CacheUtil {
         long blockLength;
         for(long left = dataSpec.length != -1L ? dataSpec.length : cache.getContentLength(key); left != 0L; left -= left == -1L ? 0L : blockLength) {
             throwExceptionIfInterruptedOrCancelled(isCanceled);
-            blockLength = cache.getCachedLength(key, start, left != -1L ? left : 9223372036854775807L);
+            blockLength = cache.getCachedLength(key, start, left != -1L ? left : Long.MAX_VALUE);
             if (blockLength <= 0L) {
                 blockLength = -blockLength;
                 long read = readAndDiscard(dataSpec, start, blockLength, dataSource, buffer, priorityTaskManager, priority, counters, isCanceled);
@@ -111,10 +106,10 @@ public final class CacheUtil {
                 while(true) {
                     if (totalRead != length) {
                         throwExceptionIfInterruptedOrCancelled(isCanceled);
-                        int read = dataSource.read(buffer, 0, length != -1L ? (int)Math.min((long)buffer.length, length - totalRead) : buffer.length);
+                        int read = dataSource.read(buffer, 0, length != -1L ? (int)Math.min(buffer.length, length - totalRead) : buffer.length);
                         if (read != -1) {
-                            totalRead += (long)read;
-                            counters.newlyCachedBytes += (long)read;
+                            totalRead += read;
+                            counters.newlyCachedBytes += read;
                             continue;
                         }
 

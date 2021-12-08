@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.drm;
 
 import com.zj.playerLib.util.Assertions;
@@ -12,7 +7,7 @@ public final class ErrorStateDrmSession<T extends MediaCrypto> implements DrmSes
     private final DrmSessionException error;
 
     public ErrorStateDrmSession(DrmSessionException error) {
-        this.error = (DrmSessionException)Assertions.checkNotNull(error);
+        this.error = Assertions.checkNotNull(error);
     }
 
     public int getState() {

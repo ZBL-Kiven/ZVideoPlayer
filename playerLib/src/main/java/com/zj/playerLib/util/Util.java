@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.util;
 
 import android.annotation.TargetApi;
@@ -43,6 +38,7 @@ import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
@@ -205,15 +201,15 @@ public final class Util {
     }
 
     public static String fromUtf8Bytes(byte[] bytes) {
-        return new String(bytes, Charset.forName("UTF-8"));
+        return new String(bytes, StandardCharsets.UTF_8);
     }
 
     public static String fromUtf8Bytes(byte[] bytes, int offset, int length) {
-        return new String(bytes, offset, length, Charset.forName("UTF-8"));
+        return new String(bytes, offset, length, StandardCharsets.UTF_8);
     }
 
     public static byte[] getUtf8Bytes(String value) {
-        return value.getBytes(Charset.forName("UTF-8"));
+        return value.getBytes(StandardCharsets.UTF_8);
     }
 
     public static String[] split(String value, String regex) {
@@ -510,7 +506,7 @@ public final class Util {
             return positionUs;
         } else {
             long minPositionUs = subtractWithOverflowDefault(positionUs, seekParameters.toleranceBeforeUs, -9223372036854775808L);
-            long maxPositionUs = addWithOverflowDefault(positionUs, seekParameters.toleranceAfterUs, 9223372036854775807L);
+            long maxPositionUs = addWithOverflowDefault(positionUs, seekParameters.toleranceAfterUs, Long.MAX_VALUE);
             boolean firstSyncPositionValid = minPositionUs <= firstSyncUs && firstSyncUs <= maxPositionUs;
             boolean secondSyncPositionValid = minPositionUs <= secondSyncUs && secondSyncUs <= maxPositionUs;
             if (firstSyncPositionValid && secondSyncPositionValid) {
@@ -817,7 +813,7 @@ public final class Util {
     }
 
     public static String getStringForTime(StringBuilder builder, Formatter formatter, long timeMs) {
-        if (timeMs == -9223372036854775807L) {
+        if (timeMs == -Long.MAX_VALUE) {
             timeMs = 0L;
         }
 

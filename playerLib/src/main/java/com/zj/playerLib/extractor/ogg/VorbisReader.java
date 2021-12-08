@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.extractor.ogg;
 
 import com.zj.playerLib.Format;
@@ -58,10 +53,10 @@ final class VorbisReader extends StreamReader {
         } else {
             int packetBlockSize = decodeBlockSize(packet.data[0], this.vorbisSetup);
             int samplesInPacket = this.seenFirstAudioPacket ? (packetBlockSize + this.previousPacketBlockSize) / 4 : 0;
-            appendNumberOfSamples(packet, (long)samplesInPacket);
+            appendNumberOfSamples(packet, samplesInPacket);
             this.seenFirstAudioPacket = true;
             this.previousPacketBlockSize = packetBlockSize;
-            return (long)samplesInPacket;
+            return samplesInPacket;
         }
     }
 
@@ -76,7 +71,7 @@ final class VorbisReader extends StreamReader {
                 ArrayList<byte[]> codecInitialisationData = new ArrayList();
                 codecInitialisationData.add(this.vorbisSetup.idHeader.data);
                 codecInitialisationData.add(this.vorbisSetup.setupHeaderData);
-                setupData.format = Format.createAudioSampleFormat((String)null, "audio/vorbis", (String)null, this.vorbisSetup.idHeader.bitrateNominal, -1, this.vorbisSetup.idHeader.channels, (int)this.vorbisSetup.idHeader.sampleRate, codecInitialisationData, (DrmInitData)null, 0, (String)null);
+                setupData.format = Format.createAudioSampleFormat(null, "audio/vorbis", null, this.vorbisSetup.idHeader.bitrateNominal, -1, this.vorbisSetup.idHeader.channels, (int)this.vorbisSetup.idHeader.sampleRate, codecInitialisationData, null, 0, null);
                 return true;
             }
         }

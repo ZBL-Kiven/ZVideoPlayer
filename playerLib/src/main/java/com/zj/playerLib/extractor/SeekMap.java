@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.extractor;
 
 import androidx.annotation.Nullable;
@@ -16,7 +11,7 @@ public interface SeekMap {
 
     SeekPoints getSeekPoints(long var1);
 
-    public static final class SeekPoints {
+    final class SeekPoints {
         public final SeekPoint first;
         public final SeekPoint second;
 
@@ -25,8 +20,8 @@ public interface SeekMap {
         }
 
         public SeekPoints(SeekPoint first, SeekPoint second) {
-            this.first = (SeekPoint)Assertions.checkNotNull(first);
-            this.second = (SeekPoint)Assertions.checkNotNull(second);
+            this.first = Assertions.checkNotNull(first);
+            this.second = Assertions.checkNotNull(second);
         }
 
         public String toString() {
@@ -49,7 +44,7 @@ public interface SeekMap {
         }
     }
 
-    public static final class Unseekable implements SeekMap {
+    final class Unseekable implements SeekMap {
         private final long durationUs;
         private final SeekPoints startSeekPoints;
 

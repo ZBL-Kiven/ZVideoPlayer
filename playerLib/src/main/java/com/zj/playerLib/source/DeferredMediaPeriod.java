@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.source;
 
 import androidx.annotation.Nullable;
@@ -31,7 +26,7 @@ public final class DeferredMediaPeriod implements MediaPeriod, Callback {
         this.id = id;
         this.allocator = allocator;
         this.mediaSource = mediaSource;
-        this.preparePositionOverrideUs = -9223372036854775807L;
+        this.preparePositionOverrideUs = -Long.MAX_VALUE;
     }
 
     public void setPrepareErrorListener(PrepareErrorListener listener) {
@@ -49,7 +44,7 @@ public final class DeferredMediaPeriod implements MediaPeriod, Callback {
     public void createPeriod(MediaPeriodId id) {
         this.mediaPeriod = this.mediaSource.createPeriod(id, this.allocator);
         if (this.callback != null) {
-            long preparePositionUs = this.preparePositionOverrideUs != -9223372036854775807L ? this.preparePositionOverrideUs : this.preparePositionUs;
+            long preparePositionUs = this.preparePositionOverrideUs != -Long.MAX_VALUE ? this.preparePositionOverrideUs : this.preparePositionUs;
             this.mediaPeriod.prepare(this, preparePositionUs);
         }
 
@@ -96,9 +91,9 @@ public final class DeferredMediaPeriod implements MediaPeriod, Callback {
     }
 
     public long selectTracks(TrackSelection[] selections, boolean[] mayRetainStreamFlags, SampleStream[] streams, boolean[] streamResetFlags, long positionUs) {
-        if (this.preparePositionOverrideUs != -9223372036854775807L && positionUs == this.preparePositionUs) {
+        if (this.preparePositionOverrideUs != -Long.MAX_VALUE && positionUs == this.preparePositionUs) {
             positionUs = this.preparePositionOverrideUs;
-            this.preparePositionOverrideUs = -9223372036854775807L;
+            this.preparePositionOverrideUs = -Long.MAX_VALUE;
         }
 
         return this.mediaPeriod.selectTracks(selections, mayRetainStreamFlags, streams, streamResetFlags, positionUs);

@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.trackselection;
 
 import android.util.Pair;
@@ -62,16 +57,16 @@ public abstract class MappingTrackSelector extends TrackSelector {
 
         for(unmappedTrackGroupCount = 0; unmappedTrackGroupCount < rendererCapabilities.length; ++unmappedTrackGroupCount) {
             int rendererTrackGroupCount = rendererTrackGroupCounts[unmappedTrackGroupCount];
-            rendererTrackGroupArrays[unmappedTrackGroupCount] = new TrackGroupArray((TrackGroup[])Util.nullSafeArrayCopy(rendererTrackGroups[unmappedTrackGroupCount], rendererTrackGroupCount));
-            rendererFormatSupports[unmappedTrackGroupCount] = (int[][])Util.nullSafeArrayCopy(rendererFormatSupports[unmappedTrackGroupCount], rendererTrackGroupCount);
+            rendererTrackGroupArrays[unmappedTrackGroupCount] = new TrackGroupArray(Util.nullSafeArrayCopy(rendererTrackGroups[unmappedTrackGroupCount], rendererTrackGroupCount));
+            rendererFormatSupports[unmappedTrackGroupCount] = Util.nullSafeArrayCopy(rendererFormatSupports[unmappedTrackGroupCount], rendererTrackGroupCount);
             rendererTrackTypes[unmappedTrackGroupCount] = rendererCapabilities[unmappedTrackGroupCount].getTrackType();
         }
 
         unmappedTrackGroupCount = rendererTrackGroupCounts[rendererCapabilities.length];
-        TrackGroupArray unmappedTrackGroupArray = new TrackGroupArray((TrackGroup[])Util.nullSafeArrayCopy(rendererTrackGroups[rendererCapabilities.length], unmappedTrackGroupCount));
+        TrackGroupArray unmappedTrackGroupArray = new TrackGroupArray(Util.nullSafeArrayCopy(rendererTrackGroups[rendererCapabilities.length], unmappedTrackGroupCount));
         MappedTrackInfo mappedTrackInfo = new MappedTrackInfo(rendererTrackTypes, rendererTrackGroupArrays, rendererMixedMimeTypeAdaptationSupports, rendererFormatSupports, unmappedTrackGroupArray);
         Pair<RendererConfiguration[], TrackSelection[]> result = this.selectTracks(mappedTrackInfo, rendererFormatSupports, rendererMixedMimeTypeAdaptationSupports);
-        return new TrackSelectorResult((RendererConfiguration[])result.first, (TrackSelection[])result.second, mappedTrackInfo);
+        return new TrackSelectorResult(result.first, result.second, mappedTrackInfo);
     }
 
     protected abstract Pair<RendererConfiguration[], TrackSelection[]> selectTracks(MappedTrackInfo var1, int[][][] var2, int[] var3) throws PlaybackException;

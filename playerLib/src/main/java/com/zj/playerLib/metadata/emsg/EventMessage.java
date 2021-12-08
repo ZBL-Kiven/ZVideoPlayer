@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.metadata.emsg;
 
 import android.os.Parcel;
@@ -42,12 +37,12 @@ public final class EventMessage implements Entry {
     }
 
     EventMessage(Parcel in) {
-        this.schemeIdUri = (String)Util.castNonNull(in.readString());
-        this.value = (String)Util.castNonNull(in.readString());
+        this.schemeIdUri = Util.castNonNull(in.readString());
+        this.value = Util.castNonNull(in.readString());
         this.presentationTimeUs = in.readLong();
         this.durationMs = in.readLong();
         this.id = in.readLong();
-        this.messageData = (byte[])Util.castNonNull(in.createByteArray());
+        this.messageData = Util.castNonNull(in.createByteArray());
     }
 
     public int hashCode() {

@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.source;
 
 import android.net.Uri;
@@ -39,7 +34,7 @@ public final class ExtractorMediaSource extends BaseMediaSource implements Liste
     /** @deprecated */
     @Deprecated
     public ExtractorMediaSource(Uri uri, DataSource.Factory dataSourceFactory, ExtractorsFactory extractorsFactory, Handler eventHandler, EventListener eventListener) {
-        this(uri, dataSourceFactory, extractorsFactory, eventHandler, eventListener, (String)null);
+        this(uri, dataSourceFactory, extractorsFactory, eventHandler, eventListener, null);
     }
 
     /** @deprecated */
@@ -51,7 +46,7 @@ public final class ExtractorMediaSource extends BaseMediaSource implements Liste
     /** @deprecated */
     @Deprecated
     public ExtractorMediaSource(Uri uri, DataSource.Factory dataSourceFactory, ExtractorsFactory extractorsFactory, Handler eventHandler, EventListener eventListener, String customCacheKey, int continueLoadingCheckIntervalBytes) {
-        this(uri, dataSourceFactory, extractorsFactory, new DefaultLoadErrorHandlingPolicy(), customCacheKey, continueLoadingCheckIntervalBytes, (Object)null);
+        this(uri, dataSourceFactory, extractorsFactory, new DefaultLoadErrorHandlingPolicy(), customCacheKey, continueLoadingCheckIntervalBytes, null);
         if (eventListener != null && eventHandler != null) {
             this.addEventListener(eventHandler, new EventListenerWrapper(eventListener));
         }
@@ -65,7 +60,7 @@ public final class ExtractorMediaSource extends BaseMediaSource implements Liste
         this.loadableLoadErrorHandlingPolicy = loadableLoadErrorHandlingPolicy;
         this.customCacheKey = customCacheKey;
         this.continueLoadingCheckIntervalBytes = continueLoadingCheckIntervalBytes;
-        this.timelineDurationUs = -9223372036854775807L;
+        this.timelineDurationUs = -Long.MAX_VALUE;
         this.tag = tag;
     }
 
@@ -99,7 +94,7 @@ public final class ExtractorMediaSource extends BaseMediaSource implements Liste
     }
 
     public void onSourceInfoRefreshed(long durationUs, boolean isSeekable) {
-        durationUs = durationUs == -9223372036854775807L ? this.timelineDurationUs : durationUs;
+        durationUs = durationUs == -Long.MAX_VALUE ? this.timelineDurationUs : durationUs;
         if (this.timelineDurationUs != durationUs || this.timelineIsSeekable != isSeekable) {
             this.notifySourceInfoRefreshed(durationUs, isSeekable);
         }
@@ -108,7 +103,7 @@ public final class ExtractorMediaSource extends BaseMediaSource implements Liste
     private void notifySourceInfoRefreshed(long durationUs, boolean isSeekable) {
         this.timelineDurationUs = durationUs;
         this.timelineIsSeekable = isSeekable;
-        this.refreshSourceInfo(new SinglePeriodTimeline(this.timelineDurationUs, this.timelineIsSeekable, false, this.tag), (Object)null);
+        this.refreshSourceInfo(new SinglePeriodTimeline(this.timelineDurationUs, this.timelineIsSeekable, false, this.tag), null);
     }
 
     /** @deprecated */
@@ -117,7 +112,7 @@ public final class ExtractorMediaSource extends BaseMediaSource implements Liste
         private final EventListener eventListener;
 
         public EventListenerWrapper(EventListener eventListener) {
-            this.eventListener = (EventListener)Assertions.checkNotNull(eventListener);
+            this.eventListener = Assertions.checkNotNull(eventListener);
         }
 
         public void onLoadError(int windowIndex, @Nullable MediaPeriodId mediaPeriodId, LoadEventInfo loadEventInfo, MediaLoadData mediaLoadData, IOException error, boolean wasCanceled) {

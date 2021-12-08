@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.source;
 
 import androidx.annotation.Nullable;
@@ -59,7 +54,7 @@ final class SingleSampleMediaPeriod implements MediaPeriod, Callback<SingleSampl
         this.loadErrorHandlingPolicy = loadErrorHandlingPolicy;
         this.eventDispatcher = eventDispatcher;
         this.treatLoadErrorsAsEndOfStream = treatLoadErrorsAsEndOfStream;
-        this.tracks = new TrackGroupArray(new TrackGroup[]{new TrackGroup(new Format[]{format})});
+        this.tracks = new TrackGroupArray(new TrackGroup(format));
         this.sampleStreams = new ArrayList();
         this.loader = new Loader("Loader:SingleSampleMediaPeriod");
         eventDispatcher.mediaPeriodCreated();
@@ -113,7 +108,7 @@ final class SingleSampleMediaPeriod implements MediaPeriod, Callback<SingleSampl
             }
 
             long elapsedRealtimeMs = this.loader.startLoading(new SourceLoadable(this.dataSpec, dataSource), this, this.loadErrorHandlingPolicy.getMinimumLoadableRetryCount(1));
-            this.eventDispatcher.loadStarted(this.dataSpec, 1, -1, this.format, 0, (Object)null, 0L, this.durationUs, elapsedRealtimeMs);
+            this.eventDispatcher.loadStarted(this.dataSpec, 1, -1, this.format, 0, null, 0L, this.durationUs, elapsedRealtimeMs);
             return true;
         } else {
             return false;
@@ -126,7 +121,7 @@ final class SingleSampleMediaPeriod implements MediaPeriod, Callback<SingleSampl
             this.notifiedReadingStarted = true;
         }
 
-        return -9223372036854775807L;
+        return -Long.MAX_VALUE;
     }
 
     public long getNextLoadPositionUs() {
@@ -139,7 +134,7 @@ final class SingleSampleMediaPeriod implements MediaPeriod, Callback<SingleSampl
 
     public long seekToUs(long positionUs) {
         for(int i = 0; i < this.sampleStreams.size(); ++i) {
-            ((SampleStreamImpl)this.sampleStreams.get(i)).reset();
+            this.sampleStreams.get(i).reset();
         }
 
         return positionUs;
@@ -154,25 +149,25 @@ final class SingleSampleMediaPeriod implements MediaPeriod, Callback<SingleSampl
         this.sampleData = loadable.sampleData;
         this.loadingFinished = true;
         this.loadingSucceeded = true;
-        this.eventDispatcher.loadCompleted(loadable.dataSpec, loadable.dataSource.getLastOpenedUri(), loadable.dataSource.getLastResponseHeaders(), 1, -1, this.format, 0, (Object)null, 0L, this.durationUs, elapsedRealtimeMs, loadDurationMs, (long)this.sampleSize);
+        this.eventDispatcher.loadCompleted(loadable.dataSpec, loadable.dataSource.getLastOpenedUri(), loadable.dataSource.getLastResponseHeaders(), 1, -1, this.format, 0, null, 0L, this.durationUs, elapsedRealtimeMs, loadDurationMs, this.sampleSize);
     }
 
     public void onLoadCanceled(SourceLoadable loadable, long elapsedRealtimeMs, long loadDurationMs, boolean released) {
-        this.eventDispatcher.loadCanceled(loadable.dataSpec, loadable.dataSource.getLastOpenedUri(), loadable.dataSource.getLastResponseHeaders(), 1, -1, (Format)null, 0, (Object)null, 0L, this.durationUs, elapsedRealtimeMs, loadDurationMs, loadable.dataSource.getBytesRead());
+        this.eventDispatcher.loadCanceled(loadable.dataSpec, loadable.dataSource.getLastOpenedUri(), loadable.dataSource.getLastResponseHeaders(), 1, -1, null, 0, null, 0L, this.durationUs, elapsedRealtimeMs, loadDurationMs, loadable.dataSource.getBytesRead());
     }
 
     public LoadErrorAction onLoadError(SourceLoadable loadable, long elapsedRealtimeMs, long loadDurationMs, IOException error, int errorCount) {
         long retryDelay = this.loadErrorHandlingPolicy.getRetryDelayMsFor(1, this.durationUs, error, errorCount);
-        boolean errorCanBePropagated = retryDelay == -9223372036854775807L || errorCount >= this.loadErrorHandlingPolicy.getMinimumLoadableRetryCount(1);
+        boolean errorCanBePropagated = retryDelay == -Long.MAX_VALUE || errorCount >= this.loadErrorHandlingPolicy.getMinimumLoadableRetryCount(1);
         LoadErrorAction action;
         if (this.treatLoadErrorsAsEndOfStream && errorCanBePropagated) {
             this.loadingFinished = true;
             action = Loader.DONT_RETRY;
         } else {
-            action = retryDelay != -9223372036854775807L ? Loader.createRetryAction(false, retryDelay) : Loader.DONT_RETRY_FATAL;
+            action = retryDelay != -Long.MAX_VALUE ? Loader.createRetryAction(false, retryDelay) : Loader.DONT_RETRY_FATAL;
         }
 
-        this.eventDispatcher.loadError(loadable.dataSpec, loadable.dataSource.getLastOpenedUri(), loadable.dataSource.getLastResponseHeaders(), 1, -1, this.format, 0, (Object)null, 0L, this.durationUs, elapsedRealtimeMs, loadDurationMs, loadable.dataSource.getBytesRead(), error, !action.isRetry());
+        this.eventDispatcher.loadError(loadable.dataSpec, loadable.dataSource.getLastOpenedUri(), loadable.dataSource.getLastResponseHeaders(), 1, -1, this.format, 0, null, 0L, this.durationUs, elapsedRealtimeMs, loadDurationMs, loadable.dataSource.getBytesRead(), error, !action.isRetry());
         return action;
     }
 
@@ -279,7 +274,7 @@ final class SingleSampleMediaPeriod implements MediaPeriod, Callback<SingleSampl
 
         private void maybeNotifyDownstreamFormat() {
             if (!this.notifiedDownstreamFormat) {
-                SingleSampleMediaPeriod.this.eventDispatcher.downstreamFormatChanged(MimeTypes.getTrackType(SingleSampleMediaPeriod.this.format.sampleMimeType), SingleSampleMediaPeriod.this.format, 0, (Object)null, 0L);
+                SingleSampleMediaPeriod.this.eventDispatcher.downstreamFormatChanged(MimeTypes.getTrackType(SingleSampleMediaPeriod.this.format.sampleMimeType), SingleSampleMediaPeriod.this.format, 0, null, 0L);
                 this.notifiedDownstreamFormat = true;
             }
 

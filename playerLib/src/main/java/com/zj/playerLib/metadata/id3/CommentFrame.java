@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.metadata.id3;
 
 import android.os.Parcel;
@@ -35,9 +30,9 @@ public final class CommentFrame extends Id3Frame {
 
     CommentFrame(Parcel in) {
         super("COMM");
-        this.language = (String)Util.castNonNull(in.readString());
-        this.description = (String)Util.castNonNull(in.readString());
-        this.text = (String)Util.castNonNull(in.readString());
+        this.language = Util.castNonNull(in.readString());
+        this.description = Util.castNonNull(in.readString());
+        this.text = Util.castNonNull(in.readString());
     }
 
     public boolean equals(@Nullable Object obj) {

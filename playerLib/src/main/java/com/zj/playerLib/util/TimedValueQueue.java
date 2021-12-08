@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.util;
 
 import androidx.annotation.Nullable;
@@ -54,7 +49,7 @@ public final class TimedValueQueue {
     private Object poll(long timestamp, boolean onlyOlder) {
         Object value = null;
 
-        for (long previousTimeDiff = 9223372036854775807L; this.size > 0; --this.size) {
+        for (long previousTimeDiff = Long.MAX_VALUE; this.size > 0; --this.size) {
             long timeDiff = timestamp - this.timestamps[this.first];
             if (timeDiff < 0L && (onlyOlder || -timeDiff >= previousTimeDiff)) {
                 break;

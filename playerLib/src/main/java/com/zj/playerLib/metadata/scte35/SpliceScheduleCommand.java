@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.metadata.scte35;
 
 import android.os.Parcel;
@@ -56,7 +51,7 @@ public final class SpliceScheduleCommand extends SpliceCommand {
         dest.writeInt(eventsSize);
 
         for(int i = 0; i < eventsSize; ++i) {
-            ((Event)this.events.get(i)).writeToParcel(dest);
+            this.events.get(i).writeToParcel(dest);
         }
 
     }
@@ -133,13 +128,13 @@ public final class SpliceScheduleCommand extends SpliceCommand {
             boolean spliceEventCancelIndicator = (sectionData.readUnsignedByte() & 128) != 0;
             boolean outOfNetworkIndicator = false;
             boolean programSpliceFlag = false;
-            long utcSpliceTime = -9223372036854775807L;
+            long utcSpliceTime = -Long.MAX_VALUE;
             ArrayList<ComponentSplice> componentSplices = new ArrayList();
             int uniqueProgramId = 0;
             int availNum = 0;
             int availsExpected = 0;
             boolean autoReturn = false;
-            long breakDurationUs = -9223372036854775807L;
+            long breakDurationUs = -Long.MAX_VALUE;
             if (!spliceEventCancelIndicator) {
                 int headerByte = sectionData.readUnsignedByte();
                 outOfNetworkIndicator = (headerByte & 128) != 0;
@@ -161,7 +156,7 @@ public final class SpliceScheduleCommand extends SpliceCommand {
                 }
 
                 if (durationFlag) {
-                    long firstByte = (long)sectionData.readUnsignedByte();
+                    long firstByte = sectionData.readUnsignedByte();
                     autoReturn = (firstByte & 128L) != 0L;
                     long breakDuration90khz = (firstByte & 1L) << 32 | sectionData.readUnsignedInt();
                     breakDurationUs = breakDuration90khz * 1000L / 90L;
@@ -184,7 +179,7 @@ public final class SpliceScheduleCommand extends SpliceCommand {
             dest.writeInt(componentSpliceListSize);
 
             for(int i = 0; i < componentSpliceListSize; ++i) {
-                ((ComponentSplice)this.componentSpliceList.get(i)).writeToParcel(dest);
+                this.componentSpliceList.get(i).writeToParcel(dest);
             }
 
             dest.writeLong(this.utcSpliceTime);

@@ -1,23 +1,18 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.util;
 
 public final class TimestampAdjuster {
-    public static final long DO_NOT_OFFSET = 9223372036854775807L;
+    public static final long DO_NOT_OFFSET = Long.MAX_VALUE;
     private static final long MAX_PTS_PLUS_ONE = 8589934592L;
     private long firstSampleTimestampUs;
     private long timestampOffsetUs;
-    private volatile long lastSampleTimestampUs = -9223372036854775807L;
+    private volatile long lastSampleTimestampUs = -Long.MAX_VALUE;
 
     public TimestampAdjuster(long firstSampleTimestampUs) {
         this.setFirstSampleTimestampUs(firstSampleTimestampUs);
     }
 
     public synchronized void setFirstSampleTimestampUs(long firstSampleTimestampUs) {
-        Assertions.checkState(this.lastSampleTimestampUs == -9223372036854775807L);
+        Assertions.checkState(this.lastSampleTimestampUs == -Long.MAX_VALUE);
         this.firstSampleTimestampUs = firstSampleTimestampUs;
     }
 
@@ -26,22 +21,22 @@ public final class TimestampAdjuster {
     }
 
     public long getLastAdjustedTimestampUs() {
-        return this.lastSampleTimestampUs != -9223372036854775807L ? this.lastSampleTimestampUs + this.timestampOffsetUs : (this.firstSampleTimestampUs != 9223372036854775807L ? this.firstSampleTimestampUs : -9223372036854775807L);
+        return this.lastSampleTimestampUs != -Long.MAX_VALUE ? this.lastSampleTimestampUs + this.timestampOffsetUs : (this.firstSampleTimestampUs != Long.MAX_VALUE ? this.firstSampleTimestampUs : -Long.MAX_VALUE);
     }
 
     public long getTimestampOffsetUs() {
-        return this.firstSampleTimestampUs == 9223372036854775807L ? 0L : (this.lastSampleTimestampUs == -9223372036854775807L ? -9223372036854775807L : this.timestampOffsetUs);
+        return this.firstSampleTimestampUs == Long.MAX_VALUE ? 0L : (this.lastSampleTimestampUs == -Long.MAX_VALUE ? -Long.MAX_VALUE : this.timestampOffsetUs);
     }
 
     public void reset() {
-        this.lastSampleTimestampUs = -9223372036854775807L;
+        this.lastSampleTimestampUs = -Long.MAX_VALUE;
     }
 
     public long adjustTsTimestamp(long pts90Khz) {
-        if (pts90Khz == -9223372036854775807L) {
-            return -9223372036854775807L;
+        if (pts90Khz == -Long.MAX_VALUE) {
+            return -Long.MAX_VALUE;
         } else {
-            if (this.lastSampleTimestampUs != -9223372036854775807L) {
+            if (this.lastSampleTimestampUs != -Long.MAX_VALUE) {
                 long lastPts = usToPts(this.lastSampleTimestampUs);
                 long closestWrapCount = (lastPts + 4294967296L) / 8589934592L;
                 long ptsWrapBelow = pts90Khz + 8589934592L * (closestWrapCount - 1L);
@@ -54,13 +49,13 @@ public final class TimestampAdjuster {
     }
 
     public long adjustSampleTimestamp(long timeUs) {
-        if (timeUs == -9223372036854775807L) {
-            return -9223372036854775807L;
+        if (timeUs == -Long.MAX_VALUE) {
+            return -Long.MAX_VALUE;
         } else {
-            if (this.lastSampleTimestampUs != -9223372036854775807L) {
+            if (this.lastSampleTimestampUs != -Long.MAX_VALUE) {
                 this.lastSampleTimestampUs = timeUs;
             } else {
-                if (this.firstSampleTimestampUs != 9223372036854775807L) {
+                if (this.firstSampleTimestampUs != Long.MAX_VALUE) {
                     this.timestampOffsetUs = this.firstSampleTimestampUs - timeUs;
                 }
 
@@ -75,7 +70,7 @@ public final class TimestampAdjuster {
     }
 
     public synchronized void waitUntilInitialized() throws InterruptedException {
-        while(this.lastSampleTimestampUs == -9223372036854775807L) {
+        while(this.lastSampleTimestampUs == -Long.MAX_VALUE) {
             this.wait();
         }
 

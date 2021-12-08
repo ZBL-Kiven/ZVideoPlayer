@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.source.chunk;
 
 import android.net.Uri;
@@ -32,7 +27,7 @@ public abstract class Chunk implements Loadable {
 
     public Chunk(DataSource dataSource, DataSpec dataSpec, int type, Format trackFormat, int trackSelectionReason, @Nullable Object trackSelectionData, long startTimeUs, long endTimeUs) {
         this.dataSource = new StatsDataSource(dataSource);
-        this.dataSpec = (DataSpec)Assertions.checkNotNull(dataSpec);
+        this.dataSpec = Assertions.checkNotNull(dataSpec);
         this.type = type;
         this.trackFormat = trackFormat;
         this.trackSelectionReason = trackSelectionReason;

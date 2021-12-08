@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.metadata.id3;
 
 import android.os.Parcel;
@@ -43,7 +38,7 @@ public final class ChapterFrame extends Id3Frame {
 
     ChapterFrame(Parcel in) {
         super("CHAP");
-        this.chapterId = (String) Util.castNonNull(in.readString());
+        this.chapterId = Util.castNonNull(in.readString());
         this.startTimeMs = in.readInt();
         this.endTimeMs = in.readInt();
         this.startOffset = in.readLong();
@@ -52,7 +47,7 @@ public final class ChapterFrame extends Id3Frame {
         this.subFrames = new Id3Frame[subFrameCount];
 
         for (int i = 0; i < subFrameCount; ++i) {
-            this.subFrames[i] = (Id3Frame) in.readParcelable(Id3Frame.class.getClassLoader());
+            this.subFrames[i] = in.readParcelable(Id3Frame.class.getClassLoader());
         }
 
     }

@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.source;
 
 import android.os.Handler;
@@ -94,7 +89,7 @@ public class ConcatenatingMediaSource extends CompositeMediaSource<Concatenating
     }
 
     public final synchronized void addMediaSource(MediaSource mediaSource) {
-        this.addMediaSource(this.mediaSourcesPublic.size(), mediaSource, (Runnable)null);
+        this.addMediaSource(this.mediaSourcesPublic.size(), mediaSource, null);
     }
 
     public final synchronized void addMediaSource(MediaSource mediaSource, @Nullable Runnable actionOnCompletion) {
@@ -102,7 +97,7 @@ public class ConcatenatingMediaSource extends CompositeMediaSource<Concatenating
     }
 
     public final synchronized void addMediaSource(int index, MediaSource mediaSource) {
-        this.addMediaSource(index, mediaSource, (Runnable)null);
+        this.addMediaSource(index, mediaSource, null);
     }
 
     public final synchronized void addMediaSource(int index, MediaSource mediaSource, @Nullable Runnable actionOnCompletion) {
@@ -110,7 +105,7 @@ public class ConcatenatingMediaSource extends CompositeMediaSource<Concatenating
     }
 
     public final synchronized void addMediaSources(Collection<MediaSource> mediaSources) {
-        this.addMediaSources(this.mediaSourcesPublic.size(), mediaSources, (Runnable)null);
+        this.addMediaSources(this.mediaSourcesPublic.size(), mediaSources, null);
     }
 
     public final synchronized void addMediaSources(Collection<MediaSource> mediaSources, @Nullable Runnable actionOnCompletion) {
@@ -118,7 +113,7 @@ public class ConcatenatingMediaSource extends CompositeMediaSource<Concatenating
     }
 
     public final synchronized void addMediaSources(int index, Collection<MediaSource> mediaSources) {
-        this.addMediaSources(index, mediaSources, (Runnable)null);
+        this.addMediaSources(index, mediaSources, null);
     }
 
     public final synchronized void addMediaSources(int index, Collection<MediaSource> mediaSources, @Nullable Runnable actionOnCompletion) {
@@ -147,7 +142,7 @@ public class ConcatenatingMediaSource extends CompositeMediaSource<Concatenating
     }
 
     public final synchronized void removeMediaSource(int index) {
-        this.removeMediaSource(index, (Runnable)null);
+        this.removeMediaSource(index, null);
     }
 
     public final synchronized void removeMediaSource(int index, @Nullable Runnable actionOnCompletion) {
@@ -155,7 +150,7 @@ public class ConcatenatingMediaSource extends CompositeMediaSource<Concatenating
     }
 
     public final synchronized void removeMediaSourceRange(int fromIndex, int toIndex) {
-        this.removeMediaSourceRange(fromIndex, toIndex, (Runnable)null);
+        this.removeMediaSourceRange(fromIndex, toIndex, null);
     }
 
     public final synchronized void removeMediaSourceRange(int fromIndex, int toIndex, @Nullable Runnable actionOnCompletion) {
@@ -176,7 +171,7 @@ public class ConcatenatingMediaSource extends CompositeMediaSource<Concatenating
     }
 
     public final synchronized void moveMediaSource(int currentIndex, int newIndex) {
-        this.moveMediaSource(currentIndex, newIndex, (Runnable)null);
+        this.moveMediaSource(currentIndex, newIndex, null);
     }
 
     public final synchronized void moveMediaSource(int currentIndex, int newIndex, @Nullable Runnable actionOnCompletion) {
@@ -197,7 +192,7 @@ public class ConcatenatingMediaSource extends CompositeMediaSource<Concatenating
     }
 
     public final synchronized void clear() {
-        this.clear((Runnable)null);
+        this.clear(null);
     }
 
     public final synchronized void clear(@Nullable Runnable actionOnCompletion) {
@@ -209,11 +204,11 @@ public class ConcatenatingMediaSource extends CompositeMediaSource<Concatenating
     }
 
     public final synchronized MediaSource getMediaSource(int index) {
-        return ((MediaSourceHolder)this.mediaSourcesPublic.get(index)).mediaSource;
+        return this.mediaSourcesPublic.get(index).mediaSource;
     }
 
     public final synchronized void setShuffleOrder(ShuffleOrder shuffleOrder) {
-        this.setShuffleOrder(shuffleOrder, (Runnable)null);
+        this.setShuffleOrder(shuffleOrder, null);
     }
 
     public final synchronized void setShuffleOrder(ShuffleOrder shuffleOrder, @Nullable Runnable actionOnCompletion) {
@@ -248,7 +243,7 @@ public class ConcatenatingMediaSource extends CompositeMediaSource<Concatenating
         } else {
             this.shuffleOrder = this.shuffleOrder.cloneAndInsert(0, this.mediaSourcesPublic.size());
             this.addMediaSourcesInternal(0, this.mediaSourcesPublic);
-            this.scheduleListenerNotification((Runnable)null);
+            this.scheduleListenerNotification(null);
         }
 
     }
@@ -258,7 +253,7 @@ public class ConcatenatingMediaSource extends CompositeMediaSource<Concatenating
 
     public final MediaPeriod createPeriod(MediaPeriodId id, Allocator allocator) {
         Object mediaSourceHolderUid = getMediaSourceHolderUid(id.periodUid);
-        MediaSourceHolder holder = (MediaSourceHolder)this.mediaSourceByUid.get(mediaSourceHolderUid);
+        MediaSourceHolder holder = this.mediaSourceByUid.get(mediaSourceHolderUid);
         if (holder == null) {
             holder = new MediaSourceHolder(new DummyMediaSource());
             holder.hasStartedPreparing = true;
@@ -279,7 +274,7 @@ public class ConcatenatingMediaSource extends CompositeMediaSource<Concatenating
     }
 
     public final void releasePeriod(MediaPeriod mediaPeriod) {
-        MediaSourceHolder holder = (MediaSourceHolder)Assertions.checkNotNull(this.mediaSourceByMediaPeriod.remove(mediaPeriod));
+        MediaSourceHolder holder = Assertions.checkNotNull(this.mediaSourceByMediaPeriod.remove(mediaPeriod));
         ((DeferredMediaPeriod)mediaPeriod).releasePeriod();
         holder.activeMediaPeriods.remove(mediaPeriod);
         this.maybeReleaseChildSource(holder);
@@ -303,7 +298,7 @@ public class ConcatenatingMediaSource extends CompositeMediaSource<Concatenating
     @Nullable
     protected MediaPeriodId getMediaPeriodIdForChildMediaPeriodId(MediaSourceHolder mediaSourceHolder, MediaPeriodId mediaPeriodId) {
         for(int i = 0; i < mediaSourceHolder.activeMediaPeriods.size(); ++i) {
-            if (((DeferredMediaPeriod)mediaSourceHolder.activeMediaPeriods.get(i)).id.windowSequenceNumber == mediaPeriodId.windowSequenceNumber) {
+            if (mediaSourceHolder.activeMediaPeriods.get(i).id.windowSequenceNumber == mediaPeriodId.windowSequenceNumber) {
                 Object periodUid = getPeriodUid(mediaSourceHolder, mediaPeriodId.periodUid);
                 return mediaPeriodId.copyWithPeriodUid(periodUid);
             }
@@ -321,14 +316,14 @@ public class ConcatenatingMediaSource extends CompositeMediaSource<Concatenating
             switch(messageType) {
             case 0:
                 MessageData<Collection<MediaSourceHolder>> addMessage = (MessageData)Util.castNonNull(message);
-                this.shuffleOrder = this.shuffleOrder.cloneAndInsert(addMessage.index, ((Collection)addMessage.customData).size());
-                this.addMediaSourcesInternal(addMessage.index, (Collection)addMessage.customData);
+                this.shuffleOrder = this.shuffleOrder.cloneAndInsert(addMessage.index, addMessage.customData.size());
+                this.addMediaSourcesInternal(addMessage.index, addMessage.customData);
                 this.scheduleListenerNotification(addMessage.actionOnCompletion);
                 break;
             case 1:
                 MessageData<Integer> removeMessage = (MessageData)Util.castNonNull(message);
                 int fromIndex = removeMessage.index;
-                int toIndex = (Integer)removeMessage.customData;
+                int toIndex = removeMessage.customData;
                 if (fromIndex == 0 && toIndex == this.shuffleOrder.getLength()) {
                     this.shuffleOrder = this.shuffleOrder.cloneAndClear();
                 } else {
@@ -344,13 +339,13 @@ public class ConcatenatingMediaSource extends CompositeMediaSource<Concatenating
             case 2:
                 MessageData<Integer> moveMessage = (MessageData)Util.castNonNull(message);
                 this.shuffleOrder = this.shuffleOrder.cloneAndRemove(moveMessage.index, moveMessage.index + 1);
-                this.shuffleOrder = this.shuffleOrder.cloneAndInsert((Integer)moveMessage.customData, 1);
-                this.moveMediaSourceInternal(moveMessage.index, (Integer)moveMessage.customData);
+                this.shuffleOrder = this.shuffleOrder.cloneAndInsert(moveMessage.customData, 1);
+                this.moveMediaSourceInternal(moveMessage.index, moveMessage.customData);
                 this.scheduleListenerNotification(moveMessage.actionOnCompletion);
                 break;
             case 3:
                 MessageData<ShuffleOrder> shuffleOrderMessage = (MessageData)Util.castNonNull(message);
-                this.shuffleOrder = (ShuffleOrder)shuffleOrderMessage.customData;
+                this.shuffleOrder = shuffleOrderMessage.customData;
                 this.scheduleListenerNotification(shuffleOrderMessage.actionOnCompletion);
                 break;
             case 4:
@@ -358,10 +353,10 @@ public class ConcatenatingMediaSource extends CompositeMediaSource<Concatenating
                 break;
             case 5:
                 List<Runnable> actionsOnCompletion = (List)Util.castNonNull(message);
-                Handler handler = (Handler)Assertions.checkNotNull(this.playerApplicationHandler);
+                Handler handler = Assertions.checkNotNull(this.playerApplicationHandler);
 
                 for(int i = 0; i < actionsOnCompletion.size(); ++i) {
-                    handler.post((Runnable)actionsOnCompletion.get(i));
+                    handler.post(actionsOnCompletion.get(i));
                 }
 
                 return;
@@ -374,7 +369,7 @@ public class ConcatenatingMediaSource extends CompositeMediaSource<Concatenating
 
     private void scheduleListenerNotification(@Nullable Runnable actionOnCompletion) {
         if (!this.listenerNotificationScheduled) {
-            ((InlinePlayer)Assertions.checkNotNull(this.player)).createMessage(this).setType(4).send();
+            Assertions.checkNotNull(this.player).createMessage(this).setType(4).send();
             this.listenerNotificationScheduled = true;
         }
 
@@ -388,9 +383,9 @@ public class ConcatenatingMediaSource extends CompositeMediaSource<Concatenating
         this.listenerNotificationScheduled = false;
         List<Runnable> actionsOnCompletion = this.pendingOnCompletionActions.isEmpty() ? Collections.emptyList() : new ArrayList(this.pendingOnCompletionActions);
         this.pendingOnCompletionActions.clear();
-        this.refreshSourceInfo(new ConcatenatedTimeline(this.mediaSourceHolders, this.windowCount, this.periodCount, this.shuffleOrder, this.isAtomic), (Object)null);
-        if (!((List)actionsOnCompletion).isEmpty()) {
-            ((InlinePlayer)Assertions.checkNotNull(this.player)).createMessage(this).setType(5).setPayload(actionsOnCompletion).send();
+        this.refreshSourceInfo(new ConcatenatedTimeline(this.mediaSourceHolders, this.windowCount, this.periodCount, this.shuffleOrder, this.isAtomic), null);
+        if (!actionsOnCompletion.isEmpty()) {
+            Assertions.checkNotNull(this.player).createMessage(this).setType(5).setPayload(actionsOnCompletion).send();
         }
 
     }
@@ -407,7 +402,7 @@ public class ConcatenatingMediaSource extends CompositeMediaSource<Concatenating
 
     private void addMediaSourceInternal(int newIndex, MediaSourceHolder newMediaSourceHolder) {
         if (newIndex > 0) {
-            MediaSourceHolder previousHolder = (MediaSourceHolder)this.mediaSourceHolders.get(newIndex - 1);
+            MediaSourceHolder previousHolder = this.mediaSourceHolders.get(newIndex - 1);
             newMediaSourceHolder.reset(newIndex, previousHolder.firstWindowIndexInChild + previousHolder.timeline.getWindowCount(), previousHolder.firstPeriodIndexInChild + previousHolder.timeline.getPeriodCount());
         } else {
             newMediaSourceHolder.reset(newIndex, 0, 0);
@@ -441,7 +436,7 @@ public class ConcatenatingMediaSource extends CompositeMediaSource<Concatenating
                     mediaSourceHolder.timeline = DeferredTimeline.createWithRealTimeline(timeline, DeferredTimeline.DUMMY_ID);
                 } else {
                     Assertions.checkState(mediaSourceHolder.activeMediaPeriods.size() <= 1);
-                    DeferredMediaPeriod deferredMediaPeriod = mediaSourceHolder.activeMediaPeriods.isEmpty() ? null : (DeferredMediaPeriod)mediaSourceHolder.activeMediaPeriods.get(0);
+                    DeferredMediaPeriod deferredMediaPeriod = mediaSourceHolder.activeMediaPeriods.isEmpty() ? null : mediaSourceHolder.activeMediaPeriods.get(0);
                     long windowStartPositionUs = this.window.getDefaultPositionUs();
                     if (deferredMediaPeriod != null) {
                         long periodPreparePositionUs = deferredMediaPeriod.getPreparePositionUs();
@@ -452,7 +447,7 @@ public class ConcatenatingMediaSource extends CompositeMediaSource<Concatenating
 
                     Pair<Object, Long> periodPosition = timeline.getPeriodPosition(this.window, this.period, 0, windowStartPositionUs);
                     Object periodUid = periodPosition.first;
-                    long periodPositionUs = (Long)periodPosition.second;
+                    long periodPositionUs = periodPosition.second;
                     mediaSourceHolder.timeline = DeferredTimeline.createWithRealTimeline(timeline, periodUid);
                     if (deferredMediaPeriod != null) {
                         deferredMediaPeriod.overridePreparePositionUs(periodPositionUs);
@@ -462,13 +457,13 @@ public class ConcatenatingMediaSource extends CompositeMediaSource<Concatenating
                 }
 
                 mediaSourceHolder.isPrepared = true;
-                this.scheduleListenerNotification((Runnable)null);
+                this.scheduleListenerNotification(null);
             }
         }
     }
 
     private void removeMediaSourceInternal(int index) {
-        MediaSourceHolder holder = (MediaSourceHolder)this.mediaSourceHolders.remove(index);
+        MediaSourceHolder holder = this.mediaSourceHolders.remove(index);
         this.mediaSourceByUid.remove(holder.uid);
         Timeline oldTimeline = holder.timeline;
         this.correctOffsets(index, -1, -oldTimeline.getWindowCount(), -oldTimeline.getPeriodCount());
@@ -479,12 +474,12 @@ public class ConcatenatingMediaSource extends CompositeMediaSource<Concatenating
     private void moveMediaSourceInternal(int currentIndex, int newIndex) {
         int startIndex = Math.min(currentIndex, newIndex);
         int endIndex = Math.max(currentIndex, newIndex);
-        int windowOffset = ((MediaSourceHolder)this.mediaSourceHolders.get(startIndex)).firstWindowIndexInChild;
-        int periodOffset = ((MediaSourceHolder)this.mediaSourceHolders.get(startIndex)).firstPeriodIndexInChild;
+        int windowOffset = this.mediaSourceHolders.get(startIndex).firstWindowIndexInChild;
+        int periodOffset = this.mediaSourceHolders.get(startIndex).firstPeriodIndexInChild;
         this.mediaSourceHolders.add(newIndex, this.mediaSourceHolders.remove(currentIndex));
 
         for(int i = startIndex; i <= endIndex; ++i) {
-            MediaSourceHolder holder = (MediaSourceHolder)this.mediaSourceHolders.get(i);
+            MediaSourceHolder holder = this.mediaSourceHolders.get(i);
             holder.firstWindowIndexInChild = windowOffset;
             holder.firstPeriodIndexInChild = periodOffset;
             windowOffset += holder.timeline.getWindowCount();
@@ -498,11 +493,11 @@ public class ConcatenatingMediaSource extends CompositeMediaSource<Concatenating
         this.periodCount += periodOffsetUpdate;
 
         for(int i = startIndex; i < this.mediaSourceHolders.size(); ++i) {
-            MediaSourceHolder var10000 = (MediaSourceHolder)this.mediaSourceHolders.get(i);
+            MediaSourceHolder var10000 = this.mediaSourceHolders.get(i);
             var10000.childIndex += childIndexUpdate;
-            var10000 = (MediaSourceHolder)this.mediaSourceHolders.get(i);
+            var10000 = this.mediaSourceHolders.get(i);
             var10000.firstWindowIndexInChild += windowOffsetUpdate;
-            var10000 = (MediaSourceHolder)this.mediaSourceHolders.get(i);
+            var10000 = this.mediaSourceHolders.get(i);
             var10000.firstPeriodIndexInChild += periodOffsetUpdate;
         }
 
@@ -571,7 +566,7 @@ public class ConcatenatingMediaSource extends CompositeMediaSource<Concatenating
         }
 
         public Window getWindow(int windowIndex, Window window, boolean setTag, long defaultPositionProjectionUs) {
-            return window.set(this.tag, -9223372036854775807L, -9223372036854775807L, false, true, 0L, -9223372036854775807L, 0, 0, 0L);
+            return window.set(this.tag, -Long.MAX_VALUE, -Long.MAX_VALUE, false, true, 0L, -Long.MAX_VALUE, 0, 0, 0L);
         }
 
         public int getPeriodCount() {
@@ -579,7 +574,7 @@ public class ConcatenatingMediaSource extends CompositeMediaSource<Concatenating
         }
 
         public Period getPeriod(int periodIndex, Period period, boolean setIds) {
-            return period.set(0, DeferredTimeline.DUMMY_ID, 0, -9223372036854775807L, 0L);
+            return period.set(0, DeferredTimeline.DUMMY_ID, 0, -Long.MAX_VALUE, 0L);
         }
 
         public int getIndexOfPeriod(Object uid) {
@@ -677,7 +672,7 @@ public class ConcatenatingMediaSource extends CompositeMediaSource<Concatenating
         }
 
         protected int getChildIndexByChildUid(Object childUid) {
-            Integer index = (Integer)this.childIndexByUid.get(childUid);
+            Integer index = this.childIndexByUid.get(childUid);
             return index == null ? -1 : index;
         }
 

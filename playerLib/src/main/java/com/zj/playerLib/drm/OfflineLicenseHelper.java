@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.drm;
 
 import android.os.ConditionVariable;
@@ -24,11 +19,11 @@ public final class OfflineLicenseHelper<T extends MediaCrypto> {
     private final HandlerThread handlerThread = new HandlerThread("OfflineLicenseHelper");
 
     public static OfflineLicenseHelper<FrameworkMediaCrypto> newWidevineInstance(String defaultLicenseUrl, Factory httpDataSourceFactory) throws UnsupportedDrmException {
-        return newWidevineInstance(defaultLicenseUrl, false, httpDataSourceFactory, (HashMap)null);
+        return newWidevineInstance(defaultLicenseUrl, false, httpDataSourceFactory, null);
     }
 
     public static OfflineLicenseHelper<FrameworkMediaCrypto> newWidevineInstance(String defaultLicenseUrl, boolean forceDefaultLicenseUrl, Factory httpDataSourceFactory) throws UnsupportedDrmException {
-        return newWidevineInstance(defaultLicenseUrl, forceDefaultLicenseUrl, httpDataSourceFactory, (HashMap)null);
+        return newWidevineInstance(defaultLicenseUrl, forceDefaultLicenseUrl, httpDataSourceFactory, null);
     }
 
     public static OfflineLicenseHelper<FrameworkMediaCrypto> newWidevineInstance(String defaultLicenseUrl, boolean forceDefaultLicenseUrl, Factory httpDataSourceFactory, HashMap<String, String> optionalKeyRequestParameters) throws UnsupportedDrmException {
@@ -77,22 +72,22 @@ public final class OfflineLicenseHelper<T extends MediaCrypto> {
 
     public synchronized byte[] downloadLicense(DrmInitData drmInitData) throws DrmSessionException {
         Assertions.checkArgument(drmInitData != null);
-        return this.blockingKeyRequest(2, (byte[])null, drmInitData);
+        return this.blockingKeyRequest(2, null, drmInitData);
     }
 
     public synchronized byte[] renewLicense(byte[] offlineLicenseKeySetId) throws DrmSessionException {
         Assertions.checkNotNull(offlineLicenseKeySetId);
-        return this.blockingKeyRequest(2, offlineLicenseKeySetId, (DrmInitData)null);
+        return this.blockingKeyRequest(2, offlineLicenseKeySetId, null);
     }
 
     public synchronized void releaseLicense(byte[] offlineLicenseKeySetId) throws DrmSessionException {
         Assertions.checkNotNull(offlineLicenseKeySetId);
-        this.blockingKeyRequest(3, offlineLicenseKeySetId, (DrmInitData)null);
+        this.blockingKeyRequest(3, offlineLicenseKeySetId, null);
     }
 
     public synchronized Pair<Long, Long> getLicenseDurationRemainingSec(byte[] offlineLicenseKeySetId) throws DrmSessionException {
         Assertions.checkNotNull(offlineLicenseKeySetId);
-        DrmSession<T> drmSession = this.openBlockingKeyRequest(1, offlineLicenseKeySetId, (DrmInitData)null);
+        DrmSession<T> drmSession = this.openBlockingKeyRequest(1, offlineLicenseKeySetId, null);
         DrmSessionException error = drmSession.getError();
         Pair<Long, Long> licenseDurationRemainingSec = WidevineUtil.getLicenseDurationRemainingSec(drmSession);
         this.drmSessionManager.releaseSession(drmSession);

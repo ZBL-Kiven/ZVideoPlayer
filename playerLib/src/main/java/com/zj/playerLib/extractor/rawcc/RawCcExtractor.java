@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.extractor.rawcc;
 
 import com.zj.playerLib.Format;
@@ -44,7 +39,7 @@ public final class RawCcExtractor implements Extractor {
     }
 
     public void init(ExtractorOutput output) {
-        output.seekMap(new Unseekable(-9223372036854775807L));
+        output.seekMap(new Unseekable(-Long.MAX_VALUE));
         this.trackOutput = output.track(0, 3);
         output.endTracks();
         this.trackOutput.format(this.format);
@@ -140,7 +135,7 @@ public final class RawCcExtractor implements Extractor {
         }
 
         if (this.sampleBytesWritten > 0) {
-            this.trackOutput.sampleMetadata(this.timestampUs, 1, this.sampleBytesWritten, 0, (CryptoData)null);
+            this.trackOutput.sampleMetadata(this.timestampUs, 1, this.sampleBytesWritten, 0, null);
         }
 
     }

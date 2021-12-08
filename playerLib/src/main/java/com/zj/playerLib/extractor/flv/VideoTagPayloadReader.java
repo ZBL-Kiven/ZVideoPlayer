@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.extractor.flv;
 
 import com.zj.playerLib.Format;
@@ -56,7 +51,7 @@ final class VideoTagPayloadReader extends TagPayloadReader {
             data.readBytes(videoSequence.data, 0, data.bytesLeft());
             AvcConfig avcConfig = AvcConfig.parse(videoSequence);
             this.nalUnitLengthFieldLength = avcConfig.nalUnitLengthFieldLength;
-            Format format = Format.createVideoSampleFormat((String)null, "video/avc", (String)null, -1, -1, avcConfig.width, avcConfig.height, -1.0F, avcConfig.initializationData, -1, avcConfig.pixelWidthAspectRatio, (DrmInitData)null);
+            Format format = Format.createVideoSampleFormat(null, "video/avc", null, -1, -1, avcConfig.width, avcConfig.height, -1.0F, avcConfig.initializationData, -1, avcConfig.pixelWidthAspectRatio, null);
             this.output.format(format);
             this.hasOutputFormat = true;
         } else if (packetType == 1 && this.hasOutputFormat) {
@@ -78,7 +73,7 @@ final class VideoTagPayloadReader extends TagPayloadReader {
                 this.output.sampleData(data, bytesToWrite);
             }
 
-            this.output.sampleMetadata(timeUs, this.frameType == 1 ? 1 : 0, bytesWritten, 0, (CryptoData)null);
+            this.output.sampleMetadata(timeUs, this.frameType == 1 ? 1 : 0, bytesWritten, 0, null);
         }
 
     }

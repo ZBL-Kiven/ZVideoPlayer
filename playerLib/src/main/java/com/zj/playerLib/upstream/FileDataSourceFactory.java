@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.upstream;
 
 import androidx.annotation.Nullable;
@@ -14,7 +9,7 @@ public final class FileDataSourceFactory implements Factory {
     private final TransferListener listener;
 
     public FileDataSourceFactory() {
-        this((TransferListener)null);
+        this(null);
     }
 
     public FileDataSourceFactory(@Nullable TransferListener listener) {

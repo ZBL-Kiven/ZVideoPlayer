@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.upstream.cache;
 
 import androidx.annotation.Nullable;
@@ -82,11 +77,11 @@ final class CachedContent {
 
     public SimpleCacheSpan getSpan(long position) {
         SimpleCacheSpan lookupSpan = SimpleCacheSpan.createLookup(this.key, position);
-        SimpleCacheSpan floorSpan = (SimpleCacheSpan)this.cachedSpans.floor(lookupSpan);
+        SimpleCacheSpan floorSpan = this.cachedSpans.floor(lookupSpan);
         if (floorSpan != null && floorSpan.position + floorSpan.length > position) {
             return floorSpan;
         } else {
-            SimpleCacheSpan ceilSpan = (SimpleCacheSpan)this.cachedSpans.ceiling(lookupSpan);
+            SimpleCacheSpan ceilSpan = this.cachedSpans.ceiling(lookupSpan);
             return ceilSpan == null ? SimpleCacheSpan.createOpenHole(this.key, position) : SimpleCacheSpan.createClosedHole(this.key, position, ceilSpan.position - position);
         }
     }
@@ -94,7 +89,7 @@ final class CachedContent {
     public long getCachedBytesLength(long position, long length) {
         SimpleCacheSpan span = this.getSpan(position);
         if (span.isHoleSpan()) {
-            return -Math.min(span.isOpenEnded() ? 9223372036854775807L : span.length, length);
+            return -Math.min(span.isOpenEnded() ? Long.MAX_VALUE : span.length, length);
         } else {
             long queryEndPosition = position + length;
             long currentEndPosition = span.position + span.length;

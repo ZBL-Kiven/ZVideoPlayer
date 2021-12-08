@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.drm;
 
 import android.os.Parcel;
@@ -73,15 +68,15 @@ public final class DrmInitData implements Comparator<DrmInitData.SchemeData>, Pa
     }
 
     public DrmInitData(List<SchemeData> schemeDatas) {
-        this((String)null, false, (SchemeData[])schemeDatas.toArray(new SchemeData[schemeDatas.size()]));
+        this(null, false, schemeDatas.toArray(new SchemeData[schemeDatas.size()]));
     }
 
     public DrmInitData(String schemeType, List<SchemeData> schemeDatas) {
-        this(schemeType, false, (SchemeData[])schemeDatas.toArray(new SchemeData[schemeDatas.size()]));
+        this(schemeType, false, schemeDatas.toArray(new SchemeData[schemeDatas.size()]));
     }
 
     public DrmInitData(SchemeData... schemeDatas) {
-        this((String)null, (SchemeData[])schemeDatas);
+        this(null, schemeDatas);
     }
 
     public DrmInitData(@Nullable String schemeType, SchemeData... schemeDatas) {
@@ -91,7 +86,7 @@ public final class DrmInitData implements Comparator<DrmInitData.SchemeData>, Pa
     private DrmInitData(@Nullable String schemeType, boolean cloneSchemeDatas, SchemeData... schemeDatas) {
         this.schemeType = schemeType;
         if (cloneSchemeDatas) {
-            schemeDatas = (SchemeData[])schemeDatas.clone();
+            schemeDatas = schemeDatas.clone();
         }
 
         Arrays.sort(schemeDatas, this);
@@ -101,7 +96,7 @@ public final class DrmInitData implements Comparator<DrmInitData.SchemeData>, Pa
 
     DrmInitData(Parcel in) {
         this.schemeType = in.readString();
-        this.schemeDatas = (SchemeData[])in.createTypedArray(SchemeData.CREATOR);
+        this.schemeDatas = in.createTypedArray(SchemeData.CREATOR);
         this.schemeDataCount = this.schemeDatas.length;
     }
 
@@ -165,7 +160,7 @@ public final class DrmInitData implements Comparator<DrmInitData.SchemeData>, Pa
 
     private static boolean containsSchemeDataWithUuid(ArrayList<SchemeData> datas, int limit, UUID uuid) {
         for(int i = 0; i < limit; ++i) {
-            if (((SchemeData)datas.get(i)).uuid.equals(uuid)) {
+            if (datas.get(i).uuid.equals(uuid)) {
                 return true;
             }
         }
@@ -196,13 +191,13 @@ public final class DrmInitData implements Comparator<DrmInitData.SchemeData>, Pa
         }
 
         public SchemeData(UUID uuid, String mimeType, byte[] data, boolean requiresSecureDecryption) {
-            this(uuid, (String)null, mimeType, data, requiresSecureDecryption);
+            this(uuid, null, mimeType, data, requiresSecureDecryption);
         }
 
         public SchemeData(UUID uuid, @Nullable String licenseServerUrl, String mimeType, byte[] data, boolean requiresSecureDecryption) {
-            this.uuid = (UUID)Assertions.checkNotNull(uuid);
+            this.uuid = Assertions.checkNotNull(uuid);
             this.licenseServerUrl = licenseServerUrl;
-            this.mimeType = (String)Assertions.checkNotNull(mimeType);
+            this.mimeType = Assertions.checkNotNull(mimeType);
             this.data = data;
             this.requiresSecureDecryption = requiresSecureDecryption;
         }

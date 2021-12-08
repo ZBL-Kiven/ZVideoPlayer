@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.extractor.ts;
 
 import com.zj.playerLib.extractor.BinarySearchSeeker;
@@ -48,7 +43,7 @@ final class TsBinarySearchSeeker extends BinarySearchSeeker {
 
             long lastPcrTimeUsInRange;
             int endOfPacket;
-            for(lastPcrTimeUsInRange = -9223372036854775807L; packetBuffer.bytesLeft() >= 188; endOfLastPacketPosition = (long)endOfPacket) {
+            for(lastPcrTimeUsInRange = -Long.MAX_VALUE; packetBuffer.bytesLeft() >= 188; endOfLastPacketPosition = endOfPacket) {
                 int startOfPacket = TsUtil.findSyncBytePosition(packetBuffer.data, packetBuffer.getPosition(), limit);
                 endOfPacket = startOfPacket + 188;
                 if (endOfPacket > limit) {
@@ -56,10 +51,10 @@ final class TsBinarySearchSeeker extends BinarySearchSeeker {
                 }
 
                 long pcrValue = TsUtil.readPcrFromPacket(packetBuffer, startOfPacket, this.pcrPid);
-                if (pcrValue != -9223372036854775807L) {
+                if (pcrValue != -Long.MAX_VALUE) {
                     long pcrTimeUs = this.pcrTimestampAdjuster.adjustTsTimestamp(pcrValue);
                     if (pcrTimeUs > targetPcrTimeUs) {
-                        if (lastPcrTimeUsInRange == -9223372036854775807L) {
+                        if (lastPcrTimeUsInRange == -Long.MAX_VALUE) {
                             return TimestampSearchResult.overestimatedResult(pcrTimeUs, bufferStartOffset);
                         }
 
@@ -72,13 +67,13 @@ final class TsBinarySearchSeeker extends BinarySearchSeeker {
                     }
 
                     lastPcrTimeUsInRange = pcrTimeUs;
-                    startOfLastPacketPosition = (long)startOfPacket;
+                    startOfLastPacketPosition = startOfPacket;
                 }
 
                 packetBuffer.setPosition(endOfPacket);
             }
 
-            if (lastPcrTimeUsInRange != -9223372036854775807L) {
+            if (lastPcrTimeUsInRange != -Long.MAX_VALUE) {
                 long endOfLastPacketPositionInStream = bufferStartOffset + endOfLastPacketPosition;
                 return TimestampSearchResult.underestimatedResult(lastPcrTimeUsInRange, endOfLastPacketPositionInStream);
             } else {

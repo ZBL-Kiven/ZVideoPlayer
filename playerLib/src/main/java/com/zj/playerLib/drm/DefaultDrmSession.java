@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.drm;
 
 import android.annotation.SuppressLint;
@@ -59,7 +54,7 @@ class DefaultDrmSession<T extends MediaCrypto> implements DrmSession<T> {
     private KeyRequest currentKeyRequest;
     private ProvisionRequest currentProvisionRequest;
 
-    public DefaultDrmSession(UUID uuid, MediaDrm<T> mediaDrm, ProvisioningManager<T> provisioningManager, @Nullable List<SchemeData> schemeDatas, int mode, @Nullable byte[] offlineLicenseKeySetId, HashMap<String, String> optionalKeyRequestParameters, MediaDrmCallback callback, Looper playbackLooper, EventDispatcher<DefaultDrmSessionEventListener> eventDispatcher, int initialDrmRequestRetryCount) {
+    public DefaultDrmSession(UUID uuid, MediaDrm<T> mediaDrm, ProvisioningManager<T> provisioningManager, List<SchemeData> schemeDatas, int mode, @Nullable byte[] offlineLicenseKeySetId, HashMap<String, String> optionalKeyRequestParameters, MediaDrmCallback callback, Looper playbackLooper, EventDispatcher<DefaultDrmSessionEventListener> eventDispatcher, int initialDrmRequestRetryCount) {
         this.uuid = uuid;
         this.provisioningManager = provisioningManager;
         this.mediaDrm = mediaDrm;
@@ -93,8 +88,8 @@ class DefaultDrmSession<T extends MediaCrypto> implements DrmSession<T> {
     public boolean release() {
         if (--this.openCount == 0) {
             this.state = 0;
-            this.postResponseHandler.removeCallbacksAndMessages((Object)null);
-            this.postRequestHandler.removeCallbacksAndMessages((Object)null);
+            this.postResponseHandler.removeCallbacksAndMessages(null);
+            this.postRequestHandler.removeCallbacksAndMessages(null);
             this.postRequestHandler = null;
             this.requestHandlerThread.quit();
             this.requestHandlerThread = null;
@@ -120,16 +115,16 @@ class DefaultDrmSession<T extends MediaCrypto> implements DrmSession<T> {
 
     public void onMediaDrmEvent(int what) {
         if (this.isOpen()) {
-            switch(what) {
-            case 1:
-                this.state = 3;
-                this.provisioningManager.provisionRequired(this);
-                break;
-            case 2:
-                this.doLicense(false);
-                break;
-            case 3:
-                this.onKeysExpired();
+            switch (what) {
+                case 1:
+                    this.state = 3;
+                    this.provisioningManager.provisionRequired(this);
+                    break;
+                case 2:
+                    this.doLicense(false);
+                    break;
+                case 3:
+                    this.onKeysExpired();
             }
 
         }
@@ -199,10 +194,10 @@ class DefaultDrmSession<T extends MediaCrypto> implements DrmSession<T> {
         if (request == this.currentProvisionRequest && (this.state == 2 || this.isOpen())) {
             this.currentProvisionRequest = null;
             if (response instanceof Exception) {
-                this.provisioningManager.onProvisionError((Exception)response);
+                this.provisioningManager.onProvisionError((Exception) response);
             } else {
                 try {
-                    this.mediaDrm.provideProvisionResponse((byte[])((byte[])response));
+                    this.mediaDrm.provideProvisionResponse((byte[]) response);
                 } catch (Exception var4) {
                     this.provisioningManager.onProvisionError(var4);
                     return;
@@ -214,35 +209,35 @@ class DefaultDrmSession<T extends MediaCrypto> implements DrmSession<T> {
     }
 
     private void doLicense(boolean allowRetry) {
-        switch(this.mode) {
-        case 0:
-        case 1:
-            if (this.offlineLicenseKeySetId == null) {
-                this.postKeyRequest(1, allowRetry);
-            } else if (this.state == 4 || this.restoreKeys()) {
-                long licenseDurationRemainingSec = this.getLicenseDurationRemainingSec();
-                if (this.mode == 0 && licenseDurationRemainingSec <= 60L) {
-                    Log.d("DefaultDrmSession", "Offline license has expired or will expire soon. Remaining seconds: " + licenseDurationRemainingSec);
-                    this.postKeyRequest(2, allowRetry);
-                } else if (licenseDurationRemainingSec <= 0L) {
-                    this.onError(new KeysExpiredException());
-                } else {
-                    this.state = 4;
-                    this.eventDispatcher.dispatch(DefaultDrmSessionEventListener::onDrmKeysRestored);
+        switch (this.mode) {
+            case 0:
+            case 1:
+                if (this.offlineLicenseKeySetId == null) {
+                    this.postKeyRequest(1, allowRetry);
+                } else if (this.state == 4 || this.restoreKeys()) {
+                    long licenseDurationRemainingSec = this.getLicenseDurationRemainingSec();
+                    if (this.mode == 0 && licenseDurationRemainingSec <= 60L) {
+                        Log.d("DefaultDrmSession", "Offline license has expired or will expire soon. Remaining seconds: " + licenseDurationRemainingSec);
+                        this.postKeyRequest(2, allowRetry);
+                    } else if (licenseDurationRemainingSec <= 0L) {
+                        this.onError(new KeysExpiredException());
+                    } else {
+                        this.state = 4;
+                        this.eventDispatcher.dispatch(DefaultDrmSessionEventListener::onDrmKeysRestored);
+                    }
                 }
-            }
-            break;
-        case 2:
-            if (this.offlineLicenseKeySetId == null) {
-                this.postKeyRequest(2, allowRetry);
-            } else if (this.restoreKeys()) {
-                this.postKeyRequest(2, allowRetry);
-            }
-            break;
-        case 3:
-            if (this.restoreKeys()) {
-                this.postKeyRequest(3, allowRetry);
-            }
+                break;
+            case 2:
+                if (this.offlineLicenseKeySetId == null) {
+                    this.postKeyRequest(2, allowRetry);
+                } else if (this.restoreKeys()) {
+                    this.postKeyRequest(2, allowRetry);
+                }
+                break;
+            case 3:
+                if (this.restoreKeys()) {
+                    this.postKeyRequest(3, allowRetry);
+                }
         }
 
     }
@@ -260,10 +255,11 @@ class DefaultDrmSession<T extends MediaCrypto> implements DrmSession<T> {
 
     private long getLicenseDurationRemainingSec() {
         if (!C.WIDEVINE_UUID.equals(this.uuid)) {
-            return 9223372036854775807L;
+            return Long.MAX_VALUE;
         } else {
             Pair<Long, Long> pair = WidevineUtil.getLicenseDurationRemainingSec(this);
-            return Math.min((Long)pair.first, (Long)pair.second);
+            if (pair == null) return Long.MAX_VALUE;
+            return Math.min(pair.first, pair.second);
         }
     }
 
@@ -283,10 +279,10 @@ class DefaultDrmSession<T extends MediaCrypto> implements DrmSession<T> {
         if (request == this.currentKeyRequest && this.isOpen()) {
             this.currentKeyRequest = null;
             if (response instanceof Exception) {
-                this.onKeysError((Exception)response);
+                this.onKeysError((Exception) response);
             } else {
                 try {
-                    byte[] responseData = (byte[])((byte[])response);
+                    byte[] responseData = (byte[]) response;
                     if (this.mode == 3) {
                         this.mediaDrm.provideKeyResponse(this.offlineLicenseKeySetId, responseData);
                         this.eventDispatcher.dispatch(DefaultDrmSessionEventListener::onDrmKeysRestored);
@@ -326,9 +322,7 @@ class DefaultDrmSession<T extends MediaCrypto> implements DrmSession<T> {
 
     private void onError(Exception e) {
         this.lastException = new DrmSessionException(e);
-        this.eventDispatcher.dispatch((listener) -> {
-            listener.onDrmSessionManagerError(e);
-        });
+        this.eventDispatcher.dispatch((listener) -> listener.onDrmSessionManagerError(e));
         if (this.state != 4) {
             this.state = 1;
         }
@@ -356,15 +350,15 @@ class DefaultDrmSession<T extends MediaCrypto> implements DrmSession<T> {
 
             Object response;
             try {
-                switch(msg.what) {
-                case 0:
-                    response = DefaultDrmSession.this.callback.executeProvisionRequest(DefaultDrmSession.this.uuid, (ProvisionRequest)request);
-                    break;
-                case 1:
-                    response = DefaultDrmSession.this.callback.executeKeyRequest(DefaultDrmSession.this.uuid, (KeyRequest)request);
-                    break;
-                default:
-                    throw new RuntimeException();
+                switch (msg.what) {
+                    case 0:
+                        response = DefaultDrmSession.this.callback.executeProvisionRequest(DefaultDrmSession.this.uuid, (ProvisionRequest) request);
+                        break;
+                    case 1:
+                        response = DefaultDrmSession.this.callback.executeKeyRequest(DefaultDrmSession.this.uuid, (KeyRequest) request);
+                        break;
+                    default:
+                        throw new RuntimeException();
                 }
             } catch (Exception var5) {
                 if (this.maybeRetryRequest(msg)) {
@@ -395,7 +389,7 @@ class DefaultDrmSession<T extends MediaCrypto> implements DrmSession<T> {
         }
 
         private long getRetryDelayMillis(int errorCount) {
-            return (long)Math.min((errorCount - 1) * 1000, 5000);
+            return Math.min((errorCount - 1) * 1000, 5000);
         }
     }
 
@@ -406,15 +400,15 @@ class DefaultDrmSession<T extends MediaCrypto> implements DrmSession<T> {
         }
 
         public void handleMessage(Message msg) {
-            Pair<?, ?> requestAndResponse = (Pair)msg.obj;
+            Pair<?, ?> requestAndResponse = (Pair<?, ?>) msg.obj;
             Object request = requestAndResponse.first;
             Object response = requestAndResponse.second;
-            switch(msg.what) {
-            case 0:
-                DefaultDrmSession.this.onProvisionResponse(request, response);
-                break;
-            case 1:
-                DefaultDrmSession.this.onKeyResponse(request, response);
+            switch (msg.what) {
+                case 0:
+                    DefaultDrmSession.this.onProvisionResponse(request, response);
+                    break;
+                case 1:
+                    DefaultDrmSession.this.onKeyResponse(request, response);
             }
 
         }

@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.extractor.mp4;
 
 import com.zj.playerLib.util.Util;
@@ -40,7 +35,7 @@ final class FixedSampleSizeRechunker {
                 maximumSize = Math.max(maximumSize, sizes[newSampleIndex]);
                 timestamps[newSampleIndex] = timestampDeltaInTimeUnits * (long)originalSampleIndex;
                 flags[newSampleIndex] = 1;
-                sampleOffset += (long)sizes[newSampleIndex];
+                sampleOffset += sizes[newSampleIndex];
                 originalSampleIndex += bufferSampleCount;
                 chunkSamplesRemaining -= bufferSampleCount;
             }

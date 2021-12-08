@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.text;
 
 import android.graphics.Bitmap;
@@ -39,11 +34,11 @@ public class Cue {
     public final float textSize;
 
     public Cue(Bitmap bitmap, float horizontalPosition, int horizontalPositionAnchor, float verticalPosition, int verticalPositionAnchor, float width, float height) {
-        this((CharSequence)null, (Alignment)null, bitmap, verticalPosition, 0, verticalPositionAnchor, horizontalPosition, horizontalPositionAnchor, -2147483648, 1.4E-45F, width, height, false, -16777216);
+        this(null, null, bitmap, verticalPosition, 0, verticalPositionAnchor, horizontalPosition, horizontalPositionAnchor, -2147483648, 1.4E-45F, width, height, false, -16777216);
     }
 
     public Cue(CharSequence text) {
-        this(text, (Alignment)null, 1.4E-45F, -2147483648, -2147483648, 1.4E-45F, -2147483648, 1.4E-45F);
+        this(text, null, 1.4E-45F, -2147483648, -2147483648, 1.4E-45F, -2147483648, 1.4E-45F);
     }
 
     public Cue(CharSequence text, Alignment textAlignment, float line, int lineType, int lineAnchor, float position, int positionAnchor, float size) {
@@ -51,11 +46,11 @@ public class Cue {
     }
 
     public Cue(CharSequence text, Alignment textAlignment, float line, int lineType, int lineAnchor, float position, int positionAnchor, float size, int textSizeType, float textSize) {
-        this(text, textAlignment, (Bitmap)null, line, lineType, lineAnchor, position, positionAnchor, textSizeType, textSize, size, 1.4E-45F, false, -16777216);
+        this(text, textAlignment, null, line, lineType, lineAnchor, position, positionAnchor, textSizeType, textSize, size, 1.4E-45F, false, -16777216);
     }
 
     public Cue(CharSequence text, Alignment textAlignment, float line, int lineType, int lineAnchor, float position, int positionAnchor, float size, boolean windowColorSet, int windowColor) {
-        this(text, textAlignment, (Bitmap)null, line, lineType, lineAnchor, position, positionAnchor, -2147483648, 1.4E-45F, size, 1.4E-45F, windowColorSet, windowColor);
+        this(text, textAlignment, null, line, lineType, lineAnchor, position, positionAnchor, -2147483648, 1.4E-45F, size, 1.4E-45F, windowColorSet, windowColor);
     }
 
     private Cue(CharSequence text, Alignment textAlignment, Bitmap bitmap, float line, int lineType, int lineAnchor, float position, int positionAnchor, int textSizeType, float textSize, float size, float bitmapHeight, boolean windowColorSet, int windowColor) {

@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.extractor.ts;
 
 import android.util.SparseArray;
@@ -82,7 +77,7 @@ public final class H264Reader implements ElementaryStreamReader {
         int offset = data.getPosition();
         int limit = data.limit();
         byte[] dataArray = data.data;
-        this.totalBytesWritten += (long)data.bytesLeft();
+        this.totalBytesWritten += data.bytesLeft();
         this.output.sampleData(data, data.bytesLeft());
 
         while(true) {
@@ -140,7 +135,7 @@ public final class H264Reader implements ElementaryStreamReader {
                     initializationData.add(Arrays.copyOf(this.pps.nalData, this.pps.nalLength));
                     SpsData spsData = NalUnitUtil.parseSpsNalUnit(this.sps.nalData, 3, this.sps.nalLength);
                     PpsData ppsData = NalUnitUtil.parsePpsNalUnit(this.pps.nalData, 3, this.pps.nalLength);
-                    this.output.format(Format.createVideoSampleFormat(this.formatId, "video/avc", CodecSpecificDataUtil.buildAvcCodecString(spsData.profileIdc, spsData.constraintsFlagsAndReservedZero2Bits, spsData.levelIdc), -1, -1, spsData.width, spsData.height, -1.0F, initializationData, -1, spsData.pixelWidthAspectRatio, (DrmInitData)null));
+                    this.output.format(Format.createVideoSampleFormat(this.formatId, "video/avc", CodecSpecificDataUtil.buildAvcCodecString(spsData.profileIdc, spsData.constraintsFlagsAndReservedZero2Bits, spsData.levelIdc), -1, -1, spsData.width, spsData.height, -1.0F, initializationData, -1, spsData.pixelWidthAspectRatio, null));
                     this.hasOutputFormat = true;
                     this.sampleReader.putSps(spsData);
                     this.sampleReader.putPps(ppsData);
@@ -269,8 +264,8 @@ public final class H264Reader implements ElementaryStreamReader {
                                 if (this.pps.indexOfKey(picParameterSetId) < 0) {
                                     this.isFilling = false;
                                 } else {
-                                    PpsData ppsData = (PpsData)this.pps.get(picParameterSetId);
-                                    SpsData spsData = (SpsData)this.sps.get(ppsData.seqParameterSetId);
+                                    PpsData ppsData = this.pps.get(picParameterSetId);
+                                    SpsData spsData = this.sps.get(ppsData.seqParameterSetId);
                                     if (spsData.separateColorPlaneFlag) {
                                         if (!this.bitArray.canReadBits(2)) {
                                             return;
@@ -374,7 +369,7 @@ public final class H264Reader implements ElementaryStreamReader {
         private void outputSample(int offset) {
             int flags = this.sampleIsKeyframe ? 1 : 0;
             int size = (int)(this.nalUnitStartPosition - this.samplePosition);
-            this.output.sampleMetadata(this.sampleTimeUs, flags, size, offset, (CryptoData)null);
+            this.output.sampleMetadata(this.sampleTimeUs, flags, size, offset, null);
         }
 
         private static final class SliceHeaderData {

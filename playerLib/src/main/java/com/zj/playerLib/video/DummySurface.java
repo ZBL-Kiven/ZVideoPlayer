@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.video;
 
 import android.annotation.TargetApi;
@@ -138,7 +133,7 @@ public final class DummySurface extends Surface {
             } else if (this.initError != null) {
                 throw this.initError;
             } else {
-                return (DummySurface)Assertions.checkNotNull(this.surface);
+                return Assertions.checkNotNull(this.surface);
             }
         }
 

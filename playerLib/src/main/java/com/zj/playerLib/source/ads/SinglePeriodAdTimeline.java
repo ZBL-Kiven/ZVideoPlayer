@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.source.ads;
 
 import androidx.annotation.VisibleForTesting;
@@ -31,7 +26,7 @@ public final class SinglePeriodAdTimeline extends ForwardingTimeline {
 
     public Window getWindow(int windowIndex, Window window, boolean setTag, long defaultPositionProjectionUs) {
         window = super.getWindow(windowIndex, window, setTag, defaultPositionProjectionUs);
-        if (window.durationUs == -9223372036854775807L) {
+        if (window.durationUs == -Long.MAX_VALUE) {
             window.durationUs = this.adPlaybackState.contentDurationUs;
         }
 

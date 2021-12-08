@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.extractor.ts;
 
 import com.zj.playerLib.extractor.BinarySearchSeeker;
@@ -50,7 +45,7 @@ final class PsBinarySearchSeeker extends BinarySearchSeeker {
         private TimestampSearchResult searchForScrValueInBuffer(ParsableByteArray packetBuffer, long targetScrTimeUs, long bufferStartOffset) {
             int startOfLastPacketPosition = -1;
             int endOfLastPacketPosition = -1;
-            long lastScrTimeUsInRange = -9223372036854775807L;
+            long lastScrTimeUsInRange = -Long.MAX_VALUE;
 
             while(packetBuffer.bytesLeft() >= 4) {
                 int nextStartCode = PsBinarySearchSeeker.peekIntAtPosition(packetBuffer.data, packetBuffer.getPosition());
@@ -59,10 +54,10 @@ final class PsBinarySearchSeeker extends BinarySearchSeeker {
                 } else {
                     packetBuffer.skipBytes(4);
                     long scrValue = PsDurationReader.readScrValueFromPack(packetBuffer);
-                    if (scrValue != -9223372036854775807L) {
+                    if (scrValue != -Long.MAX_VALUE) {
                         long scrTimeUs = this.scrTimestampAdjuster.adjustTsTimestamp(scrValue);
                         if (scrTimeUs > targetScrTimeUs) {
-                            if (lastScrTimeUsInRange == -9223372036854775807L) {
+                            if (lastScrTimeUsInRange == -Long.MAX_VALUE) {
                                 return TimestampSearchResult.overestimatedResult(scrTimeUs, bufferStartOffset);
                             }
 
@@ -83,7 +78,7 @@ final class PsBinarySearchSeeker extends BinarySearchSeeker {
                 }
             }
 
-            if (lastScrTimeUsInRange != -9223372036854775807L) {
+            if (lastScrTimeUsInRange != -Long.MAX_VALUE) {
                 long endOfLastPacketPositionInStream = bufferStartOffset + (long)endOfLastPacketPosition;
                 return TimestampSearchResult.underestimatedResult(lastScrTimeUsInRange, endOfLastPacketPositionInStream);
             } else {

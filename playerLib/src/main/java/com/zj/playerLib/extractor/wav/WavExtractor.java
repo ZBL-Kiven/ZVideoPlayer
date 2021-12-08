@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.extractor.wav;
 
 import com.zj.playerLib.Format;
@@ -58,7 +53,7 @@ public final class WavExtractor implements Extractor {
                 throw new ParserException("Unsupported or unrecognized wav header.");
             }
 
-            Format format = Format.createAudioSampleFormat((String)null, "audio/raw", (String)null, this.wavHeader.getBitrate(), 32768, this.wavHeader.getNumChannels(), this.wavHeader.getSampleRateHz(), this.wavHeader.getEncoding(), (List)null, (DrmInitData)null, 0, (String)null);
+            Format format = Format.createAudioSampleFormat(null, "audio/raw", null, this.wavHeader.getBitrate(), 32768, this.wavHeader.getNumChannels(), this.wavHeader.getSampleRateHz(), this.wavHeader.getEncoding(), null, null, 0, null);
             this.trackOutput.format(format);
             this.bytesPerFrame = this.wavHeader.getBytesPerFrame();
         }
@@ -74,7 +69,7 @@ public final class WavExtractor implements Extractor {
         if (bytesLeft <= 0L) {
             return -1;
         } else {
-            int maxBytesToRead = (int)Math.min((long)('耀' - this.pendingBytes), bytesLeft);
+            int maxBytesToRead = (int)Math.min('耀' - this.pendingBytes, bytesLeft);
             int bytesAppended = this.trackOutput.sampleData(input, maxBytesToRead, true);
             if (bytesAppended != -1) {
                 this.pendingBytes += bytesAppended;
@@ -85,7 +80,7 @@ public final class WavExtractor implements Extractor {
                 long timeUs = this.wavHeader.getTimeUs(input.getPosition() - (long)this.pendingBytes);
                 int size = pendingFrames * this.bytesPerFrame;
                 this.pendingBytes -= size;
-                this.trackOutput.sampleMetadata(timeUs, 1, size, this.pendingBytes, (CryptoData)null);
+                this.trackOutput.sampleMetadata(timeUs, 1, size, this.pendingBytes, null);
             }
 
             return bytesAppended == -1 ? -1 : 0;

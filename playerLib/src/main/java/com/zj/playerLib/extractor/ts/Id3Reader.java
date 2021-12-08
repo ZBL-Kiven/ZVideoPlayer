@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.extractor.ts;
 
 import com.zj.playerLib.Format;
@@ -34,7 +29,7 @@ public final class Id3Reader implements ElementaryStreamReader {
     public void createTracks(ExtractorOutput extractorOutput, TrackIdGenerator idGenerator) {
         idGenerator.generateNewId();
         this.output = extractorOutput.track(idGenerator.getTrackId(), 4);
-        this.output.format(Format.createSampleFormat(idGenerator.getFormatId(), "application/id3", (String)null, -1, (DrmInitData)null));
+        this.output.format(Format.createSampleFormat(idGenerator.getFormatId(), "application/id3", null, -1, null));
     }
 
     public void packetStarted(long pesTimeUs, int flags) {
@@ -74,7 +69,7 @@ public final class Id3Reader implements ElementaryStreamReader {
 
     public void packetFinished() {
         if (this.writingSample && this.sampleSize != 0 && this.sampleBytesRead == this.sampleSize) {
-            this.output.sampleMetadata(this.sampleTimeUs, 1, this.sampleSize, 0, (CryptoData)null);
+            this.output.sampleMetadata(this.sampleTimeUs, 1, this.sampleSize, 0, null);
             this.writingSample = false;
         }
     }

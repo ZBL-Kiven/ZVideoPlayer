@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.util;
 
 import android.text.TextUtils;
@@ -56,7 +51,7 @@ public final class ColorParser {
                     return rgb(Integer.parseInt(matcher.group(1), 10), Integer.parseInt(matcher.group(2), 10), Integer.parseInt(matcher.group(3), 10));
                 }
             } else {
-                Integer color = (Integer)COLOR_MAP.get(Util.toLowerInvariant(colorExpression));
+                Integer color = COLOR_MAP.get(Util.toLowerInvariant(colorExpression));
                 if (color != null) {
                     return color;
                 }

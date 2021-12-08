@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib;
 
 import android.os.Handler;
@@ -31,7 +26,7 @@ public final class PlayerMessage {
         this.timeline = timeline;
         this.handler = defaultHandler;
         this.windowIndex = defaultWindowIndex;
-        this.positionMs = -9223372036854775807L;
+        this.positionMs = -Long.MAX_VALUE;
         this.deleteAfterDelivery = true;
     }
 
@@ -86,7 +81,7 @@ public final class PlayerMessage {
 
     public PlayerMessage setPosition(int windowIndex, long positionMs) {
         Assertions.checkState(!this.isSent);
-        Assertions.checkArgument(positionMs != -9223372036854775807L);
+        Assertions.checkArgument(positionMs != -Long.MAX_VALUE);
         if (windowIndex >= 0 && (this.timeline.isEmpty() || windowIndex < this.timeline.getWindowCount())) {
             this.windowIndex = windowIndex;
             this.positionMs = positionMs;
@@ -112,7 +107,7 @@ public final class PlayerMessage {
 
     public PlayerMessage send() {
         Assertions.checkState(!this.isSent);
-        if (this.positionMs == -9223372036854775807L) {
+        if (this.positionMs == -Long.MAX_VALUE) {
             Assertions.checkArgument(this.deleteAfterDelivery);
         }
 

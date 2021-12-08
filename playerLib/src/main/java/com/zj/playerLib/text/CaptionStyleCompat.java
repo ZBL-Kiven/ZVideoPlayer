@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.text;
 
 import android.annotation.TargetApi;
@@ -20,7 +15,7 @@ public final class CaptionStyleCompat {
     public static final int EDGE_TYPE_RAISED = 3;
     public static final int EDGE_TYPE_DEPRESSED = 4;
     public static final int USE_TRACK_COLOR_SETTINGS = 1;
-    public static final CaptionStyleCompat DEFAULT = new CaptionStyleCompat(-1, -16777216, 0, 0, -1, (Typeface)null);
+    public static final CaptionStyleCompat DEFAULT = new CaptionStyleCompat(-1, -16777216, 0, 0, -1, null);
     public final int foregroundColor;
     public final int backgroundColor;
     public final int windowColor;

@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.source;
 
 import androidx.annotation.Nullable;
@@ -53,7 +48,7 @@ public final class ClippingMediaSource extends CompositeMediaSource<Void> {
 
     public ClippingMediaSource(MediaSource mediaSource, long startPositionUs, long endPositionUs, boolean enableInitialDiscontinuity, boolean allowDynamicClippingUpdates, boolean relativeToDefaultPosition) {
         Assertions.checkArgument(startPositionUs >= 0L);
-        this.mediaSource = (MediaSource)Assertions.checkNotNull(mediaSource);
+        this.mediaSource = Assertions.checkNotNull(mediaSource);
         this.startUs = startPositionUs;
         this.endUs = endPositionUs;
         this.enableInitialDiscontinuity = enableInitialDiscontinuity;
@@ -146,8 +141,8 @@ public final class ClippingMediaSource extends CompositeMediaSource<Void> {
     }
 
     protected long getMediaTimeForChildMediaTime(Void id, long mediaTimeMs) {
-        if (mediaTimeMs == -9223372036854775807L) {
-            return -9223372036854775807L;
+        if (mediaTimeMs == -Long.MAX_VALUE) {
+            return -Long.MAX_VALUE;
         } else {
             long startMs = C.usToMs(this.startUs);
             long clippedTimeMs = Math.max(0L, mediaTimeMs - startMs);
@@ -173,7 +168,7 @@ public final class ClippingMediaSource extends CompositeMediaSource<Void> {
                 Window window = timeline.getWindow(0, new Window());
                 startUs = Math.max(0L, startUs);
                 long resolvedEndUs = endUs == -9223372036854775808L ? window.durationUs : Math.max(0L, endUs);
-                if (window.durationUs != -9223372036854775807L) {
+                if (window.durationUs != -Long.MAX_VALUE) {
                     if (resolvedEndUs > window.durationUs) {
                         resolvedEndUs = window.durationUs;
                     }
@@ -189,8 +184,8 @@ public final class ClippingMediaSource extends CompositeMediaSource<Void> {
 
                 this.startUs = startUs;
                 this.endUs = resolvedEndUs;
-                this.durationUs = resolvedEndUs == -9223372036854775807L ? -9223372036854775807L : resolvedEndUs - startUs;
-                this.isDynamic = window.isDynamic && (resolvedEndUs == -9223372036854775807L || window.durationUs != -9223372036854775807L && resolvedEndUs == window.durationUs);
+                this.durationUs = resolvedEndUs == -Long.MAX_VALUE ? -Long.MAX_VALUE : resolvedEndUs - startUs;
+                this.isDynamic = window.isDynamic && (resolvedEndUs == -Long.MAX_VALUE || window.durationUs != -Long.MAX_VALUE && resolvedEndUs == window.durationUs);
             }
         }
 
@@ -199,18 +194,18 @@ public final class ClippingMediaSource extends CompositeMediaSource<Void> {
             window.positionInFirstPeriodUs += this.startUs;
             window.durationUs = this.durationUs;
             window.isDynamic = this.isDynamic;
-            if (window.defaultPositionUs != -9223372036854775807L) {
+            if (window.defaultPositionUs != -Long.MAX_VALUE) {
                 window.defaultPositionUs = Math.max(window.defaultPositionUs, this.startUs);
-                window.defaultPositionUs = this.endUs == -9223372036854775807L ? window.defaultPositionUs : Math.min(window.defaultPositionUs, this.endUs);
+                window.defaultPositionUs = this.endUs == -Long.MAX_VALUE ? window.defaultPositionUs : Math.min(window.defaultPositionUs, this.endUs);
                 window.defaultPositionUs -= this.startUs;
             }
 
             long startMs = C.usToMs(this.startUs);
-            if (window.presentationStartTimeMs != -9223372036854775807L) {
+            if (window.presentationStartTimeMs != -Long.MAX_VALUE) {
                 window.presentationStartTimeMs += startMs;
             }
 
-            if (window.windowStartTimeMs != -9223372036854775807L) {
+            if (window.windowStartTimeMs != -Long.MAX_VALUE) {
                 window.windowStartTimeMs += startMs;
             }
 
@@ -220,7 +215,7 @@ public final class ClippingMediaSource extends CompositeMediaSource<Void> {
         public Period getPeriod(int periodIndex, Period period, boolean setIds) {
             this.timeline.getPeriod(0, period, setIds);
             long positionInClippedWindowUs = period.getPositionInWindowUs() - this.startUs;
-            long periodDurationUs = this.durationUs == -9223372036854775807L ? -9223372036854775807L : this.durationUs - positionInClippedWindowUs;
+            long periodDurationUs = this.durationUs == -Long.MAX_VALUE ? -Long.MAX_VALUE : this.durationUs - positionInClippedWindowUs;
             return period.set(period.id, period.uid, 0, periodDurationUs, positionInClippedWindowUs);
         }
     }

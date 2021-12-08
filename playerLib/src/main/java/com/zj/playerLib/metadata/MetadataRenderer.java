@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.metadata;
 
 import android.os.Handler;
@@ -44,9 +39,9 @@ public final class MetadataRenderer extends BaseRenderer implements Callback {
 
     public MetadataRenderer(MetadataOutput output, @Nullable Looper outputLooper, MetadataDecoderFactory decoderFactory) {
         super(4);
-        this.output = (MetadataOutput)Assertions.checkNotNull(output);
+        this.output = Assertions.checkNotNull(output);
         this.outputHandler = outputLooper == null ? null : Util.createHandler(outputLooper, this);
-        this.decoderFactory = (MetadataDecoderFactory)Assertions.checkNotNull(decoderFactory);
+        this.decoderFactory = Assertions.checkNotNull(decoderFactory);
         this.formatHolder = new FormatHolder();
         this.buffer = new MetadataInputBuffer();
         this.pendingMetadata = new Metadata[5];
@@ -55,7 +50,7 @@ public final class MetadataRenderer extends BaseRenderer implements Callback {
 
     public int supportsFormat(Format format) {
         if (this.decoderFactory.supportsFormat(format)) {
-            return supportsFormatDrm((DrmSessionManager)null, format.drmInitData) ? 4 : 2;
+            return supportsFormatDrm(null, format.drmInitData) ? 4 : 2;
         } else {
             return 0;
         }
@@ -123,7 +118,7 @@ public final class MetadataRenderer extends BaseRenderer implements Callback {
     }
 
     private void flushPendingMetadata() {
-        Arrays.fill(this.pendingMetadata, (Object)null);
+        Arrays.fill(this.pendingMetadata, null);
         this.pendingMetadataIndex = 0;
         this.pendingMetadataCount = 0;
     }

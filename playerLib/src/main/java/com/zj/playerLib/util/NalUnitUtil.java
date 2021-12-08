@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.util;
 
 import java.nio.ByteBuffer;
@@ -140,7 +135,7 @@ public final class NalUnitUtil {
             deltaPicOrderAlwaysZeroFlag = data.readBit();
             data.readSignedExpGolombCodedInt();
             data.readSignedExpGolombCodedInt();
-            long numRefFramesInPicOrderCntCycle = (long)data.readUnsignedExpGolombCodedInt();
+            long numRefFramesInPicOrderCntCycle = data.readUnsignedExpGolombCodedInt();
 
             for(int i = 0; (long)i < numRefFramesInPicOrderCntCycle; ++i) {
                 data.readUnsignedExpGolombCodedInt();

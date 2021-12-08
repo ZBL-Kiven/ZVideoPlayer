@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.upstream.cache;
 
 import androidx.annotation.NonNull;
@@ -50,7 +45,7 @@ public final class CachedRegionTracker implements Listener {
 
     public synchronized int getRegionEndTimeMs(long byteOffset) {
         this.lookupRegion.startOffset = byteOffset;
-        Region floorRegion = (Region)this.regions.floor(this.lookupRegion);
+        Region floorRegion = this.regions.floor(this.lookupRegion);
         if (floorRegion != null && byteOffset <= floorRegion.endOffset && floorRegion.endOffsetIndex != -1) {
             int index = floorRegion.endOffsetIndex;
             if (index == this.chunkIndex.length - 1 && floorRegion.endOffset == this.chunkIndex.offsets[index] + (long)this.chunkIndex.sizes[index]) {
@@ -70,7 +65,7 @@ public final class CachedRegionTracker implements Listener {
 
     public synchronized void onSpanRemoved(Cache cache, CacheSpan span) {
         Region removedRegion = new Region(span.position, span.position + span.length);
-        Region floorRegion = (Region)this.regions.floor(removedRegion);
+        Region floorRegion = this.regions.floor(removedRegion);
         if (floorRegion == null) {
             Log.e("CachedRegionTracker", "Removed a span we were not aware of");
         } else {
@@ -97,8 +92,8 @@ public final class CachedRegionTracker implements Listener {
 
     private void mergeSpan(CacheSpan span) {
         Region newRegion = new Region(span.position, span.position + span.length);
-        Region floorRegion = (Region)this.regions.floor(newRegion);
-        Region ceilingRegion = (Region)this.regions.ceiling(newRegion);
+        Region floorRegion = this.regions.floor(newRegion);
+        Region ceilingRegion = this.regions.ceiling(newRegion);
         boolean floorConnects = this.regionsConnect(floorRegion, newRegion);
         boolean ceilingConnects = this.regionsConnect(newRegion, ceilingRegion);
         if (ceilingConnects) {

@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.extractor.ts;
 
 import com.zj.playerLib.Format;
@@ -26,21 +21,21 @@ public final class SpliceInfoSectionReader implements SectionPayloadReader {
         this.timestampAdjuster = timestampAdjuster;
         idGenerator.generateNewId();
         this.output = extractorOutput.track(idGenerator.getTrackId(), 4);
-        this.output.format(Format.createSampleFormat(idGenerator.getFormatId(), "application/x-scte35", (String)null, -1, (DrmInitData)null));
+        this.output.format(Format.createSampleFormat(idGenerator.getFormatId(), "application/x-scte35", null, -1, null));
     }
 
     public void consume(ParsableByteArray sectionData) {
         if (!this.formatDeclared) {
-            if (this.timestampAdjuster.getTimestampOffsetUs() == -9223372036854775807L) {
+            if (this.timestampAdjuster.getTimestampOffsetUs() == -Long.MAX_VALUE) {
                 return;
             }
 
-            this.output.format(Format.createSampleFormat((String)null, "application/x-scte35", this.timestampAdjuster.getTimestampOffsetUs()));
+            this.output.format(Format.createSampleFormat(null, "application/x-scte35", this.timestampAdjuster.getTimestampOffsetUs()));
             this.formatDeclared = true;
         }
 
         int sampleSize = sectionData.bytesLeft();
         this.output.sampleData(sectionData, sampleSize);
-        this.output.sampleMetadata(this.timestampAdjuster.getLastAdjustedTimestampUs(), 1, sampleSize, 0, (CryptoData)null);
+        this.output.sampleMetadata(this.timestampAdjuster.getLastAdjustedTimestampUs(), 1, sampleSize, 0, null);
     }
 }

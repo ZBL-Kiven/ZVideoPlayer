@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.source;
 
 import java.util.Arrays;
@@ -25,7 +20,7 @@ public interface ShuffleOrder {
 
     ShuffleOrder cloneAndClear();
 
-    public static final class UnshuffledShuffleOrder implements ShuffleOrder {
+    final class UnshuffledShuffleOrder implements ShuffleOrder {
         private final int length;
 
         public UnshuffledShuffleOrder(int length) {
@@ -67,7 +62,7 @@ public interface ShuffleOrder {
         }
     }
 
-    public static class DefaultShuffleOrder implements ShuffleOrder {
+    class DefaultShuffleOrder implements ShuffleOrder {
         private final Random random;
         private final int[] shuffled;
         private final int[] indexInShuffled;

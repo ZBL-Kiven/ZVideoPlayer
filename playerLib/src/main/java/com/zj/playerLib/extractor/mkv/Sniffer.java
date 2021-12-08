@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.extractor.mkv;
 
 import com.zj.playerLib.extractor.ExtractorInput;
@@ -25,7 +20,7 @@ final class Sniffer {
         input.peekFully(this.scratch.data, 0, 4);
         long tag = this.scratch.readUnsignedInt();
 
-        for(this.peekLength = 4; tag != 440786851L; tag |= (long)(this.scratch.data[0] & 255)) {
+        for(this.peekLength = 4; tag != 440786851L; tag |= this.scratch.data[0] & 255) {
             if (++this.peekLength == bytesToSearch) {
                 return false;
             }
@@ -35,7 +30,7 @@ final class Sniffer {
         }
 
         long headerSize = this.readUint(input);
-        long headerStart = (long)this.peekLength;
+        long headerStart = this.peekLength;
         if (headerSize != -9223372036854775808L && (inputLength == -1L || headerStart + headerSize < inputLength)) {
             while((long)this.peekLength < headerStart + headerSize) {
                 long id = this.readUint(input);
@@ -83,7 +78,7 @@ final class Sniffer {
             }
 
             this.peekLength += length + 1;
-            return (long)value;
+            return value;
         }
     }
 }

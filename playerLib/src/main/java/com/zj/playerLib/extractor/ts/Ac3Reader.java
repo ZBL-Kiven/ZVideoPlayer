@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.extractor.ts;
 
 import com.zj.playerLib.Format;
@@ -37,7 +32,7 @@ public final class Ac3Reader implements ElementaryStreamReader {
     private long timeUs;
 
     public Ac3Reader() {
-        this((String)null);
+        this(null);
     }
 
     public Ac3Reader(String language) {
@@ -87,7 +82,7 @@ public final class Ac3Reader implements ElementaryStreamReader {
                 this.output.sampleData(data, bytesToRead);
                 this.bytesRead += bytesToRead;
                 if (this.bytesRead == this.sampleSize) {
-                    this.output.sampleMetadata(this.timeUs, 1, this.sampleSize, 0, (CryptoData)null);
+                    this.output.sampleMetadata(this.timeUs, 1, this.sampleSize, 0, null);
                     this.timeUs += this.sampleDurationUs;
                     this.state = 0;
                 }
@@ -128,7 +123,7 @@ public final class Ac3Reader implements ElementaryStreamReader {
         this.headerScratchBits.setPosition(0);
         SyncFrameInfo frameInfo = Ac3Util.parseAc3SyncframeInfo(this.headerScratchBits);
         if (this.format == null || frameInfo.channelCount != this.format.channelCount || frameInfo.sampleRate != this.format.sampleRate || frameInfo.mimeType != this.format.sampleMimeType) {
-            this.format = Format.createAudioSampleFormat(this.trackFormatId, frameInfo.mimeType, (String)null, -1, -1, frameInfo.channelCount, frameInfo.sampleRate, (List)null, (DrmInitData)null, 0, this.language);
+            this.format = Format.createAudioSampleFormat(this.trackFormatId, frameInfo.mimeType, null, -1, -1, frameInfo.channelCount, frameInfo.sampleRate, null, null, 0, this.language);
             this.output.format(this.format);
         }
 

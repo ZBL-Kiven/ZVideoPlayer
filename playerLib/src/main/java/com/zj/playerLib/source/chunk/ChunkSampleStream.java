@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.source.chunk;
 
 import androidx.annotation.Nullable;
@@ -136,7 +131,7 @@ public class ChunkSampleStream<T extends ChunkSource> implements SampleStream, S
         } else {
             long bufferedPositionUs = this.lastSeekPositionUs;
             BaseMediaChunk lastMediaChunk = this.getLastMediaChunk();
-            BaseMediaChunk lastCompletedMediaChunk = lastMediaChunk.isLoadCompleted() ? lastMediaChunk : (this.mediaChunks.size() > 1 ? (BaseMediaChunk)this.mediaChunks.get(this.mediaChunks.size() - 2) : null);
+            BaseMediaChunk lastCompletedMediaChunk = lastMediaChunk.isLoadCompleted() ? lastMediaChunk : (this.mediaChunks.size() > 1 ? this.mediaChunks.get(this.mediaChunks.size() - 2) : null);
             if (lastCompletedMediaChunk != null) {
                 bufferedPositionUs = Math.max(bufferedPositionUs, lastCompletedMediaChunk.endTimeUs);
             }
@@ -157,9 +152,9 @@ public class ChunkSampleStream<T extends ChunkSource> implements SampleStream, S
             BaseMediaChunk seekToMediaChunk = null;
 
             for(int i = 0; i < this.mediaChunks.size(); ++i) {
-                BaseMediaChunk mediaChunk = (BaseMediaChunk)this.mediaChunks.get(i);
+                BaseMediaChunk mediaChunk = this.mediaChunks.get(i);
                 long mediaChunkStartTimeUs = mediaChunk.startTimeUs;
-                if (mediaChunkStartTimeUs == positionUs && mediaChunk.clippedStartTimeUs == -9223372036854775807L) {
+                if (mediaChunkStartTimeUs == positionUs && mediaChunk.clippedStartTimeUs == -Long.MAX_VALUE) {
                     seekToMediaChunk = mediaChunk;
                     break;
                 }
@@ -216,7 +211,7 @@ public class ChunkSampleStream<T extends ChunkSource> implements SampleStream, S
     }
 
     public void release() {
-        this.release((ReleaseCallback)null);
+        this.release(null);
     }
 
     public void release(@Nullable ChunkSampleStream.ReleaseCallback<T> callback) {
@@ -317,7 +312,7 @@ public class ChunkSampleStream<T extends ChunkSource> implements SampleStream, S
         boolean isMediaChunk = this.isMediaChunk(loadable);
         int lastChunkIndex = this.mediaChunks.size() - 1;
         boolean cancelable = bytesLoaded == 0L || !isMediaChunk || !this.haveReadFromMediaChunk(lastChunkIndex);
-        long blacklistDurationMs = cancelable ? this.loadErrorHandlingPolicy.getBlacklistDurationMsFor(loadable.type, loadDurationMs, error, errorCount) : -9223372036854775807L;
+        long blacklistDurationMs = cancelable ? this.loadErrorHandlingPolicy.getBlacklistDurationMsFor(loadable.type, loadDurationMs, error, errorCount) : -Long.MAX_VALUE;
         LoadErrorAction loadErrorAction = null;
         if (this.chunkSource.onChunkLoadError(loadable, cancelable, error, blacklistDurationMs)) {
             if (cancelable) {
@@ -336,7 +331,7 @@ public class ChunkSampleStream<T extends ChunkSource> implements SampleStream, S
 
         if (loadErrorAction == null) {
             long retryDelayMs = this.loadErrorHandlingPolicy.getRetryDelayMsFor(loadable.type, loadDurationMs, error, errorCount);
-            loadErrorAction = retryDelayMs != -9223372036854775807L ? Loader.createRetryAction(false, retryDelayMs) : Loader.DONT_RETRY_FATAL;
+            loadErrorAction = retryDelayMs != -Long.MAX_VALUE ? Loader.createRetryAction(false, retryDelayMs) : Loader.DONT_RETRY_FATAL;
         }
 
         boolean canceled = !loadErrorAction.isRetry();
@@ -366,7 +361,7 @@ public class ChunkSampleStream<T extends ChunkSource> implements SampleStream, S
             Chunk loadable = this.nextChunkHolder.chunk;
             this.nextChunkHolder.clear();
             if (endOfStream) {
-                this.pendingResetPositionUs = -9223372036854775807L;
+                this.pendingResetPositionUs = -Long.MAX_VALUE;
                 this.loadingFinished = true;
                 return true;
             } else if (loadable == null) {
@@ -377,7 +372,7 @@ public class ChunkSampleStream<T extends ChunkSource> implements SampleStream, S
                     if (pendingReset) {
                         boolean resetToMediaChunk = mediaChunk.startTimeUs == this.pendingResetPositionUs;
                         this.decodeOnlyUntilPositionUs = resetToMediaChunk ? 0L : this.pendingResetPositionUs;
-                        this.pendingResetPositionUs = -9223372036854775807L;
+                        this.pendingResetPositionUs = -Long.MAX_VALUE;
                     }
 
                     mediaChunk.init(this.mediaChunkOutput);
@@ -434,7 +429,7 @@ public class ChunkSampleStream<T extends ChunkSource> implements SampleStream, S
     }
 
     private boolean haveReadFromMediaChunk(int mediaChunkIndex) {
-        BaseMediaChunk mediaChunk = (BaseMediaChunk)this.mediaChunks.get(mediaChunkIndex);
+        BaseMediaChunk mediaChunk = this.mediaChunks.get(mediaChunkIndex);
         if (this.primarySampleQueue.getReadIndex() > mediaChunk.getFirstSampleIndex(0)) {
             return true;
         } else {
@@ -449,7 +444,7 @@ public class ChunkSampleStream<T extends ChunkSource> implements SampleStream, S
     }
 
     boolean isPendingReset() {
-        return this.pendingResetPositionUs != -9223372036854775807L;
+        return this.pendingResetPositionUs != -Long.MAX_VALUE;
     }
 
     private void discardDownstreamMediaChunks(int discardToSampleIndex) {
@@ -473,7 +468,7 @@ public class ChunkSampleStream<T extends ChunkSource> implements SampleStream, S
     }
 
     private void maybeNotifyPrimaryTrackFormatChanged(int mediaChunkReadIndex) {
-        BaseMediaChunk currentChunk = (BaseMediaChunk)this.mediaChunks.get(mediaChunkReadIndex);
+        BaseMediaChunk currentChunk = this.mediaChunks.get(mediaChunkReadIndex);
         Format trackFormat = currentChunk.trackFormat;
         if (!trackFormat.equals(this.primaryDownstreamTrackFormat)) {
             this.eventDispatcher.downstreamFormatChanged(this.primaryTrackType, trackFormat, currentChunk.trackSelectionReason, currentChunk.trackSelectionData, currentChunk.startTimeUs);
@@ -484,7 +479,7 @@ public class ChunkSampleStream<T extends ChunkSource> implements SampleStream, S
 
     private int primarySampleIndexToMediaChunkIndex(int primarySampleIndex, int minChunkIndex) {
         for(int i = minChunkIndex + 1; i < this.mediaChunks.size(); ++i) {
-            if (((BaseMediaChunk)this.mediaChunks.get(i)).getFirstSampleIndex(0) > primarySampleIndex) {
+            if (this.mediaChunks.get(i).getFirstSampleIndex(0) > primarySampleIndex) {
                 return i - 1;
             }
         }
@@ -493,11 +488,11 @@ public class ChunkSampleStream<T extends ChunkSource> implements SampleStream, S
     }
 
     private BaseMediaChunk getLastMediaChunk() {
-        return (BaseMediaChunk)this.mediaChunks.get(this.mediaChunks.size() - 1);
+        return this.mediaChunks.get(this.mediaChunks.size() - 1);
     }
 
     private BaseMediaChunk discardUpstreamMediaChunksFromIndex(int chunkIndex) {
-        BaseMediaChunk firstRemovedChunk = (BaseMediaChunk)this.mediaChunks.get(chunkIndex);
+        BaseMediaChunk firstRemovedChunk = this.mediaChunks.get(chunkIndex);
         Util.removeRange(this.mediaChunks, chunkIndex, this.mediaChunks.size());
         this.nextNotifyPrimaryFormatMediaChunkIndex = Math.max(this.nextNotifyPrimaryFormatMediaChunkIndex, this.mediaChunks.size());
         this.primarySampleQueue.discardUpstreamSamples(firstRemovedChunk.getFirstSampleIndex(0));
@@ -563,7 +558,7 @@ public class ChunkSampleStream<T extends ChunkSource> implements SampleStream, S
 
         private void maybeNotifyDownstreamFormat() {
             if (!this.notifiedDownstreamFormat) {
-                ChunkSampleStream.this.eventDispatcher.downstreamFormatChanged(ChunkSampleStream.this.embeddedTrackTypes[this.index], ChunkSampleStream.this.embeddedTrackFormats[this.index], 0, (Object)null, ChunkSampleStream.this.lastSeekPositionUs);
+                ChunkSampleStream.this.eventDispatcher.downstreamFormatChanged(ChunkSampleStream.this.embeddedTrackTypes[this.index], ChunkSampleStream.this.embeddedTrackFormats[this.index], 0, null, ChunkSampleStream.this.lastSeekPositionUs);
                 this.notifiedDownstreamFormat = true;
             }
 

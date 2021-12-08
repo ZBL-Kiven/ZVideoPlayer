@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.extractor.ts;
 
 import com.zj.playerLib.util.ParsableByteArray;
@@ -19,19 +14,19 @@ public final class TsUtil {
     public static long readPcrFromPacket(ParsableByteArray packetBuffer, int startOfPacket, int pcrPid) {
         packetBuffer.setPosition(startOfPacket);
         if (packetBuffer.bytesLeft() < 5) {
-            return -9223372036854775807L;
+            return -Long.MAX_VALUE;
         } else {
             int tsPacketHeader = packetBuffer.readInt();
             if ((tsPacketHeader & 8388608) != 0) {
-                return -9223372036854775807L;
+                return -Long.MAX_VALUE;
             } else {
                 int pid = (tsPacketHeader & 2096896) >> 8;
                 if (pid != pcrPid) {
-                    return -9223372036854775807L;
+                    return -Long.MAX_VALUE;
                 } else {
                     boolean adaptationFieldExists = (tsPacketHeader & 32) != 0;
                     if (!adaptationFieldExists) {
-                        return -9223372036854775807L;
+                        return -Long.MAX_VALUE;
                     } else {
                         int adaptationFieldLength = packetBuffer.readUnsignedByte();
                         if (adaptationFieldLength >= 7 && packetBuffer.bytesLeft() >= 7) {
@@ -44,7 +39,7 @@ public final class TsUtil {
                             }
                         }
 
-                        return -9223372036854775807L;
+                        return -Long.MAX_VALUE;
                     }
                 }
             }

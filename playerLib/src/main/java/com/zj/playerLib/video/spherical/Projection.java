@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.video.spherical;
 
 import com.zj.playerLib.util.Assertions;
@@ -32,8 +27,8 @@ public final class Projection {
         Assertions.checkArgument(longitudes >= 1);
         Assertions.checkArgument(verticalFovDegrees > 0.0F && verticalFovDegrees <= 180.0F);
         Assertions.checkArgument(horizontalFovDegrees > 0.0F && horizontalFovDegrees <= 360.0F);
-        float verticalFovRads = (float)Math.toRadians((double)verticalFovDegrees);
-        float horizontalFovRads = (float)Math.toRadians((double)horizontalFovDegrees);
+        float verticalFovRads = (float)Math.toRadians(verticalFovDegrees);
+        float horizontalFovRads = (float)Math.toRadians(horizontalFovDegrees);
         float quadHeightRads = verticalFovRads / (float)latitudes;
         float quadWidthRads = horizontalFovRads / (float)longitudes;
         int vertexCount = (2 * (longitudes + 1) + 2) * latitudes;
@@ -50,9 +45,9 @@ public final class Projection {
                 for(int k = 0; k < 2; ++k) {
                     float phi = k == 0 ? phiLow : phiHigh;
                     float theta = quadWidthRads * (float)i + 3.1415927F - horizontalFovRads / 2.0F;
-                    vertexData[vOffset++] = -((float)((double)radius * Math.sin((double)theta) * Math.cos((double)phi)));
-                    vertexData[vOffset++] = (float)((double)radius * Math.sin((double)phi));
-                    vertexData[vOffset++] = (float)((double)radius * Math.cos((double)theta) * Math.cos((double)phi));
+                    vertexData[vOffset++] = -((float)((double)radius * Math.sin(theta) * Math.cos(phi)));
+                    vertexData[vOffset++] = (float)((double)radius * Math.sin(phi));
+                    vertexData[vOffset++] = (float)((double)radius * Math.cos(theta) * Math.cos(phi));
                     textureData[tOffset++] = (float)i * quadWidthRads / horizontalFovRads;
                     textureData[tOffset++] = (float)(j + k) * quadHeightRads / verticalFovRads;
                     if (i == 0 && k == 0 || i == longitudes && k == 1) {
@@ -66,7 +61,7 @@ public final class Projection {
         }
 
         SubMesh subMesh = new SubMesh(0, vertexData, textureData, 1);
-        return new Projection(new Mesh(new SubMesh[]{subMesh}), stereoMode);
+        return new Projection(new Mesh(subMesh), stereoMode);
     }
 
     public Projection(Mesh mesh, int stereoMode) {

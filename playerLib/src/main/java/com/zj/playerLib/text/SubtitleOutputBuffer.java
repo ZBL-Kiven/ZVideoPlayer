@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.text;
 
 import com.zj.playerLib.decoder.OutputBuffer;
@@ -19,7 +14,7 @@ public abstract class SubtitleOutputBuffer extends OutputBuffer implements Subti
     public void setContent(long timeUs, Subtitle subtitle, long subSampleOffsetUs) {
         this.timeUs = timeUs;
         this.subtitle = subtitle;
-        this.subSampleOffsetUs = subSampleOffsetUs == 9223372036854775807L ? this.timeUs : subSampleOffsetUs;
+        this.subSampleOffsetUs = subSampleOffsetUs == Long.MAX_VALUE ? this.timeUs : subSampleOffsetUs;
     }
 
     public int getEventTimeCount() {

@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.video.spherical;
 
 import android.opengl.Matrix;
@@ -46,7 +41,7 @@ public final class FrameRotationQueue {
     private static void computeRecenterMatrix(float[] recenterMatrix, float[] rotationMatrix) {
         Matrix.setIdentityM(recenterMatrix, 0);
         float normRowSqr = rotationMatrix[10] * rotationMatrix[10] + rotationMatrix[8] * rotationMatrix[8];
-        float normRow = (float)Math.sqrt((double)normRowSqr);
+        float normRow = (float)Math.sqrt(normRowSqr);
         recenterMatrix[0] = rotationMatrix[10] / normRow;
         recenterMatrix[2] = rotationMatrix[8] / normRow;
         recenterMatrix[8] = -rotationMatrix[8] / normRow;
@@ -59,7 +54,7 @@ public final class FrameRotationQueue {
         float z = -angleAxis[2];
         float angleRad = Matrix.length(x, y, z);
         if (angleRad != 0.0F) {
-            float angleDeg = (float)Math.toDegrees((double)angleRad);
+            float angleDeg = (float)Math.toDegrees(angleRad);
             Matrix.setRotateM(matrix, 0, angleDeg, x / angleRad, y / angleRad, z / angleRad);
         } else {
             Matrix.setIdentityM(matrix, 0);

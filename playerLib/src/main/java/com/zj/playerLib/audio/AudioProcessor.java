@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.audio;
 
 import java.nio.ByteBuffer;
@@ -33,7 +28,7 @@ public interface AudioProcessor {
 
     void reset();
 
-    public static final class UnhandledFormatException extends Exception {
+    final class UnhandledFormatException extends Exception {
         public UnhandledFormatException(int sampleRateHz, int channelCount, int encoding) {
             super("Unhandled format: " + sampleRateHz + " Hz, " + channelCount + " channels in encoding " + encoding);
         }

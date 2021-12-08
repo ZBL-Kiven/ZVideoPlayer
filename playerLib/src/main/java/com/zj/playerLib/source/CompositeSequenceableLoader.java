@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.source;
 
 public class CompositeSequenceableLoader implements SequenceableLoader {
@@ -13,7 +8,7 @@ public class CompositeSequenceableLoader implements SequenceableLoader {
     }
 
     public final long getBufferedPositionUs() {
-        long bufferedPositionUs = 9223372036854775807L;
+        long bufferedPositionUs = Long.MAX_VALUE;
         SequenceableLoader[] var3 = this.loaders;
         int var4 = var3.length;
 
@@ -25,11 +20,11 @@ public class CompositeSequenceableLoader implements SequenceableLoader {
             }
         }
 
-        return bufferedPositionUs == 9223372036854775807L ? -9223372036854775808L : bufferedPositionUs;
+        return bufferedPositionUs == Long.MAX_VALUE ? -9223372036854775808L : bufferedPositionUs;
     }
 
     public final long getNextLoadPositionUs() {
-        long nextLoadPositionUs = 9223372036854775807L;
+        long nextLoadPositionUs = Long.MAX_VALUE;
         SequenceableLoader[] var3 = this.loaders;
         int var4 = var3.length;
 
@@ -41,7 +36,7 @@ public class CompositeSequenceableLoader implements SequenceableLoader {
             }
         }
 
-        return nextLoadPositionUs == 9223372036854775807L ? -9223372036854775808L : nextLoadPositionUs;
+        return nextLoadPositionUs == Long.MAX_VALUE ? -9223372036854775808L : nextLoadPositionUs;
     }
 
     public final void reevaluateBuffer(long positionUs) {

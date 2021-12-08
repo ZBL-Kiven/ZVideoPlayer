@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.audio;
 
 import android.os.Handler;
@@ -30,14 +25,14 @@ public interface AudioRendererEventListener {
     default void onAudioDisabled(DecoderCounters counters) {
     }
 
-    public static final class EventDispatcher {
+    final class EventDispatcher {
         @Nullable
         private final Handler handler;
         @Nullable
         private final AudioRendererEventListener listener;
 
         public EventDispatcher(@Nullable Handler handler, @Nullable AudioRendererEventListener listener) {
-            this.handler = listener != null ? (Handler)Assertions.checkNotNull(handler) : null;
+            this.handler = listener != null ? Assertions.checkNotNull(handler) : null;
             this.listener = listener;
         }
 

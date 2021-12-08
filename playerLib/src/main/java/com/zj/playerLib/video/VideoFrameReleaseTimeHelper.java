@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.video;
 
 import android.annotation.TargetApi;
@@ -40,7 +35,7 @@ public final class VideoFrameReleaseTimeHelper {
     private long frameCount;
 
     public VideoFrameReleaseTimeHelper() {
-        this((Context)null);
+        this(null);
     }
 
     public VideoFrameReleaseTimeHelper(@Nullable Context context) {
@@ -59,8 +54,8 @@ public final class VideoFrameReleaseTimeHelper {
             this.vsyncSampler = null;
         }
 
-        this.vsyncDurationNs = -9223372036854775807L;
-        this.vsyncOffsetNs = -9223372036854775807L;
+        this.vsyncDurationNs = -Long.MAX_VALUE;
+        this.vsyncOffsetNs = -Long.MAX_VALUE;
     }
 
     public void enable() {
@@ -122,9 +117,9 @@ public final class VideoFrameReleaseTimeHelper {
 
         this.lastFramePresentationTimeUs = framePresentationTimeUs;
         this.pendingAdjustedFrameTimeNs = adjustedFrameTimeNs;
-        if (this.vsyncSampler != null && this.vsyncDurationNs != -9223372036854775807L) {
+        if (this.vsyncSampler != null && this.vsyncDurationNs != -Long.MAX_VALUE) {
             sampledVsyncTimeNs = this.vsyncSampler.sampledVsyncTimeNs;
-            if (sampledVsyncTimeNs == -9223372036854775807L) {
+            if (sampledVsyncTimeNs == -Long.MAX_VALUE) {
                 return adjustedReleaseTimeNs;
             } else {
                 snappedTimeNs = closestVsync(adjustedReleaseTimeNs, sampledVsyncTimeNs, this.vsyncDurationNs);
@@ -144,7 +139,7 @@ public final class VideoFrameReleaseTimeHelper {
     private void updateDefaultDisplayRefreshRateParams() {
         Display defaultDisplay = this.windowManager.getDefaultDisplay();
         if (defaultDisplay != null) {
-            double defaultDisplayRefreshRate = (double)defaultDisplay.getRefreshRate();
+            double defaultDisplayRefreshRate = defaultDisplay.getRefreshRate();
             this.vsyncDurationNs = (long)(1.0E9D / defaultDisplayRefreshRate);
             this.vsyncOffsetNs = this.vsyncDurationNs * 80L / 100L;
         }
@@ -176,7 +171,7 @@ public final class VideoFrameReleaseTimeHelper {
     }
 
     private static final class VSyncSampler implements FrameCallback, Callback {
-        public volatile long sampledVsyncTimeNs = -9223372036854775807L;
+        public volatile long sampledVsyncTimeNs = -Long.MAX_VALUE;
         private static final int CREATE_CHOREOGRAPHER = 0;
         private static final int MSG_ADD_OBSERVER = 1;
         private static final int MSG_REMOVE_OBSERVER = 2;
@@ -241,7 +236,7 @@ public final class VideoFrameReleaseTimeHelper {
             --this.observerCount;
             if (this.observerCount == 0) {
                 this.choreographer.removeFrameCallback(this);
-                this.sampledVsyncTimeNs = -9223372036854775807L;
+                this.sampledVsyncTimeNs = -Long.MAX_VALUE;
             }
 
         }
@@ -256,7 +251,7 @@ public final class VideoFrameReleaseTimeHelper {
         }
 
         public void register() {
-            this.displayManager.registerDisplayListener(this, (Handler)null);
+            this.displayManager.registerDisplayListener(this, null);
         }
 
         public void unregister() {

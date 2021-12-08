@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.extractor.mp4;
 
 import androidx.annotation.Nullable;
@@ -218,7 +213,7 @@ final class MetadataUtil {
         if (atomType == Atom.TYPE_data) {
             data.skipBytes(8);
             String value = data.readNullTerminatedString(atomSize - 16);
-            return new TextInformationFrame(id, (String)null, value);
+            return new TextInformationFrame(id, null, value);
         } else {
             Log.w("MetadataUtil", "Failed to parse text attribute: " + Atom.getAtomTypeString(type));
             return null;
@@ -247,7 +242,7 @@ final class MetadataUtil {
         }
 
         if (value >= 0) {
-            return (Id3Frame)(isTextInformationFrame ? new TextInformationFrame(id, (String)null, Integer.toString(value)) : new CommentFrame("und", id, Integer.toString(value)));
+            return isTextInformationFrame ? new TextInformationFrame(id, null, Integer.toString(value)) : new CommentFrame("und", id, Integer.toString(value));
         } else {
             Log.w("MetadataUtil", "Failed to parse uint8 attribute: " + Atom.getAtomTypeString(type));
             return null;
@@ -268,7 +263,7 @@ final class MetadataUtil {
                     value = value + "/" + count;
                 }
 
-                return new TextInformationFrame(attributeName, (String)null, value);
+                return new TextInformationFrame(attributeName, null, value);
             }
         }
 
@@ -281,7 +276,7 @@ final class MetadataUtil {
         int genreCode = parseUint8AttributeValue(data);
         String genreString = 0 < genreCode && genreCode <= STANDARD_GENRES.length ? STANDARD_GENRES[genreCode - 1] : null;
         if (genreString != null) {
-            return new TextInformationFrame("TCON", (String)null, genreString);
+            return new TextInformationFrame("TCON", null, genreString);
         } else {
             Log.w("MetadataUtil", "Failed to parse standard genre code");
             return null;
@@ -303,7 +298,7 @@ final class MetadataUtil {
                 data.skipBytes(4);
                 byte[] pictureData = new byte[atomSize - 16];
                 data.readBytes(pictureData, 0, pictureData.length);
-                return new ApicFrame(mimeType, (String)null, 3, pictureData);
+                return new ApicFrame(mimeType, null, 3, pictureData);
             }
         } else {
             Log.w("MetadataUtil", "Failed to parse cover art attribute");

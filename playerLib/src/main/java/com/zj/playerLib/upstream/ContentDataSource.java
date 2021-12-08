@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.upstream;
 
 import android.content.ContentResolver;
@@ -34,7 +29,9 @@ public final class ContentDataSource extends BaseDataSource {
         this.resolver = context.getContentResolver();
     }
 
-    /** @deprecated */
+    /**
+     * @deprecated
+     */
     @Deprecated
     public ContentDataSource(Context context, @Nullable TransferListener listener) {
         this(context);
@@ -89,7 +86,8 @@ public final class ContentDataSource extends BaseDataSource {
         } else {
             int bytesRead;
             try {
-                int bytesToRead = this.bytesRemaining == -1L ? readLength : (int)Math.min(this.bytesRemaining, (long)readLength);
+                int bytesToRead = this.bytesRemaining == -1L ? readLength : (int) Math.min(this.bytesRemaining, readLength);
+                assert this.inputStream != null;
                 bytesRead = this.inputStream.read(buffer, offset, bytesToRead);
             } catch (IOException var6) {
                 throw new ContentDataSourceException(var6);
@@ -103,7 +101,7 @@ public final class ContentDataSource extends BaseDataSource {
                 }
             } else {
                 if (this.bytesRemaining != -1L) {
-                    this.bytesRemaining -= (long)bytesRead;
+                    this.bytesRemaining -= bytesRead;
                 }
 
                 this.bytesTransferred(bytesRead);
@@ -127,25 +125,25 @@ public final class ContentDataSource extends BaseDataSource {
         } catch (IOException var26) {
             throw new ContentDataSourceException(var26);
         } finally {
-            this.inputStream = null;
-
-            try {
-                if (this.assetFileDescriptor != null) {
-                    this.assetFileDescriptor.close();
-                }
-            } catch (IOException var24) {
-                throw new ContentDataSourceException(var24);
-            } finally {
-                this.assetFileDescriptor = null;
-                if (this.opened) {
-                    this.opened = false;
-                    this.transferEnded();
-                }
-
-            }
-
+            finallyClose();
         }
+    }
 
+    private void finallyClose() throws ContentDataSourceException {
+        this.inputStream = null;
+        try {
+            if (this.assetFileDescriptor != null) {
+                this.assetFileDescriptor.close();
+            }
+        } catch (IOException var24) {
+            throw new ContentDataSourceException(var24);
+        } finally {
+            this.assetFileDescriptor = null;
+            if (this.opened) {
+                this.opened = false;
+                this.transferEnded();
+            }
+        }
     }
 
     public static class ContentDataSourceException extends IOException {

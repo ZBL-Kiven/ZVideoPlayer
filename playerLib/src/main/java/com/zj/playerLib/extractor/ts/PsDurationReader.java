@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.extractor.ts;
 
 import com.zj.playerLib.extractor.ExtractorInput;
@@ -20,9 +15,9 @@ final class PsDurationReader {
     private boolean isDurationRead;
     private boolean isFirstScrValueRead;
     private boolean isLastScrValueRead;
-    private long firstScrValue = -9223372036854775807L;
-    private long lastScrValue = -9223372036854775807L;
-    private long durationUs = -9223372036854775807L;
+    private long firstScrValue = -Long.MAX_VALUE;
+    private long lastScrValue = -Long.MAX_VALUE;
+    private long durationUs = -Long.MAX_VALUE;
 
     PsDurationReader() {
     }
@@ -38,11 +33,11 @@ final class PsDurationReader {
     public int readDuration(ExtractorInput input, PositionHolder seekPositionHolder) throws IOException, InterruptedException {
         if (!this.isLastScrValueRead) {
             return this.readLastScrValue(input, seekPositionHolder);
-        } else if (this.lastScrValue == -9223372036854775807L) {
+        } else if (this.lastScrValue == -Long.MAX_VALUE) {
             return this.finishReadDuration(input);
         } else if (!this.isFirstScrValueRead) {
             return this.readFirstScrValue(input, seekPositionHolder);
-        } else if (this.firstScrValue == -9223372036854775807L) {
+        } else if (this.firstScrValue == -Long.MAX_VALUE) {
             return this.finishReadDuration(input);
         } else {
             long minScrPositionUs = this.scrTimestampAdjuster.adjustTsTimestamp(this.firstScrValue);
@@ -59,12 +54,12 @@ final class PsDurationReader {
     public static long readScrValueFromPack(ParsableByteArray packetBuffer) {
         int originalPosition = packetBuffer.getPosition();
         if (packetBuffer.bytesLeft() < 9) {
-            return -9223372036854775807L;
+            return -Long.MAX_VALUE;
         } else {
             byte[] scrBytes = new byte[9];
             packetBuffer.readBytes(scrBytes, 0, scrBytes.length);
             packetBuffer.setPosition(originalPosition);
-            return !checkMarkerBits(scrBytes) ? -9223372036854775807L : readScrValueFromPackHeader(scrBytes);
+            return !checkMarkerBits(scrBytes) ? -Long.MAX_VALUE : readScrValueFromPackHeader(scrBytes);
         }
     }
 
@@ -79,7 +74,7 @@ final class PsDurationReader {
         int bytesToSearch = (int)Math.min(20000L, input.getLength());
         int searchStartPosition = 0;
         if (input.getPosition() != (long)searchStartPosition) {
-            seekPositionHolder.position = (long)searchStartPosition;
+            seekPositionHolder.position = searchStartPosition;
             return 1;
         } else {
             this.packetBuffer.reset(bytesToSearch);
@@ -100,13 +95,13 @@ final class PsDurationReader {
             if (nextStartCode == 442) {
                 packetBuffer.setPosition(searchPosition + 4);
                 long scrValue = readScrValueFromPack(packetBuffer);
-                if (scrValue != -9223372036854775807L) {
+                if (scrValue != -Long.MAX_VALUE) {
                     return scrValue;
                 }
             }
         }
 
-        return -9223372036854775807L;
+        return -Long.MAX_VALUE;
     }
 
     private int readLastScrValue(ExtractorInput input, PositionHolder seekPositionHolder) throws IOException, InterruptedException {
@@ -135,13 +130,13 @@ final class PsDurationReader {
             if (nextStartCode == 442) {
                 packetBuffer.setPosition(searchPosition + 4);
                 long scrValue = readScrValueFromPack(packetBuffer);
-                if (scrValue != -9223372036854775807L) {
+                if (scrValue != -Long.MAX_VALUE) {
                     return scrValue;
                 }
             }
         }
 
-        return -9223372036854775807L;
+        return -Long.MAX_VALUE;
     }
 
     private int peekIntAtPosition(byte[] data, int position) {

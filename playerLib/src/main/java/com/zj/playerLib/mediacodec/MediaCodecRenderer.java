@@ -199,7 +199,7 @@ public abstract class MediaCodecRenderer extends BaseRenderer {
             this.codecNeedsEosOutputExceptionWorkaround = codecNeedsEosOutputExceptionWorkaround(codecName);
             this.codecNeedsMonoChannelCountWorkaround = codecNeedsMonoChannelCountWorkaround(codecName, this.format);
             this.codecNeedsEosPropagation = codecNeedsEosPropagationWorkaround(this.codecInfo) || this.getCodecNeedsEosPropagation();
-            this.codecHotswapDeadlineMs = this.getState() == 2 ? SystemClock.elapsedRealtime() + 1000L : -9223372036854775807L;
+            this.codecHotswapDeadlineMs = this.getState() == 2 ? SystemClock.elapsedRealtime() + 1000L : -Long.MAX_VALUE;
             this.resetInputBuffer();
             this.resetOutputBuffer();
             this.waitingForFirstSyncFrame = true;
@@ -282,7 +282,7 @@ public abstract class MediaCodecRenderer extends BaseRenderer {
 
     @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
     protected void releaseCodec() {
-        this.codecHotswapDeadlineMs = -9223372036854775807L;
+        this.codecHotswapDeadlineMs = -Long.MAX_VALUE;
         this.resetInputBuffer();
         this.resetOutputBuffer();
         this.waitingForKeys = false;
@@ -391,7 +391,7 @@ public abstract class MediaCodecRenderer extends BaseRenderer {
     }
 
     protected void flushCodec() throws PlaybackException {
-        this.codecHotswapDeadlineMs = -9223372036854775807L;
+        this.codecHotswapDeadlineMs = -Long.MAX_VALUE;
         this.resetInputBuffer();
         this.resetOutputBuffer();
         this.waitingForFirstSyncFrame = true;
@@ -763,7 +763,7 @@ public abstract class MediaCodecRenderer extends BaseRenderer {
     }
 
     public boolean isReady() {
-        return this.format != null && !this.waitingForKeys && (this.isSourceReady() || this.hasOutputBuffer() || this.codecHotswapDeadlineMs != -9223372036854775807L && SystemClock.elapsedRealtime() < this.codecHotswapDeadlineMs);
+        return this.format != null && !this.waitingForKeys && (this.isSourceReady() || this.hasOutputBuffer() || this.codecHotswapDeadlineMs != -Long.MAX_VALUE && SystemClock.elapsedRealtime() < this.codecHotswapDeadlineMs);
     }
 
     protected long getDequeueOutputBufferTimeoutUs() {

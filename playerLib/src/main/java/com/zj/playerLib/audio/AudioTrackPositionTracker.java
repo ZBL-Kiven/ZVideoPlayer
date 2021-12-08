@@ -72,13 +72,13 @@ final class AudioTrackPositionTracker {
         this.outputSampleRate = audioTrack.getSampleRate();
         this.needsPassthroughWorkarounds = needsPassThroughWorkarounds(outputEncoding);
         this.isOutputPcm = Util.isEncodingLinearPcm(outputEncoding);
-        this.bufferSizeUs = this.isOutputPcm ? this.framesToDurationUs(bufferSize / outputPcmFrameSize) : -9223372036854775807L;
+        this.bufferSizeUs = this.isOutputPcm ? this.framesToDurationUs(bufferSize / outputPcmFrameSize) : -Long.MAX_VALUE;
         this.lastRawPlaybackHeadPosition = 0L;
         this.rawPlaybackHeadWrapCount = 0L;
         this.passThroughWorkaroundPauseOffset = 0L;
         this.hasData = false;
-        this.stopTimestampUs = -9223372036854775807L;
-        this.forceResetWorkaroundTimeMs = -9223372036854775807L;
+        this.stopTimestampUs = -Long.MAX_VALUE;
+        this.forceResetWorkaroundTimeMs = -Long.MAX_VALUE;
         this.latencyUs = 0L;
     }
 
@@ -150,7 +150,7 @@ final class AudioTrackPositionTracker {
     }
 
     public boolean isStalled(long writtenFrames) {
-        return this.forceResetWorkaroundTimeMs != -9223372036854775807L && writtenFrames > 0L && SystemClock.elapsedRealtime() - this.forceResetWorkaroundTimeMs >= 200L;
+        return this.forceResetWorkaroundTimeMs != -Long.MAX_VALUE && writtenFrames > 0L && SystemClock.elapsedRealtime() - this.forceResetWorkaroundTimeMs >= 200L;
     }
 
     public void handleEndOfStream(long writtenFrames) {
@@ -165,7 +165,7 @@ final class AudioTrackPositionTracker {
 
     public boolean pause() {
         this.resetSyncParams();
-        if (this.stopTimestampUs == -9223372036854775807L) {
+        if (this.stopTimestampUs == -Long.MAX_VALUE) {
             Assertions.checkNotNull(this.audioTimestampPoller).reset();
             return true;
         } else {
@@ -267,7 +267,7 @@ final class AudioTrackPositionTracker {
 
     private long getPlaybackHeadPosition() {
         AudioTrack audioTrack = Assertions.checkNotNull(this.audioTrack);
-        if (this.stopTimestampUs != -9223372036854775807L) {
+        if (this.stopTimestampUs != -Long.MAX_VALUE) {
             long elapsedTimeSinceStopUs = SystemClock.elapsedRealtime() * 1000L - this.stopTimestampUs;
             long framesSinceStop = elapsedTimeSinceStopUs * (long) this.outputSampleRate / 1000000L;
             return Math.min(this.endPlaybackHeadPosition, this.stopPlaybackHeadPosition + framesSinceStop);
@@ -287,14 +287,14 @@ final class AudioTrackPositionTracker {
 
                 if (Util.SDK_INT <= 28) {
                     if (rawPlaybackHeadPosition == 0L && this.lastRawPlaybackHeadPosition > 0L && state == 3) {
-                        if (this.forceResetWorkaroundTimeMs == -9223372036854775807L) {
+                        if (this.forceResetWorkaroundTimeMs == -Long.MAX_VALUE) {
                             this.forceResetWorkaroundTimeMs = SystemClock.elapsedRealtime();
                         }
 
                         return this.lastRawPlaybackHeadPosition;
                     }
 
-                    this.forceResetWorkaroundTimeMs = -9223372036854775807L;
+                    this.forceResetWorkaroundTimeMs = -Long.MAX_VALUE;
                 }
 
                 if (this.lastRawPlaybackHeadPosition > rawPlaybackHeadPosition) {

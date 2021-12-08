@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.text.webvtt;
 
 import android.text.SpannableStringBuilder;
@@ -19,7 +14,7 @@ public final class WebvttCue extends Cue {
     }
 
     public WebvttCue(long startTime, long endTime, CharSequence text) {
-        this(startTime, endTime, text, (Alignment)null, 1.4E-45F, -2147483648, -2147483648, 1.4E-45F, -2147483648, 1.4E-45F);
+        this(startTime, endTime, text, null, 1.4E-45F, -2147483648, -2147483648, 1.4E-45F, -2147483648, 1.4E-45F);
     }
 
     public WebvttCue(long startTime, long endTime, CharSequence text, Alignment textAlignment, float line, int lineType, int lineAnchor, float position, int positionAnchor, float width) {

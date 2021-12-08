@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.upstream.cache;
 
 import androidx.annotation.Nullable;
@@ -23,15 +18,15 @@ final class SimpleCacheSpan extends CacheSpan {
     }
 
     public static SimpleCacheSpan createLookup(String key, long position) {
-        return new SimpleCacheSpan(key, position, -1L, -9223372036854775807L, (File) null);
+        return new SimpleCacheSpan(key, position, -1L, -Long.MAX_VALUE, null);
     }
 
     public static SimpleCacheSpan createOpenHole(String key, long position) {
-        return new SimpleCacheSpan(key, position, -1L, -9223372036854775807L, (File) null);
+        return new SimpleCacheSpan(key, position, -1L, -Long.MAX_VALUE, null);
     }
 
     public static SimpleCacheSpan createClosedHole(String key, long position, long length) {
-        return new SimpleCacheSpan(key, position, length, -9223372036854775807L, (File) null);
+        return new SimpleCacheSpan(key, position, length, -Long.MAX_VALUE, null);
     }
 
     @Nullable

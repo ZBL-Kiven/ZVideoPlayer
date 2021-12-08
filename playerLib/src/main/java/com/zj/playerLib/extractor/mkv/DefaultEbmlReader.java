@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.extractor.mkv;
 
 import com.zj.playerLib.ParserException;
@@ -45,7 +40,7 @@ final class DefaultEbmlReader implements EbmlReader {
     public boolean read(ExtractorInput input) throws IOException, InterruptedException {
         Assertions.checkState(this.output != null);
 
-        while(this.masterElementsStack.isEmpty() || input.getPosition() < ((MasterElement)this.masterElementsStack.peek()).elementEndPosition) {
+        while(this.masterElementsStack.isEmpty() || input.getPosition() < this.masterElementsStack.peek().elementEndPosition) {
             if (this.elementState == 0) {
                 long result = this.varintReader.readUnsignedVarint(input, true, false, 4);
                 if (result == -2L) {
@@ -111,7 +106,7 @@ final class DefaultEbmlReader implements EbmlReader {
             }
         }
 
-        this.output.endMasterElement(((MasterElement)this.masterElementsStack.pop()).elementId);
+        this.output.endMasterElement(this.masterElementsStack.pop().elementId);
         return true;
     }
 
@@ -125,7 +120,7 @@ final class DefaultEbmlReader implements EbmlReader {
                 int potentialId = (int)VarintReader.assembleVarint(this.scratch, varintLength, false);
                 if (this.output.isLevel1Element(potentialId)) {
                     input.skipFully(varintLength);
-                    return (long)potentialId;
+                    return potentialId;
                 }
             }
 
@@ -148,7 +143,7 @@ final class DefaultEbmlReader implements EbmlReader {
         long integerValue = this.readInteger(input, byteLength);
         double floatValue;
         if (byteLength == 4) {
-            floatValue = (double)Float.intBitsToFloat((int)integerValue);
+            floatValue = Float.intBitsToFloat((int)integerValue);
         } else {
             floatValue = Double.longBitsToDouble(integerValue);
         }

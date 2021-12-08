@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.text.cea;
 
 import android.graphics.Color;
@@ -1001,7 +996,7 @@ public final class Cea708Decoder extends CeaDecoder {
                 SpannableStringBuilder cueString = new SpannableStringBuilder();
 
                 for(int i = 0; i < this.rolledUpCaptions.size(); ++i) {
-                    cueString.append((CharSequence)this.rolledUpCaptions.get(i));
+                    cueString.append(this.rolledUpCaptions.get(i));
                     cueString.append('\n');
                 }
 

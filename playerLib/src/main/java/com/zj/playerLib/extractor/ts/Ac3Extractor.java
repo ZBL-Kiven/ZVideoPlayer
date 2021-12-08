@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.extractor.ts;
 
 import com.zj.playerLib.audio.Ac3Util;
@@ -96,7 +91,7 @@ public final class Ac3Extractor implements Extractor {
     public void init(ExtractorOutput output) {
         this.reader.createTracks(output, new TrackIdGenerator(0, 1));
         output.endTracks();
-        output.seekMap(new Unseekable(-9223372036854775807L));
+        output.seekMap(new Unseekable(-Long.MAX_VALUE));
     }
 
     public void seek(long position, long timeUs) {

@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.text.ssa;
 
 import android.text.TextUtils;
@@ -32,17 +27,17 @@ public final class SsaDecoder extends SimpleSubtitleDecoder {
     private int formatTextIndex;
 
     public SsaDecoder() {
-        this((List) null);
+        this(null);
     }
 
     public SsaDecoder(List<byte[]> initializationData) {
         super("SsaDecoder");
         if (initializationData != null && !initializationData.isEmpty()) {
             this.haveInitializationData = true;
-            String formatLine = Util.fromUtf8Bytes((byte[]) initializationData.get(0));
+            String formatLine = Util.fromUtf8Bytes(initializationData.get(0));
             Assertions.checkArgument(formatLine.startsWith("Format: "));
             this.parseFormatLine(formatLine);
-            this.parseHeader(new ParsableByteArray((byte[]) initializationData.get(1)));
+            this.parseHeader(new ParsableByteArray(initializationData.get(1)));
         } else {
             this.haveInitializationData = false;
         }
@@ -145,14 +140,14 @@ public final class SsaDecoder extends SimpleSubtitleDecoder {
                 Log.w("SsaDecoder", "Skipping dialogue line with fewer columns than format: " + dialogueLine);
             } else {
                 long startTimeUs = parseTimecodeUs(lineValues[this.formatStartIndex]);
-                if (startTimeUs == -9223372036854775807L) {
+                if (startTimeUs == -Long.MAX_VALUE) {
                     Log.w("SsaDecoder", "Skipping invalid timing: " + dialogueLine);
                 } else {
-                    long endTimeUs = -9223372036854775807L;
+                    long endTimeUs = -Long.MAX_VALUE;
                     String endTimeString = lineValues[this.formatEndIndex];
                     if (!endTimeString.trim().isEmpty()) {
                         endTimeUs = parseTimecodeUs(endTimeString);
-                        if (endTimeUs == -9223372036854775807L) {
+                        if (endTimeUs == -Long.MAX_VALUE) {
                             Log.w("SsaDecoder", "Skipping invalid timing: " + dialogueLine);
                             return;
                         }
@@ -161,7 +156,7 @@ public final class SsaDecoder extends SimpleSubtitleDecoder {
                     String text = lineValues[this.formatTextIndex].replaceAll("\\{.*?\\}", "").replaceAll("\\\\N", "\n").replaceAll("\\\\n", "\n");
                     cues.add(new Cue(text));
                     cueTimesUs.add(startTimeUs);
-                    if (endTimeUs != -9223372036854775807L) {
+                    if (endTimeUs != -Long.MAX_VALUE) {
                         cues.add(null);
                         cueTimesUs.add(endTimeUs);
                     }
@@ -174,7 +169,7 @@ public final class SsaDecoder extends SimpleSubtitleDecoder {
     public static long parseTimecodeUs(String timeString) {
         Matcher matcher = SSA_TIMECODE_PATTERN.matcher(timeString);
         if (!matcher.matches()) {
-            return -9223372036854775807L;
+            return -Long.MAX_VALUE;
         } else {
             long timestampUs = Long.parseLong(matcher.group(1)) * 60L * 60L * 1000000L;
             timestampUs += Long.parseLong(matcher.group(2)) * 60L * 1000000L;

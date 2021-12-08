@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.extractor;
 
 import com.zj.playerLib.extractor.amr.AmrExtractor;
@@ -96,7 +91,7 @@ public final class DefaultExtractorsFactory implements ExtractorsFactory {
         extractors[11] = new AmrExtractor(this.amrFlags | (this.constantBitrateSeekingEnabled ? 1 : 0));
         if (FLAC_EXTRACTOR_CONSTRUCTOR != null) {
             try {
-                extractors[12] = (Extractor)FLAC_EXTRACTOR_CONSTRUCTOR.newInstance();
+                extractors[12] = FLAC_EXTRACTOR_CONSTRUCTOR.newInstance();
             } catch (Exception var3) {
                 throw new IllegalStateException("Unexpected error creating FLAC extractor", var3);
             }

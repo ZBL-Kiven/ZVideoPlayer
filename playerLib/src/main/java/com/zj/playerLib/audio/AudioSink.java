@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.audio;
 
 import androidx.annotation.Nullable;
@@ -56,7 +51,7 @@ public interface AudioSink {
 
     void release();
 
-    public static final class WriteException extends Exception {
+    final class WriteException extends Exception {
         public final int errorCode;
 
         public WriteException(int errorCode) {
@@ -65,7 +60,7 @@ public interface AudioSink {
         }
     }
 
-    public static final class InitializationException extends Exception {
+    final class InitializationException extends Exception {
         public final int audioTrackState;
 
         public InitializationException(int audioTrackState, int sampleRate, int channelConfig, int bufferSize) {
@@ -74,7 +69,7 @@ public interface AudioSink {
         }
     }
 
-    public static final class ConfigurationException extends Exception {
+    final class ConfigurationException extends Exception {
         public ConfigurationException(Throwable cause) {
             super(cause);
         }
@@ -84,7 +79,7 @@ public interface AudioSink {
         }
     }
 
-    public interface Listener {
+    interface Listener {
         void onAudioSessionId(int var1);
 
         void onPositionDiscontinuity();

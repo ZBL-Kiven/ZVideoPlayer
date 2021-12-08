@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.source;
 
 import com.zj.playerLib.Format;
@@ -27,7 +22,7 @@ public final class ClippingMediaPeriod implements MediaPeriod, Callback {
     public ClippingMediaPeriod(MediaPeriod mediaPeriod, boolean enableInitialDiscontinuity, long startUs, long endUs) {
         this.mediaPeriod = mediaPeriod;
         this.sampleStreams = new ClippingSampleStream[0];
-        this.pendingInitialDiscontinuityPositionUs = enableInitialDiscontinuity ? startUs : -9223372036854775807L;
+        this.pendingInitialDiscontinuityPositionUs = enableInitialDiscontinuity ? startUs : -Long.MAX_VALUE;
         this.startUs = startUs;
         this.endUs = endUs;
     }
@@ -60,7 +55,7 @@ public final class ClippingMediaPeriod implements MediaPeriod, Callback {
         }
 
         long enablePositionUs = this.mediaPeriod.selectTracks(selections, mayRetainStreamFlags, childStreams, streamResetFlags, positionUs);
-        this.pendingInitialDiscontinuityPositionUs = this.isPendingInitialDiscontinuity() && positionUs == this.startUs && shouldKeepInitialDiscontinuity(this.startUs, selections) ? enablePositionUs : -9223372036854775807L;
+        this.pendingInitialDiscontinuityPositionUs = this.isPendingInitialDiscontinuity() && positionUs == this.startUs && shouldKeepInitialDiscontinuity(this.startUs, selections) ? enablePositionUs : -Long.MAX_VALUE;
         Assertions.checkState(enablePositionUs == positionUs || enablePositionUs >= this.startUs && (this.endUs == -9223372036854775808L || enablePositionUs <= this.endUs));
 
         for(int i = 0; i < streams.length; ++i) {
@@ -88,13 +83,13 @@ public final class ClippingMediaPeriod implements MediaPeriod, Callback {
         long discontinuityUs;
         if (this.isPendingInitialDiscontinuity()) {
             discontinuityUs = this.pendingInitialDiscontinuityPositionUs;
-            this.pendingInitialDiscontinuityPositionUs = -9223372036854775807L;
+            this.pendingInitialDiscontinuityPositionUs = -Long.MAX_VALUE;
             long childDiscontinuityUs = this.readDiscontinuity();
-            return childDiscontinuityUs != -9223372036854775807L ? childDiscontinuityUs : discontinuityUs;
+            return childDiscontinuityUs != -Long.MAX_VALUE ? childDiscontinuityUs : discontinuityUs;
         } else {
             discontinuityUs = this.mediaPeriod.readDiscontinuity();
-            if (discontinuityUs == -9223372036854775807L) {
-                return -9223372036854775807L;
+            if (discontinuityUs == -Long.MAX_VALUE) {
+                return -Long.MAX_VALUE;
             } else {
                 Assertions.checkState(discontinuityUs >= this.startUs);
                 Assertions.checkState(this.endUs == -9223372036854775808L || discontinuityUs <= this.endUs);
@@ -109,7 +104,7 @@ public final class ClippingMediaPeriod implements MediaPeriod, Callback {
     }
 
     public long seekToUs(long positionUs) {
-        this.pendingInitialDiscontinuityPositionUs = -9223372036854775807L;
+        this.pendingInitialDiscontinuityPositionUs = -Long.MAX_VALUE;
         ClippingSampleStream[] var3 = this.sampleStreams;
         int var4 = var3.length;
 
@@ -152,12 +147,12 @@ public final class ClippingMediaPeriod implements MediaPeriod, Callback {
     }
 
     boolean isPendingInitialDiscontinuity() {
-        return this.pendingInitialDiscontinuityPositionUs != -9223372036854775807L;
+        return this.pendingInitialDiscontinuityPositionUs != -Long.MAX_VALUE;
     }
 
     private SeekParameters clipSeekParameters(long positionUs, SeekParameters seekParameters) {
         long toleranceBeforeUs = Util.constrainValue(seekParameters.toleranceBeforeUs, 0L, positionUs - this.startUs);
-        long toleranceAfterUs = Util.constrainValue(seekParameters.toleranceAfterUs, 0L, this.endUs == -9223372036854775808L ? 9223372036854775807L : this.endUs - positionUs);
+        long toleranceAfterUs = Util.constrainValue(seekParameters.toleranceAfterUs, 0L, this.endUs == -9223372036854775808L ? Long.MAX_VALUE : this.endUs - positionUs);
         return toleranceBeforeUs == seekParameters.toleranceBeforeUs && toleranceAfterUs == seekParameters.toleranceAfterUs ? seekParameters : new SeekParameters(toleranceBeforeUs, toleranceAfterUs);
     }
 

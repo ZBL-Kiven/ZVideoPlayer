@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.extractor.ts;
 
 import android.util.SparseArray;
@@ -149,7 +144,7 @@ public final class TsExtractor implements Extractor {
         int i;
         for (i = 0; i < timestampAdjustersCount; ++i) {
             TimestampAdjuster timestampAdjuster = this.timestampAdjusters.get(i);
-            boolean hasNotEncounteredFirstTimestamp = timestampAdjuster.getTimestampOffsetUs() == -9223372036854775807L;
+            boolean hasNotEncounteredFirstTimestamp = timestampAdjuster.getTimestampOffsetUs() == -Long.MAX_VALUE;
             if (hasNotEncounteredFirstTimestamp || timestampAdjuster.getTimestampOffsetUs() != 0L && timestampAdjuster.getFirstSampleTimestampUs() != timeUs) {
                 timestampAdjuster.reset();
                 timestampAdjuster.setFirstSampleTimestampUs(timeUs);
@@ -255,7 +250,7 @@ public final class TsExtractor implements Extractor {
     private void maybeOutputSeekMap(long inputLength) {
         if (!this.hasOutputSeekMap) {
             this.hasOutputSeekMap = true;
-            if (this.durationReader.getDurationUs() != -9223372036854775807L) {
+            if (this.durationReader.getDurationUs() != -Long.MAX_VALUE) {
                 this.tsBinarySearchSeeker = new TsBinarySearchSeeker(this.durationReader.getPcrTimestampAdjuster(), this.durationReader.getDurationUs(), inputLength, this.pcrPid);
                 this.output.seekMap(this.tsBinarySearchSeeker.getSeekMap());
             } else {

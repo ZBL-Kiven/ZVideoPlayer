@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.extractor.mp4;
 
 import android.util.Pair;
@@ -50,30 +45,30 @@ final class AtomParsers {
             return null;
         } else {
             TkhdData tkhdData = parseTkhd(trak.getLeafAtomOfType(Atom.TYPE_tkhd).data);
-            if (duration == -9223372036854775807L) {
+            if (duration == -Long.MAX_VALUE) {
                 duration = tkhdData.duration;
             }
 
             long movieTimescale = parseMvhd(mvhd.data);
             long durationUs;
-            if (duration == -9223372036854775807L) {
-                durationUs = -9223372036854775807L;
+            if (duration == -Long.MAX_VALUE) {
+                durationUs = -Long.MAX_VALUE;
             } else {
                 durationUs = Util.scaleLargeTimestamp(duration, 1000000L, movieTimescale);
             }
 
             ContainerAtom stbl = mdia.getContainerAtomOfType(Atom.TYPE_minf).getContainerAtomOfType(Atom.TYPE_stbl);
             Pair<Long, String> mdhdData = parseMdhd(mdia.getLeafAtomOfType(Atom.TYPE_mdhd).data);
-            StsdData stsdData = parseStsd(stbl.getLeafAtomOfType(Atom.TYPE_stsd).data, tkhdData.id, tkhdData.rotationDegrees, (String) mdhdData.second, drmInitData, isQuickTime);
+            StsdData stsdData = parseStsd(stbl.getLeafAtomOfType(Atom.TYPE_stsd).data, tkhdData.id, tkhdData.rotationDegrees, mdhdData.second, drmInitData, isQuickTime);
             long[] editListDurations = null;
             long[] editListMediaTimes = null;
             if (!ignoreEditLists) {
                 Pair<long[], long[]> edtsData = parseEdts(trak.getContainerAtomOfType(Atom.TYPE_edts));
-                editListDurations = (long[]) edtsData.first;
-                editListMediaTimes = (long[]) edtsData.second;
+                editListDurations = edtsData.first;
+                editListMediaTimes = edtsData.second;
             }
 
-            return stsdData.format == null ? null : new Track(tkhdData.id, trackType, (Long) mdhdData.first, movieTimescale, durationUs, stsdData.format, stsdData.requiredSampleTransformation, stsdData.trackEncryptionBoxes, stsdData.nalUnitLengthFieldLength, editListDurations, editListMediaTimes);
+            return stsdData.format == null ? null : new Track(tkhdData.id, trackType, mdhdData.first, movieTimescale, durationUs, stsdData.format, stsdData.requiredSampleTransformation, stsdData.trackEncryptionBoxes, stsdData.nalUnitLengthFieldLength, editListDurations, editListMediaTimes);
         }
     }
 
@@ -93,7 +88,7 @@ final class AtomParsers {
 
         int sampleCount = sampleSizeBox.getSampleCount();
         if (sampleCount == 0) {
-            return new TrackSampleTable(track, new long[0], new int[0], 0, new long[0], new int[0], -9223372036854775807L);
+            return new TrackSampleTable(track, new long[0], new int[0], 0, new long[0], new int[0], -Long.MAX_VALUE);
         } else {
             boolean chunkOffsetsAreLongs = false;
             LeafAtom chunkOffsetsAtom = stblAtom.getLeafAtomOfType(Atom.TYPE_stco);
@@ -195,7 +190,7 @@ final class AtomParsers {
                         }
                     }
 
-                    timestampTimeUnits += (long) timestampDeltaInTimeUnits;
+                    timestampTimeUnits += timestampDeltaInTimeUnits;
                     --remainingSamplesAtTimestampDelta;
                     if (remainingSamplesAtTimestampDelta == 0 && remainingTimestampDeltaChanges > 0) {
                         remainingSamplesAtTimestampDelta = stts.readUnsignedIntToInt();
@@ -203,7 +198,7 @@ final class AtomParsers {
                         --remainingTimestampDeltaChanges;
                     }
 
-                    offset += (long) sizes[editedSampleCount];
+                    offset += sizes[editedSampleCount];
                     --remainingSamplesInChunk;
                 }
 
@@ -231,7 +226,7 @@ final class AtomParsers {
                 }
 
                 remainingSamplesInChunk = Util.getPcmFrameSize(track.format.pcmEncoding, track.format.channelCount);
-                Results rechunkedResults = FixedSampleSizeRechunker.rechunk(remainingSamplesInChunk, chunkOffsetsBytes, chunkSampleCounts, (long) timestampDeltaInTimeUnits);
+                Results rechunkedResults = FixedSampleSizeRechunker.rechunk(remainingSamplesInChunk, chunkOffsetsBytes, chunkSampleCounts, timestampDeltaInTimeUnits);
                 offsets = rechunkedResults.offsets;
                 sizes = rechunkedResults.sizes;
                 maximumSize = rechunkedResults.maximumSize;
@@ -248,8 +243,8 @@ final class AtomParsers {
                     long editEndTime = editStartTime + Util.scaleLargeTimestamp(track.editListDurations[0], track.timescale, track.movieTimescale);
                     if (canApplyEditWithGaplessInfo(timestamps, duration, editStartTime, editEndTime)) {
                         long paddingTimeUnits = duration - editEndTime;
-                        long encoderDelay = Util.scaleLargeTimestamp(editStartTime - timestamps[0], (long) track.format.sampleRate, track.timescale);
-                        long encoderPadding = Util.scaleLargeTimestamp(paddingTimeUnits, (long) track.format.sampleRate, track.timescale);
+                        long encoderDelay = Util.scaleLargeTimestamp(editStartTime - timestamps[0], track.format.sampleRate, track.timescale);
+                        long encoderPadding = Util.scaleLargeTimestamp(paddingTimeUnits, track.format.sampleRate, track.timescale);
                         if ((encoderDelay != 0L || encoderPadding != 0L) && encoderDelay <= 2147483647L && encoderPadding <= 2147483647L) {
                             gaplessInfoHolder.encoderDelay = (int) encoderDelay;
                             gaplessInfoHolder.encoderPadding = (int) encoderPadding;
@@ -423,11 +418,11 @@ final class AtomParsers {
         long duration;
         if (durationUnknown) {
             tkhd.skipBytes(durationByteCount);
-            duration = -9223372036854775807L;
+            duration = -Long.MAX_VALUE;
         } else {
             duration = version == 0 ? tkhd.readUnsignedInt() : tkhd.readUnsignedLongToLong();
             if (duration == 0L) {
-                duration = -9223372036854775807L;
+                duration = -Long.MAX_VALUE;
             }
         }
 
@@ -492,7 +487,7 @@ final class AtomParsers {
                 if (childAtomType != Atom.TYPE_mp4a && childAtomType != Atom.TYPE_enca && childAtomType != Atom.TYPE_ac_3 && childAtomType != Atom.TYPE_ec_3 && childAtomType != Atom.TYPE_dtsc && childAtomType != Atom.TYPE_dtse && childAtomType != Atom.TYPE_dtsh && childAtomType != Atom.TYPE_dtsl && childAtomType != Atom.TYPE_samr && childAtomType != Atom.TYPE_sawb && childAtomType != Atom.TYPE_lpcm && childAtomType != Atom.TYPE_sowt && childAtomType != Atom.TYPE__mp3 && childAtomType != Atom.TYPE_alac && childAtomType != Atom.TYPE_alaw && childAtomType != Atom.TYPE_ulaw && childAtomType != Atom.TYPE_Opus && childAtomType != Atom.TYPE_fLaC) {
                     if (childAtomType != Atom.TYPE_TTML && childAtomType != Atom.TYPE_tx3g && childAtomType != Atom.TYPE_wvtt && childAtomType != Atom.TYPE_stpp && childAtomType != Atom.TYPE_c608) {
                         if (childAtomType == Atom.TYPE_camm) {
-                            out.format = Format.createSampleFormat(Integer.toString(trackId), "application/x-camera-motion", (String) null, -1, (DrmInitData) null);
+                            out.format = Format.createSampleFormat(Integer.toString(trackId), "application/x-camera-motion", null, -1, null);
                         }
                     } else {
                         parseTextSampleEntry(stsd, childAtomType, childStartPosition, childAtomSize, trackId, language, out);
@@ -513,7 +508,7 @@ final class AtomParsers {
     private static void parseTextSampleEntry(ParsableByteArray parent, int atomType, int position, int atomSize, int trackId, String language, StsdData out) throws ParserException {
         parent.setPosition(position + 8 + 8);
         List<byte[]> initializationData = null;
-        long subSampleOffsetUs = 9223372036854775807L;
+        long subSampleOffsetUs = Long.MAX_VALUE;
         String mimeType;
         if (atomType == Atom.TYPE_TTML) {
             mimeType = "application/ttml+xml";
@@ -537,7 +532,7 @@ final class AtomParsers {
             out.requiredSampleTransformation = 1;
         }
 
-        out.format = Format.createTextSampleFormat(Integer.toString(trackId), mimeType, (String) null, -1, 0, language, -1, (DrmInitData) null, subSampleOffsetUs, initializationData);
+        out.format = Format.createTextSampleFormat(Integer.toString(trackId), mimeType, null, -1, 0, language, -1, null, subSampleOffsetUs, initializationData);
     }
 
     private static void parseVideoSampleEntry(ParsableByteArray parent, int atomType, int position, int size, int trackId, int rotationDegrees, DrmInitData drmInitData, StsdData out, int entryIndex) throws ParserException {
@@ -552,9 +547,9 @@ final class AtomParsers {
         if (atomType == Atom.TYPE_encv) {
             Pair<Integer, TrackEncryptionBox> sampleEntryEncryptionData = parseSampleEntryEncryptionData(parent, position, size);
             if (sampleEntryEncryptionData != null) {
-                atomType = (Integer) sampleEntryEncryptionData.first;
-                drmInitData = drmInitData == null ? null : drmInitData.copyWithSchemeType(((TrackEncryptionBox) sampleEntryEncryptionData.second).schemeType);
-                out.trackEncryptionBoxes[entryIndex] = (TrackEncryptionBox) sampleEntryEncryptionData.second;
+                atomType = sampleEntryEncryptionData.first;
+                drmInitData = drmInitData == null ? null : drmInitData.copyWithSchemeType(sampleEntryEncryptionData.second.schemeType);
+                out.trackEncryptionBoxes[entryIndex] = sampleEntryEncryptionData.second;
             }
 
             parent.setPosition(childPosition);
@@ -602,7 +597,7 @@ final class AtomParsers {
             } else if (childAtomType == Atom.TYPE_esds) {
                 Assertions.checkState(mimeType == null);
                 Pair<String, byte[]> mimeTypeAndInitializationData = parseEsdsFromParent(parent, childStartPosition);
-                mimeType = (String) mimeTypeAndInitializationData.first;
+                mimeType = mimeTypeAndInitializationData.first;
                 initializationData = Collections.singletonList(mimeTypeAndInitializationData.second);
             } else if (childAtomType == Atom.TYPE_pasp) {
                 pixelWidthHeightRatio = parsePaspFromParent(parent, childStartPosition);
@@ -632,7 +627,7 @@ final class AtomParsers {
         }
 
         if (mimeType != null) {
-            out.format = Format.createVideoSampleFormat(Integer.toString(trackId), mimeType, (String) null, -1, -1, width, height, -1.0F, initializationData, rotationDegrees, pixelWidthHeightRatio, projectionData, stereoMode, (ColorInfo) null, drmInitData);
+            out.format = Format.createVideoSampleFormat(Integer.toString(trackId), mimeType, null, -1, -1, width, height, -1.0F, initializationData, rotationDegrees, pixelWidthHeightRatio, projectionData, stereoMode, null, drmInitData);
         }
     }
 
@@ -704,9 +699,9 @@ final class AtomParsers {
         if (atomType == Atom.TYPE_enca) {
             Pair<Integer, TrackEncryptionBox> sampleEntryEncryptionData = parseSampleEntryEncryptionData(parent, position, size);
             if (sampleEntryEncryptionData != null) {
-                atomType = (Integer) sampleEntryEncryptionData.first;
-                drmInitData = drmInitData == null ? null : drmInitData.copyWithSchemeType(((TrackEncryptionBox) sampleEntryEncryptionData.second).schemeType);
-                out.trackEncryptionBoxes[entryIndex] = (TrackEncryptionBox) sampleEntryEncryptionData.second;
+                atomType = sampleEntryEncryptionData.first;
+                drmInitData = drmInitData == null ? null : drmInitData.copyWithSchemeType(sampleEntryEncryptionData.second.schemeType);
+                out.trackEncryptionBoxes[entryIndex] = sampleEntryEncryptionData.second;
             }
 
             parent.setPosition(childPosition);
@@ -759,12 +754,12 @@ final class AtomParsers {
                 childAtomBodySize = childAtomType == Atom.TYPE_esds ? childPosition : findEsdsPosition(parent, childPosition, childAtomSize);
                 if (childAtomBodySize != -1) {
                     Pair<String, byte[]> mimeTypeAndInitializationData = parseEsdsFromParent(parent, childAtomBodySize);
-                    mimeType = (String) mimeTypeAndInitializationData.first;
-                    initializationData = (byte[]) mimeTypeAndInitializationData.second;
+                    mimeType = mimeTypeAndInitializationData.first;
+                    initializationData = mimeTypeAndInitializationData.second;
                     if ("audio/mp4a-latm".equals(mimeType)) {
                         Pair<Integer, Integer> audioSpecificConfig = CodecSpecificDataUtil.parseAacAudioSpecificConfig(initializationData);
-                        sampleRate = (Integer) audioSpecificConfig.first;
-                        channelCount = (Integer) audioSpecificConfig.second;
+                        sampleRate = audioSpecificConfig.first;
+                        channelCount = audioSpecificConfig.second;
                     }
                 }
             } else if (childAtomType == Atom.TYPE_dac3) {
@@ -774,7 +769,7 @@ final class AtomParsers {
                 parent.setPosition(8 + childPosition);
                 out.format = Ac3Util.parseEAc3AnnexFFormat(parent, Integer.toString(trackId), language, drmInitData);
             } else if (childAtomType == Atom.TYPE_ddts) {
-                out.format = Format.createAudioSampleFormat(Integer.toString(trackId), mimeType, (String) null, -1, -1, channelCount, sampleRate, (List) null, drmInitData, 0, language);
+                out.format = Format.createAudioSampleFormat(Integer.toString(trackId), mimeType, null, -1, -1, channelCount, sampleRate, null, drmInitData, 0, language);
             } else if (childAtomType == Atom.TYPE_alac) {
                 initializationData = new byte[childAtomSize];
                 parent.setPosition(childPosition);
@@ -795,7 +790,7 @@ final class AtomParsers {
 
         if (out.format == null && mimeType != null) {
             childAtomSize = "audio/raw".equals(mimeType) ? 2 : -1;
-            out.format = Format.createAudioSampleFormat(Integer.toString(trackId), mimeType, (String) null, -1, -1, channelCount, sampleRate, childAtomSize, initializationData == null ? null : Collections.singletonList(initializationData), drmInitData, 0, language);
+            out.format = Format.createAudioSampleFormat(Integer.toString(trackId), mimeType, null, -1, -1, channelCount, sampleRate, childAtomSize, initializationData == null ? null : Collections.singletonList(initializationData), drmInitData, 0, language);
         }
 
     }

@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.metadata.scte35;
 
 import android.os.Parcel;
@@ -35,8 +30,8 @@ public final class TimeSignalCommand extends SpliceCommand {
     }
 
     static long parseSpliceTime(ParsableByteArray sectionData, long ptsAdjustment) {
-        long firstByte = (long)sectionData.readUnsignedByte();
-        long ptsTime = -9223372036854775807L;
+        long firstByte = sectionData.readUnsignedByte();
+        long ptsTime = -Long.MAX_VALUE;
         if ((firstByte & 128L) != 0L) {
             ptsTime = (firstByte & 1L) << 32 | sectionData.readUnsignedInt();
             ptsTime += ptsAdjustment;

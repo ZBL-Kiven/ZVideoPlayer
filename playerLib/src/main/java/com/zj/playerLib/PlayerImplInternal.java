@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib;
 
 import android.os.Handler;
@@ -116,7 +111,7 @@ final class PlayerImplInternal implements Callback, MediaPeriod.Callback, Invali
         this.backBufferDurationUs = loadControl.getBackBufferDurationUs();
         this.retainBackBufferFromKeyframe = loadControl.retainBackBufferFromKeyframe();
         this.seekParameters = SeekParameters.DEFAULT;
-        this.playbackInfo = PlaybackInfo.createDummy(-9223372036854775807L, emptyTrackSelectorResult);
+        this.playbackInfo = PlaybackInfo.createDummy(-Long.MAX_VALUE, emptyTrackSelectorResult);
         this.playbackInfoUpdate = new PlaybackInfoUpdate();
         this.rendererCapabilities = new RendererCapabilities[renderers.length];
 
@@ -398,7 +393,7 @@ final class PlayerImplInternal implements Callback, MediaPeriod.Callback, Invali
             MediaPeriodHolder playingPeriodHolder = this.queue.getPlayingPeriod();
             long periodPositionUs = 0;
             if (playingPeriodHolder != null) periodPositionUs = playingPeriodHolder.mediaPeriod.readDiscontinuity();
-            if (periodPositionUs != -9223372036854775807L) {
+            if (periodPositionUs != -Long.MAX_VALUE) {
                 this.resetRendererPosition(periodPositionUs);
                 if (periodPositionUs != this.playbackInfo.positionUs) {
                     this.playbackInfo = this.playbackInfo.copyWithNewPosition(this.playbackInfo.periodId, periodPositionUs, this.playbackInfo.contentPositionUs, this.getTotalBufferedDurationUs());
@@ -448,7 +443,7 @@ final class PlayerImplInternal implements Callback, MediaPeriod.Callback, Invali
             }
 
             long playingPeriodDurationUs = playingPeriodHolder.info.durationUs;
-            if (renderersEnded && (playingPeriodDurationUs == -9223372036854775807L || playingPeriodDurationUs <= this.playbackInfo.positionUs) && playingPeriodHolder.info.isFinal) {
+            if (renderersEnded && (playingPeriodDurationUs == -Long.MAX_VALUE || playingPeriodDurationUs <= this.playbackInfo.positionUs) && playingPeriodHolder.info.isFinal) {
                 this.setState(4);
                 this.stopRenderers();
             } else if (this.playbackInfo.playbackState == 2 && this.shouldTransitionToReadyState(renderersReadyOrEnded)) {
@@ -508,8 +503,8 @@ final class PlayerImplInternal implements Callback, MediaPeriod.Callback, Invali
         boolean seekPositionAdjusted;
         if (resolvedSeekPosition == null) {
             periodId = this.playbackInfo.getDummyFirstMediaPeriodId(this.shuffleModeEnabled, this.window);
-            periodPositionUs = -9223372036854775807L;
-            contentPositionUs = -9223372036854775807L;
+            periodPositionUs = -Long.MAX_VALUE;
+            contentPositionUs = -Long.MAX_VALUE;
             seekPositionAdjusted = true;
         } else {
             Object periodUid = resolvedSeekPosition.first;
@@ -520,13 +515,13 @@ final class PlayerImplInternal implements Callback, MediaPeriod.Callback, Invali
                 seekPositionAdjusted = true;
             } else {
                 periodPositionUs = resolvedSeekPosition.second;
-                seekPositionAdjusted = seekPosition.windowPositionUs == -9223372036854775807L;
+                seekPositionAdjusted = seekPosition.windowPositionUs == -Long.MAX_VALUE;
             }
         }
 
         try {
             if (this.mediaSource != null && this.pendingPrepareCount <= 0) {
-                if (periodPositionUs == -9223372036854775807L) {
+                if (periodPositionUs == -Long.MAX_VALUE) {
                     this.setState(4);
                     this.resetInternal(false, true, false);
                 } else {
@@ -681,8 +676,8 @@ final class PlayerImplInternal implements Callback, MediaPeriod.Callback, Invali
         }
 
         MediaPeriodId mediaPeriodId = resetPosition ? this.playbackInfo.getDummyFirstMediaPeriodId(this.shuffleModeEnabled, this.window) : this.playbackInfo.periodId;
-        long startPositionUs = resetPosition ? -9223372036854775807L : this.playbackInfo.positionUs;
-        long contentPositionUs = resetPosition ? -9223372036854775807L : this.playbackInfo.contentPositionUs;
+        long startPositionUs = resetPosition ? -Long.MAX_VALUE : this.playbackInfo.positionUs;
+        long contentPositionUs = resetPosition ? -Long.MAX_VALUE : this.playbackInfo.contentPositionUs;
         this.playbackInfo = new PlaybackInfo(resetState ? Timeline.EMPTY : this.playbackInfo.timeline, resetState ? null : this.playbackInfo.manifest, mediaPeriodId, startPositionUs, contentPositionUs, this.playbackInfo.playbackState, false, resetState ? TrackGroupArray.EMPTY : this.playbackInfo.trackGroups, resetState ? this.emptyTrackSelectorResult : this.playbackInfo.trackSelectorResult, mediaPeriodId, startPositionUs, 0L, startPositionUs);
         if (releaseMediaSource && this.mediaSource != null) {
             this.mediaSource.releaseSource(this);
@@ -692,7 +687,7 @@ final class PlayerImplInternal implements Callback, MediaPeriod.Callback, Invali
     }
 
     private void sendMessageInternal(PlayerMessage message) throws PlaybackException {
-        if (message.getPositionMs() == -9223372036854775807L) {
+        if (message.getPositionMs() == -Long.MAX_VALUE) {
             this.sendMessageToTarget(message);
         } else if (this.mediaSource != null && this.pendingPrepareCount <= 0) {
             PendingMessageInfo pendingMessageInfo = new PendingMessageInfo(message);
@@ -915,7 +910,7 @@ final class PlayerImplInternal implements Callback, MediaPeriod.Callback, Invali
         MediaPeriodHolder playingPeriodHolder = this.queue.getPlayingPeriod();
         if (playingPeriodHolder == null) return false;
         long playingPeriodDurationUs = playingPeriodHolder.info.durationUs;
-        return playingPeriodDurationUs == -9223372036854775807L || this.playbackInfo.positionUs < playingPeriodDurationUs || playingPeriodHolder.next != null && (playingPeriodHolder.next.prepared || playingPeriodHolder.next.info.id.isAd());
+        return playingPeriodDurationUs == -Long.MAX_VALUE || this.playbackInfo.positionUs < playingPeriodDurationUs || playingPeriodHolder.next != null && (playingPeriodHolder.next.prepared || playingPeriodHolder.next.info.id.isAd());
     }
 
     private void maybeThrowSourceInfoRefreshError() throws IOException {
@@ -965,7 +960,7 @@ final class PlayerImplInternal implements Callback, MediaPeriod.Callback, Invali
                         periodPosition = this.resolveSeekPosition(this.pendingInitialSeekPosition, true);
                     } catch (IllegalSeekPositionException var15) {
                         MediaPeriodId firstMediaPeriodId = this.playbackInfo.getDummyFirstMediaPeriodId(this.shuffleModeEnabled, this.window);
-                        this.playbackInfo = this.playbackInfo.resetToNewPosition(firstMediaPeriodId, -9223372036854775807L, -9223372036854775807L);
+                        this.playbackInfo = this.playbackInfo.resetToNewPosition(firstMediaPeriodId, -Long.MAX_VALUE, -Long.MAX_VALUE);
                         throw var15;
                     }
 
@@ -978,7 +973,7 @@ final class PlayerImplInternal implements Callback, MediaPeriod.Callback, Invali
                         periodId = this.queue.resolveMediaPeriodIdForAds(periodUid, positionUs);
                         this.playbackInfo = this.playbackInfo.resetToNewPosition(periodId, periodId.isAd() ? 0L : positionUs, positionUs);
                     }
-                } else if (this.playbackInfo.startPositionUs == -9223372036854775807L) {
+                } else if (this.playbackInfo.startPositionUs == -Long.MAX_VALUE) {
                     if (timeline.isEmpty()) {
                         this.handleSourceInfoRefreshEndedPlayback();
                     } else {
@@ -1107,7 +1102,7 @@ final class PlayerImplInternal implements Callback, MediaPeriod.Callback, Invali
     }
 
     private Pair<Object, Long> getPeriodPosition(Timeline timeline, int windowIndex) {
-        return timeline.getPeriodPosition(this.window, this.period, windowIndex, -9223372036854775807L);
+        return timeline.getPeriodPosition(this.window, this.period, windowIndex, -Long.MAX_VALUE);
     }
 
     private void updatePeriods() throws PlaybackException, IOException {
@@ -1169,7 +1164,7 @@ final class PlayerImplInternal implements Callback, MediaPeriod.Callback, Invali
                             TrackSelectorResult oldTrackSelectorResult = readingPeriodHolder.trackSelectorResult;
                             readingPeriodHolder = this.queue.advanceReadingPeriod();
                             TrackSelectorResult newTrackSelectorResult = readingPeriodHolder.trackSelectorResult;
-                            boolean initialDiscontinuity = readingPeriodHolder.mediaPeriod.readDiscontinuity() != -9223372036854775807L;
+                            boolean initialDiscontinuity = readingPeriodHolder.mediaPeriod.readDiscontinuity() != -Long.MAX_VALUE;
 
                             for (int i1 = 0; i1 < this.renderers.length; ++i1) {
                                 Renderer r = this.renderers[i1];

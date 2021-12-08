@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib;
 
 import android.util.Pair;
@@ -116,9 +111,9 @@ public abstract class Timeline {
     public final Pair<Object, Long> getPeriodPosition(Window window, Period period, int windowIndex, long windowPositionUs, long defaultPositionProjectionUs) {
         Assertions.checkIndex(windowIndex, 0, this.getWindowCount());
         this.getWindow(windowIndex, window, false, defaultPositionProjectionUs);
-        if (windowPositionUs == -9223372036854775807L) {
+        if (windowPositionUs == -Long.MAX_VALUE) {
             windowPositionUs = window.getDefaultPositionUs();
-            if (windowPositionUs == -9223372036854775807L) {
+            if (windowPositionUs == -Long.MAX_VALUE) {
                 return null;
             }
         }
@@ -126,7 +121,7 @@ public abstract class Timeline {
         int periodIndex = window.firstPeriodIndex;
         long periodPositionUs = window.getPositionInFirstPeriodUs() + windowPositionUs;
 
-        for(long periodDurationUs = this.getPeriod(periodIndex, period, true).getDurationUs(); periodDurationUs != -9223372036854775807L && periodPositionUs >= periodDurationUs && periodIndex < window.lastPeriodIndex; periodDurationUs = this.getPeriod(periodIndex, period, true).getDurationUs()) {
+        for(long periodDurationUs = this.getPeriod(periodIndex, period, true).getDurationUs(); periodDurationUs != -Long.MAX_VALUE && periodPositionUs >= periodDurationUs && periodIndex < window.lastPeriodIndex; periodDurationUs = this.getPeriod(periodIndex, period, true).getDurationUs()) {
             periodPositionUs -= periodDurationUs;
             ++periodIndex;
         }
@@ -228,7 +223,7 @@ public abstract class Timeline {
 
         public long getAdDurationUs(int adGroupIndex, int adIndexInAdGroup) {
             AdGroup adGroup = this.adPlaybackState.adGroups[adGroupIndex];
-            return adGroup.count != -1 ? adGroup.durationsUs[adIndexInAdGroup] : -9223372036854775807L;
+            return adGroup.count != -1 ? adGroup.durationsUs[adIndexInAdGroup] : -Long.MAX_VALUE;
         }
 
         public long getAdResumePositionUs() {

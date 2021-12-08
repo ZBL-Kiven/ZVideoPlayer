@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.upstream;
 
 import android.net.Uri;
@@ -23,7 +18,7 @@ public final class StatsDataSource implements DataSource {
     private Map<String, List<String>> lastResponseHeaders;
 
     public StatsDataSource(DataSource dataSource) {
-        this.dataSource = (DataSource)Assertions.checkNotNull(dataSource);
+        this.dataSource = Assertions.checkNotNull(dataSource);
         this.lastOpenedUri = Uri.EMPTY;
         this.lastResponseHeaders = Collections.emptyMap();
     }
@@ -52,7 +47,7 @@ public final class StatsDataSource implements DataSource {
         this.lastOpenedUri = dataSpec.uri;
         this.lastResponseHeaders = Collections.emptyMap();
         long availableBytes = this.dataSource.open(dataSpec);
-        this.lastOpenedUri = (Uri)Assertions.checkNotNull(this.getUri());
+        this.lastOpenedUri = Assertions.checkNotNull(this.getUri());
         this.lastResponseHeaders = this.getResponseHeaders();
         return availableBytes;
     }
@@ -60,7 +55,7 @@ public final class StatsDataSource implements DataSource {
     public int read(byte[] buffer, int offset, int readLength) throws IOException {
         int bytesRead = this.dataSource.read(buffer, offset, readLength);
         if (bytesRead != -1) {
-            this.bytesRead += (long)bytesRead;
+            this.bytesRead += bytesRead;
         }
 
         return bytesRead;

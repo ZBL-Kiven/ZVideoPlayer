@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.drm;
 
 import android.media.DeniedByServerException;
@@ -55,7 +50,7 @@ public interface MediaDrm<T extends MediaCrypto> {
 
     T createMediaCrypto(byte[] var1) throws MediaCryptoException;
 
-    public static final class ProvisionRequest {
+    final class ProvisionRequest {
         private final byte[] data;
         private final String defaultUrl;
 
@@ -73,7 +68,7 @@ public interface MediaDrm<T extends MediaCrypto> {
         }
     }
 
-    public static final class KeyRequest {
+    final class KeyRequest {
         private final byte[] data;
         private final String licenseServerUrl;
 
@@ -91,7 +86,7 @@ public interface MediaDrm<T extends MediaCrypto> {
         }
     }
 
-    public static final class KeyStatus {
+    final class KeyStatus {
         private final int statusCode;
         private final byte[] keyId;
 
@@ -109,11 +104,11 @@ public interface MediaDrm<T extends MediaCrypto> {
         }
     }
 
-    public interface OnKeyStatusChangeListener<T extends MediaCrypto> {
+    interface OnKeyStatusChangeListener<T extends MediaCrypto> {
         void onKeyStatusChange(MediaDrm<? extends T> var1, byte[] var2, List<KeyStatus> var3, boolean var4);
     }
 
-    public interface OnEventListener<T extends MediaCrypto> {
+    interface OnEventListener<T extends MediaCrypto> {
         void onEvent(MediaDrm<? extends T> var1, byte[] var2, int var3, int var4, @Nullable byte[] var5);
     }
 }

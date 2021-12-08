@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.extractor;
 
 import java.io.IOException;
@@ -27,6 +22,6 @@ public interface Extractor {
 
     @Documented
     @Retention(RetentionPolicy.SOURCE)
-    public @interface ReadResult {
+    @interface ReadResult {
     }
 }

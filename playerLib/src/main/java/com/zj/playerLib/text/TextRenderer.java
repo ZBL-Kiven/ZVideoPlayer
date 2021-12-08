@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.text;
 
 import android.os.Handler;
@@ -47,7 +42,7 @@ public final class TextRenderer extends BaseRenderer implements Callback {
 
     public TextRenderer(TextOutput output, @Nullable Looper outputLooper, SubtitleDecoderFactory decoderFactory) {
         super(3);
-        this.output = (TextOutput)Assertions.checkNotNull(output);
+        this.output = Assertions.checkNotNull(output);
         this.outputHandler = outputLooper == null ? null : Util.createHandler(outputLooper, this);
         this.decoderFactory = decoderFactory;
         this.formatHolder = new FormatHolder();
@@ -55,7 +50,7 @@ public final class TextRenderer extends BaseRenderer implements Callback {
 
     public int supportsFormat(Format format) {
         if (this.decoderFactory.supportsFormat(format)) {
-            return supportsFormatDrm((DrmSessionManager)null, format.drmInitData) ? 4 : 2;
+            return supportsFormatDrm(null, format.drmInitData) ? 4 : 2;
         } else {
             return MimeTypes.isText(format.sampleMimeType) ? 1 : 0;
         }
@@ -90,7 +85,7 @@ public final class TextRenderer extends BaseRenderer implements Callback {
                 this.decoder.setPositionUs(positionUs);
 
                 try {
-                    this.nextSubtitle = (SubtitleOutputBuffer)this.decoder.dequeueOutputBuffer();
+                    this.nextSubtitle = this.decoder.dequeueOutputBuffer();
                 } catch (SubtitleDecoderException var9) {
                     throw PlaybackException.createForRenderer(var9, this.getIndex());
                 }
@@ -107,7 +102,7 @@ public final class TextRenderer extends BaseRenderer implements Callback {
 
                 if (this.nextSubtitle != null) {
                     if (this.nextSubtitle.isEndOfStream()) {
-                        if (!textRendererNeedsUpdate && this.getNextEventTime() == 9223372036854775807L) {
+                        if (!textRendererNeedsUpdate && this.getNextEventTime() == Long.MAX_VALUE) {
                             if (this.decoderReplacementState == 2) {
                                 this.replaceDecoder();
                             } else {
@@ -135,7 +130,7 @@ public final class TextRenderer extends BaseRenderer implements Callback {
                     try {
                         while(!this.inputStreamEnded) {
                             if (this.nextInputBuffer == null) {
-                                this.nextInputBuffer = (SubtitleInputBuffer)this.decoder.dequeueInputBuffer();
+                                this.nextInputBuffer = this.decoder.dequeueInputBuffer();
                                 if (this.nextInputBuffer == null) {
                                     return;
                                 }
@@ -215,7 +210,7 @@ public final class TextRenderer extends BaseRenderer implements Callback {
     }
 
     private long getNextEventTime() {
-        return this.nextSubtitleEventIndex != -1 && this.nextSubtitleEventIndex < this.subtitle.getEventTimeCount() ? this.subtitle.getEventTime(this.nextSubtitleEventIndex) : 9223372036854775807L;
+        return this.nextSubtitleEventIndex != -1 && this.nextSubtitleEventIndex < this.subtitle.getEventTimeCount() ? this.subtitle.getEventTime(this.nextSubtitleEventIndex) : Long.MAX_VALUE;
     }
 
     private void updateOutput(List<Cue> cues) {

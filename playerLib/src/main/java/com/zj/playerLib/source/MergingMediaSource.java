@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.source;
 
 import androidx.annotation.Nullable;
@@ -85,7 +80,7 @@ public final class MergingMediaSource extends CompositeMediaSource<Integer> {
 
     public void releaseSourceInternal() {
         super.releaseSourceInternal();
-        Arrays.fill(this.timelines, (Object)null);
+        Arrays.fill(this.timelines, null);
         this.primaryManifest = null;
         this.periodCount = -1;
         this.mergeError = null;

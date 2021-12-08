@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib;
 
 import com.zj.playerLib.source.ClippingMediaPeriod;
@@ -48,10 +43,10 @@ final class MediaPeriodHolder {
         this.mayRetainStreamFlags = new boolean[rendererCapabilities.length];
         MediaPeriod mediaPeriod = mediaSource.createPeriod(info.id, allocator);
         if (info.id.endPositionUs != -9223372036854775808L) {
-            mediaPeriod = new ClippingMediaPeriod((MediaPeriod)mediaPeriod, true, 0L, info.id.endPositionUs);
+            mediaPeriod = new ClippingMediaPeriod(mediaPeriod, true, 0L, info.id.endPositionUs);
         }
 
-        this.mediaPeriod = (MediaPeriod)mediaPeriod;
+        this.mediaPeriod = mediaPeriod;
     }
 
     public long toRendererTime(long periodTimeUs) {
@@ -163,7 +158,7 @@ final class MediaPeriodHolder {
     }
 
     public void release() {
-        this.updatePeriodTrackSelectorResult((TrackSelectorResult)null);
+        this.updatePeriodTrackSelectorResult(null);
 
         try {
             if (this.info.id.endPositionUs != -9223372036854775808L) {

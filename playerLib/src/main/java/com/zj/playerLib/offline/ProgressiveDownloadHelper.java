@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.offline;
 
 import android.net.Uri;
@@ -19,7 +14,7 @@ public final class ProgressiveDownloadHelper extends DownloadHelper {
     private final String customCacheKey;
 
     public ProgressiveDownloadHelper(Uri uri) {
-        this(uri, (String)null);
+        this(uri, null);
     }
 
     public ProgressiveDownloadHelper(Uri uri, @Nullable String customCacheKey) {

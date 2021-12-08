@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib;
 
 import android.os.Looper;
@@ -160,22 +155,22 @@ public interface Player {
 
     @Documented
     @Retention(RetentionPolicy.SOURCE)
-    public @interface TimelineChangeReason {
+    @interface TimelineChangeReason {
     }
 
     @Documented
     @Retention(RetentionPolicy.SOURCE)
-    public @interface DiscontinuityReason {
+    @interface DiscontinuityReason {
     }
 
     @Documented
     @Retention(RetentionPolicy.SOURCE)
-    public @interface RepeatMode {
+    @interface RepeatMode {
     }
 
     /** @deprecated */
     @Deprecated
-    public abstract static class DefaultEventListener implements EventListener {
+    abstract class DefaultEventListener implements EventListener {
         public DefaultEventListener() {
         }
 
@@ -189,7 +184,7 @@ public interface Player {
         }
     }
 
-    public interface EventListener {
+    interface EventListener {
         default void onTimelineChanged(Timeline timeline, @Nullable Object manifest, int reason) {
         }
 
@@ -221,19 +216,19 @@ public interface Player {
         }
     }
 
-    public interface MetadataComponent {
+    interface MetadataComponent {
         void addMetadataOutput(MetadataOutput var1);
 
         void removeMetadataOutput(MetadataOutput var1);
     }
 
-    public interface TextComponent {
+    interface TextComponent {
         void addTextOutput(TextOutput var1);
 
         void removeTextOutput(TextOutput var1);
     }
 
-    public interface VideoComponent {
+    interface VideoComponent {
         void setVideoScalingMode(int var1);
 
         int getVideoScalingMode();
@@ -269,7 +264,7 @@ public interface Player {
         void clearVideoTextureView(TextureView var1);
     }
 
-    public interface AudioComponent {
+    interface AudioComponent {
         void addAudioListener(AudioListener var1);
 
         void removeAudioListener(AudioListener var1);

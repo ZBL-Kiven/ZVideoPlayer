@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.text.webvtt;
 
 import com.zj.playerLib.text.Cue;
@@ -66,7 +61,7 @@ public final class Mp4WebvttDecoder extends SimpleSubtitleDecoder {
             if (boxType == TYPE_sttg) {
                 WebvttCueParser.parseCueSettingsList(boxPayload, builder);
             } else if (boxType == TYPE_payl) {
-                WebvttCueParser.parseCueText((String)null, boxPayload.trim(), builder, Collections.emptyList());
+                WebvttCueParser.parseCueText(null, boxPayload.trim(), builder, Collections.emptyList());
             }
         }
 

@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.offline;
 
 import android.app.Notification;
@@ -58,7 +53,7 @@ public abstract class DownloadService extends Service {
     }
 
     protected DownloadService(int foregroundNotificationId, long foregroundNotificationUpdateInterval) {
-        this(foregroundNotificationId, foregroundNotificationUpdateInterval, (String)null, 0);
+        this(foregroundNotificationId, foregroundNotificationUpdateInterval, null, 0);
     }
 
     protected DownloadService(int foregroundNotificationId, long foregroundNotificationUpdateInterval, @Nullable String channelId, @StringRes int channelName) {
@@ -215,7 +210,7 @@ public abstract class DownloadService extends Service {
     private void maybeStartWatchingRequirements(Requirements requirements) {
         if (this.downloadManager.getDownloadCount() != 0) {
             Class<? extends DownloadService> clazz = this.getClass();
-            RequirementsHelper requirementsHelper = (RequirementsHelper)requirementsHelpers.get(clazz);
+            RequirementsHelper requirementsHelper = requirementsHelpers.get(clazz);
             if (requirementsHelper == null) {
                 requirementsHelper = new RequirementsHelper(this, requirements, this.getScheduler(), clazz);
                 requirementsHelpers.put(clazz, requirementsHelper);
@@ -233,7 +228,7 @@ public abstract class DownloadService extends Service {
     }
 
     private void stopWatchingRequirements() {
-        RequirementsHelper requirementsHelper = (RequirementsHelper)requirementsHelpers.remove(this.getClass());
+        RequirementsHelper requirementsHelper = requirementsHelpers.remove(this.getClass());
         if (requirementsHelper != null) {
             requirementsHelper.stop();
             this.logd("stopped watching requirements");

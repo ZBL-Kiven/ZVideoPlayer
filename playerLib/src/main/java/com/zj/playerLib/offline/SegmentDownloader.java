@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.offline;
 
 import android.net.Uri;
@@ -110,7 +105,7 @@ public abstract class SegmentDownloader<M extends FilterableManifest<M>> impleme
     private List<Segment> initDownload() throws IOException, InterruptedException {
         M manifest = this.getManifest(this.dataSource, this.manifestUri);
         if (!this.streamKeys.isEmpty()) {
-            manifest = (M) manifest.copy(this.streamKeys);
+            manifest = manifest.copy(this.streamKeys);
         }
 
         List<Segment> segments = this.getSegments(this.dataSource, manifest, false);

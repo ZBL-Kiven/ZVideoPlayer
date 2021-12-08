@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.audio;
 
 import androidx.annotation.Nullable;
@@ -116,7 +111,7 @@ public final class SonicAudioProcessor implements AudioProcessor {
         if (inputBuffer.hasRemaining()) {
             ShortBuffer shortBuffer = inputBuffer.asShortBuffer();
             int inputSize = inputBuffer.remaining();
-            this.inputBytes += (long)inputSize;
+            this.inputBytes += inputSize;
             this.sonic.queueInput(shortBuffer);
             inputBuffer.position(inputBuffer.position() + inputSize);
         }
@@ -132,7 +127,7 @@ public final class SonicAudioProcessor implements AudioProcessor {
             }
 
             this.sonic.getOutput(this.shortBuffer);
-            this.outputBytes += (long)outputSize;
+            this.outputBytes += outputSize;
             this.buffer.limit(outputSize);
             this.outputBuffer = this.buffer;
         }

@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.extractor.ts;
 
 import android.util.SparseArray;
@@ -87,7 +82,7 @@ public final class PsExtractor implements Extractor {
     }
 
     public void seek(long position, long timeUs) {
-        boolean hasNotEncounteredFirstTimestamp = this.timestampAdjuster.getTimestampOffsetUs() == -9223372036854775807L;
+        boolean hasNotEncounteredFirstTimestamp = this.timestampAdjuster.getTimestampOffsetUs() == -Long.MAX_VALUE;
         if (hasNotEncounteredFirstTimestamp || this.timestampAdjuster.getFirstSampleTimestampUs() != 0L && this.timestampAdjuster.getFirstSampleTimestampUs() != timeUs) {
             this.timestampAdjuster.reset();
             this.timestampAdjuster.setFirstSampleTimestampUs(timeUs);
@@ -98,7 +93,7 @@ public final class PsExtractor implements Extractor {
         }
 
         for(int i = 0; i < this.psPayloadReaders.size(); ++i) {
-            ((PesReader)this.psPayloadReaders.valueAt(i)).seek();
+            this.psPayloadReaders.valueAt(i).seek();
         }
 
     }
@@ -114,7 +109,7 @@ public final class PsExtractor implements Extractor {
         } else {
             this.maybeOutputSeekMap(inputLength);
             if (this.psBinarySearchSeeker != null && this.psBinarySearchSeeker.isSeeking()) {
-                return this.psBinarySearchSeeker.handlePendingSeek(input, seekPosition, (OutputFrameHolder)null);
+                return this.psBinarySearchSeeker.handlePendingSeek(input, seekPosition, null);
             } else {
                 input.resetPeekPosition();
                 long peekBytesLeft = inputLength != -1L ? inputLength - input.getPeekPosition() : -1L;
@@ -146,7 +141,7 @@ public final class PsExtractor implements Extractor {
                             return 0;
                         } else {
                             streamId = nextStartCode & 255;
-                            PesReader payloadReader = (PesReader)this.psPayloadReaders.get(streamId);
+                            PesReader payloadReader = this.psPayloadReaders.get(streamId);
                             if (!this.foundAllTracks) {
                                 if (payloadReader == null) {
                                     ElementaryStreamReader elementaryStreamReader = null;
@@ -166,8 +161,8 @@ public final class PsExtractor implements Extractor {
 
                                     if (elementaryStreamReader != null) {
                                         TrackIdGenerator idGenerator = new TrackIdGenerator(streamId, 256);
-                                        ((ElementaryStreamReader)elementaryStreamReader).createTracks(this.output, idGenerator);
-                                        payloadReader = new PesReader((ElementaryStreamReader)elementaryStreamReader, this.timestampAdjuster);
+                                        elementaryStreamReader.createTracks(this.output, idGenerator);
+                                        payloadReader = new PesReader(elementaryStreamReader, this.timestampAdjuster);
                                         this.psPayloadReaders.put(streamId, payloadReader);
                                     }
                                 }
@@ -204,7 +199,7 @@ public final class PsExtractor implements Extractor {
     private void maybeOutputSeekMap(long inputLength) {
         if (!this.hasOutputSeekMap) {
             this.hasOutputSeekMap = true;
-            if (this.durationReader.getDurationUs() != -9223372036854775807L) {
+            if (this.durationReader.getDurationUs() != -Long.MAX_VALUE) {
                 this.psBinarySearchSeeker = new PsBinarySearchSeeker(this.durationReader.getScrTimestampAdjuster(), this.durationReader.getDurationUs(), inputLength);
                 this.output.seekMap(this.psBinarySearchSeeker.getSeekMap());
             } else {
@@ -262,17 +257,17 @@ public final class PsExtractor implements Extractor {
                 this.pesScratch.skipBits(4);
                 long pts = (long)this.pesScratch.readBits(3) << 30;
                 this.pesScratch.skipBits(1);
-                pts |= (long)(this.pesScratch.readBits(15) << 15);
+                pts |= this.pesScratch.readBits(15) << 15;
                 this.pesScratch.skipBits(1);
-                pts |= (long)this.pesScratch.readBits(15);
+                pts |= this.pesScratch.readBits(15);
                 this.pesScratch.skipBits(1);
                 if (!this.seenFirstDts && this.dtsFlag) {
                     this.pesScratch.skipBits(4);
                     long dts = (long)this.pesScratch.readBits(3) << 30;
                     this.pesScratch.skipBits(1);
-                    dts |= (long)(this.pesScratch.readBits(15) << 15);
+                    dts |= this.pesScratch.readBits(15) << 15;
                     this.pesScratch.skipBits(1);
-                    dts |= (long)this.pesScratch.readBits(15);
+                    dts |= this.pesScratch.readBits(15);
                     this.pesScratch.skipBits(1);
                     this.timestampAdjuster.adjustTsTimestamp(dts);
                     this.seenFirstDts = true;

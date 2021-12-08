@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.upstream;
 
 import android.content.Context;
@@ -104,7 +99,7 @@ public final class DefaultBandwidthMeter implements BandwidthMeter, TransferList
 
     public synchronized void onBytesTransferred(DataSource source, DataSpec dataSpec, boolean isNetwork, int bytes) {
         if (isNetwork) {
-            this.sampleBytesTransferred += (long)bytes;
+            this.sampleBytesTransferred += bytes;
         }
     }
 
@@ -113,7 +108,7 @@ public final class DefaultBandwidthMeter implements BandwidthMeter, TransferList
             Assertions.checkState(this.streamCount > 0);
             long nowMs = this.clock.elapsedRealtime();
             int sampleElapsedTimeMs = (int)(nowMs - this.sampleStartTimeMs);
-            this.totalElapsedTimeMs += (long)sampleElapsedTimeMs;
+            this.totalElapsedTimeMs += sampleElapsedTimeMs;
             this.totalBytesTransferred += this.sampleBytesTransferred;
             if (sampleElapsedTimeMs > 0) {
                 float bitsPerSecond = (float)(this.sampleBytesTransferred * 8000L / (long)sampleElapsedTimeMs);
@@ -443,9 +438,9 @@ public final class DefaultBandwidthMeter implements BandwidthMeter, TransferList
         }
 
         public DefaultBandwidthMeter build() {
-            Long initialBitrateEstimate = (Long)this.initialBitrateEstimates.get(Util.getNetworkType(this.context));
+            Long initialBitrateEstimate = this.initialBitrateEstimates.get(Util.getNetworkType(this.context));
             if (initialBitrateEstimate == null) {
-                initialBitrateEstimate = (Long)this.initialBitrateEstimates.get(0);
+                initialBitrateEstimate = this.initialBitrateEstimates.get(0);
             }
 
             DefaultBandwidthMeter bandwidthMeter = new DefaultBandwidthMeter(initialBitrateEstimate, this.slidingWindowMaxWeight, this.clock);
@@ -469,7 +464,7 @@ public final class DefaultBandwidthMeter implements BandwidthMeter, TransferList
         }
 
         private static int[] getCountryGroupIndices(String countryCode) {
-            int[] groupIndices = (int[])DefaultBandwidthMeter.DEFAULT_INITIAL_BITRATE_COUNTRY_GROUPS.get(countryCode);
+            int[] groupIndices = DefaultBandwidthMeter.DEFAULT_INITIAL_BITRATE_COUNTRY_GROUPS.get(countryCode);
             return groupIndices == null ? new int[]{2, 2, 2, 2} : groupIndices;
         }
     }

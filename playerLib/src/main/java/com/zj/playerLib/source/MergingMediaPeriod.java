@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.source;
 
 import com.zj.playerLib.SeekParameters;
@@ -29,7 +24,7 @@ final class MergingMediaPeriod implements MediaPeriod, Callback {
         this.compositeSequenceableLoaderFactory = compositeSequenceableLoaderFactory;
         this.periods = periods;
         this.childrenPendingPreparation = new ArrayList();
-        this.compositeSequenceableLoader = compositeSequenceableLoaderFactory.createCompositeSequenceableLoader(new SequenceableLoader[0]);
+        this.compositeSequenceableLoader = compositeSequenceableLoaderFactory.createCompositeSequenceableLoader();
         this.streamPeriodIndices = new IdentityHashMap();
     }
 
@@ -66,7 +61,7 @@ final class MergingMediaPeriod implements MediaPeriod, Callback {
         int[] selectionChildIndices = new int[selections.length];
 
         for(int i = 0; i < selections.length; ++i) {
-            streamChildIndices[i] = streams[i] == null ? -1 : (Integer)this.streamPeriodIndices.get(streams[i]);
+            streamChildIndices[i] = streams[i] == null ? -1 : this.streamPeriodIndices.get(streams[i]);
             selectionChildIndices[i] = -1;
             if (selections[i] != null) {
                 TrackGroup trackGroup = selections[i].getTrackGroup();
@@ -146,7 +141,7 @@ final class MergingMediaPeriod implements MediaPeriod, Callback {
             int childrenPendingPreparationSize = this.childrenPendingPreparation.size();
 
             for(int i = 0; i < childrenPendingPreparationSize; ++i) {
-                ((MediaPeriod)this.childrenPendingPreparation.get(i)).continueLoading(positionUs);
+                this.childrenPendingPreparation.get(i).continueLoading(positionUs);
             }
 
             return false;
@@ -161,12 +156,12 @@ final class MergingMediaPeriod implements MediaPeriod, Callback {
         long positionUs = this.periods[0].readDiscontinuity();
 
         for(int i = 1; i < this.periods.length; ++i) {
-            if (this.periods[i].readDiscontinuity() != -9223372036854775807L) {
+            if (this.periods[i].readDiscontinuity() != -Long.MAX_VALUE) {
                 throw new IllegalStateException("Child reported discontinuity.");
             }
         }
 
-        if (positionUs != -9223372036854775807L) {
+        if (positionUs != -Long.MAX_VALUE) {
             MediaPeriod[] var7 = this.enabledPeriods;
             int var4 = var7.length;
 

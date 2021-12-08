@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.scheduler;
 
 import android.content.BroadcastReceiver;
@@ -103,7 +98,7 @@ public final class Requirements {
         if (!this.isChargingRequired()) {
             return true;
         } else {
-            Intent batteryStatus = context.registerReceiver((BroadcastReceiver)null, new IntentFilter("android.intent.action.BATTERY_CHANGED"));
+            Intent batteryStatus = context.registerReceiver(null, new IntentFilter("android.intent.action.BATTERY_CHANGED"));
             if (batteryStatus == null) {
                 return false;
             } else {

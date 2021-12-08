@@ -19,10 +19,10 @@ public final class Loader implements LoaderErrorThrower {
     private static final int ACTION_TYPE_RETRY_AND_RESET_ERROR_COUNT = 1;
     private static final int ACTION_TYPE_DONT_RETRY = 2;
     private static final int ACTION_TYPE_DONT_RETRY_FATAL = 3;
-    public static final LoadErrorAction RETRY = createRetryAction(false, -9223372036854775807L);
-    public static final LoadErrorAction RETRY_RESET_ERROR_COUNT = createRetryAction(true, -9223372036854775807L);
-    public static final LoadErrorAction DONT_RETRY = new LoadErrorAction(2, -9223372036854775807L);
-    public static final LoadErrorAction DONT_RETRY_FATAL = new LoadErrorAction(3, -9223372036854775807L);
+    public static final LoadErrorAction RETRY = createRetryAction(false, -Long.MAX_VALUE);
+    public static final LoadErrorAction RETRY_RESET_ERROR_COUNT = createRetryAction(true, -Long.MAX_VALUE);
+    public static final LoadErrorAction DONT_RETRY = new LoadErrorAction(2, -Long.MAX_VALUE);
+    public static final LoadErrorAction DONT_RETRY_FATAL = new LoadErrorAction(3, -Long.MAX_VALUE);
     private final ExecutorService downloadExecutorService;
     private LoadTask<? extends Loadable> currentTask;
     private IOException fatalError;
@@ -53,7 +53,7 @@ public final class Loader implements LoaderErrorThrower {
     }
 
     public void release() {
-        this.release((ReleaseCallback)null);
+        this.release(null);
     }
 
     public void release(@Nullable Loader.ReleaseCallback callback) {
@@ -246,7 +246,7 @@ public final class Loader implements LoaderErrorThrower {
                                     this.errorCount = 1;
                                 }
 
-                                this.start(action.retryDelayMillis != -9223372036854775807L ? action.retryDelayMillis : this.getRetryDelayMillis());
+                                this.start(action.retryDelayMillis != -Long.MAX_VALUE ? action.retryDelayMillis : this.getRetryDelayMillis());
                             }
                         }
 
@@ -265,7 +265,7 @@ public final class Loader implements LoaderErrorThrower {
         }
 
         private long getRetryDelayMillis() {
-            return (long)Math.min((this.errorCount - 1) * 1000, 5000);
+            return Math.min((this.errorCount - 1) * 1000, 5000);
         }
     }
 

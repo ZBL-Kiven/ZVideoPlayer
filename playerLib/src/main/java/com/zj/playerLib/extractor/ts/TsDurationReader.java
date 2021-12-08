@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.extractor.ts;
 
 import com.zj.playerLib.extractor.ExtractorInput;
@@ -19,9 +14,9 @@ final class TsDurationReader {
     private boolean isDurationRead;
     private boolean isFirstPcrValueRead;
     private boolean isLastPcrValueRead;
-    private long firstPcrValue = -9223372036854775807L;
-    private long lastPcrValue = -9223372036854775807L;
-    private long durationUs = -9223372036854775807L;
+    private long firstPcrValue = -Long.MAX_VALUE;
+    private long lastPcrValue = -Long.MAX_VALUE;
+    private long durationUs = -Long.MAX_VALUE;
 
     TsDurationReader() {
     }
@@ -35,11 +30,11 @@ final class TsDurationReader {
             return this.finishReadDuration(input);
         } else if (!this.isLastPcrValueRead) {
             return this.readLastPcrValue(input, seekPositionHolder, pcrPid);
-        } else if (this.lastPcrValue == -9223372036854775807L) {
+        } else if (this.lastPcrValue == -Long.MAX_VALUE) {
             return this.finishReadDuration(input);
         } else if (!this.isFirstPcrValueRead) {
             return this.readFirstPcrValue(input, seekPositionHolder, pcrPid);
-        } else if (this.firstPcrValue == -9223372036854775807L) {
+        } else if (this.firstPcrValue == -Long.MAX_VALUE) {
             return this.finishReadDuration(input);
         } else {
             long minPcrPositionUs = this.pcrTimestampAdjuster.adjustTsTimestamp(this.firstPcrValue);
@@ -68,7 +63,7 @@ final class TsDurationReader {
         int bytesToSearch = (int)Math.min(112800L, input.getLength());
         int searchStartPosition = 0;
         if (input.getPosition() != (long)searchStartPosition) {
-            seekPositionHolder.position = (long)searchStartPosition;
+            seekPositionHolder.position = searchStartPosition;
             return 1;
         } else {
             this.packetBuffer.reset(bytesToSearch);
@@ -87,13 +82,13 @@ final class TsDurationReader {
         for(int searchPosition = searchStartPosition; searchPosition < searchEndPosition; ++searchPosition) {
             if (packetBuffer.data[searchPosition] == 71) {
                 long pcrValue = TsUtil.readPcrFromPacket(packetBuffer, searchPosition, pcrPid);
-                if (pcrValue != -9223372036854775807L) {
+                if (pcrValue != -Long.MAX_VALUE) {
                     return pcrValue;
                 }
             }
         }
 
-        return -9223372036854775807L;
+        return -Long.MAX_VALUE;
     }
 
     private int readLastPcrValue(ExtractorInput input, PositionHolder seekPositionHolder, int pcrPid) throws IOException, InterruptedException {
@@ -120,12 +115,12 @@ final class TsDurationReader {
         for(int searchPosition = searchEndPosition - 1; searchPosition >= searchStartPosition; --searchPosition) {
             if (packetBuffer.data[searchPosition] == 71) {
                 long pcrValue = TsUtil.readPcrFromPacket(packetBuffer, searchPosition, pcrPid);
-                if (pcrValue != -9223372036854775807L) {
+                if (pcrValue != -Long.MAX_VALUE) {
                     return pcrValue;
                 }
             }
         }
 
-        return -9223372036854775807L;
+        return -Long.MAX_VALUE;
     }
 }

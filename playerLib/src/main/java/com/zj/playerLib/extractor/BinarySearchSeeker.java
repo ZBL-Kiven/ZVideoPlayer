@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.extractor;
 
 import androidx.annotation.Nullable;
@@ -42,10 +37,10 @@ public abstract class BinarySearchSeeker {
     }
 
     public int handlePendingSeek(ExtractorInput input, PositionHolder seekPositionHolder, OutputFrameHolder outputFrameHolder) throws InterruptedException, IOException {
-        TimestampSeeker timestampSeeker = (TimestampSeeker)Assertions.checkNotNull(this.timestampSeeker);
+        TimestampSeeker timestampSeeker = Assertions.checkNotNull(this.timestampSeeker);
 
         while(true) {
-            SeekOperationParams seekOperationParams = (SeekOperationParams)Assertions.checkNotNull(this.seekOperationParams);
+            SeekOperationParams seekOperationParams = Assertions.checkNotNull(this.seekOperationParams);
             long floorPosition = seekOperationParams.getFloorBytePosition();
             long ceilingPosition = seekOperationParams.getCeilingBytePosition();
             long searchPosition = seekOperationParams.getNextSearchBytePosition();
@@ -154,7 +149,7 @@ public abstract class BinarySearchSeeker {
         public static final int TYPE_POSITION_OVERESTIMATED = -1;
         public static final int TYPE_POSITION_UNDERESTIMATED = -2;
         public static final int TYPE_NO_TIMESTAMP = -3;
-        public static final TimestampSearchResult NO_TIMESTAMP_IN_RANGE_RESULT = new TimestampSearchResult(-3, -9223372036854775807L, -1L);
+        public static final TimestampSearchResult NO_TIMESTAMP_IN_RANGE_RESULT = new TimestampSearchResult(-3, -Long.MAX_VALUE, -1L);
         private final int type;
         private final long timestampToUpdate;
         private final long bytePositionToUpdate;
@@ -174,7 +169,7 @@ public abstract class BinarySearchSeeker {
         }
 
         public static TimestampSearchResult targetFoundResult(long resultBytePosition) {
-            return new TimestampSearchResult(0, -9223372036854775807L, resultBytePosition);
+            return new TimestampSearchResult(0, -Long.MAX_VALUE, resultBytePosition);
         }
     }
 

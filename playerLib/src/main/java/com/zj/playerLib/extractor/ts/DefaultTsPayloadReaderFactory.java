@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.extractor.ts;
 
 import android.util.SparseArray;
@@ -37,7 +32,7 @@ public final class DefaultTsPayloadReaderFactory implements Factory {
     }
 
     public DefaultTsPayloadReaderFactory(int flags) {
-        this(flags, Collections.singletonList(Format.createTextSampleFormat((String)null, "application/cea-608", 0, (String)null)));
+        this(flags, Collections.singletonList(Format.createTextSampleFormat(null, "application/cea-608", 0, null)));
     }
 
     public DefaultTsPayloadReaderFactory(int flags, List<Format> closedCaptionFormats) {
@@ -127,7 +122,7 @@ public final class DefaultTsPayloadReaderFactory implements Factory {
                             initializationData = Cea708InitializationData.buildData(isWideAspectRatio);
                         }
 
-                        ((List)closedCaptionFormats).add(Format.createTextSampleFormat((String)null, mimeType, (String)null, -1, 0, language, accessibilityChannel, (DrmInitData)null, 9223372036854775807L, initializationData));
+                        ((List)closedCaptionFormats).add(Format.createTextSampleFormat(null, mimeType, null, -1, 0, language, accessibilityChannel, null, Long.MAX_VALUE, initializationData));
                     }
                 }
             }

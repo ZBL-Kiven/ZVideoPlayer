@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.extractor.ts;
 
 import com.zj.playerLib.Format;
@@ -36,10 +31,10 @@ public final class DvbSubtitleReader implements ElementaryStreamReader {
 
     public void createTracks(ExtractorOutput extractorOutput, TrackIdGenerator idGenerator) {
         for(int i = 0; i < this.outputs.length; ++i) {
-            DvbSubtitleInfo subtitleInfo = (DvbSubtitleInfo)this.subtitleInfos.get(i);
+            DvbSubtitleInfo subtitleInfo = this.subtitleInfos.get(i);
             idGenerator.generateNewId();
             TrackOutput output = extractorOutput.track(idGenerator.getTrackId(), 3);
-            output.format(Format.createImageSampleFormat(idGenerator.getFormatId(), "application/dvbsubs", (String)null, -1, 0, Collections.singletonList(subtitleInfo.initializationData), subtitleInfo.language, (DrmInitData)null));
+            output.format(Format.createImageSampleFormat(idGenerator.getFormatId(), "application/dvbsubs", null, -1, 0, Collections.singletonList(subtitleInfo.initializationData), subtitleInfo.language, null));
             this.outputs[i] = output;
         }
 
@@ -61,7 +56,7 @@ public final class DvbSubtitleReader implements ElementaryStreamReader {
 
             for(int var3 = 0; var3 < var2; ++var3) {
                 TrackOutput output = var1[var3];
-                output.sampleMetadata(this.sampleTimeUs, 1, this.sampleBytesWritten, 0, (CryptoData)null);
+                output.sampleMetadata(this.sampleTimeUs, 1, this.sampleBytesWritten, 0, null);
             }
 
             this.writingSample = false;

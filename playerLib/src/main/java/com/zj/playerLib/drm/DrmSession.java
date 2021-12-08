@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.drm;
 
 import android.annotation.TargetApi;
@@ -32,10 +27,10 @@ public interface DrmSession<T extends MediaCrypto> {
 
     @Documented
     @Retention(RetentionPolicy.SOURCE)
-    public @interface State {
+    @interface State {
     }
 
-    public static class DrmSessionException extends Exception {
+    class DrmSessionException extends Exception {
         public DrmSessionException(Throwable cause) {
             super(cause);
         }

@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.extractor.mp3;
 
 import androidx.annotation.Nullable;
@@ -72,7 +67,7 @@ public final class Mp3Extractor implements Extractor {
     }
 
     public Mp3Extractor(int flags) {
-        this(flags, -9223372036854775807L);
+        this(flags, -Long.MAX_VALUE);
     }
 
     public Mp3Extractor(int flags, long forcedFirstSampleTimestampUs) {
@@ -81,7 +76,7 @@ public final class Mp3Extractor implements Extractor {
         this.scratch = new ParsableByteArray(10);
         this.synchronizedHeader = new MpegAudioHeader();
         this.gaplessInfoHolder = new GaplessInfoHolder();
-        this.basisTimeUs = -9223372036854775807L;
+        this.basisTimeUs = -Long.MAX_VALUE;
         this.id3Peeker = new Id3Peeker();
     }
 
@@ -97,7 +92,7 @@ public final class Mp3Extractor implements Extractor {
 
     public void seek(long position, long timeUs) {
         this.synchronizedHeaderData = 0;
-        this.basisTimeUs = -9223372036854775807L;
+        this.basisTimeUs = -Long.MAX_VALUE;
         this.samplesRead = 0L;
         this.sampleBytesRemaining = 0;
     }
@@ -128,7 +123,7 @@ public final class Mp3Extractor implements Extractor {
             }
 
             this.extractorOutput.seekMap(this.seeker);
-            this.trackOutput.format(Format.createAudioSampleFormat((String)null, this.synchronizedHeader.mimeType, (String)null, -1, 4096, this.synchronizedHeader.channels, this.synchronizedHeader.sampleRate, -1, this.gaplessInfoHolder.encoderDelay, this.gaplessInfoHolder.encoderPadding, (List)null, (DrmInitData)null, 0, (String)null, (this.flags & 2) != 0 ? null : this.metadata));
+            this.trackOutput.format(Format.createAudioSampleFormat(null, this.synchronizedHeader.mimeType, null, -1, 4096, this.synchronizedHeader.channels, this.synchronizedHeader.sampleRate, -1, this.gaplessInfoHolder.encoderDelay, this.gaplessInfoHolder.encoderPadding, null, null, 0, null, (this.flags & 2) != 0 ? null : this.metadata));
         }
 
         return this.readSample(input);
@@ -145,16 +140,16 @@ public final class Mp3Extractor implements Extractor {
 
             this.scratch.setPosition(0);
             sampleHeaderData = this.scratch.readInt();
-            if (!headersMatch(sampleHeaderData, (long)this.synchronizedHeaderData) || MpegAudioHeader.getFrameSize(sampleHeaderData) == -1) {
+            if (!headersMatch(sampleHeaderData, this.synchronizedHeaderData) || MpegAudioHeader.getFrameSize(sampleHeaderData) == -1) {
                 extractorInput.skipFully(1);
                 this.synchronizedHeaderData = 0;
                 return 0;
             }
 
             MpegAudioHeader.populateHeader(sampleHeaderData, this.synchronizedHeader);
-            if (this.basisTimeUs == -9223372036854775807L) {
+            if (this.basisTimeUs == -Long.MAX_VALUE) {
                 this.basisTimeUs = this.seeker.getTimeUs(extractorInput.getPosition());
-                if (this.forcedFirstSampleTimestampUs != -9223372036854775807L) {
+                if (this.forcedFirstSampleTimestampUs != -Long.MAX_VALUE) {
                     embeddedFirstSampleTimestampUs = this.seeker.getTimeUs(0L);
                     this.basisTimeUs += this.forcedFirstSampleTimestampUs - embeddedFirstSampleTimestampUs;
                 }
@@ -172,8 +167,8 @@ public final class Mp3Extractor implements Extractor {
                 return 0;
             } else {
                 embeddedFirstSampleTimestampUs = this.basisTimeUs + this.samplesRead * 1000000L / (long)this.synchronizedHeader.sampleRate;
-                this.trackOutput.sampleMetadata(embeddedFirstSampleTimestampUs, 1, this.synchronizedHeader.frameSize, 0, (CryptoData)null);
-                this.samplesRead += (long)this.synchronizedHeader.samplesPerFrame;
+                this.trackOutput.sampleMetadata(embeddedFirstSampleTimestampUs, 1, this.synchronizedHeader.frameSize, 0, null);
+                this.samplesRead += this.synchronizedHeader.samplesPerFrame;
                 this.sampleBytesRemaining = 0;
                 return 0;
             }
@@ -212,7 +207,7 @@ public final class Mp3Extractor implements Extractor {
             this.scratch.setPosition(0);
             int headerData = this.scratch.readInt();
             int frameSize;
-            if ((candidateSynchronizedHeaderData == 0 || headersMatch(headerData, (long)candidateSynchronizedHeaderData)) && (frameSize = MpegAudioHeader.getFrameSize(headerData)) != -1) {
+            if ((candidateSynchronizedHeaderData == 0 || headersMatch(headerData, candidateSynchronizedHeaderData)) && (frameSize = MpegAudioHeader.getFrameSize(headerData)) != -1) {
                 ++validFrameCount;
                 if (validFrameCount == 1) {
                     MpegAudioHeader.populateHeader(headerData, this.synchronizedHeader);

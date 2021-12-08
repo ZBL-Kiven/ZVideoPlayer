@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib;
 
 import androidx.annotation.Nullable;
@@ -165,7 +160,7 @@ public abstract class BaseRenderer implements Renderer, RendererCapabilities {
             buffer.timeUs += this.streamOffsetUs;
         } else if (result == -5) {
             Format format = formatHolder.format;
-            if (format.subSampleOffsetUs != 9223372036854775807L) {
+            if (format.subSampleOffsetUs != Long.MAX_VALUE) {
                 format = format.copyWithSubSampleOffsetUs(format.subSampleOffsetUs + this.streamOffsetUs);
                 formatHolder.format = format;
             }
@@ -186,7 +181,7 @@ public abstract class BaseRenderer implements Renderer, RendererCapabilities {
         if (drmInitData == null) {
             return true;
         } else {
-            return drmSessionManager == null ? false : drmSessionManager.canAcquireSession(drmInitData);
+            return drmSessionManager != null && drmSessionManager.canAcquireSession(drmInitData);
         }
     }
 }

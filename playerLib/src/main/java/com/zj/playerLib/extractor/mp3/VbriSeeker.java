@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.extractor.mp3;
 
 import androidx.annotation.Nullable;
@@ -29,7 +24,7 @@ final class VbriSeeker implements Seeker {
             return null;
         } else {
             int sampleRate = mpegAudioHeader.sampleRate;
-            long durationUs = Util.scaleLargeTimestamp((long)numFrames, 1000000L * (long)(sampleRate >= 32000 ? 1152 : 576), (long)sampleRate);
+            long durationUs = Util.scaleLargeTimestamp(numFrames, 1000000L * (long)(sampleRate >= 32000 ? 1152 : 576), sampleRate);
             int entryCount = frame.readUnsignedShort();
             int scale = frame.readUnsignedShort();
             int entrySize = frame.readUnsignedShort();
@@ -59,7 +54,7 @@ final class VbriSeeker implements Seeker {
                     return null;
                 }
 
-                position += (long)(segmentSize * scale);
+                position += segmentSize * scale;
             }
 
             if (inputLength != -1L && inputLength != position) {

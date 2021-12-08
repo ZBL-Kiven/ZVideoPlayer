@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.upstream.cache;
 
 import androidx.annotation.Nullable;
@@ -50,7 +45,7 @@ public interface Cache {
 
     ContentMetadata getContentMetadata(String var1);
 
-    public static class CacheException extends IOException {
+    class CacheException extends IOException {
         public CacheException(String message) {
             super(message);
         }
@@ -60,7 +55,7 @@ public interface Cache {
         }
     }
 
-    public interface Listener {
+    interface Listener {
         void onSpanAdded(Cache var1, CacheSpan var2);
 
         void onSpanRemoved(Cache var1, CacheSpan var2);

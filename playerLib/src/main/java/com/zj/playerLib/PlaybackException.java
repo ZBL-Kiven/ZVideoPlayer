@@ -1,16 +1,6 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib;
 
 import com.zj.playerLib.util.Assertions;
-
-import java.io.IOException;
-import java.lang.annotation.Documented;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 
 public final class PlaybackException extends Exception {
     public static final int TYPE_SOURCE = 0;
@@ -20,16 +10,16 @@ public final class PlaybackException extends Exception {
     public final int rendererIndex;
     private final Throwable cause;
 
-    public static PlaybackException createForSource(IOException cause) {
-        return new PlaybackException(0, cause, -1);
+    public static PlaybackException createForSource(Throwable cause) {
+        return new PlaybackException(TYPE_SOURCE, cause, -1);
     }
 
     public static PlaybackException createForRenderer(Exception cause, int rendererIndex) {
-        return new PlaybackException(1, cause, rendererIndex);
+        return new PlaybackException(TYPE_RENDERER, cause, rendererIndex);
     }
 
     static PlaybackException createForUnexpected(RuntimeException cause) {
-        return new PlaybackException(2, cause, -1);
+        return new PlaybackException(TYPE_UNEXPECTED, cause, -1);
     }
 
     private PlaybackException(int type, Throwable cause, int rendererIndex) {
@@ -39,23 +29,18 @@ public final class PlaybackException extends Exception {
         this.rendererIndex = rendererIndex;
     }
 
-    public IOException getSourceException() {
-        Assertions.checkState(this.type == 0);
-        return (IOException)this.cause;
+    public Throwable getSourceException() {
+        Assertions.checkState(this.type == TYPE_SOURCE);
+        return this.cause;
     }
 
     public Exception getRendererException() {
-        Assertions.checkState(this.type == 1);
-        return (Exception)this.cause;
+        Assertions.checkState(this.type == TYPE_RENDERER);
+        return (Exception) this.cause;
     }
 
     public RuntimeException getUnexpectedException() {
-        Assertions.checkState(this.type == 2);
-        return (RuntimeException)this.cause;
-    }
-
-    @Documented
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface Type {
+        Assertions.checkState(this.type == TYPE_UNEXPECTED);
+        return (RuntimeException) this.cause;
     }
 }

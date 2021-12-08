@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.extractor.flv;
 
 import com.zj.playerLib.ParserException;
@@ -25,10 +20,10 @@ final class ScriptTagPayloadReader extends TagPayloadReader {
     private static final int AMF_TYPE_END_MARKER = 9;
     private static final int AMF_TYPE_STRICT_ARRAY = 10;
     private static final int AMF_TYPE_DATE = 11;
-    private long durationUs = -9223372036854775807L;
+    private long durationUs = -Long.MAX_VALUE;
 
     public ScriptTagPayloadReader() {
-        super((TrackOutput) null);
+        super(null);
     }
 
     public long getDurationUs() {

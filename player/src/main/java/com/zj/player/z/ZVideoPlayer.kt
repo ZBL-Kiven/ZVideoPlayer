@@ -1,7 +1,9 @@
 package com.zj.player.z
 
+import android.Manifest
 import android.content.ContentValues
 import android.content.Context
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.os.Handler
@@ -10,6 +12,7 @@ import android.os.Message
 import android.provider.MediaStore
 import android.view.WindowManager
 import androidx.annotation.UiThread
+import androidx.core.content.ContextCompat
 import com.zj.playerLib.*
 import com.zj.playerLib.mediacodec.MediaCodecRenderer
 import com.zj.playerLib.source.ExtractorMediaSource
@@ -188,6 +191,7 @@ open class ZVideoPlayer(var config: VideoConfig = VideoConfig.create()) : BasePl
     private fun loading(videoUrl: String = currentPlayPath()) {
         val context = controller?.context ?: return
         handler?.removeCallbacksAndMessages(null)
+        val dataSource = getDataSourceFromPath(context, videoUrl) ?: return
         if (player == null) {
             if (CORE_LOG_ABLE) log("new player create")
             createPlayer(context)
@@ -201,21 +205,32 @@ open class ZVideoPlayer(var config: VideoConfig = VideoConfig.create()) : BasePl
             controller?.onError(NullPointerException("the video path should not be null or empty !!"))
             return
         }
-        val uri: Uri? = Uri.parse(videoUrl)
-        val scheme = uri?.scheme
-        val dataSource = if (scheme == null || !scheme.startsWith("http")) {
-            val realUri = if (scheme == "content" || (Build.VERSION.SDK_INT != Build.VERSION_CODES.Q && (scheme == null || scheme == "file"))) {
-                Uri.parse(videoUrl)
-            } else {
-                getPathForSearchQ(context, videoUrl)
-            }
-            createDefaultDataSource(context, realUri)
-        } else {
-            createCachedDataSource(context, videoUrl)
-        }
         runWithPlayer {
             it.prepare(dataSource)
             it.addListener(this)
+        }
+    }
+
+    private fun getDataSourceFromPath(context: Context, videoUrl: String): MediaSource? {
+        val uri: Uri? = Uri.parse(videoUrl)
+        val scheme = uri?.scheme
+        return try {
+            if (scheme == null || !scheme.startsWith("http")) {
+                val hasPermission = ContextCompat.checkSelfPermission(context, Manifest.permission.READ_EXTERNAL_STORAGE)
+                if (hasPermission != PackageManager.PERMISSION_GRANTED) {
+                    throw SecurityException("you must granted the \'READ_EXTERNAL_STORAGE\' permission to access the video $videoUrl")
+                }
+                val realUri = if (scheme == "content" || (Build.VERSION.SDK_INT != Build.VERSION_CODES.Q && (scheme == null || scheme == "file"))) {
+                    uri
+                } else {
+                    getPathForSearchQ(context, videoUrl)
+                }
+                createDefaultDataSource(context, realUri)
+            } else {
+                createCachedDataSource(context, videoUrl)
+            }
+        } catch (e: Exception) {
+            onPlayerError(createForSource(e));null
         }
     }
 

@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib;
 
 import android.annotation.SuppressLint;
@@ -216,10 +211,10 @@ final class PlayerImpl extends BasePlayer implements InlinePlayer {
             } else {
                 this.maskingWindowIndex = windowIndex;
                 if (timeline.isEmpty()) {
-                    this.maskingWindowPositionMs = positionMs == -9223372036854775807L ? 0L : positionMs;
+                    this.maskingWindowPositionMs = positionMs == -Long.MAX_VALUE ? 0L : positionMs;
                     this.maskingPeriodIndex = 0;
                 } else {
-                    long windowPositionUs = positionMs == -9223372036854775807L ? timeline.getWindow(windowIndex, this.window).getDefaultPositionUs() : C.msToUs(positionMs);
+                    long windowPositionUs = positionMs == -Long.MAX_VALUE ? timeline.getWindow(windowIndex, this.window).getDefaultPositionUs() : C.msToUs(positionMs);
                     Pair<Object, Long> periodUidAndPosition = timeline.getPeriodPosition(this.window, this.period, windowIndex, windowPositionUs);
                     this.maskingWindowPositionMs = C.usToMs(windowPositionUs);
                     this.maskingPeriodIndex = timeline.getIndexOfPeriod(periodUidAndPosition.first);
@@ -419,7 +414,7 @@ final class PlayerImpl extends BasePlayer implements InlinePlayer {
     private void handlePlaybackInfo(PlaybackInfo playbackInfo, int operationAcks, boolean positionDiscontinuity, int positionDiscontinuityReason) {
         this.pendingOperationAcks -= operationAcks;
         if (this.pendingOperationAcks == 0) {
-            if (playbackInfo.startPositionUs == -9223372036854775807L) {
+            if (playbackInfo.startPositionUs == -Long.MAX_VALUE) {
                 playbackInfo = playbackInfo.resetToNewPosition(playbackInfo.periodId, 0L, playbackInfo.contentPositionUs);
             }
 
@@ -451,7 +446,7 @@ final class PlayerImpl extends BasePlayer implements InlinePlayer {
 
         MediaPeriodId mediaPeriodId = resetPosition ? this.playbackInfo.getDummyFirstMediaPeriodId(this.shuffleModeEnabled, this.window) : this.playbackInfo.periodId;
         long startPositionUs = resetPosition ? 0L : this.playbackInfo.positionUs;
-        long contentPositionUs = resetPosition ? -9223372036854775807L : this.playbackInfo.contentPositionUs;
+        long contentPositionUs = resetPosition ? -Long.MAX_VALUE : this.playbackInfo.contentPositionUs;
         return new PlaybackInfo(resetState ? Timeline.EMPTY : this.playbackInfo.timeline, resetState ? null : this.playbackInfo.manifest, mediaPeriodId, startPositionUs, contentPositionUs, playbackState, false, resetState ? TrackGroupArray.EMPTY : this.playbackInfo.trackGroups, resetState ? this.emptyTrackSelectorResult : this.playbackInfo.trackSelectorResult, mediaPeriodId, startPositionUs, 0L, startPositionUs);
     }
 

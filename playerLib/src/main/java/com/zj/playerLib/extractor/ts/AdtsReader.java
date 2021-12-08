@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.extractor.ts;
 
 import android.util.Pair;
@@ -62,7 +57,7 @@ public final class AdtsReader implements ElementaryStreamReader {
     private long currentSampleDuration;
 
     public AdtsReader(boolean exposeId3) {
-        this(exposeId3, (String)null);
+        this(exposeId3, null);
     }
 
     public AdtsReader(boolean exposeId3, String language) {
@@ -71,7 +66,7 @@ public final class AdtsReader implements ElementaryStreamReader {
         this.setFindingSampleState();
         this.firstFrameVersion = -1;
         this.firstFrameSampleRateIndex = -1;
-        this.sampleDurationUs = -9223372036854775807L;
+        this.sampleDurationUs = -Long.MAX_VALUE;
         this.exposeId3 = exposeId3;
         this.language = language;
     }
@@ -91,7 +86,7 @@ public final class AdtsReader implements ElementaryStreamReader {
         if (this.exposeId3) {
             idGenerator.generateNewId();
             this.id3Output = extractorOutput.track(idGenerator.getTrackId(), 4);
-            this.id3Output.format(Format.createSampleFormat(idGenerator.getFormatId(), "application/id3", (String)null, -1, (DrmInitData)null));
+            this.id3Output.format(Format.createSampleFormat(idGenerator.getFormatId(), "application/id3", null, -1, null));
         } else {
             this.id3Output = new DummyTrackOutput();
         }
@@ -325,7 +320,7 @@ public final class AdtsReader implements ElementaryStreamReader {
             int channelConfig = this.adtsScratch.readBits(3);
             byte[] audioSpecificConfig = CodecSpecificDataUtil.buildAacAudioSpecificConfig(sampleSize, this.firstFrameSampleRateIndex, channelConfig);
             Pair<Integer, Integer> audioParams = CodecSpecificDataUtil.parseAacAudioSpecificConfig(audioSpecificConfig);
-            Format format = Format.createAudioSampleFormat(this.formatId, "audio/mp4a-latm", (String)null, -1, -1, (Integer)audioParams.second, (Integer)audioParams.first, Collections.singletonList(audioSpecificConfig), (DrmInitData)null, 0, this.language);
+            Format format = Format.createAudioSampleFormat(this.formatId, "audio/mp4a-latm", null, -1, -1, audioParams.second, audioParams.first, Collections.singletonList(audioSpecificConfig), null, 0, this.language);
             this.sampleDurationUs = 1024000000L / (long)format.sampleRate;
             this.output.format(format);
             this.hasOutputFormat = true;
@@ -347,7 +342,7 @@ public final class AdtsReader implements ElementaryStreamReader {
         this.currentOutput.sampleData(data, bytesToRead);
         this.bytesRead += bytesToRead;
         if (this.bytesRead == this.sampleSize) {
-            this.currentOutput.sampleMetadata(this.timeUs, 1, this.sampleSize, 0, (CryptoData)null);
+            this.currentOutput.sampleMetadata(this.timeUs, 1, this.sampleSize, 0, null);
             this.timeUs += this.currentSampleDuration;
             this.setFindingSampleState();
         }

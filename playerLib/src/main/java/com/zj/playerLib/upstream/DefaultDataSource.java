@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.upstream;
 
 import android.content.Context;
@@ -51,12 +46,12 @@ public final class DefaultDataSource implements DataSource {
     }
 
     public DefaultDataSource(Context context, String userAgent, int connectTimeoutMillis, int readTimeoutMillis, boolean allowCrossProtocolRedirects) {
-        this(context, new DefaultHttpDataSource(userAgent, (Predicate)null, connectTimeoutMillis, readTimeoutMillis, allowCrossProtocolRedirects, (RequestProperties)null));
+        this(context, new DefaultHttpDataSource(userAgent, null, connectTimeoutMillis, readTimeoutMillis, allowCrossProtocolRedirects, null));
     }
 
     public DefaultDataSource(Context context, DataSource baseDataSource) {
         this.context = context.getApplicationContext();
-        this.baseDataSource = (DataSource)Assertions.checkNotNull(baseDataSource);
+        this.baseDataSource = Assertions.checkNotNull(baseDataSource);
         this.transferListeners = new ArrayList();
     }
 
@@ -69,7 +64,7 @@ public final class DefaultDataSource implements DataSource {
     /** @deprecated */
     @Deprecated
     public DefaultDataSource(Context context, @Nullable TransferListener listener, String userAgent, int connectTimeoutMillis, int readTimeoutMillis, boolean allowCrossProtocolRedirects) {
-        this(context, listener, new DefaultHttpDataSource(userAgent, (Predicate)null, listener, connectTimeoutMillis, readTimeoutMillis, allowCrossProtocolRedirects, (RequestProperties)null));
+        this(context, listener, new DefaultHttpDataSource(userAgent, null, listener, connectTimeoutMillis, readTimeoutMillis, allowCrossProtocolRedirects, null));
     }
 
     /** @deprecated */
@@ -115,12 +110,11 @@ public final class DefaultDataSource implements DataSource {
         } else {
             this.dataSource = this.baseDataSource;
         }
-
         return this.dataSource.open(dataSpec);
     }
 
     public int read(byte[] buffer, int offset, int readLength) throws IOException {
-        return ((DataSource)Assertions.checkNotNull(this.dataSource)).read(buffer, offset, readLength);
+        return Assertions.checkNotNull(this.dataSource).read(buffer, offset, readLength);
     }
 
     @Nullable
@@ -210,7 +204,7 @@ public final class DefaultDataSource implements DataSource {
 
     private void addListenersToDataSource(DataSource dataSource) {
         for(int i = 0; i < this.transferListeners.size(); ++i) {
-            dataSource.addTransferListener((TransferListener)this.transferListeners.get(i));
+            dataSource.addTransferListener(this.transferListeners.get(i));
         }
 
     }

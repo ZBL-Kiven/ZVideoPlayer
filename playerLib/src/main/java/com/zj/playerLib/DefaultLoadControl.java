@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib;
 
 import com.zj.playerLib.source.TrackGroupArray;
@@ -48,7 +43,7 @@ public class DefaultLoadControl implements LoadControl {
     /** @deprecated */
     @Deprecated
     public DefaultLoadControl(DefaultAllocator allocator, int minBufferMs, int maxBufferMs, int bufferForPlaybackMs, int bufferForPlaybackAfterRebufferMs, int targetBufferBytes, boolean prioritizeTimeOverSizeThresholds) {
-        this(allocator, minBufferMs, maxBufferMs, bufferForPlaybackMs, bufferForPlaybackAfterRebufferMs, targetBufferBytes, prioritizeTimeOverSizeThresholds, (PriorityTaskManager)null);
+        this(allocator, minBufferMs, maxBufferMs, bufferForPlaybackMs, bufferForPlaybackAfterRebufferMs, targetBufferBytes, prioritizeTimeOverSizeThresholds, null);
     }
 
     /** @deprecated */
@@ -65,14 +60,14 @@ public class DefaultLoadControl implements LoadControl {
         assertGreaterOrEqual(maxBufferMs, minBufferMs, "maxBufferMs", "minBufferMs");
         assertGreaterOrEqual(backBufferDurationMs, 0, "backBufferDurationMs", "0");
         this.allocator = allocator;
-        this.minBufferUs = C.msToUs((long)minBufferMs);
-        this.maxBufferUs = C.msToUs((long)maxBufferMs);
-        this.bufferForPlaybackUs = C.msToUs((long)bufferForPlaybackMs);
-        this.bufferForPlaybackAfterRebufferUs = C.msToUs((long)bufferForPlaybackAfterRebufferMs);
+        this.minBufferUs = C.msToUs(minBufferMs);
+        this.maxBufferUs = C.msToUs(maxBufferMs);
+        this.bufferForPlaybackUs = C.msToUs(bufferForPlaybackMs);
+        this.bufferForPlaybackAfterRebufferUs = C.msToUs(bufferForPlaybackAfterRebufferMs);
         this.targetBufferBytesOverwrite = targetBufferBytes;
         this.prioritizeTimeOverSizeThresholds = prioritizeTimeOverSizeThresholds;
         this.priorityTaskManager = priorityTaskManager;
-        this.backBufferDurationUs = C.msToUs((long)backBufferDurationMs);
+        this.backBufferDurationUs = C.msToUs(backBufferDurationMs);
         this.retainBackBufferFromKeyframe = retainBackBufferFromKeyframe;
     }
 

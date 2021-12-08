@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.zj.playerLib.text.subrip;
 
 import android.text.Html;
@@ -92,7 +87,7 @@ public final class SubripDecoder extends SimpleSubtitleDecoder {
                     String alignmentTag = null;
 
                     for(int i = 0; i < this.tags.size(); ++i) {
-                        String tag = (String)this.tags.get(i);
+                        String tag = this.tags.get(i);
                         if (tag.matches("\\{\\\\an[1-9]\\}")) {
                             alignmentTag = tag;
                             break;
@@ -268,7 +263,7 @@ public final class SubripDecoder extends SimpleSubtitleDecoder {
                 lineAnchor = 1;
             }
 
-            return new Cue(text, (Alignment)null, getFractionalPositionForAnchorType(lineAnchor), 0, lineAnchor, getFractionalPositionForAnchorType(positionAnchor), positionAnchor, 1.4E-45F);
+            return new Cue(text, null, getFractionalPositionForAnchorType(lineAnchor), 0, lineAnchor, getFractionalPositionForAnchorType(positionAnchor), positionAnchor, 1.4E-45F);
         }
     }
 
