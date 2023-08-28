@@ -29,14 +29,8 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
     implementation 'androidx.appcompat:appcompat:1.4.0'
     implementation 'androidx.recyclerview:recyclerview:1.2.1'
-
-//    implementation 'com.cc.android:player-core:2.9.4'
-//    api 'com.cc.android:immersion-bar:1.0.0@aar'
-
     api 'com.zj.repo:immersion-bar:1.0.0@aar'
-    implementation 'com.zj.repo:player-core:2.9.4'
-
-//    api project(':playerLib')
+    api project(':playerLib')
 }
 
 apply from: 'upload.gradle'
